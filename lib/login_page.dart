@@ -1,13 +1,13 @@
-import 'package:flutter/gestures.dart';
+// ignore_for_file: use_super_parameters
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/inscription_page.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 class LoginPage extends StatefulWidget{
   const LoginPage({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _LoginPagestate createState()  => _LoginPagestate();
 
 }
@@ -189,34 +189,35 @@ class _LoginPagestate  extends State<LoginPage> {
             ),
           ),
 
-          SizedBox(height:w*0.2),
-          RichText(text: TextSpan(
-            text: "vous n'avez pas encore un compte?",
-            style: TextStyle(
-              color:Colors.grey[500],
-              fontSize: 20
+         SizedBox(height: w * 0.2),
+            GestureDetector(
+              onTap: () {
+                // Navigation vers la page d'inscription lorsque le texte est cliqué
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const InscriptionPage()),
+                );
+              },
+              child: RichText(
+                text: TextSpan(
+                  text: "Vous n'avez pas encore un compte? ",
+                  style: TextStyle(color: Colors.grey[500], fontSize: 20),
+                  children: const [
+                    TextSpan(
+                      text: "Inscrivez-vous",
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.purple,
+                        decorationStyle: TextDecorationStyle.solid,
+                        color: Colors.purple,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            children: const [
-              TextSpan(
-
-            text: "Inscrivez-vous",
-           
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-              decorationColor: Colors.purple,
-              decorationStyle: TextDecorationStyle.solid, 
-              color:Colors.purple,
-              fontSize: 20,
-              fontWeight: FontWeight.bold
-              ),
-              recognizer: TapGestureRecognizer()..onTap=()=>Get.to(()=>const InscriptionPage())
-              ),
-              
-            ]
-
-          )
-          )
-
         ],
       )
       )
