@@ -1,7 +1,10 @@
-// ignore_for_file: use_super_parameters
+// ignore_for_file: use_super_parameters, unnecessary_import
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/inscription_page.dart';
+
+import 'auth_controller.dart';
 
 class LoginPage extends StatefulWidget{
   const LoginPage({Key? key}) : super(key: key);
@@ -13,6 +16,9 @@ class LoginPage extends StatefulWidget{
 }
 
 class _LoginPagestate  extends State<LoginPage> {
+  var emailController = TextEditingController();
+  var passwordController = TextEditingController();
+  
   @override
 
 
@@ -74,7 +80,7 @@ class _LoginPagestate  extends State<LoginPage> {
                       ]
                     ),
                     child: TextField(
-                      
+                      controller: emailController,
                       decoration: InputDecoration(
                         hintText: 'Entrez votre email ', // Ajoutez votre texte ici
                         prefixIcon: const Icon(Icons.email, color:Colors.purpleAccent),
@@ -116,6 +122,8 @@ class _LoginPagestate  extends State<LoginPage> {
                       ]
                     ),
                     child: TextField(
+                      controller: passwordController,
+                      obscureText: true,
                       decoration: InputDecoration(
                         hintText: 'Entrez votre mot de passe', // Ajoutez votre texte ici
                         prefixIcon: const Icon(Icons.password, color:Colors.purpleAccent),
@@ -163,31 +171,36 @@ class _LoginPagestate  extends State<LoginPage> {
 
           const SizedBox(height: 65,),
 
-           Container(
-            width: w*0.3,
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              image: const DecorationImage(
-                image: AssetImage(
-                  "assets/images/purple-wallpaper.jpg"
-                ),
-                fit: BoxFit.cover
-              )
-            ),
-
-            
-            child: const Center(
-              child: Text(
-                     "Se connecter",
-                     style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      color:Colors.white,
-                     ),
-                     ),
-            ),
-          ),
+           GestureDetector(
+            onTap: (){
+               AuthController.instance.login(emailController.text.trim(), passwordController.text.trim());
+            },
+             child: Container(
+              width: w*0.3,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                image: const DecorationImage(
+                  image: AssetImage(
+                    "assets/images/purple-wallpaper.jpg"
+                  ),
+                  fit: BoxFit.cover
+                )
+              ),
+             
+              
+              child: const Center(
+                child: Text(
+                       "Se connecter",
+                       style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color:Colors.white,
+                       ),
+                       ),
+              ),
+                       ),
+           ),
 
          SizedBox(height: w * 0.2),
             GestureDetector(

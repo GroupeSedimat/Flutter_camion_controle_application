@@ -1,10 +1,15 @@
+// ignore_for_file: use_super_parameters, prefer_const_constructors, prefer_interpolation_to_compose_strings
 import 'package:flutter/material.dart';
+
+import 'auth_controller.dart';
 
 class InscriptionPage extends StatelessWidget {
   const InscriptionPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var emailController = TextEditingController();
+    var passwordController = TextEditingController();
     List images = [
       "google.png",
       "facebook.png",
@@ -69,10 +74,11 @@ class InscriptionPage extends StatelessWidget {
                       ]
                     ),
                     child: TextField(
+                      controller: emailController,
                       decoration: InputDecoration(
-                        hintText: 'Entrez votre email ', // Ajoutez votre texte ici
+                        hintText: 'Entrez votre email ', 
                         prefixIcon: const Icon(Icons.email, color:Colors.purpleAccent),
-                        hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), // Définissez l'opacité souhaitée
+                        hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), 
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                           borderSide: const BorderSide(
@@ -108,8 +114,10 @@ class InscriptionPage extends StatelessWidget {
                       ]
                     ),
                     child: TextField(
+                      controller: passwordController,
+                      obscureText: true,
                       decoration: InputDecoration(
-                        hintText: 'Entrez votre mot de passe', // Ajoutez votre texte ici
+                        hintText: 'Entrez votre mot de passe', 
                         prefixIcon: const Icon(Icons.password, color:Colors.purpleAccent),
                         hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), // Définissez l'opacité souhaitée
                         focusedBorder: OutlineInputBorder(
@@ -136,23 +144,29 @@ class InscriptionPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 65,),
-            Container(
-              width: w*0.3,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                image: const DecorationImage(
-                  image: AssetImage("assets/images/purple-wallpaper.jpg"),
-                  fit: BoxFit.cover
-                )
-              ),
-              child: const Center(
-                child: Text(
-                  "S'inscrire",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color:Colors.white,
+            
+            GestureDetector(
+              onTap: (){
+                AuthController.instance.register(emailController.text.trim(), passwordController.text.trim());
+              },
+              child: Container (
+                width: w*0.3,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  image: const DecorationImage(
+                    image: AssetImage("assets/images/purple-wallpaper.jpg"),
+                    fit: BoxFit.cover
+                  )
+                ),
+                child: const Center(
+                  child: Text(
+                    "S'inscrire",
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color:Colors.white,
+                    ),
                   ),
                 ),
               ),
