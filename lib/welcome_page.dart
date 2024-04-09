@@ -102,6 +102,12 @@ class WelcomePage extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 AuthController.instance.logOut();
+                ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Vous avez été déconnecté'),
+        backgroundColor: Colors.green, // Couleur du SnackBar
+      ),
+    );
               },
               child: Container(
                 width: w * 0.3,

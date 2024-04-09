@@ -31,28 +31,26 @@ class AuthController extends GetxController{
       Get.offAll(()=>WelcomePage(email:user.email!));
     }
   }
-Future<void> register(String email, password) async {
-  try{
-   await auth.createUserWithEmailAndPassword(email: email, password: password);
-  }catch(e){
-    Get.snackbar("about user", "user message",
-    backgroundColor: Colors.redAccent,
-    snackPosition: SnackPosition.BOTTOM,
-      titleText: Text(
-        "account creation failed",
-        style: TextStyle(
-          color: Colors.white
-        ),
-      ),
-      messageText: Text(
+Future<void> register(String email, String password) async {
+    try {
+      await auth.createUserWithEmailAndPassword(email: email, password: password);
+      Get.snackbar(
+        "Création de compte réussie",
+        "Votre compte a été créé avec succès",
+        backgroundColor: Colors.green,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      // Naviguer vers la page de connexion après l'inscription réussie
+      Get.offAll(() => LoginPage());
+    } catch (e) {
+      Get.snackbar(
+        "Erreur lors de la création de compte",
         e.toString(),
-          style: TextStyle(
-            color: Colors.white
-          )
-      )
-    );
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
-}
 Future<void> login(String email, password) async {
   try{
    await auth.signInWithEmailAndPassword(email: email, password: password);

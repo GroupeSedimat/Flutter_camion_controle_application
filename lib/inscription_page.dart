@@ -148,6 +148,8 @@ class InscriptionPage extends StatelessWidget {
             GestureDetector(
               onTap: (){
                 AuthController.instance.register(emailController.text.trim(), passwordController.text.trim());
+                
+    
               },
               child: Container (
                 width: w*0.3,
