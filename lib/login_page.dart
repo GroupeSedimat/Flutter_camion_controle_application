@@ -3,8 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/inscription_page.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 import 'auth_controller.dart';
+import 'reset_password_page.dart';
 
 class LoginPage extends StatefulWidget{
   const LoginPage({Key? key}) : super(key: key);
@@ -125,9 +128,9 @@ class _LoginPagestate  extends State<LoginPage> {
                       controller: passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        hintText: 'Entrez votre mot de passe', // Ajoutez votre texte ici
+                        hintText: 'Entrez votre mot de passe', 
                         prefixIcon: const Icon(Icons.password, color:Colors.purpleAccent),
-                        hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), // Définissez l'opacité souhaitée
+                        hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), 
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                           borderSide: const BorderSide(
@@ -150,20 +153,28 @@ class _LoginPagestate  extends State<LoginPage> {
 
                     const SizedBox(height: 50,),
                     Row(
-                      children: [
-                        Expanded(child: Container(),),
-                        Text(
-                   "Mot de passe oublié?",
-                   style: TextStyle(
-                   decoration: TextDecoration.underline,
-                   decorationColor: Colors.purple,
-                   decorationStyle: TextDecorationStyle.solid, 
-                    fontSize: 20,
-                    color:Colors.purple[400]
-                   ),
-                   ),
-                      ]
-                    ),
+  children: [
+    Expanded(
+      child: Container(),
+    ),
+    GestureDetector(
+      onTap: () {
+        Get.to(() => ResetPasswordPage()); // Naviguer vers la page de réinitialisation du mot de passe
+      },
+      child: Text(
+        "Mot de passe oublié?",
+        style: TextStyle(
+          decoration: TextDecoration.underline,
+          decorationColor: Colors.purple,
+          decorationStyle: TextDecorationStyle.solid,
+          fontSize: 20,
+          color: Colors.purple[400],
+        ),
+      ),
+    ),
+  ],
+)
+,
                     
               ],
             ),

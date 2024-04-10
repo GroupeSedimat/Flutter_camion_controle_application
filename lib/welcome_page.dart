@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'auth_controller.dart';
 
 class WelcomePage extends StatelessWidget {
-  final String email;
-  const WelcomePage({Key? key, required this.email}) : super(key: key);
+  final String username;
+
+  const WelcomePage({Key? key, required this.username}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -92,9 +93,9 @@ class WelcomePage extends StatelessWidget {
               ),
             ),
             Text(
-              email,
+              username,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 30,
                 color: Colors.purple[300],
               ),
             ),
@@ -103,11 +104,11 @@ class WelcomePage extends StatelessWidget {
               onTap: () {
                 AuthController.instance.logOut();
                 ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Vous avez été déconnecté'),
-        backgroundColor: Colors.green, // Couleur du SnackBar
-      ),
-    );
+                  SnackBar(
+                    content: Text('Vous avez été déconnecté'),
+                    backgroundColor: Colors.green, // Couleur du SnackBar
+                  ),
+                );
               },
               child: Container(
                 width: w * 0.3,

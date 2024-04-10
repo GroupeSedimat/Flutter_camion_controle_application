@@ -1,4 +1,5 @@
 // ignore_for_file: use_super_parameters, prefer_const_constructors, prefer_interpolation_to_compose_strings
+
 import 'package:flutter/material.dart';
 
 import 'auth_controller.dart';
@@ -10,7 +11,9 @@ class InscriptionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     var emailController = TextEditingController();
     var passwordController = TextEditingController();
-    List images = [
+    var usernameController = TextEditingController();
+    var confirmPasswordController = TextEditingController();
+    List<String> images = [
       "google.png",
       "facebook.png",
       "twitter.png"
@@ -99,7 +102,48 @@ class InscriptionPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 50,),
+                  
+                  const SizedBox(height: 20,),
+                  Container(
+                    decoration: BoxDecoration(
+                      color:Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 10,
+                          spreadRadius: 7,
+                          offset: const Offset(1, 1),
+                          color:Colors.grey.withOpacity(0.3)
+                        )
+                      ]
+                    ),
+                    child: TextField(
+                      controller: usernameController,
+                      decoration: InputDecoration(
+                        hintText: 'Nom d\'utilisateur ', 
+                        prefixIcon: const Icon(Icons.person, color:Colors.purpleAccent),
+                        hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), 
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                            color:Colors.white,
+                            width: 1.0
+                          )
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                            color:Colors.white,
+                            width: 1.0
+                          )
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30)
+                        )
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20,),
                   Container(
                     decoration: BoxDecoration(
                       color:Colors.white,
@@ -140,6 +184,47 @@ class InscriptionPage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 20,),
+                  Container(
+                    decoration: BoxDecoration(
+                      color:Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 10,
+                          spreadRadius: 7,
+                          offset: const Offset(1, 1),
+                          color:Colors.grey.withOpacity(0.3)
+                        )
+                      ]
+                    ),
+                    child: TextField(
+                      controller: confirmPasswordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'Confirmer le mot de passe', 
+                        prefixIcon: const Icon(Icons.password, color:Colors.purpleAccent),
+                        hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), // Définissez l'opacité souhaitée
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                            color:Colors.white,
+                            width: 1.0
+                          )
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                            color:Colors.white,
+                            width: 1.0
+                          )
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30)
+                        )
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -147,9 +232,7 @@ class InscriptionPage extends StatelessWidget {
             
             GestureDetector(
               onTap: (){
-                AuthController.instance.register(emailController.text.trim(), passwordController.text.trim());
-                
-    
+                AuthController.instance.register(emailController.text.trim(), passwordController.text.trim(), usernameController.text.trim(), confirmPasswordController.text.trim());
               },
               child: Container (
                 width: w*0.3,
