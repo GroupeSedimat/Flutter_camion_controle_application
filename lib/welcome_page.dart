@@ -1,6 +1,10 @@
 // ignore_for_file: prefer_const_constructors, use_super_parameters
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'auth_controller.dart';
+import 'edit_profile_page.dart';
+import 'reset_password_page.dart'; 
 
 class WelcomePage extends StatelessWidget {
   final String username;
@@ -17,12 +21,13 @@ class WelcomePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {
-            // Ouvrir le menu hamburger
-            Scaffold.of(context).openDrawer();
-          },
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
       ),
       drawer: Drawer(
@@ -32,32 +37,63 @@ class WelcomePage extends StatelessWidget {
             DrawerHeader(
               decoration: BoxDecoration(
                 color: Colors.purple,
+                
               ),
-              child: Text(
-                'Paramètres',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              
+              child: Icon(
+                 Icons.settings,
+                 size: 80, 
+                 color: Colors.grey, 
+               
               ),
             ),
-            ListTile(
-              title: Text('Modifier le profil'),
+              /**   ListTile(
+              leading: Icon(Icons.slideshow, color: Colors.purple), 
+              title: Text('Voir mes informations'),
               onTap: () {
-                // Implémentez l'action à effectuer lors du clic sur "Modifier le profil"
-                Navigator.pop(context); // Fermer le menu
-                // Naviguer vers l'écran de modification du profil
+                Navigator.pop(context);
+                Get.to(() => ProfileInfoPage(
+                  username: 'NomUtilisateur',
+                  dob: 'DateDeNaissance',
+                  email: 'adresse@example.com',
+                ));
+              },
+             ), */
+             ListTile(
+              leading: Icon(Icons.edit, color: Colors.purple),
+              title: Text('Modifier vos informations'),
+              onTap: () {
+                Navigator.pop(context);
+                Get.to(() => ModifyProfilePage());
               },
             ),
-            ListTile(
-              title: Text('Modifier le mot de passe'),
+             ListTile(
+              leading: Icon(Icons.mail, color: Colors.purple), 
+              title: Text('Messagerie'),
               onTap: () {
-                // Implémentez l'action à effectuer lors du clic sur "Modifier le mot de passe"
-                Navigator.pop(context); // Fermer le menu
-                // Naviguer vers l'écran de modification du mot de passe
+                Navigator.pop(context);
+              //Get.to(() => ModifyProfilePage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
               },
             ),
-            // Ajoutez d'autres options de menu selon vos besoins
+             ListTile(
+              leading: Icon(Icons.shopping_cart, color: Colors.purple),
+              title: Text('Accéder au shop'),
+              onTap: () {
+                Navigator.pop(context);
+              //Get.to(() => ModifyProfilePage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
+              },
+            ),
+            
+            ListTile(
+              leading: Icon(Icons.lock, color: Colors.purple),
+              title: Text('Modifier mot de passe'),
+              onTap: () {
+                Navigator.pop(context);
+              Get.to(() => ResetPasswordPage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
+              },
+            ),
+            
+            // Autres options de menu
           ],
         ),
       ),
@@ -106,7 +142,7 @@ class WelcomePage extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Vous avez été déconnecté'),
-                    backgroundColor: Colors.green, // Couleur du SnackBar
+                    backgroundColor: Colors.green,
                   ),
                 );
               },
