@@ -6,7 +6,7 @@
   import 'package:get/get.dart';
   import 'package:cloud_firestore/cloud_firestore.dart'; 
 
-  import 'welcome_page.dart';
+  import 'package:flutter_application_1/welcome_page.dart';
 
   class AuthController extends GetxController {
     static AuthController instance = Get.find();
@@ -35,7 +35,7 @@
             .then((DocumentSnapshot documentSnapshot) {
           if (documentSnapshot.exists) {
             String username = documentSnapshot.get('username');
-            Get.offAll(() => WelcomePage(username: username));
+            Get.offAll(() => WelcomePage());
           } else {
             print('Document does not exist on the database');
           }

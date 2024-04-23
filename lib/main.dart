@@ -2,6 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth_controller.dart';
+import 'package:flutter_application_1/checklist/loading_vrm.dart';
+import 'package:flutter_application_1/checklist/wrapper.dart';
+import 'package:flutter_application_1/checklist/checklist.dart';
+import 'package:flutter_application_1/checklist/diagrams.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -23,6 +27,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.purple,
       ),
       home: SplashScreen(),
+      routes: {
+        '/wrapper': (context) => const Wrapper(),
+        '/checklist': (context) => const CheckList(),
+        '/diagrams': (context) => const Diagrams(),
+        '/loadingdata': (context) => const LoadingData(),
+      },
     );
   }
 }
