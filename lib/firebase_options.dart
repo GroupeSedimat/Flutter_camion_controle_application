@@ -46,6 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '25240704677',
     projectId: 'camion-controle-appli-v1',
     authDomain: 'camion-controle-appli-v1.firebaseapp.com',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'camion-controle-appli-v1.appspot.com',
   );
 
@@ -54,6 +55,7 @@ class DefaultFirebaseOptions {
     appId: '1:25240704677:android:a43f9bdbda059a91b6df4c',
     messagingSenderId: '25240704677',
     projectId: 'camion-controle-appli-v1',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'camion-controle-appli-v1.appspot.com',
   );
 
@@ -62,6 +64,7 @@ class DefaultFirebaseOptions {
     appId: '1:25240704677:ios:ebd56b84801ad42cb6df4c',
     messagingSenderId: '25240704677',
     projectId: 'camion-controle-appli-v1',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'camion-controle-appli-v1.appspot.com',
     iosBundleId: 'com.mobility.corner.app.flutterApplication1',
   );
@@ -71,6 +74,7 @@ class DefaultFirebaseOptions {
     appId: '1:25240704677:ios:706bff9215fa28ecb6df4c',
     messagingSenderId: '25240704677',
     projectId: 'camion-controle-appli-v1',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'camion-controle-appli-v1.appspot.com',
     iosBundleId: 'com.example.flutterApplication1',
   );
@@ -81,6 +85,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '25240704677',
     projectId: 'camion-controle-appli-v1',
     authDomain: 'camion-controle-appli-v1.firebaseapp.com',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'camion-controle-appli-v1.appspot.com',
   );
+
 }
