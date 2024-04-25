@@ -1,7 +1,11 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/checklist/task_template.dart';
+import 'package:flutter_application_1/services/database_service.dart';
 
 class CheckList extends StatefulWidget {
   const CheckList({super.key});
@@ -11,6 +15,8 @@ class CheckList extends StatefulWidget {
 }
 
 class _CheckListState extends State<CheckList> {
+
+  final DatabaseService _databaseService = DatabaseService();
 
   List<ListOfLists> listOfLists = [
     ListOfLists(listNr: 0, listName: "Before setting off"),
@@ -24,20 +30,23 @@ class _CheckListState extends State<CheckList> {
     ListOfLists(listNr: 8, listName: "listName")
   ];
 
-  List<Task> toDoList = [
-    Task(taskInfo: "Pris charge électrique secteur	a. Débrancher la prise électrique située sur le côté conducteur du camion. b. Débrancher le sectionneur d’alimentation de la prise de recharge du camion.", listNr: 0),
-    Task(taskInfo: "Serrure portes arrière	Verrouiller non", listNr: 0),
-    Task(taskInfo: "Serrures prises recharge VE	Verrouiller oui/non", listNr: 0),
-    Task(taskInfo: "Serrure porte latérale	Verrouiller oui/non", listNr: 0),
-    Task(taskInfo: "Lumières	Allumer oui/non", listNr: 0),
-    Task(taskInfo: "Convertisseur	Off oui/non", listNr: 1),
-    Task(taskInfo: "Présence et arrimage outillage	Vérifier oui/non", listNr: 2),
-    Task(taskInfo: "Etagère 1: picking selon photo	Vérifier oui/non", listNr: 2),
-    Task(taskInfo: "Etagère 2: picking huile	Vérifier oui/non", listNr: 2)
-  ];
+  // List<Task> toDoList = [
+  //   Task(taskInfo: "Pris charge électrique secteur	a. Débrancher la prise électrique située sur le côté conducteur du camion. b. Débrancher le sectionneur d’alimentation de la prise de recharge du camion.", listNr: 0),
+  //   Task(taskInfo: "Serrure portes arrière	Verrouiller non", listNr: 0),
+  //   Task(taskInfo: "Serrures prises recharge VE	Verrouiller oui/non", listNr: 0),
+  //   Task(taskInfo: "Serrure porte latérale	Verrouiller oui/non", listNr: 0),
+  //   Task(taskInfo: "Lumières	Allumer oui/non", listNr: 0),
+  //   Task(taskInfo: "Convertisseur	Off oui/non", listNr: 1),
+  //   Task(taskInfo: "Présence et arrimage outillage	Vérifier oui/non", listNr: 2),
+  //   Task(taskInfo: "Etagère 1: picking selon photo	Vérifier oui/non", listNr: 2),
+  //   Task(taskInfo: "Etagère 2: picking huile	Vérifier oui/non", listNr: 2)
+  // ];
+
+  late List<int> counter;
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController _textEditingController = TextEditingController();
 
     return DefaultTabController(
       initialIndex: 0,
@@ -67,31 +76,107 @@ class _CheckListState extends State<CheckList> {
                 )).toList(),
           ),
         ),
-        body: TabBarView(
-          children: <Widget>[
-            for (var list in listOfLists)
-              ListView(
-                padding: const EdgeInsets.all(16.0),
-                scrollDirection: Axis.vertical,
-                children: [
-                  for (var task in toDoList)
-                    if (task.listNr == list.listNr)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: TaskTemplate(
-                            task: task,
-                            delete: (){
-                              setState(() {
-                                toDoList.remove(task);
-                              });
-                            }
+        body:
+        StreamBuilder(
+          stream: _databaseService.getTasks(),
+          builder: (context, snapshot) {
+            List tasksSnapshotList = snapshot.data?.docs ?? [];
+            Map<String, Task> tasks = HashMap();
+            for (var taskSnapshot in tasksSnapshotList){
+              tasks.addAll({taskSnapshot.id: taskSnapshot.data()});
+            }
+            counter = List<int>.filled(listOfLists.length, 0);
+            for (var i = 0; i < listOfLists.length; i++) {
+              for (Task task in tasks.values) {
+                if (task.nrOfList == listOfLists[i].listNr) {
+                  counter[i]++;
+                }
+              }
+            }
+            return TabBarView(
+              children: <Widget>[
+                for (var list in listOfLists)
+                  ListView(
+                    padding: const EdgeInsets.all(16.0),
+                    scrollDirection: Axis.vertical,
+                    children: [
+                      for (Task task in tasks.values)
+                        if (task.nrOfList == list.listNr)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: TaskTemplate(
+                                task: task,
+                                delete: (){
+                                  // Find the key corresponding to the task
+                                  String key = tasks.keys.firstWhere(
+                                        (k) => tasks[k] == task
+                                  );
+                                  // If key found, delete task using key
+                                    _databaseService.deleteTask(key);
+                                }
+                            ),
+                          ),
+                      FloatingActionButton(
+                        onPressed: () async {
+                          showDialog(
+                              context: context,
+                              builder: (context){
+                                return AlertDialog(
+                                  title: const Text("Add a Task"),
+                                  content: TextField(
+                                    controller: _textEditingController,
+                                    decoration: const InputDecoration(hintText: "Add Task name"),
+                                    // expands: true,
+                                  ),
+                                  actions: [
+                                    MaterialButton(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      textColor: Colors.lime,
+                                      child: const Text("Ok"),
+                                      onPressed: (){
+                                        Task task = Task(
+                                          title: _textEditingController.text,
+                                          description: "description",
+                                          nrOfList: list.listNr,
+                                          nrEntryPosition: counter[list.listNr]+1,
+                                          lastUpdate: Timestamp.now(),
+                                          deleted: Timestamp.now(),
+                                        );
+                                        _databaseService.addTask(task);
+                                        Navigator.pop(context);
+                                        _textEditingController.clear();
+                                      },
+                                    )
+                                  ],
+                                );
+                              }
+                          );
+                        },
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.lightGreenAccent,
                         ),
                       ),
-                ],
-              ),
-          ],
+                    ],
+                  ),
+              ],
+            );
+          }
         ),
       ),
     );
+  }
+
+  void updateCounters(List tasks) {
+    counter = List<int>.filled(listOfLists.length, 0);
+    for (var i = 0; i < listOfLists.length; i++) {
+      for (var taskSnapshot in tasks) {
+        Task task = taskSnapshot.data();
+        if (task.nrOfList == listOfLists[i].listNr) {
+          counter[i]++;
+        }
+      }
+    }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/checklist/checklist.dart';
 import 'package:flutter_application_1/checklist/loading_vrm.dart';
 import 'package:flutter_application_1/welcome_page.dart';
 import 'package:get/get.dart';
@@ -108,11 +109,20 @@ class MenuWidget extends StatelessWidget {
       const Divider(color: Colors.purple),
 
       ListTile(
-        leading: const Icon(Icons.lock, color: Colors.purple),
+        leading: const Icon(Icons.data_exploration, color: Colors.purple),
         title: const Text('Get datas'),
         onTap: () {
           Navigator.pop(context);
           Get.to(() => const LoadingData());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
+        },
+      ),
+
+      ListTile(
+        leading: const Icon(Icons.view_list, color: Colors.purple),
+        title: const Text('Go to checklist'),
+        onTap: () {
+          Navigator.pop(context);
+          Get.to(() => const CheckList());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
     ]

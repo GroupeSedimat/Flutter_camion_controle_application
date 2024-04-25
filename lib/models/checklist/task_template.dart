@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 
@@ -9,6 +11,7 @@ class TaskTemplate extends StatelessWidget{
 
   @override
   Widget build(BuildContext context){
+    bool? _isDone = false;
     return Card(
       margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
       color: Colors.grey[800],
@@ -18,7 +21,15 @@ class TaskTemplate extends StatelessWidget{
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              task.taskInfo,
+              task.title,
+              style: const TextStyle(
+                fontSize: 18.0,
+                color: Colors.amber,
+              ),
+            ),
+            const SizedBox(height: 8.0,),
+            Text(
+              task.description,
               style: const TextStyle(
                 fontSize: 18.0,
                 color: Colors.amber,
@@ -29,6 +40,13 @@ class TaskTemplate extends StatelessWidget{
               onPressed: () => delete(),
               label: const Text('delete this'),
               icon: const Icon(Icons.delete),
+            ),
+            Checkbox(
+              checkColor: Colors.white,
+              value: _isDone,
+              onChanged: (value){
+                _isDone = value;
+              }
             )
           ],
         ),
