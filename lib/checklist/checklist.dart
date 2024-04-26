@@ -2,6 +2,8 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/models/checklist/addTaskForm.dart';
+import 'package:flutter_application_1/models/checklist/pop_up_infos.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/checklist/task_template.dart';
@@ -16,7 +18,7 @@ class CheckList extends StatefulWidget {
 
 class _CheckListState extends State<CheckList> {
 
-  final DatabaseService _databaseService = DatabaseService();
+  final DatabaseService databaseService = DatabaseService();
 
   List<ListOfLists> listOfLists = [
     ListOfLists(listNr: 0, listName: "Before setting off"),
@@ -46,8 +48,22 @@ class _CheckListState extends State<CheckList> {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController _textEditingController = TextEditingController();
 
+    void showSomething(int listNbr, int position){
+      showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(10),
+          // padding: EdgeInsets.fromLTRB(
+          //   20, 60, 20, MediaQuery.of(context).viewInsets.bottom
+          // ),
+          color: Colors.white,
+          margin: EdgeInsets.fromLTRB(
+              10, 50, 10, MediaQuery.of(context).viewInsets.bottom
+          ),
+          child: AddTaskForm(nrOfList: listNbr , nrEntryPosition: position , databaseService: databaseService),
+        );
+      });
+    }
     return DefaultTabController(
       initialIndex: 0,
       length: listOfLists.length,
@@ -65,7 +81,7 @@ class _CheckListState extends State<CheckList> {
             dividerColor: Colors.transparent,
             unselectedLabelColor: Colors.lightGreenAccent,
             // indicatorColor: Colors.red,
-            indicatorPadding: EdgeInsets.only(left: -10, right: -10),
+            indicatorPadding: const EdgeInsets.only(left: -10, right: -10),
             indicatorWeight: 5,
             indicatorColor: Colors.red,
             labelColor: Colors.black,
@@ -78,7 +94,7 @@ class _CheckListState extends State<CheckList> {
         ),
         body:
         StreamBuilder(
-          stream: _databaseService.getTasks(),
+          stream: databaseService.getTasks(),
           builder: (context, snapshot) {
             List tasksSnapshotList = snapshot.data?.docs ?? [];
             Map<String, Task> tasks = HashMap();
@@ -112,45 +128,23 @@ class _CheckListState extends State<CheckList> {
                                         (k) => tasks[k] == task
                                   );
                                   // If key found, delete task using key
-                                    _databaseService.deleteTask(key);
+                                    databaseService.deleteTask(key);
                                 }
                             ),
                           ),
                       FloatingActionButton(
                         onPressed: () async {
-                          showDialog(
-                              context: context,
-                              builder: (context){
-                                return AlertDialog(
-                                  title: const Text("Add a Task"),
-                                  content: TextField(
-                                    controller: _textEditingController,
-                                    decoration: const InputDecoration(hintText: "Add Task name"),
-                                    // expands: true,
-                                  ),
-                                  actions: [
-                                    MaterialButton(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      textColor: Colors.lime,
-                                      child: const Text("Ok"),
-                                      onPressed: (){
-                                        Task task = Task(
-                                          title: _textEditingController.text,
-                                          description: "description",
-                                          nrOfList: list.listNr,
-                                          nrEntryPosition: counter[list.listNr]+1,
-                                          lastUpdate: Timestamp.now(),
-                                          deleted: Timestamp.now(),
-                                        );
-                                        _databaseService.addTask(task);
-                                        Navigator.pop(context);
-                                        _textEditingController.clear();
-                                      },
-                                    )
-                                  ],
-                                );
-                              }
-                          );
+                          showSomething(list.listNr, counter[list.listNr] +1);
+                          // showDialog(
+                          //   context: context,
+                          //   builder: (context){
+                          //     return PopUpInfo(
+                          //         listNr: list.listNr,
+                          //         counter: counter[list.listNr],
+                          //         databaseService: databaseService
+                          //     );
+                          //   }
+                          // );
                         },
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         child: const Icon(
