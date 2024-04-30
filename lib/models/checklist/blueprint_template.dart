@@ -37,7 +37,8 @@ class BlueprintTemplate extends StatelessWidget{
               ),
             ),
             const SizedBox(height: 8.0,),
-            Row(
+            Wrap(
+              alignment: WrapAlignment.spaceEvenly,
               children: [
                 TextButton.icon(
                   onPressed: () => edit(),

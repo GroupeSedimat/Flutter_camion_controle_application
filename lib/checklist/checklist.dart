@@ -68,7 +68,7 @@ class _CheckListState extends State<CheckList> {
     }
 
 
-    void showTask(int listNbr, int position, Blueprint blueprint){
+    void showTask(Blueprint blueprint){
       showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
         return Container(
           padding: const EdgeInsets.all(10),
@@ -80,8 +80,6 @@ class _CheckListState extends State<CheckList> {
               10, 50, 10, MediaQuery.of(context).viewInsets.bottom
           ),
           child: ValidateTask(
-            nrOfList: listNbr,
-            nrEntryPosition: position,
             databaseService: databaseService,
             blueprint: blueprint),
         );
@@ -155,7 +153,7 @@ class _CheckListState extends State<CheckList> {
                                     databaseService.deleteBlueprint(key);
                                 },
                               edit: (){
-                                showTask(list.listNr, counter[list.listNr], blueprint);
+                                showTask(blueprint);
                               }
                             ),
                           ),

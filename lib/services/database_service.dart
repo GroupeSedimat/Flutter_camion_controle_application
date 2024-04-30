@@ -37,6 +37,37 @@ class DatabaseService{
     return _tasksRef.doc(taskID).snapshots();
   }
 
+  Future<Task> getOneTaskWithListPos(int nrList, int nrPosition) async {
+    // return _firestore
+    //     .collection(TASK_COLLECTION_REF)
+    //     .where("nrOfList", isEqualTo: nrList)
+    //     .where("nrEntryPosition", isEqualTo: nrPosition)
+    //     .snapshots()
+    //     .map((querySnapshot) {
+    //       if (querySnapshot.docs.isNotEmpty) {
+    //         return Task.fromJson(querySnapshot.docs.first.data());
+    //       } else {
+    //         return Task();
+    //       }
+    //     });
+    try {
+        final querySnapshot = await _firestore
+        .collection(TASK_COLLECTION_REF)
+        .where("nrOfList", isEqualTo: nrList)
+        .where("nrEntryPosition", isEqualTo: nrPosition)
+        .get();
+        if (querySnapshot.docs.isNotEmpty) {
+          return Task.fromJson(querySnapshot.docs.first.data());
+        } else {
+          return Task();
+        }
+    } catch (error) {
+      // Obsłuż błąd, jeśli wystąpił.
+      print("Error retrieving task: $error");
+      return Task();
+    }
+  }
+
   void addTask(Task task) async {
     _tasksRef.add(task);
   }
