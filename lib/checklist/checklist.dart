@@ -1,12 +1,11 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/models/checklist/addTaskForm.dart';
-import 'package:flutter_application_1/models/checklist/pop_up_infos.dart';
-import 'package:flutter_application_1/models/checklist/task.dart';
+import 'package:flutter_application_1/models/checklist/add_blueprint_form.dart';
+import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
-import 'package:flutter_application_1/models/checklist/task_template.dart';
+import 'package:flutter_application_1/models/checklist/blueprint_template.dart';
+import 'package:flutter_application_1/models/checklist/validate_task.dart';
 import 'package:flutter_application_1/services/database_service.dart';
 
 class CheckList extends StatefulWidget {
@@ -32,16 +31,16 @@ class _CheckListState extends State<CheckList> {
     ListOfLists(listNr: 8, listName: "listName")
   ];
 
-  // List<Task> toDoList = [
-  //   Task(taskInfo: "Pris charge électrique secteur	a. Débrancher la prise électrique située sur le côté conducteur du camion. b. Débrancher le sectionneur d’alimentation de la prise de recharge du camion.", listNr: 0),
-  //   Task(taskInfo: "Serrure portes arrière	Verrouiller non", listNr: 0),
-  //   Task(taskInfo: "Serrures prises recharge VE	Verrouiller oui/non", listNr: 0),
-  //   Task(taskInfo: "Serrure porte latérale	Verrouiller oui/non", listNr: 0),
-  //   Task(taskInfo: "Lumières	Allumer oui/non", listNr: 0),
-  //   Task(taskInfo: "Convertisseur	Off oui/non", listNr: 1),
-  //   Task(taskInfo: "Présence et arrimage outillage	Vérifier oui/non", listNr: 2),
-  //   Task(taskInfo: "Etagère 1: picking selon photo	Vérifier oui/non", listNr: 2),
-  //   Task(taskInfo: "Etagère 2: picking huile	Vérifier oui/non", listNr: 2)
+  // List<Blueprint> toDoList = [
+  //   Blueprint(blueprintInfo: "Pris charge électrique secteur	a. Débrancher la prise électrique située sur le côté conducteur du camion. b. Débrancher le sectionneur d’alimentation de la prise de recharge du camion.", listNr: 0),
+  //   Blueprint(blueprintInfo: "Serrure portes arrière	Verrouiller non", listNr: 0),
+  //   Blueprint(blueprintInfo: "Serrures prises recharge VE	Verrouiller oui/non", listNr: 0),
+  //   Blueprint(blueprintInfo: "Serrure porte latérale	Verrouiller oui/non", listNr: 0),
+  //   Blueprint(blueprintInfo: "Lumières	Allumer oui/non", listNr: 0),
+  //   Blueprint(blueprintInfo: "Convertisseur	Off oui/non", listNr: 1),
+  //   Blueprint(blueprintInfo: "Présence et arrimage outillage	Vérifier oui/non", listNr: 2),
+  //   Blueprint(blueprintInfo: "Etagère 1: picking selon photo	Vérifier oui/non", listNr: 2),
+  //   Blueprint(blueprintInfo: "Etagère 2: picking huile	Vérifier oui/non", listNr: 2)
   // ];
 
   late List<int> counter;
@@ -49,7 +48,7 @@ class _CheckListState extends State<CheckList> {
   @override
   Widget build(BuildContext context) {
 
-    void showSomething(int listNbr, int position){
+    void showAddBlueprint(int listNbr, int position){
       showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
         return Container(
           padding: const EdgeInsets.all(10),
@@ -60,10 +59,35 @@ class _CheckListState extends State<CheckList> {
           margin: EdgeInsets.fromLTRB(
               10, 50, 10, MediaQuery.of(context).viewInsets.bottom
           ),
-          child: AddTaskForm(nrOfList: listNbr , nrEntryPosition: position , databaseService: databaseService),
+          child: AddBlueprintForm(
+              nrOfList: listNbr,
+              nrEntryPosition: position,
+              databaseService: databaseService),
         );
       });
     }
+
+
+    void showTask(int listNbr, int position, Blueprint blueprint){
+      showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(10),
+          // padding: EdgeInsets.fromLTRB(
+          //   20, 60, 20, MediaQuery.of(context).viewInsets.bottom
+          // ),
+          color: Colors.white,
+          margin: EdgeInsets.fromLTRB(
+              10, 50, 10, MediaQuery.of(context).viewInsets.bottom
+          ),
+          child: ValidateTask(
+            nrOfList: listNbr,
+            nrEntryPosition: position,
+            databaseService: databaseService,
+            blueprint: blueprint),
+        );
+      });
+    }
+
     return DefaultTabController(
       initialIndex: 0,
       length: listOfLists.length,
@@ -86,25 +110,25 @@ class _CheckListState extends State<CheckList> {
             indicatorColor: Colors.red,
             labelColor: Colors.black,
             isScrollable: true,
-            tabs: listOfLists.map((task) =>
+            tabs: listOfLists.map((blueprint) =>
                 Tab(
-                  text: task.listName,
+                  text: blueprint.listName,
                 )).toList(),
           ),
         ),
         body:
         StreamBuilder(
-          stream: databaseService.getTasks(),
+          stream: databaseService.getBlueprints(),
           builder: (context, snapshot) {
-            List tasksSnapshotList = snapshot.data?.docs ?? [];
-            Map<String, Task> tasks = HashMap();
-            for (var taskSnapshot in tasksSnapshotList){
-              tasks.addAll({taskSnapshot.id: taskSnapshot.data()});
+            List blueprintsSnapshotList = snapshot.data?.docs ?? [];
+            Map<String, Blueprint> blueprints = HashMap();
+            for (var blueprintSnapshot in blueprintsSnapshotList){
+              blueprints.addAll({blueprintSnapshot.id: blueprintSnapshot.data()});
             }
             counter = List<int>.filled(listOfLists.length, 0);
             for (var i = 0; i < listOfLists.length; i++) {
-              for (Task task in tasks.values) {
-                if (task.nrOfList == listOfLists[i].listNr) {
+              for (Blueprint blueprint in blueprints.values) {
+                if (blueprint.nrOfList == listOfLists[i].listNr) {
                   counter[i]++;
                 }
               }
@@ -116,35 +140,28 @@ class _CheckListState extends State<CheckList> {
                     padding: const EdgeInsets.all(16.0),
                     scrollDirection: Axis.vertical,
                     children: [
-                      for (Task task in tasks.values)
-                        if (task.nrOfList == list.listNr)
+                      for (Blueprint blueprint in blueprints.values)
+                        if (blueprint.nrOfList == list.listNr)
                           Padding(
                             padding: const EdgeInsets.only(left: 8.0),
-                            child: TaskTemplate(
-                                task: task,
+                            child: BlueprintTemplate(
+                                blueprint: blueprint,
                                 delete: (){
-                                  // Find the key corresponding to the task
-                                  String key = tasks.keys.firstWhere(
-                                        (k) => tasks[k] == task
+                                  // Find the key corresponding to the blueprint
+                                  String key = blueprints.keys.firstWhere(
+                                        (k) => blueprints[k] == blueprint
                                   );
-                                  // If key found, delete task using key
-                                    databaseService.deleteTask(key);
-                                }
+                                  // If key found, delete blueprint using key
+                                    databaseService.deleteBlueprint(key);
+                                },
+                              edit: (){
+                                showTask(list.listNr, counter[list.listNr], blueprint);
+                              }
                             ),
                           ),
                       FloatingActionButton(
                         onPressed: () async {
-                          showSomething(list.listNr, counter[list.listNr] +1);
-                          // showDialog(
-                          //   context: context,
-                          //   builder: (context){
-                          //     return PopUpInfo(
-                          //         listNr: list.listNr,
-                          //         counter: counter[list.listNr],
-                          //         databaseService: databaseService
-                          //     );
-                          //   }
-                          // );
+                          showAddBlueprint(list.listNr, counter[list.listNr] +1);
                         },
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         child: const Icon(
@@ -162,12 +179,12 @@ class _CheckListState extends State<CheckList> {
     );
   }
 
-  void updateCounters(List tasks) {
+  void updateCounters(List blueprints) {
     counter = List<int>.filled(listOfLists.length, 0);
     for (var i = 0; i < listOfLists.length; i++) {
-      for (var taskSnapshot in tasks) {
-        Task task = taskSnapshot.data();
-        if (task.nrOfList == listOfLists[i].listNr) {
+      for (var blueprintSnapshot in blueprints) {
+        Blueprint blueprint = blueprintSnapshot.data();
+        if (blueprint.nrOfList == listOfLists[i].listNr) {
           counter[i]++;
         }
       }

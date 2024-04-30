@@ -1,25 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/checklist/task.dart';
+import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/services/database_service.dart';
 import 'package:intl/intl.dart';
 
-class AddTaskForm extends StatefulWidget {
+class AddBlueprintForm extends StatefulWidget {
   int nrOfList;
   int nrEntryPosition;
   DatabaseService databaseService;
-  AddTaskForm({super.key, required this.nrOfList, required this.nrEntryPosition , required this.databaseService});
+  AddBlueprintForm({super.key, required this.nrOfList, required this.nrEntryPosition , required this.databaseService});
 
   @override
-  State<AddTaskForm> createState() => _AddTaskFormState();
+  State<AddBlueprintForm> createState() => _AdBlueprintFormState();
 }
 
-class _AddTaskFormState extends State<AddTaskForm> {
+class _AdBlueprintFormState extends State<AddBlueprintForm> {
 
   final _formKey = GlobalKey<FormState>();
   late String title;
   late String description;
-  Timestamp deleted = Timestamp.now();
   Timestamp lastUpdate = Timestamp.now();
 
   @override
@@ -30,7 +29,7 @@ class _AddTaskFormState extends State<AddTaskForm> {
         scrollDirection: Axis.vertical,
         children: <Widget> [
           const Text(
-            "Add new task",
+            "Add new blueprint",
             style: TextStyle(
               backgroundColor: Colors.white,
               fontSize: 30,
@@ -44,7 +43,7 @@ class _AddTaskFormState extends State<AddTaskForm> {
           TextFormField(
             decoration: const InputDecoration(
               hintText: "Give me name!",
-              labelText: "Task name:",
+              labelText: "Blueprint name:",
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -53,7 +52,7 @@ class _AddTaskFormState extends State<AddTaskForm> {
               focusedBorder: OutlineInputBorder(gapPadding: 15),
               border: OutlineInputBorder(gapPadding: 5),
             ),
-            validator: (val) {return (val == null || val.isEmpty) ? 'Enter task name:' : null;},
+            validator: (val) {return (val == null || val.isEmpty) ? 'Enter blueprint name:' : null;},
             onChanged: (val) => setState(() {title = val;}),
           ),
 
@@ -110,15 +109,14 @@ class _AddTaskFormState extends State<AddTaskForm> {
               ),
             ),
             onPressed: () async {
-              Task task = Task(
+              Blueprint blueprint = Blueprint(
                 title: title,
                 description: description,
                 nrOfList: widget.nrOfList,
                 nrEntryPosition: widget.nrEntryPosition,
                 lastUpdate: lastUpdate,
-                deleted: deleted,
               );
-              widget.databaseService.addTask(task);
+              widget.databaseService.addBlueprint(blueprint);
               Navigator.pop(context);
             },
           )

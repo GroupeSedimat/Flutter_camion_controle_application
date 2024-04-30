@@ -1,57 +1,57 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Task {
-  String title;
-  String description;
+class Task{
+  String? descriptionOfProblem;
+  String? photoFilePath;
+  bool? isDone;
   int? nrOfList;
   int? nrEntryPosition;
-  Timestamp? deleted;
-  Timestamp? lastUpdate;
+  Timestamp? validationDate;
 
   Task({
-    required this.title,
-    required this.description,
+    this.descriptionOfProblem,
+    this.photoFilePath,
+    this.isDone,
     this.nrOfList,
     this.nrEntryPosition,
-    this.deleted,
-    this.lastUpdate,
+    this.validationDate
   });
 
   Task.fromJson(Map<String, Object?> json): this (
-      title: json['title']! as String,
-      description: json['description']! as String,
-      nrOfList: json['nrOfList']! as int,
-      nrEntryPosition: json['nrEntryPosition']! as int,
-      deleted: json['deleted']! as Timestamp,
-      lastUpdate: json['lastUpdate']! as Timestamp,
+    descriptionOfProblem: json['descriptionOfProblem']! as String,
+    photoFilePath: json['photoFilePath']! as String,
+    isDone: json['isDone']! as bool,
+    nrOfList: json['nrOfList']! as int,
+    nrEntryPosition: json['nrEntryPosition']! as int,
+    validationDate: json['validationDate']! as Timestamp,
   );
 
   Task copyWith({
-    String? title,
-    String? description,
+    String? descriptionOfProblem,
+    String? photoFilePath,
+    bool? isDone,
     int? nrOfList,
     int? nrEntryPosition,
-    Timestamp? deleted,
-    Timestamp? lastUpdate,
-    }){
-      return Task(
-          title: title?? this.title,
-          description: description?? this.description,
-          nrOfList: nrOfList?? this.nrOfList,
-          nrEntryPosition: nrEntryPosition?? this.nrEntryPosition,
-          deleted: deleted?? this.deleted,
-          lastUpdate: lastUpdate?? this.lastUpdate,
-      );
-    }
+    Timestamp? validationDate,
+  }){
+    return Task(
+        descriptionOfProblem: descriptionOfProblem?? this.descriptionOfProblem,
+        photoFilePath: photoFilePath?? this.photoFilePath,
+        isDone: isDone?? this.isDone,
+        nrOfList: nrOfList?? this.nrOfList,
+        nrEntryPosition: nrEntryPosition?? this.nrEntryPosition,
+        validationDate: validationDate?? this.validationDate
+    );
+  }
 
-    Map<String, Object?> toJson(){
-      return{
-        'title': title,
-        'description': description,
-        'nrOfList': nrOfList,
-        'nrEntryPosition': nrEntryPosition,
-        'deleted': deleted,
-        'lastUpdate': lastUpdate,
-      };
-    }
+  Map<String, Object?> toJson(){
+    return{
+      'descriptionOfProblem': descriptionOfProblem,
+      'photoFilePath': photoFilePath,
+      'isDone': isDone,
+      'nrOfList': nrOfList,
+      'nrEntryPosition': nrEntryPosition,
+      'validationDate': validationDate,
+    };
+  }
 }
