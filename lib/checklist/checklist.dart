@@ -1,10 +1,13 @@
 import 'dart:collection';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/auth_controller.dart';
 import 'package:flutter_application_1/models/checklist/add_blueprint_form.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/checklist/blueprint_template.dart';
+import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/models/checklist/validate_task.dart';
 import 'package:flutter_application_1/services/database_service.dart';
 
@@ -18,6 +21,7 @@ class CheckList extends StatefulWidget {
 class _CheckListState extends State<CheckList> {
 
   final DatabaseService databaseService = DatabaseService();
+  AuthController authController = AuthController.instance;
 
   List<ListOfLists> listOfLists = [
     ListOfLists(listNr: 0, listName: "Before setting off"),
@@ -47,14 +51,10 @@ class _CheckListState extends State<CheckList> {
 
   @override
   Widget build(BuildContext context) {
-
     void showAddBlueprint(int listNbr, int position){
       showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
         return Container(
           padding: const EdgeInsets.all(10),
-          // padding: EdgeInsets.fromLTRB(
-          //   20, 60, 20, MediaQuery.of(context).viewInsets.bottom
-          // ),
           color: Colors.white,
           margin: EdgeInsets.fromLTRB(
               10, 50, 10, MediaQuery.of(context).viewInsets.bottom
@@ -68,22 +68,51 @@ class _CheckListState extends State<CheckList> {
     }
 
 
-    void showTask(Blueprint blueprint){
-      showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(10),
-          // padding: EdgeInsets.fromLTRB(
-          //   20, 60, 20, MediaQuery.of(context).viewInsets.bottom
-          // ),
-          color: Colors.white,
-          margin: EdgeInsets.fromLTRB(
-              10, 50, 10, MediaQuery.of(context).viewInsets.bottom
-          ),
-          child: ValidateTask(
-            databaseService: databaseService,
-            blueprint: blueprint),
-        );
-      });
+    void showTask(Blueprint blueprint) async {
+      try {
+        String? userUID = authController.getCurrentUserUID();
+        if(userUID != null){
+          Map<String, Task> tasks = await databaseService.getTasksList(userUID);
+          Task validate = Task();
+          for (Task task in tasks.values) {
+            if (blueprint.nrOfList == task.nrOfList &&
+                blueprint.nrEntryPosition == task.nrEntryPosition) {
+              validate = task;
+              break; //
+            }
+          }
+
+          String keyId = tasks.keys.firstWhere(
+            (k) => tasks[k] == validate,
+            orElse: () =>
+                '', // Zwróć pusty ciąg, jeśli nie znaleziono dopasowania
+          );
+
+          showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                return Container(
+                  padding: const EdgeInsets.all(10),
+                  color: Colors.white,
+                  margin: EdgeInsets.fromLTRB(
+                      10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
+                  child: ValidateTask(
+                    databaseService: databaseService,
+                    blueprint: blueprint,
+                    validate: validate,
+                    keyId: keyId,
+                    userUID: userUID,
+                  ),
+                );
+              });
+        }else{
+          print("Error u need to log in");
+        }
+      } catch (e) {
+        print("Error showing task: $e");
+        // Obsłuż błąd, na przykład wyświetlając komunikat użytkownikowi
+      }
     }
 
     return DefaultTabController(
@@ -120,12 +149,16 @@ class _CheckListState extends State<CheckList> {
           builder: (context, snapshot) {
             List blueprintsSnapshotList = snapshot.data?.docs ?? [];
             Map<String, Blueprint> blueprints = HashMap();
+            Map<String, Blueprint> sortedBlueprints = HashMap();
             for (var blueprintSnapshot in blueprintsSnapshotList){
               blueprints.addAll({blueprintSnapshot.id: blueprintSnapshot.data()});
             }
             counter = List<int>.filled(listOfLists.length, 0);
             for (var i = 0; i < listOfLists.length; i++) {
-              for (Blueprint blueprint in blueprints.values) {
+              sortedBlueprints = Map.fromEntries(
+                  blueprints.entries.toList()..sort((e1,e2) => (e1.value.nrEntryPosition ?? 99).compareTo(e2.value.nrEntryPosition ?? 99))
+              );
+              for (Blueprint blueprint in sortedBlueprints.values) {
                 if (blueprint.nrOfList == listOfLists[i].listNr) {
                   counter[i]++;
                 }
@@ -138,20 +171,20 @@ class _CheckListState extends State<CheckList> {
                     padding: const EdgeInsets.all(16.0),
                     scrollDirection: Axis.vertical,
                     children: [
-                      for (Blueprint blueprint in blueprints.values)
+                      for (Blueprint blueprint in sortedBlueprints.values)
                         if (blueprint.nrOfList == list.listNr)
                           Padding(
                             padding: const EdgeInsets.only(left: 8.0),
                             child: BlueprintTemplate(
-                                blueprint: blueprint,
-                                delete: (){
-                                  // Find the key corresponding to the blueprint
-                                  String key = blueprints.keys.firstWhere(
-                                        (k) => blueprints[k] == blueprint
-                                  );
-                                  // If key found, delete blueprint using key
-                                    databaseService.deleteBlueprint(key);
-                                },
+                              blueprint: blueprint,
+                              delete: (){
+                                // Find the key corresponding to the blueprint
+                                String key = sortedBlueprints.keys.firstWhere(
+                                      (k) => sortedBlueprints[k] == blueprint
+                                );
+                                // If key found, delete blueprint using key
+                                databaseService.deleteBlueprint(key);
+                              },
                               edit: (){
                                 showTask(blueprint);
                               }

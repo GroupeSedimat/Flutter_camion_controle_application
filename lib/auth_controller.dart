@@ -71,66 +71,70 @@
   }
 
 
-    Future<void> login(String email, String password) async {
-      try {
-        await auth.signInWithEmailAndPassword(email: email, password: password);
-      } catch (e) {
-        Get.snackbar(
-          "Erreur de connexion",
-          e.toString(),
-          backgroundColor: Colors.red,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+  Future<void> login(String email, String password) async {
+    try {
+      await auth.signInWithEmailAndPassword(email: email, password: password);
+    } catch (e) {
+      Get.snackbar(
+        "Erreur de connexion",
+        e.toString(),
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
-
-    Future<void> logOut() async {
-      await auth.signOut();
-    }
-
-  
-    Future<void> resetPassword(String email) async {
-      try {
-        await auth.sendPasswordResetEmail(email: email);
-        Get.snackbar(
-          "E-mail de réinitialisation envoyé",
-          "Veuillez vérifier votre boîte de réception pour réinitialiser votre mot de passe.",
-          backgroundColor: Colors.green,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      
-        Get.offAll(() => LoginPage());
-      } catch (e) {
-        Get.snackbar(
-          "Erreur lors de l'envoi de l'e-mail",
-          e.toString(),
-          backgroundColor: Colors.red,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    }
-    Future<void> updateProfile(String newUsername, String newDob, String newEmail) async {
-  try {
-    await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).update({
-      'username': newUsername,
-      'dob': newDob,
-      'email': newEmail,
-    });
-    
-    Get.snackbar(
-      "Profil mis à jour",
-      "Les modifications ont été enregistrées avec succès.",
-      backgroundColor: Colors.green,
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  } catch (e) {
-    Get.snackbar(
-      "Erreur lors de la mise à jour du profil",
-      e.toString(),
-      backgroundColor: Colors.red,
-      snackPosition: SnackPosition.BOTTOM,
-    );
   }
+
+  Future<void> logOut() async {
+    await auth.signOut();
+  }
+
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await auth.sendPasswordResetEmail(email: email);
+      Get.snackbar(
+        "E-mail de réinitialisation envoyé",
+        "Veuillez vérifier votre boîte de réception pour réinitialiser votre mot de passe.",
+        backgroundColor: Colors.green,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
+      Get.offAll(() => LoginPage());
+    } catch (e) {
+      Get.snackbar(
+        "Erreur lors de l'envoi de l'e-mail",
+        e.toString(),
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+  Future<void> updateProfile(String newUsername, String newDob, String newEmail) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).update({
+        'username': newUsername,
+        'dob': newDob,
+        'email': newEmail,
+      });
+
+      Get.snackbar(
+        "Profil mis à jour",
+        "Les modifications ont été enregistrées avec succès.",
+        backgroundColor: Colors.green,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      Get.snackbar(
+        "Erreur lors de la mise à jour du profil",
+        e.toString(),
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+    String? getCurrentUserUID() {
+      return _user.value?.uid; // Renvoie l'UID de l'utilisateur actuel ou null si l'utilisateur n'est pas connecté
+    }
+
 }
-
-  }

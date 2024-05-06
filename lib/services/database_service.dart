@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
@@ -18,7 +20,7 @@ class DatabaseService{
               snapshots.data()!,
             ),
           toFirestore: (task, _) => task.toJson()
-    );
+        );
     _blueprintRef = _firestore
         .collection(BLUEPRINT_COLLECTION_REF)
         .withConverter<Blueprint>(
@@ -38,18 +40,6 @@ class DatabaseService{
   }
 
   Future<Task> getOneTaskWithListPos(int nrList, int nrPosition) async {
-    // return _firestore
-    //     .collection(TASK_COLLECTION_REF)
-    //     .where("nrOfList", isEqualTo: nrList)
-    //     .where("nrEntryPosition", isEqualTo: nrPosition)
-    //     .snapshots()
-    //     .map((querySnapshot) {
-    //       if (querySnapshot.docs.isNotEmpty) {
-    //         return Task.fromJson(querySnapshot.docs.first.data());
-    //       } else {
-    //         return Task();
-    //       }
-    //     });
     try {
         final querySnapshot = await _firestore
         .collection(TASK_COLLECTION_REF)
@@ -62,9 +52,26 @@ class DatabaseService{
           return Task();
         }
     } catch (error) {
-      // Obsłuż błąd, jeśli wystąpił.
+      // Gérez l’erreur
       print("Error retrieving task: $error");
       return Task();
+    }
+  }
+
+  Future<Map<String, Task>> getTasksList(String userUID) async {
+    try {
+      final querySnapshot = await _tasksRef.where("userId", isEqualTo: userUID).get();
+
+      List tasksSnapshotList = querySnapshot.docs ?? [];
+      Map<String, Task> tasks = HashMap();
+      for (var taskSnapshot in tasksSnapshotList){
+        tasks.addAll({taskSnapshot.id: taskSnapshot.data()});
+      }
+      return tasks;
+
+    } catch (e) {
+      print("Error getting tasks: $e");
+      throw e; // Gérez l’erreur le cas échéant.
     }
   }
 

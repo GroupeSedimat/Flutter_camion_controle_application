@@ -7,6 +7,7 @@ class Task{
   int? nrOfList;
   int? nrEntryPosition;
   Timestamp? validationDate;
+  String? userId;
 
   Task({
     this.descriptionOfProblem,
@@ -14,7 +15,8 @@ class Task{
     this.isDone,
     this.nrOfList,
     this.nrEntryPosition,
-    this.validationDate
+    this.validationDate,
+    this.userId
   });
 
   Task.fromJson(Map<String, Object?> json): this (
@@ -24,6 +26,7 @@ class Task{
     nrOfList: json['nrOfList']! as int,
     nrEntryPosition: json['nrEntryPosition']! as int,
     validationDate: json['validationDate']! as Timestamp,
+    userId: json['userId']! as String,
   );
 
   Task copyWith({
@@ -33,6 +36,7 @@ class Task{
     int? nrOfList,
     int? nrEntryPosition,
     Timestamp? validationDate,
+    String? userId,
   }){
     return Task(
         descriptionOfProblem: descriptionOfProblem?? this.descriptionOfProblem,
@@ -40,7 +44,8 @@ class Task{
         isDone: isDone?? this.isDone,
         nrOfList: nrOfList?? this.nrOfList,
         nrEntryPosition: nrEntryPosition?? this.nrEntryPosition,
-        validationDate: validationDate?? this.validationDate
+        validationDate: validationDate?? this.validationDate,
+        userId: userId?? this.userId,
     );
   }
 
@@ -52,6 +57,7 @@ class Task{
       'nrOfList': nrOfList,
       'nrEntryPosition': nrEntryPosition,
       'validationDate': validationDate,
+      'userId': userId,
     };
   }
 }

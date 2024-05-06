@@ -3,15 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Blueprint {
   String title;
   String description;
-  int? nrOfList;
-  int? nrEntryPosition;
+  int nrOfList;
+  int nrEntryPosition;
   Timestamp? lastUpdate;
 
   Blueprint({
     required this.title,
     required this.description,
-    this.nrOfList,
-    this.nrEntryPosition,
+    required this.nrOfList,
+    required this.nrEntryPosition,
     this.lastUpdate,
   });
 
@@ -29,7 +29,7 @@ class Blueprint {
     int? nrOfList,
     int? nrEntryPosition,
     Timestamp? lastUpdate,
-    }){
+  }){
       return Blueprint(
           title: title?? this.title,
           description: description?? this.description,
