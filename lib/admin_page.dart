@@ -1,13 +1,17 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, duplicate_ignore
+// ignore_for_file: use_super_parameters, prefer_const_constructors
 
 import 'package:flutter/material.dart';
-
+import 'user_role.dart';
+//admin page pour le test
 class AdminPage extends StatelessWidget {
+  final UserRole userRole;
+
+  const AdminPage({Key? key, required this.userRole}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // ignore: prefer_const_constructors
         title: Text('Page d\'administration'),
       ),
       body: Center(
@@ -22,15 +26,21 @@ class AdminPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Ajoutez ici les actions que les administrateurs peuvent effectuer
-                // Par exemple, vous pouvez implémenter des fonctionnalités pour gérer les utilisateurs, afficher des statistiques, etc.
+                
               },
               child: Text('Effectuer une action'),
             ),
+            if (userRole == UserRole.admin) 
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  
+                },
+                child: Text('Action spécifique aux administrateurs'),
+              ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Retournez à l'écran précédent (peut-être l'écran d'accueil)
                 Navigator.pop(context);
               },
               child: Text('Retour'),
