@@ -39,7 +39,6 @@ class WelcomePage extends StatelessWidget {
           children: [
             Container(
               width: w,
-              height: h * 0.3,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage("assets/images/image2.webp"),
@@ -47,12 +46,14 @@ class WelcomePage extends StatelessWidget {
                 ),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: h * 0.12),
+                  SizedBox(height: h * 0.05),
                   CircleAvatar(
                     radius: 100,
                     backgroundImage: AssetImage("assets/images/836.jpg"),
                   ),
+                  SizedBox(height: h * 0.05),
                 ],
               ),
             ),

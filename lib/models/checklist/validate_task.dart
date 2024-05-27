@@ -101,9 +101,9 @@ class ValidateTaskState extends State<ValidateTask> {
             const SizedBox(height: 20),
             Text(
               widget.blueprint.description,
-              style: const TextStyle(
+              style: TextStyle(
                 backgroundColor: Colors.white,
-                fontSize: 20,
+                fontSize: screenWidth * 0.05,
                 color: Colors.grey,
               ),
             ),
@@ -162,18 +162,19 @@ class ValidateTaskState extends State<ValidateTask> {
             const SizedBox(height: 30),
             ElevatedButton(
                 onPressed: () => pickImageFromCamera(),
-                child: const Row(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Make photo",
                       style: TextStyle(
-                        fontSize: 30,
+                        fontSize: screenWidth * 0.04,
                       ),
                     ),
                     Icon(
                       Icons.camera_alt_outlined,
                       color: Colors.black,
-                      size: 50,
+                      size: screenWidth * 0.1,
                     ),
                   ],
                 )
@@ -194,22 +195,23 @@ class ValidateTaskState extends State<ValidateTask> {
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(150, 150),
+                minimumSize: const Size(150, 50),
                 padding: const EdgeInsets.all(10),
               ),
               onPressed: () => pickImageFromGallery(),
-              child: const Row(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     "Take photo from gallery",
                     style: TextStyle(
-                      fontSize: 30,
+                      fontSize: screenWidth * 0.04,
                     ),
                   ),
                   Icon(
                     Icons.image_outlined,
                     color: Colors.black,
-                    size: 50,
+                    size: screenWidth * 0.1,
                   ),
                 ],
               )
