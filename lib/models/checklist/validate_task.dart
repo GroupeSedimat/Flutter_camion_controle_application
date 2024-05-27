@@ -40,11 +40,15 @@ class ValidateTaskState extends State<ValidateTask> {
   int? nrOfList;
   int? nrEntryPosition;
   File? imageGalery;
+  double screenWidth = 50;
+  double screenHeight = 50;
+
   // bool _isLoading = true; // Dodaj zmienną do śledzenia stanu ładowania
 
   @override
   void initState() {
     super.initState();
+
     task = widget.validate;
     descriptionOfProblem = task?.descriptionOfProblem ?? "";
     photoFilePath = task?.photoFilePath ?? "";
@@ -77,6 +81,9 @@ class ValidateTaskState extends State<ValidateTask> {
   
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
+    screenWidth = screenSize.width;
+    screenHeight = screenSize.height;
     return Form(
         key: _formKey,
         child: ListView(
@@ -173,16 +180,22 @@ class ValidateTaskState extends State<ValidateTask> {
             ),
 
             const SizedBox(height: 30),
-            imageGalery != null
-                ? Image.file(imageGalery!)
-                : ((photoFilePath != "" && photoFilePath != null)
-                  ? Image.network(photoFilePath!)
-                  : const FlutterLogo()),
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: screenWidth * 0.8,
+                maxHeight: screenHeight * 0.8,
+              ),
+              child: imageGalery != null
+                  ? Image.file(imageGalery!)
+                  : ((photoFilePath != "" && photoFilePath != null)
+                    ? Image.network(photoFilePath!)
+                    : Container()),
+            ),
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(150, 150),
-                padding: EdgeInsets.all(10),
+                minimumSize: const Size(150, 150),
+                padding: const EdgeInsets.all(10),
               ),
               onPressed: () => pickImageFromGallery(),
               child: const Row(
