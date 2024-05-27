@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth_controller.dart';
 import 'package:flutter_application_1/models/checklist/add_blueprint_form.dart';
@@ -72,9 +71,9 @@ class _CheckListState extends State<CheckList> {
       try {
         String? userUID = authController.getCurrentUserUID();
         if(userUID != null){
-          Map<String, Task> tasks = await databaseService.getTasksList(userUID);
-          Task validate = Task();
-          for (Task task in tasks.values) {
+          Map<String, TaskChecklist> tasks = await databaseService.getTasksList(userUID);
+          TaskChecklist validate = TaskChecklist();
+          for (TaskChecklist task in tasks.values) {
             if (blueprint.nrOfList == task.nrOfList &&
                 blueprint.nrEntryPosition == task.nrEntryPosition) {
               validate = task;
@@ -156,7 +155,7 @@ class _CheckListState extends State<CheckList> {
             counter = List<int>.filled(listOfLists.length, 0);
             for (var i = 0; i < listOfLists.length; i++) {
               sortedBlueprints = Map.fromEntries(
-                  blueprints.entries.toList()..sort((e1,e2) => (e1.value.nrEntryPosition ?? 99).compareTo(e2.value.nrEntryPosition ?? 99))
+                  blueprints.entries.toList()..sort((e1,e2) => (e1.value.nrEntryPosition).compareTo(e2.value.nrEntryPosition))
               );
               for (Blueprint blueprint in sortedBlueprints.values) {
                 if (blueprint.nrOfList == listOfLists[i].listNr) {

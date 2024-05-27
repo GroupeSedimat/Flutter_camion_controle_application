@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Task{
+class TaskChecklist{
   String? descriptionOfProblem;
   String? photoFilePath;
   bool? isDone;
@@ -9,7 +9,7 @@ class Task{
   Timestamp? validationDate;
   String? userId;
 
-  Task({
+  TaskChecklist({
     this.descriptionOfProblem,
     this.photoFilePath,
     this.isDone,
@@ -19,7 +19,7 @@ class Task{
     this.userId
   });
 
-  Task.fromJson(Map<String, Object?> json): this (
+  TaskChecklist.fromJson(Map<String, Object?> json): this (
     descriptionOfProblem: json['descriptionOfProblem']! as String,
     photoFilePath: json['photoFilePath']! as String,
     isDone: json['isDone']! as bool,
@@ -29,7 +29,7 @@ class Task{
     userId: json['userId']! as String,
   );
 
-  Task copyWith({
+  TaskChecklist copyWith({
     String? descriptionOfProblem,
     String? photoFilePath,
     bool? isDone,
@@ -38,7 +38,7 @@ class Task{
     Timestamp? validationDate,
     String? userId,
   }){
-    return Task(
+    return TaskChecklist(
         descriptionOfProblem: descriptionOfProblem?? this.descriptionOfProblem,
         photoFilePath: photoFilePath?? this.photoFilePath,
         isDone: isDone?? this.isDone,

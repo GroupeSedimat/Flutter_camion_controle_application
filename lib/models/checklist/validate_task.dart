@@ -1,21 +1,18 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/services/database_service.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ValidateTask extends StatefulWidget {
 
   DatabaseService databaseService;
   Blueprint blueprint;
-  Task validate;
+  TaskChecklist validate;
   String keyId;
   String userUID;
 
@@ -35,23 +32,44 @@ class ValidateTaskState extends State<ValidateTask> {
 
 
   final _formKey = GlobalKey<FormState>();
-  String descriptionOfProblem = "";
-  String photoFilePath = "";
+  late String descriptionOfProblem;
+  String? photoFilePath;
   bool? isDone;
   Timestamp? validationDate;
-  Task? task;
+  TaskChecklist? task;
   int? nrOfList;
   int? nrEntryPosition;
   File? imageGalery;
   // bool _isLoading = true; // Dodaj zmienną do śledzenia stanu ładowania
 
-  Future pickImage() async{
+  @override
+  void initState() {
+    super.initState();
+    task = widget.validate;
+    descriptionOfProblem = task?.descriptionOfProblem ?? "";
+    photoFilePath = task?.photoFilePath ?? "";
+    isDone = task?.isDone;
+  }
+
+  Future pickImageFromGallery() async{
     try {
       final image =  await ImagePicker().pickImage(source: ImageSource.gallery);
       if(image == null) return;
 
       final imageTemp = File(image.path);
-      setState(() => this.imageGalery = imageTemp);
+      setState(() => imageGalery = imageTemp);
+    } on PlatformException catch (e) {
+      print('Failed to pisk image: $e');
+    }
+  }
+
+  Future pickImageFromCamera() async{
+    try {
+      final image =  await ImagePicker().pickImage(source: ImageSource.camera);
+      if(image == null) return;
+
+      final imageTemp = File(image.path);
+      setState(() => imageGalery = imageTemp);
     } on PlatformException catch (e) {
       print('Failed to pisk image: $e');
     }
@@ -59,7 +77,6 @@ class ValidateTaskState extends State<ValidateTask> {
   
   @override
   Widget build(BuildContext context) {
-    task = widget.validate;
     return Form(
         key: _formKey,
         child: ListView(
@@ -137,9 +154,7 @@ class ValidateTaskState extends State<ValidateTask> {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-                onPressed: (){
-
-                },
+                onPressed: () => pickImageFromCamera(),
                 child: const Row(
                   children: [
                     Text(
@@ -156,17 +171,20 @@ class ValidateTaskState extends State<ValidateTask> {
                   ],
                 )
             ),
+
             const SizedBox(height: 30),
-            if (imageGalery != null)
-              Image.file(imageGalery!)
-            else
-              const FlutterLogo(),
+            imageGalery != null
+                ? Image.file(imageGalery!)
+                : ((photoFilePath != "" && photoFilePath != null)
+                  ? Image.network(photoFilePath!)
+                  : const FlutterLogo()),
+
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(150, 150),
                 padding: EdgeInsets.all(10),
               ),
-              onPressed: () => pickImage(),
+              onPressed: () => pickImageFromGallery(),
               child: const Row(
                 children: [
                   Text(
@@ -219,9 +237,21 @@ class ValidateTaskState extends State<ValidateTask> {
                   ),
                   onPressed: () async {
                     validationDate = Timestamp.now();
+                    if (imageGalery != null) {
+                      try {
+                        String photoFilePath = await widget.databaseService.addImageToFirebase(imageGalery!.path);
+                        if (mounted) {
+                          setState(() {
+                            this.photoFilePath = photoFilePath;
+                          });
+                        }
+                      } catch (e) {
+                        print('Failed to upload image: $e');
+                      }
+                    }
+
                     if(isDone!=true) isDone = false;
-                    print(widget.validate.userId);
-                    Task task = Task(
+                    TaskChecklist task = TaskChecklist(
                         nrOfList: widget.blueprint.nrOfList,
                         nrEntryPosition: widget.blueprint.nrEntryPosition,
                         validationDate: validationDate,
@@ -235,7 +265,9 @@ class ValidateTaskState extends State<ValidateTask> {
                     }else{
                       widget.databaseService.updateTask(widget.keyId, task);
                     }
-                    Navigator.pop(context);
+                    if (mounted) {
+                      Navigator.pop(context);
+                    }
                   },
                 ),
                 TextButton(
