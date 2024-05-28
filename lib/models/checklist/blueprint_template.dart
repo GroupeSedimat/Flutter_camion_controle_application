@@ -25,7 +25,7 @@ class BlueprintTemplate extends StatelessWidget{
             Text(
               blueprint.title,
               style: const TextStyle(
-                fontSize: 18.0,
+                fontSize: 20.0,
                 color: Colors.amber,
               ),
             ),
@@ -33,7 +33,7 @@ class BlueprintTemplate extends StatelessWidget{
             Text(
               blueprint.description,
               style: const TextStyle(
-                fontSize: 18.0,
+                fontSize: 12.0,
                 color: Colors.amber,
               ),
             ),
