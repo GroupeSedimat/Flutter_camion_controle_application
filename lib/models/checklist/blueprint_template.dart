@@ -6,7 +6,8 @@ class BlueprintTemplate extends StatelessWidget{
   final Blueprint blueprint;
   final Function delete;
   final Function edit;
-  BlueprintTemplate({ required this.blueprint, required this.delete, required this.edit });
+  final Function validate;
+  BlueprintTemplate({ required this.blueprint, required this.delete, required this.edit, required this.validate });
 
   @override
   Widget build(BuildContext context){
@@ -46,6 +47,18 @@ class BlueprintTemplate extends StatelessWidget{
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.cyan
                   ),
+                  label: const Text('Edit Blueprint'),
+                  icon: const Icon(
+                    Icons.check_box,
+                    color: Colors.red,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => validate(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.cyan
+                  ),
                   label: const Text('Validation process'),
                   icon: const Icon(
                     Icons.check_box,
@@ -58,7 +71,7 @@ class BlueprintTemplate extends StatelessWidget{
                       foregroundColor: Colors.white60,
                       backgroundColor: Colors.red[900]
                   ),
-                  label: const Text('delete this'),
+                  label: const Text('Delete Blueprint'),
                   icon: const Icon(Icons.delete),
                 ),
               ],

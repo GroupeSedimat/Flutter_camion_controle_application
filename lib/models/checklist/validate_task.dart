@@ -63,7 +63,7 @@ class ValidateTaskState extends State<ValidateTask> {
       final imageTemp = File(image.path);
       setState(() => imageGalery = imageTemp);
     } on PlatformException catch (e) {
-      print('Failed to pisk image: $e');
+      print('Failed to pick image from gallery: $e');
     }
   }
 
@@ -75,7 +75,7 @@ class ValidateTaskState extends State<ValidateTask> {
       final imageTemp = File(image.path);
       setState(() => imageGalery = imageTemp);
     } on PlatformException catch (e) {
-      print('Failed to pisk image: $e');
+      print('Failed to pick image from camera: $e');
     }
   }
   
@@ -183,15 +183,16 @@ class ValidateTaskState extends State<ValidateTask> {
             const SizedBox(height: 30),
             Container(
               constraints: BoxConstraints(
-                maxWidth: screenWidth * 0.8,
-                maxHeight: screenHeight * 0.8,
+                maxWidth: screenWidth * 0.7,
+                maxHeight: screenHeight * 0.7,
               ),
               child: imageGalery != null
                   ? Image.file(imageGalery!)
                   : ((photoFilePath != "" && photoFilePath != null)
                     ? Image.network(photoFilePath!)
-                    : Container()),
+                    : const FlutterLogo()),
             ),
+            const SizedBox(height: 20),
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(

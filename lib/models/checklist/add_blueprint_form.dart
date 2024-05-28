@@ -2,13 +2,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/services/database_service.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class AddBlueprintForm extends StatefulWidget {
-  int nrOfList;
-  int nrEntryPosition;
-  DatabaseService databaseService;
-  AddBlueprintForm({super.key, required this.nrOfList, required this.nrEntryPosition , required this.databaseService});
+  final int nrOfList;
+  final int nrEntryPosition;
+  final DatabaseService databaseService;
+  final Blueprint? blueprint;
+  final String? blueprintID;
+
+  AddBlueprintForm({
+    super.key,
+    required this.nrOfList,
+    required this.nrEntryPosition,
+    required this.databaseService,
+    this.blueprint,
+    this.blueprintID});
 
   @override
   State<AddBlueprintForm> createState() => _AdBlueprintFormState();
@@ -17,12 +27,19 @@ class AddBlueprintForm extends StatefulWidget {
 class _AdBlueprintFormState extends State<AddBlueprintForm> {
 
   final _formKey = GlobalKey<FormState>();
-  late String title;
-  late String description;
+  String title = "";
+  String description = "";
+  String oldTitle = "";
+  String oldDescription = "";
   Timestamp lastUpdate = Timestamp.now();
 
   @override
   Widget build(BuildContext context) {
+    if(widget.blueprint != null){
+      oldTitle = widget.blueprint!.title;
+      oldDescription = widget.blueprint!.description;
+      print("Blueprint ID: ${widget.blueprintID!}");
+    }
     return Form(
       key: _formKey,
       child: ListView(
@@ -41,6 +58,7 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
 
           const SizedBox(height: 20),
           TextFormField(
+            initialValue: oldTitle,
             decoration: const InputDecoration(
               hintText: "Give me name!",
               labelText: "Blueprint name:",
@@ -52,12 +70,13 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
               focusedBorder: OutlineInputBorder(gapPadding: 15),
               border: OutlineInputBorder(gapPadding: 5),
             ),
-            validator: (val) {return (val == null || val.isEmpty) ? 'Enter blueprint name:' : null;},
+            validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter blueprint name:' : null;},
             onChanged: (val) => setState(() {title = val;}),
           ),
 
           const SizedBox(height: 20),
           TextFormField(
+            initialValue: oldDescription,
             decoration: const InputDecoration(
               hintText: "Description go here!",
               labelText: "Enter description:",
@@ -69,7 +88,6 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
               focusedBorder: OutlineInputBorder(gapPadding: 50),
               border: OutlineInputBorder(gapPadding: 20),
             ),
-
             validator: (val) {return (val == null || val.isEmpty) ? 'Enter description please' : null;},
             onChanged: (val) => setState(() {description = val;}),
           ),
@@ -109,14 +127,18 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
               ),
             ),
             onPressed: () async {
-              Blueprint blueprint = Blueprint(
-                title: title,
-                description: description,
+              Blueprint blueprintNew = Blueprint(
+                title: (title == "" && title != oldTitle)? oldTitle : title,
+                description: (description == "" && description != oldDescription) ? oldDescription : description,
                 nrOfList: widget.nrOfList,
                 nrEntryPosition: widget.nrEntryPosition,
                 lastUpdate: lastUpdate,
               );
-              widget.databaseService.addBlueprint(blueprint);
+              if(widget.blueprintID != null){
+                widget.databaseService.updateBlueprint(widget.blueprintID!, blueprintNew);
+              }else{
+                widget.databaseService.addBlueprint(blueprintNew);
+              }
               Navigator.pop(context);
             },
           )

@@ -106,7 +106,6 @@ class DatabaseService{
   }
 
   void updateBlueprint(String blueprintID, Blueprint blueprint){
-    blueprint.lastUpdate = Timestamp.now();
     _blueprintRef.doc(blueprintID).update(blueprint.toJson());
   }
 

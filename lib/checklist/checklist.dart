@@ -34,23 +34,17 @@ class _CheckListState extends State<CheckList> {
     ListOfLists(listNr: 8, listName: "listName")
   ];
 
-  // List<Blueprint> toDoList = [
-  //   Blueprint(blueprintInfo: "Pris charge électrique secteur	a. Débrancher la prise électrique située sur le côté conducteur du camion. b. Débrancher le sectionneur d’alimentation de la prise de recharge du camion.", listNr: 0),
-  //   Blueprint(blueprintInfo: "Serrure portes arrière	Verrouiller non", listNr: 0),
-  //   Blueprint(blueprintInfo: "Serrures prises recharge VE	Verrouiller oui/non", listNr: 0),
-  //   Blueprint(blueprintInfo: "Serrure porte latérale	Verrouiller oui/non", listNr: 0),
-  //   Blueprint(blueprintInfo: "Lumières	Allumer oui/non", listNr: 0),
-  //   Blueprint(blueprintInfo: "Convertisseur	Off oui/non", listNr: 1),
-  //   Blueprint(blueprintInfo: "Présence et arrimage outillage	Vérifier oui/non", listNr: 2),
-  //   Blueprint(blueprintInfo: "Etagère 1: picking selon photo	Vérifier oui/non", listNr: 2),
-  //   Blueprint(blueprintInfo: "Etagère 2: picking huile	Vérifier oui/non", listNr: 2)
-  // ];
-
   late List<int> counter;
 
   @override
   Widget build(BuildContext context) {
-    void showAddBlueprint(int listNbr, int position){
+
+    void showBlueprintModal({
+      required int nrOfList,
+      required int nrEntryPosition,
+      Blueprint? blueprint,
+      String? blueprintID,
+    }){
       showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
         return Container(
           padding: const EdgeInsets.all(10),
@@ -59,13 +53,19 @@ class _CheckListState extends State<CheckList> {
               10, 50, 10, MediaQuery.of(context).viewInsets.bottom
           ),
           child: AddBlueprintForm(
-              nrOfList: listNbr,
-              nrEntryPosition: position,
-              databaseService: databaseService),
+            nrOfList: nrOfList,
+            nrEntryPosition: nrEntryPosition,
+            databaseService: databaseService,
+            blueprint: blueprint,
+            blueprintID: blueprintID,
+          ),
         );
       });
     }
 
+    void makePDF(){
+
+    }
 
     void showTask(Blueprint blueprint) async {
       try {
@@ -184,19 +184,60 @@ class _CheckListState extends State<CheckList> {
                                 // If key found, delete blueprint using key
                                 databaseService.deleteBlueprint(key);
                               },
-                              edit: (){
+                              validate: (){
                                 showTask(blueprint);
-                              }
+                              },
+                              edit: (){
+                                String blueprintID = sortedBlueprints.keys.firstWhere(
+                                        (k) => sortedBlueprints[k] == blueprint
+                                );
+                                showBlueprintModal(
+                                  nrOfList: blueprint.nrOfList,
+                                  nrEntryPosition: blueprint.nrEntryPosition,
+                                  blueprint: blueprint,
+                                  blueprintID: blueprintID,
+                                );
+                              },
                             ),
                           ),
+                      const SizedBox(height: 10,),
                       FloatingActionButton(
+                        heroTag: "addBlueprintHero",
                         onPressed: () async {
-                          showAddBlueprint(list.listNr, counter[list.listNr] +1);
+                          showBlueprintModal( nrOfList: list.listNr,
+                            nrEntryPosition: (counter[list.listNr] + 1),
+                            blueprint: null,
+                            blueprintID: null,
+                          );
                         },
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         child: const Icon(
                           Icons.add,
                           color: Colors.lightGreenAccent,
+                        ),
+                      ),
+                      const SizedBox(height: 20,),
+                      FloatingActionButton(
+                        heroTag: "makePDFHero",
+                        onPressed: () async {
+                          makePDF();
+                        },
+                        backgroundColor: Colors.red,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.picture_as_pdf,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 10,),
+                            Text('Create PDF',
+                              style: TextStyle(
+                                color: Colors.white,
+
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
