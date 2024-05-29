@@ -2,25 +2,21 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/checklist/loading_vrm.dart';
 import 'package:flutter_application_1/models/menu.dart';
 import 'package:flutter_application_1/user_role.dart';
-import 'package:get/get.dart';
 import 'package:flutter_application_1/auth_controller.dart';
-import 'package:flutter_application_1/edit_profile_page.dart';
-import 'package:flutter_application_1/reset_password_page.dart';
 
 class WelcomePage extends StatelessWidget {
   final String username;
   final String role;
 
-  WelcomePage({Key? key}) : super(key: key);
-  const WelcomePage({Key? key, required this.username, required this.role}) : super(key: key);
+  //WelcomePage({Key? key}) : super(key: key);
+  WelcomePage({Key? key, required this.username, required this.role}) : super(key: key);
   final User? user = AuthController().auth.currentUser;
 
   @override
   Widget build(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
+    double w = MediaQuery.of(context).size.width;  
     double h = MediaQuery.of(context).size.height;
 
     String welcomeMessage = role == 'admin'
