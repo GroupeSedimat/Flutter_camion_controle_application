@@ -29,7 +29,12 @@ dependencies:
 
   
   cupertino_icons: ^1.0.6
+  get:
   flutter_native_splash: ^2.4.0
+  firebase_core: ^2.28.0
+  firebase_auth: ^4.19.0
+  cloud_firestore: ^4.16.1
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
@@ -38,11 +43,8 @@ dev_dependencies:
 
 
 
-flutter_native_splash:
-  color: "#f7f6f1"
-  color_dark: "#272727"
-  image: assets/images/keybas_logo.png
-  image_dark: assets/images/keybas_logo.png
+
+  
 
 
 
@@ -52,7 +54,7 @@ flutter_native_splash:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-     - assets/images/keybas_logo.png
+     - assets/images/
   
   uses-material-design: true
 

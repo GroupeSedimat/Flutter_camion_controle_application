@@ -4,7 +4,9 @@ allprojects {
         mavenCentral()
     }
 }
-
+dependencies{
+    classpath 'com.google.gms:google-services:4.3.3'
+}
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
