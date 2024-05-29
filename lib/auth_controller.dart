@@ -60,10 +60,10 @@ class AuthController extends GetxController {
       }
       int birthYear = DateTime.parse(dob).year;
       int currentYear = DateTime.now().year;
-      int minimumBirthYear = currentYear - 14; // Remplacez 18 par l'âge minimum requis
+      int minimumBirthYear = currentYear - 14; // Remplacez 14 par l'âge minimum requis
 
       if (birthYear > minimumBirthYear) {
-        throw "Vous devez avoir au moins 14 ans pour créer un compte";
+        throw "you should at least be 14 before creating an account";
       }
 
       await auth.createUserWithEmailAndPassword(email: email, password: password);
