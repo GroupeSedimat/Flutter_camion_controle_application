@@ -38,7 +38,7 @@ class _CheckListState extends State<CheckList> {
 
   @override
   Widget build(BuildContext context) {
-
+    
     void showBlueprintModal({
       required int nrOfList,
       required int nrEntryPosition,
@@ -71,7 +71,7 @@ class _CheckListState extends State<CheckList> {
       try {
         String? userUID = authController.getCurrentUserUID();
         if(userUID != null){
-          Map<String, TaskChecklist> tasks = await databaseService.getTasksList(userUID);
+          Map<String, TaskChecklist> tasks = await databaseService.getAllTasks(userUID);
           TaskChecklist validate = TaskChecklist();
           for (TaskChecklist task in tasks.values) {
             if (blueprint.nrOfList == task.nrOfList &&
@@ -87,7 +87,7 @@ class _CheckListState extends State<CheckList> {
                 '', // Zwróć pusty ciąg, jeśli nie znaleziono dopasowania
           );
 
-          showModalBottomSheet(
+          await showModalBottomSheet(
               context: context,
               isScrollControlled: true,
               builder: (context) {
@@ -105,6 +105,7 @@ class _CheckListState extends State<CheckList> {
                   ),
                 );
               });
+          setState(() {});
         }else{
           print("Error u need to log in");
         }
@@ -146,6 +147,8 @@ class _CheckListState extends State<CheckList> {
         StreamBuilder(
           stream: databaseService.getBlueprints(),
           builder: (context, snapshot) {
+            String? userUID = authController.getCurrentUserUID();
+            Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID!);
             List blueprintsSnapshotList = snapshot.data?.docs ?? [];
             Map<String, Blueprint> blueprints = HashMap();
             Map<String, Blueprint> sortedBlueprints = HashMap();
@@ -174,31 +177,58 @@ class _CheckListState extends State<CheckList> {
                         if (blueprint.nrOfList == list.listNr)
                           Padding(
                             padding: const EdgeInsets.only(left: 8.0),
-                            child: BlueprintTemplate(
-                              blueprint: blueprint,
-                              delete: (){
-                                // Find the key corresponding to the blueprint
-                                String key = sortedBlueprints.keys.firstWhere(
-                                      (k) => sortedBlueprints[k] == blueprint
+                            child: FutureBuilder<bool?>(
+                              future: validatedTask.then((v) {
+                                TaskChecklist? task = v.values.cast().firstWhere(
+                                      (element) =>
+                                  element.nrEntryPosition == blueprint.nrEntryPosition &&
+                                      element.nrOfList == blueprint.nrOfList,
+                                    orElse: () => null
                                 );
-                                // If key found, delete blueprint using key
-                                databaseService.deleteBlueprint(key);
+                                if (task != null) {
+                                  return task.isDone;
+                                } else {
+                                  return null;
+                                }
+                              }),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return Container(
+                                    // child: CircularProgressIndicator()
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  final isDone = snapshot.data;
+                                  return BlueprintTemplate(
+                                    isDone: isDone,
+                                    blueprint: blueprint,
+                                    delete: (){
+                                      // Find the key corresponding to the blueprint
+                                      String key = sortedBlueprints.keys.firstWhere(
+                                              (k) => sortedBlueprints[k] == blueprint
+                                      );
+                                      // If key found, delete blueprint using key
+                                      databaseService.deleteBlueprint(key);
+                                    },
+                                    validate: (){
+                                      showTask(blueprint);
+                                    },
+                                    edit: (){
+                                      String blueprintID = sortedBlueprints.keys.firstWhere(
+                                              (k) => sortedBlueprints[k] == blueprint
+                                      );
+                                      showBlueprintModal(
+                                        nrOfList: blueprint.nrOfList,
+                                        nrEntryPosition: blueprint.nrEntryPosition,
+                                        blueprint: blueprint,
+                                        blueprintID: blueprintID,
+                                      );
+                                    },
+                                  );
+                                }
                               },
-                              validate: (){
-                                showTask(blueprint);
-                              },
-                              edit: (){
-                                String blueprintID = sortedBlueprints.keys.firstWhere(
-                                        (k) => sortedBlueprints[k] == blueprint
-                                );
-                                showBlueprintModal(
-                                  nrOfList: blueprint.nrOfList,
-                                  nrEntryPosition: blueprint.nrEntryPosition,
-                                  blueprint: blueprint,
-                                  blueprintID: blueprintID,
-                                );
-                              },
-                            ),
+                            )
                           ),
                       const SizedBox(height: 10,),
                       FloatingActionButton(

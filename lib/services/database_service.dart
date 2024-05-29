@@ -37,34 +37,7 @@ class DatabaseService{
     _referenceImages = _fireReference.child('images');
   }
 
-  Stream<QuerySnapshot> getTasks(){
-    return _tasksRef.snapshots();
-  }
-
-  Stream<DocumentSnapshot> getOneTaskWithID(String taskID){
-    return _tasksRef.doc(taskID).snapshots();
-  }
-
-  Future<TaskChecklist> getOneTaskWithListPos(int nrList, int nrPosition) async {
-    try {
-        final querySnapshot = await _firestore
-        .collection(TASK_COLLECTION_REF)
-        .where("nrOfList", isEqualTo: nrList)
-        .where("nrEntryPosition", isEqualTo: nrPosition)
-        .get();
-        if (querySnapshot.docs.isNotEmpty) {
-          return TaskChecklist.fromJson(querySnapshot.docs.first.data());
-        } else {
-          return TaskChecklist();
-        }
-    } catch (error) {
-      // Gérez l’erreur
-      print("Error retrieving task: $error");
-      return TaskChecklist();
-    }
-  }
-
-  Future<Map<String, TaskChecklist>> getTasksList(String userUID) async {
+  Future<Map<String, TaskChecklist>> getAllTasks(String userUID) async {
     try {
       final querySnapshot = await _tasksRef.where("userId", isEqualTo: userUID).get();
 
@@ -78,6 +51,49 @@ class DatabaseService{
     } catch (e) {
       print("Error getting tasks: $e");
       throw e; // Gérez l’erreur le cas échéant.
+    }
+  }
+
+  Future<Map<String, TaskChecklist>> getOneListOfTasks(int nrList, String userUID) async {
+    Map<String, TaskChecklist> tasks = HashMap();
+    try {
+      final querySnapshot = await _firestore
+          .collection(TASK_COLLECTION_REF)
+          .where("nrOfList", isEqualTo: nrList)
+          .where("userId", isEqualTo: userUID)
+          .get();
+      if (querySnapshot.docs.isNotEmpty) {
+        List tasksSnapshotList = querySnapshot.docs;
+        for (var taskSnapshot in tasksSnapshotList){
+          tasks.addAll({taskSnapshot.id: taskSnapshot.data()});
+        }
+      }
+      return tasks;
+
+    } catch (error) {
+      // Gérez l’erreur
+      print("Error retrieving task: $error");
+      return tasks;
+    }
+  }
+
+  Future<TaskChecklist> getOneTaskWithListPos(int nrList, int nrPosition, String userUID) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(TASK_COLLECTION_REF)
+          .where("nrOfList", isEqualTo: nrList)
+          .where("nrEntryPosition", isEqualTo: nrPosition)
+          .where("userId", isEqualTo: userUID)
+          .get();
+      if (querySnapshot.docs.isNotEmpty) {
+        return TaskChecklist.fromJson(querySnapshot.docs.first.data());
+      } else {
+        return TaskChecklist();
+      }
+    } catch (error) {
+      // Gérez l’erreur
+      print("Error retrieving task: $error");
+      return TaskChecklist();
     }
   }
 

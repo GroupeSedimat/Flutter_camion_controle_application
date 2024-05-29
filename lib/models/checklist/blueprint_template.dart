@@ -7,16 +7,15 @@ class BlueprintTemplate extends StatelessWidget{
   final Function delete;
   final Function edit;
   final Function validate;
-  BlueprintTemplate({ required this.blueprint, required this.delete, required this.edit, required this.validate });
+  bool? isDone;
+  BlueprintTemplate({ required this.blueprint, required this.delete, required this.edit, required this.validate, this.isDone });
 
   @override
   Widget build(BuildContext context){
-    bool? _isDone = false;
-
 
     return Card(
       margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-      color: Colors.grey[800],
+      color: isDone == null ? Colors.grey[800] : isDone! ? Colors.green : Colors.red,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -26,7 +25,7 @@ class BlueprintTemplate extends StatelessWidget{
               blueprint.title,
               style: const TextStyle(
                 fontSize: 20.0,
-                color: Colors.amber,
+                color: Colors.amber ,
               ),
             ),
             const SizedBox(height: 8.0,),
