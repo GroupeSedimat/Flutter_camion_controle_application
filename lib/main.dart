@@ -12,7 +12,7 @@ void main() async {
   await Firebase.initializeApp();
   Get.put(AuthController());
   runApp(MyApp());
-}
+} 
 
 class MyApp extends StatelessWidget {
   @override

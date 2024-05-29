@@ -1,8 +1,9 @@
 // ignore_for_file: use_super_parameters, prefer_const_constructors
 
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
+import 'package:flutter_application_1/auth_controller.dart';
 import 'user_role.dart';
-//admin page pour le test
+
 class AdminPage extends StatelessWidget {
   final UserRole userRole;
 
@@ -26,15 +27,15 @@ class AdminPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                
+                // Action
               },
               child: Text('Effectuer une action'),
             ),
-            if (userRole == UserRole.admin) 
+            if (userRole == UserRole.admin)
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  
+                  // Admin specific action
                 },
                 child: Text('Action spécifique aux administrateurs'),
               ),
@@ -45,9 +46,16 @@ class AdminPage extends StatelessWidget {
               },
               child: Text('Retour'),
             ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                AuthController.instance.logOut();
+              },
+              child: Text('Déconnexion'),
+            ),
           ],
         ),
       ),
     );
   }
-}
+}*/

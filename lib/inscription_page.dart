@@ -1,8 +1,7 @@
-// ignore_for_file: use_super_parameters, library_private_types_in_public_api, prefer_const_constructors, prefer_interpolation_to_compose_strings, avoid_print, unused_local_variable
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api, use_super_parameters, unused_local_variable
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'auth_controller.dart';
 
 class InscriptionPage extends StatefulWidget {
@@ -18,6 +17,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
   late TextEditingController usernameController;
   late TextEditingController confirmPasswordController;
   late TextEditingController dobController;
+  String selectedRole = 'user';
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
@@ -93,131 +93,29 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   const SizedBox(
                     height: 50,
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 10,
-                          spreadRadius: 7,
-                          offset: const Offset(1, 1),
-                          color: Colors.grey.withOpacity(0.3),
-                        )
-                      ],
-                    ),
-                    child: TextField(
-                      controller: emailController,
-                      decoration: InputDecoration(
-                          hintText: 'Entrez votre email',
-                          prefixIcon:
-                              const Icon(Icons.email, color: Colors.purpleAccent),
-                          hintStyle:
-                              TextStyle(color: Colors.grey.withOpacity(0.5)),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(
-                                  color: Colors.white, width: 1.0)),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(
-                                  color: Colors.white, width: 1.0)),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30))),
-                    ),
-                  ),
+                  buildTextField('Entrez votre email', Icons.email, emailController),
                   const SizedBox(
                     height: 20,
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 10,
-                          spreadRadius: 7,
-                          offset: const Offset(1, 1),
-                          color: Colors.grey.withOpacity(0.3),
-                        )
-                      ],
-                    ),
-                    child: TextField(
-                      controller: usernameController,
-                      decoration: InputDecoration(
-                          hintText: 'Nom d\'utilisateur',
-                          prefixIcon:
-                              const Icon(Icons.person, color: Colors.purpleAccent),
-                          hintStyle:
-                              TextStyle(color: Colors.grey.withOpacity(0.5)),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(
-                                  color: Colors.white, width: 1.0)),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(
-                                  color: Colors.white, width: 1.0)),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30))),
-                    ),
-                  ),
+                  buildTextField('Nom d\'utilisateur', Icons.person, usernameController),
                   const SizedBox(
                     height: 20,
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 10,
-                          spreadRadius: 7,
-                          offset: const Offset(1, 1),
-                          color: Colors.grey.withOpacity(0.3),
-                        )
-                      ],
-                    ),
-                    child: GestureDetector(
-                      onTap: () async {
-                        DateTime? selectedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime.now(),
-                        );
+                  GestureDetector(
+                    onTap: () async {
+                      DateTime? selectedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                      );
 
-                        if (selectedDate != null) {
-                          print(selectedDate);
-                          dobController.text =
-                              DateFormat('yyyy-MM-dd').format(selectedDate);
-                        }
-                      },
-                      child: AbsorbPointer(
-                        child: TextField(
-                          controller: dobController,
-                          decoration: InputDecoration(
-                            hintText: 'Date de naissance',
-                            prefixIcon: const Icon(Icons.calendar_today,
-                                color: Colors.purpleAccent),
-                            hintStyle:
-                                TextStyle(color: Colors.grey.withOpacity(0.5)),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(
-                                  color: Colors.white, width: 1.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(
-                                  color: Colors.white, width: 1.0),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                        ),
-                      ),
+                      if (selectedDate != null) {
+                        dobController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
+                      }
+                    },
+                    child: AbsorbPointer(
+                      child: buildTextField('Date de naissance', Icons.calendar_today, dobController),
                     ),
                   ),
                   const SizedBox(
@@ -228,6 +126,33 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     height: 20,
                   ),
                   buildPasswordTextField('Confirmer le mot de passe', confirmPasswordController, obscureConfirmPassword),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: selectedRole,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    items: [
+                      DropdownMenuItem(value: 'user', child: Text('User')),
+                      DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedRole = value!;
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
@@ -242,6 +167,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   dobController.text.trim(),
                   passwordController.text.trim(),
                   confirmPasswordController.text.trim(),
+                  selectedRole,
                 );
               },
               child: Container(
@@ -264,37 +190,43 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 ),
               ),
             ),
-            
-            
-            //je commente pour le moment l'inscription via d'autres méthodes on verra après
-            
-            /* SizedBox(height: w * 0.2),
-            RichText(
-              text: TextSpan(
-                text: "Inscrivez-vous en utilisant ces méthodes suivantes:",
-                style: TextStyle(color: Colors.grey[500], fontSize: 20),
-              ),
-            ),
-            Wrap(
-              children: List<Widget>.generate(
-                3,
-                (index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 25,
-                        backgroundImage:
-                            AssetImage("assets/images/" + images[index]),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ), */
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildTextField(String hintText, IconData icon, TextEditingController controller) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 10,
+            spreadRadius: 7,
+            offset: const Offset(1, 1),
+            color: Colors.grey.withOpacity(0.3),
+          )
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: hintText,
+          prefixIcon: Icon(icon, color: Colors.purpleAccent),
+          hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: const BorderSide(color: Colors.white, width: 1.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: const BorderSide(color: Colors.white, width: 1.0),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
         ),
       ),
     );
@@ -322,7 +254,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
           prefixIcon: const Icon(Icons.password, color: Colors.purpleAccent),
           suffixIcon: IconButton(
             icon: Icon(
-         obscureText ? Icons.visibility_off : Icons.visibility, 
+              obscureText ? Icons.visibility_off : Icons.visibility,
               color: Colors.purple,
             ),
             onPressed: () {

@@ -2,6 +2,6 @@
 
 enum UserRole {
   admin,
-  normalUser,
+  user
 }
 

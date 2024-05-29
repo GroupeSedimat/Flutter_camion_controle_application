@@ -1,12 +1,14 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
+// ignore_for_file: avoid_print, prefer_const_constructors, unused_import
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/login_page.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+//import 'admin_page.dart';
+import 'login_page.dart';
 import 'welcome_page.dart';
+import 'user_role.dart';
 
 class AuthController extends GetxController {
   static AuthController instance = Get.find();
@@ -35,7 +37,9 @@ class AuthController extends GetxController {
           .then((DocumentSnapshot documentSnapshot) {
         if (documentSnapshot.exists) {
           String username = documentSnapshot.get('username');
-          Get.offAll(() => WelcomePage(username: username));
+          String role = documentSnapshot.get('role');
+
+          Get.offAll(() => WelcomePage(username: username, role: role));
         } else {
           print('Document does not exist on the database');
         }
@@ -45,11 +49,21 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> register(String email, String username, String dob, String password, String confirmPassword) async {
+  Future<void> register(String email, String username, String dob, String password, String confirmPassword, String role) async {
     try {
       print('Password: $password, Confirm Password: $confirmPassword');
       if (password != confirmPassword) {
         throw "Les mots de passe ne correspondent pas";
+      }
+      if (role != 'user' && role != 'admin'){
+        throw "Role invalide";
+      }
+      int birthYear = DateTime.parse(dob).year;
+      int currentYear = DateTime.now().year;
+      int minimumBirthYear = currentYear - 14; // Remplacez 18 par l'âge minimum requis
+
+      if (birthYear > minimumBirthYear) {
+        throw "Vous devez avoir au moins 14 ans pour créer un compte";
       }
 
       await auth.createUserWithEmailAndPassword(email: email, password: password);
@@ -57,6 +71,7 @@ class AuthController extends GetxController {
       await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).set({
         'username': username,
         'dob': dob,
+        'role': role,
       });
 
       Get.offAll(() => LoginPage());
@@ -85,6 +100,7 @@ class AuthController extends GetxController {
 
   Future<void> logOut() async {
     await auth.signOut();
+    Get.offAll(() => LoginPage());
   }
 
   Future<void> resetPassword(String email) async {
