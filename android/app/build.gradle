@@ -1,5 +1,8 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -21,7 +24,7 @@ def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
-apply plugin: 'com.google.gms.google-services'
+
 android {
     namespace "com.example.flutter_application_1"
     compileSdk flutter.compileSdkVersion
@@ -49,7 +52,7 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        MultiDexEnable true
+        multiDexEnabled true
     }
 
     buildTypes {

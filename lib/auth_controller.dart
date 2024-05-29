@@ -1,14 +1,13 @@
-// ignore_for_file: avoid_print, prefer_const_constructors, unused_import
+  // ignore_for_file: prefer_const_constructors, avoid_print
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-//import 'admin_page.dart';
 import 'login_page.dart';
-import 'welcome_page.dart';
 import 'user_role.dart';
+import 'package:flutter_application_1/welcome_page.dart';
 
 class AuthController extends GetxController {
   static AuthController instance = Get.find();
