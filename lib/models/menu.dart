@@ -7,8 +7,9 @@ import 'package:flutter_application_1/edit_profile_page.dart';
 import 'package:flutter_application_1/reset_password_page.dart';
 
 class MenuWidget extends StatelessWidget {
-  String username;
-  MenuWidget({super.key, required this.username});
+  final String username;
+  final String role;
+  MenuWidget({super.key, required this.username, required this.role});
 
   @override
   Widget build(BuildContext context) => Drawer(
@@ -45,8 +46,15 @@ class MenuWidget extends StatelessWidget {
             Text(
               username,
               style: const TextStyle(
-                  fontSize: 28,
-                  color: Colors.black
+                fontSize: 28,
+                color: Colors.black,
+              ),
+            ),
+            Text(
+              'Role: $role',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black,
               ),
             ),
           ],

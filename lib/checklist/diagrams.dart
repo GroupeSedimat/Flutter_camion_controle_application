@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/checklist/loading.dart';
 import 'package:flutter_application_1/checklist/get_data_vrm_api/get_data.dart';
 import 'package:flutter_application_1/auth_controller.dart';
 import 'package:flutter_application_1/models/menu.dart';
+import 'package:flutter_application_1/models/my_user.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 class Diagrams extends StatefulWidget {
   const Diagrams({super.key});
@@ -16,9 +17,6 @@ class _DiagramsState extends State<Diagrams> {
 
   String data = 'No data, sorry :(';
   bool loading = true;
-  final User? user = AuthController().auth.currentUser;
-  final String username = AuthController().getUserName();
-  final String role = AuthController().getRole();
 
   void setupGetData() async {
     GetData instance = GetData(signature: "219757", precision: "/stats");
@@ -58,7 +56,21 @@ class _DiagramsState extends State<Diagrams> {
           ),
         ],
       ),
-      drawer: MenuWidget(username: username),
+      drawer: FutureBuilder<MyUser>(
+        future: UserService().getCurrentUserData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          } else if (snapshot.hasData) {
+            final MyUser userData = snapshot.data!;
+            return MenuWidget(username: userData.username, role: userData.role);
+          } else {
+            return Center(child: Text("No data available"));
+          }
+        },
+      ),
       body: ListView(
         children: <Widget>[
           TextButton.icon(
