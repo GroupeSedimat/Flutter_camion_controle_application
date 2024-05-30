@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'login_page.dart';
-import 'user_role.dart';
 import 'package:flutter_application_1/welcome_page.dart';
 
 class AuthController extends GetxController {
@@ -14,6 +13,8 @@ class AuthController extends GetxController {
 
   late Rx<User?> _user;
   FirebaseAuth auth = FirebaseAuth.instance;
+  late String _username;
+  late String _role;
 
   @override
   void onReady() {
@@ -35,10 +36,12 @@ class AuthController extends GetxController {
           .get()
           .then((DocumentSnapshot documentSnapshot) {
         if (documentSnapshot.exists) {
-          String username = documentSnapshot.get('username');
-          String role = documentSnapshot.get('role');
+          _username = documentSnapshot.get('username');
+          _role = documentSnapshot.get('role');
 
-          Get.offAll(() => WelcomePage(username: username, role: role));
+          print( "username : $_username, role: $_role");
+          // Get.offAll(() => WelcomePage(username: username, role: role));
+          Get.offAll(() => WelcomePage());
         } else {
           print('Document does not exist on the database');
         }
@@ -146,4 +149,17 @@ class AuthController extends GetxController {
       );
     }
   }
+
+  String? getCurrentUserUID() {
+    return _user.value?.uid; // Renvoie l'UID de l'utilisateur actuel ou null si l'utilisateur n'est pas connecté
+  }
+
+  String getUserName(){
+    return _username;
+  }
+
+  String getRole(){
+    return _role;
+  }
+
 }
