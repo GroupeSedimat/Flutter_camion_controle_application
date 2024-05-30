@@ -17,6 +17,8 @@ class _DiagramsState extends State<Diagrams> {
   String data = 'No data, sorry :(';
   bool loading = true;
   final User? user = AuthController().auth.currentUser;
+  final String username = AuthController().getUserName();
+  final String role = AuthController().getRole();
 
   void setupGetData() async {
     GetData instance = GetData(signature: "219757", precision: "/stats");
@@ -56,7 +58,7 @@ class _DiagramsState extends State<Diagrams> {
           ),
         ],
       ),
-      drawer: MenuWidget(user: user),
+      drawer: MenuWidget(username: username),
       body: ListView(
         children: <Widget>[
           TextButton.icon(

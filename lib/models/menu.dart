@@ -1,16 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/checklist/checklist.dart';
 import 'package:flutter_application_1/checklist/loading_vrm.dart';
 import 'package:flutter_application_1/welcome_page.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/auth_controller.dart';
 import 'package:flutter_application_1/edit_profile_page.dart';
 import 'package:flutter_application_1/reset_password_page.dart';
 
 class MenuWidget extends StatelessWidget {
-  User? user;
-  MenuWidget({super.key, this.user});
+  String username;
+  MenuWidget({super.key, required this.username});
 
   @override
   Widget build(BuildContext context) => Drawer(
@@ -45,7 +43,7 @@ class MenuWidget extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              "${user?.email}",
+              username,
               style: const TextStyle(
                   fontSize: 28,
                   color: Colors.black

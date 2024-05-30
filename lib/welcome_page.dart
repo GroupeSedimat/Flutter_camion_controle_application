@@ -3,15 +3,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/menu.dart';
-import 'package:flutter_application_1/user_role.dart';
 import 'package:flutter_application_1/auth_controller.dart';
 
 class WelcomePage extends StatelessWidget {
-  final String username;
-  final String role;
+  final String username = AuthController().getUserName();
+  final String role = AuthController().getRole();
 
-  //WelcomePage({Key? key}) : super(key: key);
-  WelcomePage({Key? key, required this.username, required this.role}) : super(key: key);
+  WelcomePage({Key? key}) : super(key: key);
+  // WelcomePage({Key? key, required this.username, required this.role}) : super(key: key);
   final User? user = AuthController().auth.currentUser;
 
   @override
@@ -37,7 +36,7 @@ class WelcomePage extends StatelessWidget {
           ),
         ),
       ),
-      drawer: MenuWidget(user: user),
+      drawer: MenuWidget(username: username),
       body: SingleChildScrollView(
         child: Column(
           children: [
