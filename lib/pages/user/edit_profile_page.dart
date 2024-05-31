@@ -1,7 +1,7 @@
 // ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'auth_controller.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 
 class ModifyProfilePage extends StatefulWidget {
   @override

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'login_page.dart';
-import 'package:flutter_application_1/welcome_page.dart';
+import 'package:flutter_application_1/pages/user/login_page.dart';
+import 'package:flutter_application_1/pages/welcome_page.dart';
 
 class AuthController extends GetxController {
   static AuthController instance = Get.find();

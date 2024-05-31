@@ -1,6 +1,6 @@
 // ignore_for_file: use_super_parameters, prefer_const_constructors, unused_import, library_private_types_in_public_api, avoid_print
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/login_page.dart'; 
+import 'package:flutter_application_1/pages/user/login_page.dart';
 import 'package:firebase_core/firebase_core.dart'; // Importez Firebase Core
 
 class SplashScreen extends StatefulWidget {

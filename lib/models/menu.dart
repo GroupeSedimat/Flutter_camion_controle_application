@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/checklist/checklist.dart';
-import 'package:flutter_application_1/checklist/loading_vrm.dart';
-import 'package:flutter_application_1/welcome_page.dart';
+import 'package:flutter_application_1/pages/checklist/checklist.dart';
+import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
+import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/edit_profile_page.dart';
-import 'package:flutter_application_1/reset_password_page.dart';
+import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
+import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 
 class MenuWidget extends StatelessWidget {
   final String username;

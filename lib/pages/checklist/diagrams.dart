@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/checklist/loading.dart';
-import 'package:flutter_application_1/checklist/get_data_vrm_api/get_data.dart';
-import 'package:flutter_application_1/auth_controller.dart';
+import 'package:flutter_application_1/pages/checklist/loading.dart';
+import 'package:flutter_application_1/pages/checklist/get_data_vrm_api/get_data.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/menu.dart';
-import 'package:flutter_application_1/models/my_user.dart';
+import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 
 class Diagrams extends StatefulWidget {

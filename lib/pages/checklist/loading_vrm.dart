@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/checklist/get_data_vrm_api/get_data.dart';
+import 'package:flutter_application_1/pages/checklist/get_data_vrm_api/get_data.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class LoadingData extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/auth_controller.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/checklist/add_blueprint_form.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';

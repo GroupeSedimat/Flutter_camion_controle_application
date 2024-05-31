@@ -1,8 +1,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/auth_controller.dart';
-import 'package:flutter_application_1/models/my_user.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/models/user/my_user.dart';
 
 const String USERS_COLLECTION_REF = "users";
 
