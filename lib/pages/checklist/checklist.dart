@@ -2,12 +2,12 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/models/checklist/add_blueprint_form.dart';
+import 'package:flutter_application_1/pages/checklist/add_blueprint_form.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
-import 'package:flutter_application_1/models/checklist/blueprint_template.dart';
+import 'package:flutter_application_1/pages/checklist/blueprint_template.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
-import 'package:flutter_application_1/models/checklist/validate_task.dart';
+import 'package:flutter_application_1/pages/checklist/validate_task.dart';
 import 'package:flutter_application_1/services/database_service.dart';
 
 class CheckList extends StatefulWidget {

@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/services/database_service.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class AddBlueprintForm extends StatefulWidget {

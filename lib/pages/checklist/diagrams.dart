@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/checklist/loading.dart';
-import 'package:flutter_application_1/pages/checklist/get_data_vrm_api/get_data.dart';
+import 'package:flutter_application_1/pages/data_api/get_data.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/models/menu.dart';
-import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/services/user_service.dart';
 
 class Diagrams extends StatefulWidget {
   const Diagrams({super.key});
@@ -33,59 +31,49 @@ class _DiagramsState extends State<Diagrams> {
     setupGetData();
   }
 
-  // final AuthService _auth = AuthService();
 
   @override
   Widget build(BuildContext context) {
+    return loading ? const Loading() : BasePage(
+      appBar: appBar(),
+      body: body(context),
+    );
+  }
 
-    return loading ? const Loading() : Scaffold(
-      backgroundColor: Colors.lightBlue,
-      appBar: AppBar(
-        title: const Text('Got data'),
-        backgroundColor: Colors.blue[800],
-        actions: <Widget>[
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            onPressed: () async {
-              AuthController.instance.logOut();
-              Navigator.pushReplacementNamed(context, '/wrapper');
-            },
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-      drawer: FutureBuilder<MyUser>(
-        future: UserService().getCurrentUserData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (snapshot.hasData) {
-            final MyUser userData = snapshot.data!;
-            return MenuWidget(username: userData.username, role: userData.role);
-          } else {
-            return Center(child: Text("No data available"));
-          }
-        },
-      ),
-      body: ListView(
-        children: <Widget>[
-          TextButton.icon(
-            onPressed: () {
-              Navigator.pushNamed(context, '/checklist');
-            },
-            label: const Text('Go to check list'),
+  body(BuildContext context) {
+    return ListView(
+      children: <Widget>[
+        TextButton.icon(
+          onPressed: () {
+            Navigator.pushNamed(context, '/checklist');
+          },
+          label: const Text('Go to check list'),
 
-            icon: const Icon(Icons.check),
+          icon: const Icon(Icons.check),
+        ),
+        Text(
+          data,
+        ),
+      ],
+    );
+  }
+
+  appBar() {
+    return AppBar(
+      title: const Text('Got data'),
+      backgroundColor: Colors.blue[800],
+      actions: <Widget>[
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
           ),
-          Text(
-            data,
-          ),
-        ],
-      ),
+          onPressed: () async {
+            AuthController.instance.logOut();
+            Navigator.pushReplacementNamed(context, '/wrapper');
+          },
+          child: const Text('Logout'),
+        ),
+      ],
     );
   }
 }

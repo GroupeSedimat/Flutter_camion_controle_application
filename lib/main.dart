@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
-import 'package:flutter_application_1/pages/checklist/wrapper.dart';
+import 'package:flutter_application_1/pages/wrapper.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/diagrams.dart';
 import 'package:get/get.dart';
