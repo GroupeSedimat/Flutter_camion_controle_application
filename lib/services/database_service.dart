@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names, avoid_print, use_rethrow_when_possible
+
 import 'dart:collection';
 import 'dart:io';
 

@@ -1,4 +1,6 @@
 
+// ignore_for_file: constant_identifier_names
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -25,6 +27,7 @@ class UserService{
   Stream<QuerySnapshot> getUsersData(){
     return _userRef.snapshots();
   }
+  
 
   Future<MyUser> getCurrentUserData() async {
     if (userID != null) {

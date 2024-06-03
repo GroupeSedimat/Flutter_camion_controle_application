@@ -1,6 +1,7 @@
-// ignore_for_file: prefer_const_constructors, use_super_parameters
+// ignore_for_file: prefer_const_constructors, use_super_parameters, prefer_const_constructors_in_immutables, sort_child_properties_last
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/user_service.dart';
@@ -9,8 +10,8 @@ import 'base_page.dart';
 
 class WelcomePage extends StatelessWidget {
 
+
   WelcomePage({Key? key}) : super(key: key);
-  // WelcomePage({Key? key, required this.username, required this.role}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -177,19 +178,51 @@ class WelcomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (userData.role != 'admin')
-                  ElevatedButton(
-                    onPressed: null, // Disabled state
-                    child: Text(
-                      "Test",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                  SizedBox(height: 200),
+                  if (userData.role == 'admin')
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => UserManagementPage()),
+                        );
+                      },
+                      child: Container(
+                        width: w * 0.3,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          image: DecorationImage(
+                            image: AssetImage("assets/images/purple-wallpaper.jpg"),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Gestion des utilisateurs",
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey, // Disabled color
+                  if (userData.role != 'admin')
+                    ElevatedButton(
+                      onPressed: null, // Disabled state
+                      child: Text(
+                        "Gestion des utilisateurs",
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey, // Disabled color
+                      ),
                     ),
                   ),
               ],

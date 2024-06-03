@@ -1,5 +1,8 @@
+// ignore_for_file: prefer_const_constructors_in_immutables
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
@@ -87,18 +90,6 @@ class MenuWidget extends StatelessWidget {
   Widget buildMenuItems(BuildContext context) => Wrap(
     runSpacing: 16, // vertical spacing
     children: [
-      /**   ListTile(
-          leading: Icon(Icons.slideshow, color: Colors.purple),
-          title: Text('Voir mes informations'),
-          onTap: () {
-          Navigator.pop(context);
-          Get.to(() => ProfileInfoPage(
-          username: 'NomUtilisateur',
-          dob: 'DateDeNaissance',
-          email: 'adresse@example.com',
-          ));
-          },
-          ), */
       ListTile(
         leading: const Icon(Icons.edit, color: Colors.purple),
         title: const Text('Modifier vos informations'),
@@ -123,7 +114,6 @@ class MenuWidget extends StatelessWidget {
           //Get.to(() => ModifyProfilePage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
-
       ListTile(
         leading: const Icon(Icons.lock, color: Colors.purple),
         title: const Text('Modifier mot de passe'),
@@ -132,9 +122,7 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => ResetPasswordPage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
-
       const Divider(color: Colors.purple),
-
       ListTile(
         leading: const Icon(Icons.data_exploration, color: Colors.purple),
         title: const Text('Get datas'),
@@ -143,7 +131,6 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => const LoadingData());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
-
       ListTile(
         leading: const Icon(Icons.view_list, color: Colors.purple),
         title: const Text('Go to checklist'),
@@ -152,6 +139,15 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => const CheckList());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
-    ]
+      if (role == 'admin') // Condition pour afficher uniquement si l'utilisateur est un administrateur
+        ListTile(
+          leading: const Icon(Icons.edit, color: Colors.purple),
+          title: const Text('Gestion des utilisateurs'),
+          onTap: () {
+            Navigator.pop(context);
+            Get.to(() => UserManagementPage());  // Pousser une nouvelle route vers la page de gestion des utilisateurs
+          },
+        ),
+    ],
   );
 }
