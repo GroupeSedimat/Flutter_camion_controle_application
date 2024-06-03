@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_import, must_be_immutable, prefer_final_fields
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

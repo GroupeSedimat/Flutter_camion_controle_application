@@ -8,13 +8,11 @@ import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 
 class WelcomePage extends StatelessWidget {
-
-
   WelcomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;  
+    double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -31,22 +29,33 @@ class WelcomePage extends StatelessWidget {
           ),
         ),
       ),
-      drawer: FutureBuilder<MyUser>(
+      drawer: FutureBuilder<MyUser?>(
         future: UserService().getCurrentUserData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Drawer(
+              child: Center(child: CircularProgressIndicator()),
+            );
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return Drawer(
+              child: Center(child: Text("Error: ${snapshot.error}")),
+            );
           } else if (snapshot.hasData) {
-            final MyUser userData = snapshot.data!;
+            final MyUser? userData = snapshot.data;
+            if (userData == null) {
+              return Drawer(
+                child: Center(child: Text("No user data found")),
+              );
+            }
             return MenuWidget(username: userData.username, role: userData.role);
           } else {
-            return Center(child: Text("No data available"));
+            return Drawer(
+              child: Center(child: Text("No data available")),
+            );
           }
         },
       ),
-      body: FutureBuilder<MyUser>(
+      body: FutureBuilder<MyUser?>(
         future: UserService().getCurrentUserData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -54,7 +63,11 @@ class WelcomePage extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
           } else if (snapshot.hasData) {
-            final MyUser userData = snapshot.data!;
+            final MyUser? userData = snapshot.data;
+            if (userData == null) {
+              return Center(child: Text("No user data found"));
+            }
+
             String welcomeMessage = userData.role == 'admin'
                 ? 'Bienvenue sur la page admin, ${userData.username}!'
                 : 'Bienvenue sur votre profil, ${userData.username}!';
