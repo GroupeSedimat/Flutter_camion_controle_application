@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 // ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, unused_element, file_names
 =======
 // ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, unused_element
 >>>>>>> 94558c0 (adding admin pages)
+=======
+// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, unused_element
+>>>>>>> 8f5f86dd924ec73abcc78cec518069910293cf84
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
