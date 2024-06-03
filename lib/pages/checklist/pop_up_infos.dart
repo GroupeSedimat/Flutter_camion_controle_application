@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore: unnecessary_import
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/services/database_service.dart';
 
+// ignore: must_be_immutable
 class PopUpInfo extends StatelessWidget {
+  // ignore: prefer_final_fields
   TextEditingController _textEditingController = TextEditingController();
   final DatabaseService databaseService;
   int listNr;
