@@ -45,7 +45,7 @@ class _CheckListState extends State<CheckList> {
       length: listOfLists.length,
       child: BasePage(
         appBar: appBar(),
-        body: body(),
+        body: body(), username: '', role: '',
       ),
     );
   }

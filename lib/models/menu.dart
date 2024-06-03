@@ -1,51 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
-import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
 import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 
 class MenuWidget extends StatelessWidget {
-  String username = "";
-  String role = "";
-  MenuWidget({super.key});
+  final String username;
+  final String role;
+  MenuWidget({super.key, required this.username, required this.role});
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<MyUser>(
-    future: UserService().getCurrentUserData(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (snapshot.hasError) {
-        return Center(child: Text("Error: ${snapshot.error}"));
-      } else if (snapshot.hasData) {
-        final MyUser userData = snapshot.data!;
-        username = userData.username;
-        role = userData.role;
-        return Drawer(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget> [
-                buildHeader(context),
-                buildMenuItems(context),
-              ],
-            ),
-          ),
-        );
-      } else {
-        return const Center(child: Text("No data available"));
-      }
-    },
+  Widget build(BuildContext context) => Drawer(
+    child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget> [
+          buildHeader(context),
+          buildMenuItems(context),
+        ],
+      ),
+    ),
   );
 
-
-
   Widget buildHeader(BuildContext context) => Material(
-    //menu head background color
     color: Colors.purple,
     child: InkWell(
       onTap: () {
@@ -87,18 +67,6 @@ class MenuWidget extends StatelessWidget {
   Widget buildMenuItems(BuildContext context) => Wrap(
     runSpacing: 16, // vertical spacing
     children: [
-      /**   ListTile(
-          leading: Icon(Icons.slideshow, color: Colors.purple),
-          title: Text('Voir mes informations'),
-          onTap: () {
-          Navigator.pop(context);
-          Get.to(() => ProfileInfoPage(
-          username: 'NomUtilisateur',
-          dob: 'DateDeNaissance',
-          email: 'adresse@example.com',
-          ));
-          },
-          ), */
       ListTile(
         leading: const Icon(Icons.edit, color: Colors.purple),
         title: const Text('Modifier vos informations'),
@@ -123,7 +91,6 @@ class MenuWidget extends StatelessWidget {
           //Get.to(() => ModifyProfilePage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
-
       ListTile(
         leading: const Icon(Icons.lock, color: Colors.purple),
         title: const Text('Modifier mot de passe'),
@@ -132,9 +99,7 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => ResetPasswordPage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
-
       const Divider(color: Colors.purple),
-
       ListTile(
         leading: const Icon(Icons.data_exploration, color: Colors.purple),
         title: const Text('Get datas'),
@@ -143,7 +108,6 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => const LoadingData());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
-
       ListTile(
         leading: const Icon(Icons.view_list, color: Colors.purple),
         title: const Text('Go to checklist'),
@@ -152,6 +116,15 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => const CheckList());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
         },
       ),
-    ]
+      if (role == 'admin') // Condition pour afficher uniquement si l'utilisateur est un administrateur
+        ListTile(
+          leading: const Icon(Icons.edit, color: Colors.purple),
+          title: const Text('Gestion des utilisateurs'),
+          onTap: () {
+            Navigator.pop(context);
+            Get.to(() => UserManagementPage());  // Pousser une nouvelle route vers la page de gestion des utilisateurs
+          },
+        ),
+    ],
   );
 }
