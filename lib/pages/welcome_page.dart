@@ -1,6 +1,10 @@
 // ignore_for_file: prefer_const_constructors, use_super_parameters, prefer_const_constructors_in_immutables, sort_child_properties_last
 
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
+=======
+import 'package:flutter_application_1/models/menu.dart';
+>>>>>>> 94558c0 (adding admin pages)
 import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';

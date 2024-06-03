@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors_in_immutables, library_private_types_in_public_api, prefer_const_constructors, file_names
+=======
+// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors_in_immutables, library_private_types_in_public_api, prefer_const_constructors
+>>>>>>> 94558c0 (adding admin pages)
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

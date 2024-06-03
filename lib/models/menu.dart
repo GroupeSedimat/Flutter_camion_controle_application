@@ -1,7 +1,10 @@
 // ignore_for_file: prefer_const_constructors_in_immutables
 
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:flutter_application_1/models/user/my_user.dart';
+=======
+>>>>>>> 94558c0 (adding admin pages)
 import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
