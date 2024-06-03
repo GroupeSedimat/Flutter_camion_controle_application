@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/checklist/add_blueprint_form.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
@@ -38,151 +39,171 @@ class _CheckListState extends State<CheckList> {
 
   @override
   Widget build(BuildContext context) {
-    
-    void showBlueprintModal({
-      required int nrOfList,
-      required int nrEntryPosition,
-      Blueprint? blueprint,
-      String? blueprintID,
-    }){
-      showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(10),
-          color: Colors.white,
-          margin: EdgeInsets.fromLTRB(
-              10, 50, 10, MediaQuery.of(context).viewInsets.bottom
-          ),
-          child: AddBlueprintForm(
-            nrOfList: nrOfList,
-            nrEntryPosition: nrEntryPosition,
-            databaseService: databaseService,
-            blueprint: blueprint,
-            blueprintID: blueprintID,
-          ),
-        );
-      });
-    }
-
-    void makePDF(){
-
-    }
-
-    void showTask(Blueprint blueprint) async {
-      try {
-        String? userUID = authController.getCurrentUserUID();
-        if(userUID != null){
-          Map<String, TaskChecklist> tasks = await databaseService.getAllTasks(userUID);
-          TaskChecklist validate = TaskChecklist();
-          for (TaskChecklist task in tasks.values) {
-            if (blueprint.nrOfList == task.nrOfList &&
-                blueprint.nrEntryPosition == task.nrEntryPosition) {
-              validate = task;
-              break; //
-            }
-          }
-
-          String keyId = tasks.keys.firstWhere(
-            (k) => tasks[k] == validate,
-            orElse: () =>
-                '', // Zwróć pusty ciąg, jeśli nie znaleziono dopasowania
-          );
-
-          await showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (context) {
-                return Container(
-                  padding: const EdgeInsets.all(10),
-                  color: Colors.white,
-                  margin: EdgeInsets.fromLTRB(
-                      10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
-                  child: ValidateTask(
-                    databaseService: databaseService,
-                    blueprint: blueprint,
-                    validate: validate,
-                    keyId: keyId,
-                    userUID: userUID,
-                  ),
-                );
-              });
-          setState(() {});
-        }else{
-          print("Error u need to log in");
-        }
-      } catch (e) {
-        print("Error showing task: $e");
-        // Obsłuż błąd, na przykład wyświetlając komunikat użytkownikowi
-      }
-    }
 
     return DefaultTabController(
       initialIndex: 0,
       length: listOfLists.length,
-      child: Scaffold(
-        backgroundColor: Colors.lightBlue,
-        appBar: AppBar(
-          title: const Text('Check list: the begining',
-            style: TextStyle(
-              color: Colors.amber,
-            ),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.blue[900],
-          bottom: TabBar(
-            dividerColor: Colors.transparent,
-            unselectedLabelColor: Colors.lightGreenAccent,
-            // indicatorColor: Colors.red,
-            indicatorPadding: const EdgeInsets.only(left: -10, right: -10),
-            indicatorWeight: 5,
-            indicatorColor: Colors.red,
-            labelColor: Colors.black,
-            isScrollable: true,
-            tabs: listOfLists.map((blueprint) =>
-                Tab(
-                  text: blueprint.listName,
-                )).toList(),
-          ),
+      child: BasePage(
+        appBar: appBar(),
+        body: body(),
+      ),
+    );
+  }
+
+  void showBlueprintModal({
+    required int nrOfList,
+    required int nrEntryPosition,
+    Blueprint? blueprint,
+    String? blueprintID,
+  }){
+    showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
+      return Container(
+        padding: const EdgeInsets.all(10),
+        color: Colors.white,
+        margin: EdgeInsets.fromLTRB(
+            10, 50, 10, MediaQuery.of(context).viewInsets.bottom
         ),
-        body:
-        StreamBuilder(
-          stream: databaseService.getBlueprints(),
-          builder: (context, snapshot) {
-            String? userUID = authController.getCurrentUserUID();
-            Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID!);
-            List blueprintsSnapshotList = snapshot.data?.docs ?? [];
-            Map<String, Blueprint> blueprints = HashMap();
-            Map<String, Blueprint> sortedBlueprints = HashMap();
-            for (var blueprintSnapshot in blueprintsSnapshotList){
-              blueprints.addAll({blueprintSnapshot.id: blueprintSnapshot.data()});
-            }
-            counter = List<int>.filled(listOfLists.length, 0);
-            for (var i = 0; i < listOfLists.length; i++) {
-              sortedBlueprints = Map.fromEntries(
-                  blueprints.entries.toList()..sort((e1,e2) => (e1.value.nrEntryPosition).compareTo(e2.value.nrEntryPosition))
+        child: AddBlueprintForm(
+          nrOfList: nrOfList,
+          nrEntryPosition: nrEntryPosition,
+          databaseService: databaseService,
+          blueprint: blueprint,
+          blueprintID: blueprintID,
+        ),
+      );
+    });
+  }
+
+  void makePDF(){
+
+  }
+
+  void showTask(Blueprint blueprint) async {
+    try {
+      String? userUID = authController.getCurrentUserUID();
+      if(userUID != null){
+        Map<String, TaskChecklist> tasks = await databaseService.getAllTasks(userUID);
+        TaskChecklist validate = TaskChecklist();
+        for (TaskChecklist task in tasks.values) {
+          if (blueprint.nrOfList == task.nrOfList &&
+              blueprint.nrEntryPosition == task.nrEntryPosition) {
+            validate = task;
+            break; //
+          }
+        }
+
+        String keyId = tasks.keys.firstWhere(
+              (k) => tasks[k] == validate,
+          orElse: () =>
+          '', // Zwróć pusty ciąg, jeśli nie znaleziono dopasowania
+        );
+
+        await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) {
+              return Container(
+                padding: const EdgeInsets.all(10),
+                color: Colors.white,
+                margin: EdgeInsets.fromLTRB(
+                    10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
+                child: ValidateTask(
+                  databaseService: databaseService,
+                  blueprint: blueprint,
+                  validate: validate,
+                  keyId: keyId,
+                  userUID: userUID,
+                ),
               );
-              for (Blueprint blueprint in sortedBlueprints.values) {
-                if (blueprint.nrOfList == listOfLists[i].listNr) {
-                  counter[i]++;
-                }
+            });
+        setState(() {});
+      }else{
+        print("Error u need to log in");
+      }
+    } catch (e) {
+      print("Error showing task: $e");
+      // Obsłuż błąd, na przykład wyświetlając komunikat użytkownikowi
+    }
+  }
+
+  void updateCounters(List blueprints) {
+    counter = List<int>.filled(listOfLists.length, 0);
+    for (var i = 0; i < listOfLists.length; i++) {
+      for (var blueprintSnapshot in blueprints) {
+        Blueprint blueprint = blueprintSnapshot.data();
+        if (blueprint.nrOfList == listOfLists[i].listNr) {
+          counter[i]++;
+        }
+      }
+    }
+  }
+
+  appBar() {
+    return AppBar(
+      title: const Text('Check list: the begining',
+        style: TextStyle(
+          color: Colors.amber,
+        ),
+      ),
+      centerTitle: true,
+      backgroundColor: Colors.blue[900],
+      bottom: TabBar(
+        dividerColor: Colors.transparent,
+        unselectedLabelColor: Colors.lightGreenAccent,
+        // indicatorColor: Colors.red,
+        indicatorPadding: const EdgeInsets.only(left: -10, right: -10),
+        indicatorWeight: 5,
+        indicatorColor: Colors.red,
+        labelColor: Colors.black,
+        isScrollable: true,
+        tabs: listOfLists.map((blueprint) =>
+            Tab(
+              text: blueprint.listName,
+            )).toList(),
+      ),
+    );
+  }
+
+  body() {
+    return StreamBuilder(
+        stream: databaseService.getBlueprints(),
+        builder: (context, snapshot) {
+          String? userUID = authController.getCurrentUserUID();
+          Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID!);
+          List blueprintsSnapshotList = snapshot.data?.docs ?? [];
+          Map<String, Blueprint> blueprints = HashMap();
+          Map<String, Blueprint> sortedBlueprints = HashMap();
+          for (var blueprintSnapshot in blueprintsSnapshotList){
+            blueprints.addAll({blueprintSnapshot.id: blueprintSnapshot.data()});
+          }
+          counter = List<int>.filled(listOfLists.length, 0);
+          for (var i = 0; i < listOfLists.length; i++) {
+            sortedBlueprints = Map.fromEntries(
+                blueprints.entries.toList()..sort((e1,e2) => (e1.value.nrEntryPosition).compareTo(e2.value.nrEntryPosition))
+            );
+            for (Blueprint blueprint in sortedBlueprints.values) {
+              if (blueprint.nrOfList == listOfLists[i].listNr) {
+                counter[i]++;
               }
             }
-            return TabBarView(
-              children: <Widget>[
-                for (var list in listOfLists)
-                  ListView(
-                    padding: const EdgeInsets.all(16.0),
-                    scrollDirection: Axis.vertical,
-                    children: [
-                      for (Blueprint blueprint in sortedBlueprints.values)
-                        if (blueprint.nrOfList == list.listNr)
-                          Padding(
+          }
+          return TabBarView(
+            children: <Widget>[
+              for (var list in listOfLists)
+                ListView(
+                  padding: const EdgeInsets.all(16.0),
+                  scrollDirection: Axis.vertical,
+                  children: [
+                    for (Blueprint blueprint in sortedBlueprints.values)
+                      if (blueprint.nrOfList == list.listNr)
+                        Padding(
                             padding: const EdgeInsets.only(left: 8.0),
                             child: FutureBuilder<bool?>(
                               future: validatedTask.then((v) {
                                 TaskChecklist? task = v.values.cast().firstWhere(
-                                      (element) =>
-                                  element.nrEntryPosition == blueprint.nrEntryPosition &&
-                                      element.nrOfList == blueprint.nrOfList,
+                                        (element) =>
+                                    element.nrEntryPosition == blueprint.nrEntryPosition &&
+                                        element.nrOfList == blueprint.nrOfList,
                                     orElse: () => null
                                 );
                                 if (task != null) {
@@ -229,66 +250,52 @@ class _CheckListState extends State<CheckList> {
                                 }
                               },
                             )
+                        ),
+                    const SizedBox(height: 10,),
+                    FloatingActionButton(
+                      heroTag: "addBlueprintHero",
+                      onPressed: () async {
+                        showBlueprintModal( nrOfList: list.listNr,
+                          nrEntryPosition: (counter[list.listNr] + 1),
+                          blueprint: null,
+                          blueprintID: null,
+                        );
+                      },
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.lightGreenAccent,
+                      ),
+                    ),
+                    const SizedBox(height: 20,),
+                    FloatingActionButton(
+                      heroTag: "makePDFHero",
+                      onPressed: () async {
+                        makePDF();
+                      },
+                      backgroundColor: Colors.red,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.picture_as_pdf,
+                            color: Colors.white,
                           ),
-                      const SizedBox(height: 10,),
-                      FloatingActionButton(
-                        heroTag: "addBlueprintHero",
-                        onPressed: () async {
-                          showBlueprintModal( nrOfList: list.listNr,
-                            nrEntryPosition: (counter[list.listNr] + 1),
-                            blueprint: null,
-                            blueprintID: null,
-                          );
-                        },
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.lightGreenAccent,
-                        ),
-                      ),
-                      const SizedBox(height: 20,),
-                      FloatingActionButton(
-                        heroTag: "makePDFHero",
-                        onPressed: () async {
-                          makePDF();
-                        },
-                        backgroundColor: Colors.red,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.picture_as_pdf,
+                          SizedBox(width: 10,),
+                          Text('Create PDF',
+                            style: TextStyle(
                               color: Colors.white,
-                            ),
-                            SizedBox(width: 10,),
-                            Text('Create PDF',
-                              style: TextStyle(
-                                color: Colors.white,
 
-                              ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-              ],
-            );
-          }
-        ),
-      ),
-    );
-  }
-
-  void updateCounters(List blueprints) {
-    counter = List<int>.filled(listOfLists.length, 0);
-    for (var i = 0; i < listOfLists.length; i++) {
-      for (var blueprintSnapshot in blueprints) {
-        Blueprint blueprint = blueprintSnapshot.data();
-        if (blueprint.nrOfList == listOfLists[i].listNr) {
-          counter[i]++;
+                    ),
+                  ],
+                ),
+            ],
+          );
         }
-      }
-    }
+    );
   }
 }
