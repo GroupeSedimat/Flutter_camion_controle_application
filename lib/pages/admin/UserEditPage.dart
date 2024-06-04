@@ -71,7 +71,7 @@ class _UserEditPageState extends State<UserEditPage> {
     try {
       var userDoc = await FirebaseFirestore.instance
           .collection('users')
-          .where('email', isEqualTo: widget.user.email)
+          .where('username', isEqualTo: widget.user.username)
           .get();
 
       if (userDoc.docs.isNotEmpty) {
@@ -138,7 +138,7 @@ class _UserEditPageState extends State<UserEditPage> {
     try {
       var userDoc = await FirebaseFirestore.instance
           .collection('users')
-          .where('email', isEqualTo: widget.user.email)
+          .where('username', isEqualTo: widget.user.username)
           .get();
 
       if (userDoc.docs.isNotEmpty) {

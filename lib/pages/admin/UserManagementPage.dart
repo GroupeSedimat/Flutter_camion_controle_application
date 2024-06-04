@@ -43,10 +43,10 @@ class UserManagementPage extends StatelessWidget {
                         Get.to(() => UserEditPage(user: user));
                         break;
                       case 'reset_password':
-                        _resetPassword(user.email);
+                        _resetPassword(user.username);
                         break;
                       case 'delete':
-                        _deleteUser(user.email);
+                        _deleteUser(user.username);
                         break;
                     }
                   },
@@ -75,11 +75,11 @@ class UserManagementPage extends StatelessWidget {
     );
   }
 
-  void _deleteUser(String email) async {
+  void _deleteUser(String username) async {
     try {
       var userDoc = await FirebaseFirestore.instance
           .collection('users')
-          .where('email', isEqualTo: email)
+          .where('username', isEqualTo: username)
           .get();
 
       if (userDoc.docs.isNotEmpty) {
@@ -108,9 +108,9 @@ class UserManagementPage extends StatelessWidget {
     }
   }
 
-  void _resetPassword(String email) async {
+  void _resetPassword(String username) async {
     try {
-      await authController.resetPassword(email);
+      await authController.resetPassword(username);
     } catch (e) {
       Get.snackbar(
         "Erreur lors de la réinitialisation",
