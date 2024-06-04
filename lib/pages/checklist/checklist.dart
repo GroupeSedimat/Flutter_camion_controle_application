@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, avoid_print
+// ignore_for_file: use_build_context_synchronously, avoid_print, prefer_const_constructors
 
 import 'dart:collection';
 
@@ -170,8 +170,21 @@ class _CheckListState extends State<CheckList> {
     return StreamBuilder(
         stream: databaseService.getBlueprints(),
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: const CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData || snapshot.data == null) {
+            return Center(child: Text("No data found"));
+          }
+
           String? userUID = authController.getCurrentUserUID();
-          Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID!);
+          if (userUID == null) {
+            return Center(child: Text("User not logged in"));
+          }
+          Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID);
           List blueprintsSnapshotList = snapshot.data?.docs ?? [];
           Map<String, Blueprint> blueprints = HashMap();
           Map<String, Blueprint> sortedBlueprints = HashMap();

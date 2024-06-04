@@ -12,12 +12,10 @@ class MyUser {
   });
 
   MyUser.fromJson(Map<String, Object?> json)
-      : this(
-          dob: json['dob']! as String,
-          role: json['role']! as String,
-          username: json['username']! as String,
-          email: json['email']! as String,
-        );
+      : dob = json['dob'] as String? ?? '',
+        role = json['role'] as String? ?? '',
+        username = json['username'] as String? ?? '',
+        email = json['email'] as String? ?? '';
 
   MyUser copyWith({
     String? dob,
