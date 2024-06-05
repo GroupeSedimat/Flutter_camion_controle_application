@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
 import 'package:get/get.dart';
 
 
@@ -39,6 +40,9 @@ class UserManagementPage extends StatelessWidget {
                 trailing: PopupMenuButton<String>(
                   onSelected: (String value) {
                     switch (value) {
+                      case 'view':
+                        Get.to(() => UserDetailsPage(user: user));
+                        break;
                       case 'edit':
                         Get.to(() => UserEditPage(user: user));
                         break;
@@ -52,6 +56,10 @@ class UserManagementPage extends StatelessWidget {
                   },
                   itemBuilder: (BuildContext context) {
                     return [
+                      PopupMenuItem(
+                        value: 'view',
+                        child: Text('Voir les détails'),
+                      ),
                       PopupMenuItem(
                         value: 'edit',
                         child: Text('Modifier'),
