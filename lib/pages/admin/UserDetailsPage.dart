@@ -41,7 +41,7 @@ class UserDetailsPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(user.role),
-            // Ajoutez d'autres détails utilisateur ici
+           
           ],
         ),
       ),

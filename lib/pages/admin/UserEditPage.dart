@@ -133,7 +133,7 @@ class _UserEditPageState extends State<UserEditPage> {
   }
 
   void _deleteUser() async {
-    Navigator.of(context).pop(); // Fermer la boîte de dialogue
+    Navigator.of(context).pop();
     try {
       var userDoc = await FirebaseFirestore.instance
           .collection('users')
