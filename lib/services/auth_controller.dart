@@ -40,7 +40,6 @@ class AuthController extends GetxController {
           _role = documentSnapshot.get('role');
 
           print( "username : $_username, role: $_role");
-          // Get.offAll(() => WelcomePage(username: username, role: role));
           Get.offAll(() => WelcomePage());
         } else {
           print('Document does not exist on the database');
@@ -59,13 +58,6 @@ class AuthController extends GetxController {
       }
       if (role != 'user' && role != 'admin'){
         throw "Role invalide";
-      }
-      int birthYear = DateTime.parse(dob).year;
-      int currentYear = DateTime.now().year;
-      int minimumBirthYear = currentYear - 14; // Remplacez 14 par l'âge minimum requis
-
-      if (birthYear > minimumBirthYear) {
-        throw "you should at least be 14 before creating an account";
       }
 
       await auth.createUserWithEmailAndPassword(email: email, password: password);

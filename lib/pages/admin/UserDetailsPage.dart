@@ -1,5 +1,4 @@
 // ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, prefer_const_constructors_in_immutables
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 
@@ -30,6 +29,18 @@ class UserDetailsPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(user.email),
+            SizedBox(height: 16),
+            Text(
+              'Date de naissance:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(user.dob),
+            SizedBox(height: 16),
+            Text(
+              'Role:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(user.role),
             // Ajoutez d'autres détails utilisateur ici
           ],
         ),

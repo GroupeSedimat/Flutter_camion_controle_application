@@ -1,5 +1,4 @@
 // ignore_for_file: use_super_parameters, unnecessary_import, prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/pages/user/inscription_page.dart';
