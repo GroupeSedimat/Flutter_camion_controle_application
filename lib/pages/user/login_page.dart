@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/pages/user/inscription_page.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'reset_password_page.dart';
 

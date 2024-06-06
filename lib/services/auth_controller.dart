@@ -1,6 +1,8 @@
   // ignore_for_file: prefer_const_constructors, avoid_print
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/admin/admin_page.dart';
+import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/pages/user/login_page.dart';
@@ -13,7 +15,8 @@ class AuthController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
   late String _username;
   late String _role;
-
+  
+  
   @override
   void onReady() {
     super.onReady();
@@ -36,15 +39,20 @@ class AuthController extends GetxController {
         if (documentSnapshot.exists) {
           _username = documentSnapshot.get('username');
           _role = documentSnapshot.get('role');
-
+          
           print( "username : $_username, role: $_role");
-          Get.offAll(() => WelcomePage());
-        } else {
-          print('Document does not exist on the database');
-        }
-      }).catchError((error) {
-        print('Error getting document: $error');
-      });
+          //Get.offAll(() => WelcomePage());
+           if (_role == 'superadmin') {
+              Get.offAll(() => AdminPage(userRole: UserRole.superadmin,));
+            } else {
+              Get.offAll(() => WelcomePage());
+            }
+              } else {
+                print('Document does not exist on the database');
+              }
+            }).catchError((error) {
+              print('Error getting document: $error');
+            });
     }
   }
 
@@ -54,7 +62,7 @@ class AuthController extends GetxController {
       if (password != confirmPassword) {
         throw "Les mots de passe ne correspondent pas";
       }
-      if (role != 'user' && role != 'admin'){
+      if (role != 'user' && role != 'admin' && role != 'superadmin'){
         throw "Role invalide";
       }
 

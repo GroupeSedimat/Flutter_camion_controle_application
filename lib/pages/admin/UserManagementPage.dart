@@ -1,4 +1,5 @@
 // ignore_for_file: use_key_in_widget_constructors, file_names, prefer_const_constructors, avoid_print
+//import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -118,7 +119,12 @@ void _deleteUserConfirmed(String username) async {
         .get();
 
     if (userDoc.docs.isNotEmpty) {
-      await FirebaseFirestore.instance.collection('users').doc(userDoc.docs[0].id).delete();
+      //var userData = userDoc.docs[0].data() as Map<String, dynamic>;
+        //String userId = userDoc.docs[0].id;
+        //String uid = userData['uid'];
+        await FirebaseFirestore.instance.collection('users').doc(userDoc.docs[0].id).delete();
+         
+        //await FirebaseAuth.instance.currentUser!.delete();
       Get.snackbar(
         "Utilisateur supprimé",
         "L'utilisateur a été supprimé avec succès.",

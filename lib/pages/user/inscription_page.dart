@@ -145,6 +145,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     items: [
                       DropdownMenuItem(value: 'user', child: Text('User')),
                       DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                      DropdownMenuItem(value: 'superadmin', child: Text('SuperAdmin')),
                     ],
                     onChanged: (value) {
                       setState(() {
