@@ -1,4 +1,4 @@
-// ignore_for_file: use_key_in_widget_constructors, file_names, prefer_const_constructors
+// ignore_for_file: use_key_in_widget_constructors, file_names, prefer_const_constructors, avoid_print
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -26,6 +26,7 @@ class UserManagementPage extends StatelessWidget {
 
           var users = snapshot.data!.docs.map((doc) {
             var data = doc.data() as Map<String, Object?>;
+            print('Données utilisateur récupérées: $data');
             return MyUser.fromJson(data);
           }).toList();
 
@@ -49,7 +50,7 @@ class UserManagementPage extends StatelessWidget {
                         _resetPassword(user.username);
                         break;
                       case 'delete':
-                        _deleteUser(user.username);
+                        _deleteUser(context, user.username);
                         break;
                     }
                   },
@@ -82,38 +83,65 @@ class UserManagementPage extends StatelessWidget {
     );
   }
 
-  void _deleteUser(String username) async {
-    try {
-      var userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .where('username', isEqualTo: username)
-          .get();
+  void _deleteUser(BuildContext context,  String username) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Confirmer la suppression"),
+        content: Text("Êtes-vous sûr de vouloir supprimer cet utilisateur ?"),
+        actions: [
+          TextButton(
+            child: Text("Non"),
+            onPressed: () {
+              Navigator.of(context).pop(); 
+            },
+          ),
+          TextButton(
+            child: Text("Oui"),
+            onPressed: () {
+              Navigator.of(context).pop(); 
+              _deleteUserConfirmed(username); 
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
-      if (userDoc.docs.isNotEmpty) {
-        await FirebaseFirestore.instance.collection('users').doc(userDoc.docs[0].id).delete();
-        Get.snackbar(
-          "Utilisateur supprimé",
-          "L'utilisateur a été supprimé avec succès.",
-          backgroundColor: Colors.green,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          "Erreur",
-          "Utilisateur non trouvé.",
-          backgroundColor: Colors.red,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    } catch (e) {
+void _deleteUserConfirmed(String username) async {
+  try {
+    var userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .where('username', isEqualTo: username)
+        .get();
+
+    if (userDoc.docs.isNotEmpty) {
+      await FirebaseFirestore.instance.collection('users').doc(userDoc.docs[0].id).delete();
       Get.snackbar(
-        "Erreur lors de la suppression",
-        e.toString(),
+        "Utilisateur supprimé",
+        "L'utilisateur a été supprimé avec succès.",
+        backgroundColor: Colors.green,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } else {
+      Get.snackbar(
+        "Erreur",
+        "Utilisateur non trouvé.",
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
       );
     }
+  } catch (e) {
+    Get.snackbar(
+      "Erreur lors de la suppression",
+      e.toString(),
+      backgroundColor: Colors.red,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
+}
 
   void _resetPassword(String username) async {
     try {

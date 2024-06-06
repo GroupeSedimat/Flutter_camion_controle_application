@@ -239,14 +239,38 @@ class _CheckListState extends State<CheckList> {
                                   return BlueprintTemplate(
                                     isDone: isDone,
                                     blueprint: blueprint,
-                                    delete: (){
-                                      // Find the key corresponding to the blueprint
-                                      String key = sortedBlueprints.keys.firstWhere(
-                                              (k) => sortedBlueprints[k] == blueprint
-                                      );
-                                      // If key found, delete blueprint using key
-                                      databaseService.deleteBlueprint(key);
-                                    },
+                                   delete: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text("Confirmer la suppression"),
+                                              content: Text("Êtes-vous sûr de vouloir supprimer ce blueprint ?"),
+                                              actions: [
+                                                TextButton(
+                                                  child: Text("Non"),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                                                  },
+                                                ),
+                                                TextButton(
+                                                  child: Text("Oui"),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                                                    // Find the key corresponding to the blueprint
+                                                    String key = sortedBlueprints.keys.firstWhere(
+                                                      (k) => sortedBlueprints[k] == blueprint
+                                                    );
+                                                    // If key found, delete blueprint using key
+                                                    databaseService.deleteBlueprint(key);
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+
                                     validate: (){
                                       showTask(blueprint);
                                     },

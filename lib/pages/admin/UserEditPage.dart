@@ -79,6 +79,7 @@ class _UserEditPageState extends State<UserEditPage> {
             .doc(userDoc.docs[0].id)
             .update({
           'username': _usernameController.text,
+          'email': _emailController.text, 
          
         });
 
