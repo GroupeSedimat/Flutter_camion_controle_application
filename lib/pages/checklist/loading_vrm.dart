@@ -1,5 +1,4 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/data_api/get_data.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';

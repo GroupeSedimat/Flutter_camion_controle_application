@@ -1,7 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print, prefer_const_constructors
-
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';

@@ -1,8 +1,6 @@
 // ignore_for_file: constant_identifier_names, avoid_print, use_rethrow_when_possible
-
 import 'dart:collection';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
