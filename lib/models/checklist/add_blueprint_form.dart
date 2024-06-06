@@ -1,22 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
-import 'package:flutter_application_1/services/database_service.dart';
-import 'package:get/get.dart';
+import 'package:flutter_application_1/services/database_blueprints_service.dart';
 import 'package:intl/intl.dart';
 
 class AddBlueprintForm extends StatefulWidget {
   final int nrOfList;
   final int nrEntryPosition;
-  final DatabaseService databaseService;
+  final DatabaseBlueprintsService databaseBlueprintsService;
   final Blueprint? blueprint;
   final String? blueprintID;
 
-  AddBlueprintForm({
+  const AddBlueprintForm({
     super.key,
     required this.nrOfList,
     required this.nrEntryPosition,
-    required this.databaseService,
+    required this.databaseBlueprintsService,
     this.blueprint,
     this.blueprintID});
 
@@ -135,9 +134,9 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
                 lastUpdate: lastUpdate,
               );
               if(widget.blueprintID != null){
-                widget.databaseService.updateBlueprint(widget.blueprintID!, blueprintNew);
+                widget.databaseBlueprintsService.updateBlueprint(widget.blueprintID!, blueprintNew);
               }else{
-                widget.databaseService.addBlueprint(blueprintNew);
+                widget.databaseBlueprintsService.addBlueprint(blueprintNew);
               }
               Navigator.pop(context);
             },

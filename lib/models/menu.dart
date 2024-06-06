@@ -9,7 +9,7 @@ import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 class MenuWidget extends StatelessWidget {
   final String username;
   final String role;
-  MenuWidget({super.key, required this.username, required this.role});
+  const MenuWidget({super.key, required this.username, required this.role});
 
   @override
   Widget build(BuildContext context) => Drawer(
@@ -29,7 +29,7 @@ class MenuWidget extends StatelessWidget {
     child: InkWell(
       onTap: () {
         Navigator.pop(context);
-        Get.to(() => WelcomePage());
+        Get.to(() => const WelcomePage());
       },
       child: Container(
         padding: EdgeInsets.only(

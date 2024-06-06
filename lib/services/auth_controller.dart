@@ -13,8 +13,6 @@ class AuthController extends GetxController {
 
   late Rx<User?> _user;
   FirebaseAuth auth = FirebaseAuth.instance;
-  late String _username;
-  late String _role;
 
   @override
   void onReady() {
@@ -36,11 +34,6 @@ class AuthController extends GetxController {
           .get()
           .then((DocumentSnapshot documentSnapshot) {
         if (documentSnapshot.exists) {
-          _username = documentSnapshot.get('username');
-          _role = documentSnapshot.get('role');
-
-          print( "username : $_username, role: $_role");
-          // Get.offAll(() => WelcomePage(username: username, role: role));
           Get.offAll(() => WelcomePage());
         } else {
           print('Document does not exist on the database');
@@ -51,7 +44,7 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> register(String email, String username, String dob, String password, String confirmPassword, String role) async {
+  Future<void> register(String email, String username, String dob, String password, String confirmPassword, String role, String company) async {
     try {
       print('Password: $password, Confirm Password: $confirmPassword');
       if (password != confirmPassword) {
@@ -74,6 +67,7 @@ class AuthController extends GetxController {
         'username': username,
         'dob': dob,
         'role': role,
+        'company': company,
       });
 
       Get.offAll(() => LoginPage());
@@ -153,13 +147,4 @@ class AuthController extends GetxController {
   String? getCurrentUserUID() {
     return _user.value?.uid; // Renvoie l'UID de l'utilisateur actuel ou null si l'utilisateur n'est pas connecté
   }
-
-  String getUserName(){
-    return _username;
-  }
-
-  String getRole(){
-    return _role;
-  }
-
 }

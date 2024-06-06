@@ -8,7 +8,7 @@ class BlueprintTemplate extends StatelessWidget{
   final Function edit;
   final Function validate;
   bool? isDone;
-  BlueprintTemplate({ required this.blueprint, required this.delete, required this.edit, required this.validate, this.isDone });
+  BlueprintTemplate({super.key,  required this.blueprint, required this.delete, required this.edit, required this.validate, this.isDone });
 
   @override
   Widget build(BuildContext context){

@@ -1,15 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
-import 'package:flutter_application_1/services/database_service.dart';
+import 'package:flutter_application_1/services/database_blueprints_service.dart';
 
 class PopUpInfo extends StatelessWidget {
-  TextEditingController _textEditingController = TextEditingController();
-  final DatabaseService databaseService;
+  final TextEditingController _textEditingController = TextEditingController();
+  final DatabaseBlueprintsService databaseBlueprintsService;
   int listNr;
   int counter;
-  PopUpInfo({super.key, required this.listNr, required this.counter, required this.databaseService});
+  PopUpInfo({super.key, required this.listNr, required this.counter, required this.databaseBlueprintsService});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +32,7 @@ class PopUpInfo extends StatelessWidget {
               nrEntryPosition: counter+1,
               lastUpdate: Timestamp.now(),
             );
-            databaseService.addBlueprint(task);
+            databaseBlueprintsService.addBlueprint(task);
             Navigator.pop(context);
             _textEditingController.clear();
           },

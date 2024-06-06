@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/checklist/add_blueprint_form.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
@@ -8,7 +9,11 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/checklist/blueprint_template.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/models/checklist/validate_task.dart';
-import 'package:flutter_application_1/services/database_service.dart';
+import 'package:flutter_application_1/services/database_blueprints_service.dart';
+import 'package:flutter_application_1/services/database_image_service.dart';
+import 'package:flutter_application_1/services/database_tasks_service.dart';
+import 'package:flutter_application_1/services/pdf_service.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 class CheckList extends StatefulWidget {
   const CheckList({super.key});
@@ -19,7 +24,11 @@ class CheckList extends StatefulWidget {
 
 class _CheckListState extends State<CheckList> {
 
-  final DatabaseService databaseService = DatabaseService();
+  final DatabaseBlueprintsService databaseBlueprintsService = DatabaseBlueprintsService();
+  final DatabaseTasksService databaseTasksService = DatabaseTasksService();
+  final DatabaseImageService databaseImageService = DatabaseImageService();
+  final PdfService pdfService = PdfService();
+  final UserService userService = UserService();
   AuthController authController = AuthController.instance;
 
   List<ListOfLists> listOfLists = [
@@ -38,7 +47,7 @@ class _CheckListState extends State<CheckList> {
 
   @override
   Widget build(BuildContext context) {
-    
+
     void showBlueprintModal({
       required int nrOfList,
       required int nrEntryPosition,
@@ -55,7 +64,7 @@ class _CheckListState extends State<CheckList> {
           child: AddBlueprintForm(
             nrOfList: nrOfList,
             nrEntryPosition: nrEntryPosition,
-            databaseService: databaseService,
+            databaseBlueprintsService: databaseBlueprintsService,
             blueprint: blueprint,
             blueprintID: blueprintID,
           ),
@@ -63,15 +72,11 @@ class _CheckListState extends State<CheckList> {
       });
     }
 
-    void makePDF(){
-
-    }
-
     void showTask(Blueprint blueprint) async {
       try {
         String? userUID = authController.getCurrentUserUID();
         if(userUID != null){
-          Map<String, TaskChecklist> tasks = await databaseService.getAllTasks(userUID);
+          Map<String, TaskChecklist> tasks = await databaseTasksService.getAllTasks(userUID);
           TaskChecklist validate = TaskChecklist();
           for (TaskChecklist task in tasks.values) {
             if (blueprint.nrOfList == task.nrOfList &&
@@ -97,7 +102,7 @@ class _CheckListState extends State<CheckList> {
                   margin: EdgeInsets.fromLTRB(
                       10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
                   child: ValidateTask(
-                    databaseService: databaseService,
+                    databaseTasksService: databaseTasksService,
                     blueprint: blueprint,
                     validate: validate,
                     keyId: keyId,
@@ -145,10 +150,10 @@ class _CheckListState extends State<CheckList> {
         ),
         body:
         StreamBuilder(
-          stream: databaseService.getBlueprints(),
+          stream: databaseBlueprintsService.getBlueprints(),
           builder: (context, snapshot) {
             String? userUID = authController.getCurrentUserUID();
-            Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID!);
+            Future<Map<String, TaskChecklist>> validatedTask = databaseTasksService.getAllTasks(userUID!);
             List blueprintsSnapshotList = snapshot.data?.docs ?? [];
             Map<String, Blueprint> blueprints = HashMap();
             Map<String, Blueprint> sortedBlueprints = HashMap();
@@ -209,7 +214,7 @@ class _CheckListState extends State<CheckList> {
                                               (k) => sortedBlueprints[k] == blueprint
                                       );
                                       // If key found, delete blueprint using key
-                                      databaseService.deleteBlueprint(key);
+                                      databaseBlueprintsService.deleteBlueprint(key);
                                     },
                                     validate: (){
                                       showTask(blueprint);
@@ -250,7 +255,11 @@ class _CheckListState extends State<CheckList> {
                       FloatingActionButton(
                         heroTag: "makePDFHero",
                         onPressed: () async {
-                          makePDF();
+                          MyUser user = await userService.getCurrentUserData();
+                          String company = user.company;
+                          // final data = await PdfService.createInvoice(validatedTask);
+                          final data = await pdfService.createInvoice();
+                          await pdfService.savePdfFile(company, data);
                         },
                         backgroundColor: Colors.red,
                         child: const Row(
