@@ -31,11 +31,22 @@ class UserApprovalPage extends StatelessWidget {
               return ListTile(
                 title: Text(user.username),
                 subtitle: Text(user.email),
-                trailing: IconButton(
-                  icon: Icon(Icons.check),
-                  onPressed: () {
-                    _approveUser(user);
-                  },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.check),
+                      onPressed: () {
+                        _approveUser(user);
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        _disapproveUser(user);
+                      },
+                    ),
+                  ],
                 ),
               );
             },
@@ -75,6 +86,43 @@ class UserApprovalPage extends StatelessWidget {
     } catch (e) {
       Get.snackbar(
         "Erreur lors de l'approbation",
+        e.toString(),
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  void _disapproveUser(MyUser user) async {
+    try {
+      var userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username', isEqualTo: user.username)
+          .get();
+
+      if (userDoc.docs.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userDoc.docs[0].id)
+            .update({'isApproved': false});
+
+        Get.snackbar(
+          "Utilisateur désapprouvé",
+          "L'utilisateur ${user.username} a été désapprouvé.",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          "Erreur",
+          "Utilisateur non trouvé.",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Erreur lors de la désapprobation",
         e.toString(),
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,

@@ -193,9 +193,9 @@ class WelcomePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                  if (userData.role != 'admin')
+                  if (userData.role != 'admin' )
                     ElevatedButton(
-                      onPressed: null, // Disabled state
+                      onPressed: null, 
                       child: Text(
                         "Gestion des utilisateurs",
                         style: TextStyle(
@@ -205,7 +205,7 @@ class WelcomePage extends StatelessWidget {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey, // Disabled color
+                        backgroundColor: Colors.grey, 
                       ),
                     ),
                 ],

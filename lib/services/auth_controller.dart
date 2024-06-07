@@ -90,8 +90,18 @@ class AuthController extends GetxController {
   try {
     
     UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
-
     DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).get();
+    var currentUser = auth.currentUser;
+    if (currentUser != null && await isSuperAdmin(currentUser.uid)) {
+      Get.snackbar(
+        "Connexion réussie",
+        "Bienvenue ${currentUser.displayName ?? currentUser.email}",
+        backgroundColor: Colors.green,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      Get.offAll(() => AdminPage(userRole: UserRole.superadmin,));
+      return;
+    }
 
     if (userDoc.exists) {
       bool isApproved = userDoc.get('isApproved') ?? false; 
@@ -212,5 +222,23 @@ class AuthController extends GetxController {
   String getRole(){
     return _role;
   }
+  
+Future<bool> isSuperAdmin(String userId) async {
+  try {
+    var userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .get();
+
+    if (userDoc.exists) {
+      var role = userDoc.get('role');
+      return role == 'superadmin';
+    }
+  } catch (e) {
+    print('Erreur lors de la vérification du rôle de superadministrateur: $e');
+  }
+  return false;
+}
+
 
 }
