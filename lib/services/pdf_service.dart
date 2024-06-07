@@ -52,10 +52,12 @@ class PdfService {
     await file.writeAsBytes(data);
 
     await databasePDFService.addPdfToFirebase(filePath, fileName);
-    Map<String, String> list2 = await databasePDFService.getCompanyListOfPDF(company);
-    list2.forEach((fileName, url) {
-      print("File Name: $fileName, Download URL: $url");
-    });
+    // Map<String, String> pdfList = await databasePDFService.getCompanyListOfPDF(company);
+    // pdfList.forEach((fileName, url) {
+    //   print("File Name: $fileName, Download URL: $url");
+    // });
     await OpenDocument.openDocument(filePath: filePath);
   }
+
+
 }

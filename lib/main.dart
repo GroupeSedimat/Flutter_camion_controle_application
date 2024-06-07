@@ -17,9 +17,8 @@ void main() async {
   await Firebase.initializeApp();
   Get.put(AuthController());
   await FirebaseAppCheck.instance.activate(
-    webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
     androidProvider: AndroidProvider.debug,
-    appleProvider: AppleProvider.appAttest,
+    // appleProvider: AppleProvider.appAttest,
   );
 
   runApp(MyApp());
