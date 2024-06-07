@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors, use_super_parameters
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';

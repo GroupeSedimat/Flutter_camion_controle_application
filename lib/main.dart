@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors 
 
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
@@ -15,6 +16,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   Get.put(AuthController());
+  await FirebaseAppCheck.instance.activate(
+    webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
+    androidProvider: AndroidProvider.debug,
+    appleProvider: AppleProvider.appAttest,
+  );
+
   runApp(MyApp());
 } 
 

@@ -18,6 +18,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
   late TextEditingController confirmPasswordController;
   late TextEditingController dobController;
   String selectedRole = 'user';
+  String selectedCompany = 'porsche';
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
@@ -153,6 +154,33 @@ class _InscriptionPageState extends State<InscriptionPage> {
                       });
                     },
                   ),
+                  DropdownButtonFormField<String>(
+                    // value: selectedCompany,
+                    hint: Text('company'),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    items: [
+                      DropdownMenuItem(value: 'mercedes', child: Text('Mercedes')),
+                      DropdownMenuItem(value: 'bmw', child: Text('BMW')),
+                      DropdownMenuItem(value: 'audi', child: Text('Audi')),
+                      DropdownMenuItem(value: 'porsche', child: Text('Porsche')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedCompany = value!;
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
@@ -168,6 +196,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   passwordController.text.trim(),
                   confirmPasswordController.text.trim(),
                   selectedRole,
+                  selectedCompany,
                 );
               },
               child: Container(

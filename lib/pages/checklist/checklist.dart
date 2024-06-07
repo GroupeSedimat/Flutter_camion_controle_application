@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/checklist/add_blueprint_form.dart';
@@ -9,7 +10,11 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/pages/checklist/blueprint_template.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/pages/checklist/validate_task.dart';
-import 'package:flutter_application_1/services/database_service.dart';
+import 'package:flutter_application_1/services/database_blueprints_service.dart';
+import 'package:flutter_application_1/services/database_image_service.dart';
+import 'package:flutter_application_1/services/database_tasks_service.dart';
+import 'package:flutter_application_1/services/pdf_service.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 class CheckList extends StatefulWidget {
   const CheckList({super.key});
@@ -20,7 +25,11 @@ class CheckList extends StatefulWidget {
 
 class _CheckListState extends State<CheckList> {
 
-  final DatabaseService databaseService = DatabaseService();
+  final DatabaseBlueprintsService databaseBlueprintsService = DatabaseBlueprintsService();
+  final DatabaseTasksService databaseTasksService = DatabaseTasksService();
+  final DatabaseImageService databaseImageService = DatabaseImageService();
+  final PdfService pdfService = PdfService();
+  final UserService userService = UserService();
   AuthController authController = AuthController.instance;
 
   List<ListOfLists> listOfLists = [
@@ -66,7 +75,7 @@ class _CheckListState extends State<CheckList> {
         child: AddBlueprintForm(
           nrOfList: nrOfList,
           nrEntryPosition: nrEntryPosition,
-          databaseService: databaseService,
+          databaseBlueprintsService: databaseBlueprintsService,
           blueprint: blueprint,
           blueprintID: blueprintID,
         ),
@@ -74,23 +83,23 @@ class _CheckListState extends State<CheckList> {
     });
   }
 
-  void makePDF(){
+    void makePDF(){
 
-  }
+    }
 
-  void showTask(Blueprint blueprint) async {
-    try {
-      String? userUID = authController.getCurrentUserUID();
-      if(userUID != null){
-        Map<String, TaskChecklist> tasks = await databaseService.getAllTasks(userUID);
-        TaskChecklist validate = TaskChecklist();
-        for (TaskChecklist task in tasks.values) {
-          if (blueprint.nrOfList == task.nrOfList &&
-              blueprint.nrEntryPosition == task.nrEntryPosition) {
-            validate = task;
-            break; //
+    void showTask(Blueprint blueprint) async {
+      try {
+        String? userUID = authController.getCurrentUserUID();
+        if(userUID != null){
+          Map<String, TaskChecklist> tasks = await databaseTasksService.getAllTasks(userUID);
+          TaskChecklist validate = TaskChecklist();
+          for (TaskChecklist task in tasks.values) {
+            if (blueprint.nrOfList == task.nrOfList &&
+                blueprint.nrEntryPosition == task.nrEntryPosition) {
+              validate = task;
+              break; //
+            }
           }
-        }
 
         String keyId = tasks.keys.firstWhere(
               (k) => tasks[k] == validate,
@@ -98,33 +107,33 @@ class _CheckListState extends State<CheckList> {
           '', // Zwróć pusty ciąg, jeśli nie znaleziono dopasowania
         );
 
-        await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) {
-              return Container(
-                padding: const EdgeInsets.all(10),
-                color: Colors.white,
-                margin: EdgeInsets.fromLTRB(
-                    10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
-                child: ValidateTask(
-                  databaseService: databaseService,
-                  blueprint: blueprint,
-                  validate: validate,
-                  keyId: keyId,
-                  userUID: userUID,
-                ),
-              );
-            });
-        setState(() {});
-      }else{
-        print("Error u need to log in");
+          await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                return Container(
+                  padding: const EdgeInsets.all(10),
+                  color: Colors.white,
+                  margin: EdgeInsets.fromLTRB(
+                      10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
+                  child: ValidateTask(
+                    databaseTasksService: databaseTasksService,
+                    blueprint: blueprint,
+                    validate: validate,
+                    keyId: keyId,
+                    userUID: userUID,
+                  ),
+                );
+              });
+          setState(() {});
+        }else{
+          print("Error u need to log in");
+        }
+      } catch (e) {
+        print("Error showing task: $e");
+        // Obsłuż błąd, na przykład wyświetlając komunikat użytkownikowi
       }
-    } catch (e) {
-      print("Error showing task: $e");
-      // Obsłuż błąd, na przykład wyświetlając komunikat użytkownikowi
     }
-  }
 
   void updateCounters(List blueprints) {
     counter = List<int>.filled(listOfLists.length, 0);
@@ -166,10 +175,10 @@ class _CheckListState extends State<CheckList> {
 
   body() {
     return StreamBuilder(
-        stream: databaseService.getBlueprints(),
+        stream: databaseBlueprintsService.getBlueprints(),
         builder: (context, snapshot) {
           String? userUID = authController.getCurrentUserUID();
-          Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID!);
+          Future<Map<String, TaskChecklist>> validatedTask = databaseTasksService.getAllTasks(userUID!);
           List blueprintsSnapshotList = snapshot.data?.docs ?? [];
           Map<String, Blueprint> blueprints = HashMap();
           Map<String, Blueprint> sortedBlueprints = HashMap();
@@ -230,7 +239,7 @@ class _CheckListState extends State<CheckList> {
                                               (k) => sortedBlueprints[k] == blueprint
                                       );
                                       // If key found, delete blueprint using key
-                                      databaseService.deleteBlueprint(key);
+                                      databaseBlueprintsService.deleteBlueprint(key);
                                     },
                                     validate: (){
                                       showTask(blueprint);
@@ -250,41 +259,45 @@ class _CheckListState extends State<CheckList> {
                                 }
                               },
                             )
-                        ),
-                    const SizedBox(height: 10,),
-                    FloatingActionButton(
-                      heroTag: "addBlueprintHero",
-                      onPressed: () async {
-                        showBlueprintModal( nrOfList: list.listNr,
-                          nrEntryPosition: (counter[list.listNr] + 1),
-                          blueprint: null,
-                          blueprintID: null,
-                        );
-                      },
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.lightGreenAccent,
-                      ),
-                    ),
-                    const SizedBox(height: 20,),
-                    FloatingActionButton(
-                      heroTag: "makePDFHero",
-                      onPressed: () async {
-                        makePDF();
-                      },
-                      backgroundColor: Colors.red,
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.picture_as_pdf,
-                            color: Colors.white,
                           ),
-                          SizedBox(width: 10,),
-                          Text('Create PDF',
-                            style: TextStyle(
+                      const SizedBox(height: 10,),
+                      FloatingActionButton(
+                        heroTag: "addBlueprintHero",
+                        onPressed: () async {
+                          showBlueprintModal( nrOfList: list.listNr,
+                            nrEntryPosition: (counter[list.listNr] + 1),
+                            blueprint: null,
+                            blueprintID: null,
+                          );
+                        },
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.lightGreenAccent,
+                        ),
+                      ),
+                      const SizedBox(height: 20,),
+                      FloatingActionButton(
+                        heroTag: "makePDFHero",
+                        onPressed: () async {
+                          MyUser user = await userService.getCurrentUserData();
+                          String company = user.company;
+                          // final data = await PdfService.createInvoice(validatedTask);
+                          final data = await pdfService.createInvoice();
+                          await pdfService.savePdfFile(company, data);
+                        },
+                        backgroundColor: Colors.red,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.picture_as_pdf,
                               color: Colors.white,
+                            ),
+                            SizedBox(width: 10,),
+                            Text('Create PDF',
+                              style: TextStyle(
+                                color: Colors.white,
 
                             ),
                           ),

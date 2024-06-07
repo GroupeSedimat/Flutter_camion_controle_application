@@ -42,10 +42,7 @@ class MenuWidget extends StatelessWidget {
     },
   );
 
-
-
   Widget buildHeader(BuildContext context) => Material(
-    //menu head background color
     color: Colors.purple,
     child: InkWell(
       onTap: () {
