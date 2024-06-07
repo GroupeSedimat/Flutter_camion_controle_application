@@ -50,4 +50,25 @@ class DatabasePDFService{
     }
   }
 
+  Future<Map<String, String>> getUserListOfPDF(String company, String userID) async {
+    Map<String, String> pdfList = HashMap();
+    try {
+      final userRef = _referencePdf.child(company).child(userID);
+      final userSnapshot = await userRef.listAll();
+
+        // Iterate through the files (items) in each subfolder
+        for (var pdfRef in userSnapshot.items) {
+          String downloadURL = await pdfRef.getDownloadURL();
+          pdfList[pdfRef.name] = downloadURL;
+      }
+      print(pdfList);
+      return pdfList;
+
+    } catch (error) {
+      // Gérez l’erreur
+      print("Error retrieving User $userID pdf list: $error");
+      return pdfList;
+    }
+  }
+
 }
