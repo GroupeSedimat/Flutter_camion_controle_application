@@ -42,13 +42,7 @@ class AdminPage extends StatelessWidget {
                 },
                 child: Text('Gestion des utilisateurs'),
               ),
-            //SizedBox(height: 20),
-            //ElevatedButton(
-              //onPressed: () {
-                //Navigator.pop(context);
-              //},
-              //child: Text('Retour'),
-           // ),
+         
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {

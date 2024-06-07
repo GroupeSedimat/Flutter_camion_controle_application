@@ -128,7 +128,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   const SizedBox(
                     height: 20,
                   ),
-                  DropdownButtonFormField<String>(
+                  /*DropdownButtonFormField<String>(
                     value: selectedRole,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -142,20 +142,20 @@ class _InscriptionPageState extends State<InscriptionPage> {
                       filled: true,
                       fillColor: Colors.white,
                     ),
-                    items: [
-                      DropdownMenuItem(value: 'user', child: Text('User')),
-                      DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                      DropdownMenuItem(value: 'superadmin', child: Text('SuperAdmin')),
-                    ],
+                    //items: [
+                      //DropdownMenuItem(value: 'user', child: Text('User')),
+                      //DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                      //DropdownMenuItem(value: 'superadmin', child: Text('SuperAdmin')),
+                    //],
                     onChanged: (value) {
                       setState(() {
                         selectedRole = value!;
                       });
                     },
-                  ),
+                  ), */
                 ],
               ),
-            ),
+            ), 
             const SizedBox(
               height: 65,
             ),
