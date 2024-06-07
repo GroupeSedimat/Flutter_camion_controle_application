@@ -1,4 +1,3 @@
-
 // ignore_for_file: constant_identifier_names
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,7 +10,7 @@ class UserService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _userRef;
   final User? user = AuthController().auth.currentUser;
-  final String? userID = AuthController().auth.currentUser!.uid;
+  final String? userID = AuthController().auth.currentUser?.uid;
 
   UserService(){
     _userRef = _firestore.collection(USERS_COLLECTION_REF)

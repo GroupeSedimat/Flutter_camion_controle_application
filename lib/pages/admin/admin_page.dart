@@ -1,6 +1,6 @@
 // ignore_for_file: use_super_parameters, prefer_const_constructors
-
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/admin/UserApprovalPage.dart';
 import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
@@ -41,6 +41,13 @@ class AdminPage extends StatelessWidget {
                     Get.to(() => UserManagementPage());
                 },
                 child: Text('Gestion des utilisateurs'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                    Get.to(() =>  UserApprovalPage ());
+                },
+                child: Text('Approuver un compte'),
               ),
          
             SizedBox(height: 20),

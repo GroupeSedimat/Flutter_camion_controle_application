@@ -72,6 +72,7 @@ class AuthController extends GetxController {
         'username': username,
         'dob': dob,
         'role': role,
+        'isApproved': false,
       });
 
       Get.offAll(() => LoginPage());
@@ -86,17 +87,69 @@ class AuthController extends GetxController {
   }
 
   Future<void> login(String email, String password) async {
-    try {
-      await auth.signInWithEmailAndPassword(email: email, password: password);
-    } catch (e) {
+  try {
+    
+    UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
+
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).get();
+
+    if (userDoc.exists) {
+      bool isApproved = userDoc.get('isApproved') ?? false; 
+
+      if (isApproved) {
+        Get.snackbar(
+          "Connexion réussie",
+          "Bienvenue ${userDoc.get('username')}",
+          backgroundColor: Colors.green,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+
+        Get.offAll(() => WelcomePage());
+      } else {
+        Get.snackbar(
+          "Compte non approuvé",
+          "Votre compte doit être approuvé par un administrateur.",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.TOP,
+        );
+       await FirebaseAuth.instance.signOut();
+      }
+    } else {
       Get.snackbar(
-        "Erreur de connexion",
-        e.toString(),
+        "Erreur",
+        "Les informations de l'utilisateur sont introuvables.",
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
       );
+
+      await FirebaseAuth.instance.signOut();
     }
-  }
+  } catch (e) {
+        if (e is FirebaseAuthException) {
+            Get.snackbar(
+                "Erreur de connexion",
+                e.message ?? "Erreur inconnue",
+                backgroundColor: Colors.red,
+                snackPosition: SnackPosition.BOTTOM,
+            );
+        } else if (e is FirebaseException) {
+            Get.snackbar(
+                "Erreur Firestore",
+                e.message ?? "Erreur de permission Firestore",
+                backgroundColor: Colors.red,
+                snackPosition: SnackPosition.BOTTOM,
+            );
+        } else {
+            Get.snackbar(
+                "Erreur",
+                "Votre compte est en attente de validation par un administrateur.",
+                backgroundColor: Colors.yellow, 
+                snackPosition: SnackPosition.BOTTOM,
+            );
+  } 
+  } 
+}
+
 
   Future<void> logOut() async {
     await auth.signOut();
@@ -149,7 +202,7 @@ class AuthController extends GetxController {
   }
 
   String? getCurrentUserUID() {
-    return _user.value?.uid; // Renvoie l'UID de l'utilisateur actuel ou null si l'utilisateur n'est pas connecté
+    return _user.value?.uid; 
   }
 
   String getUserName(){
