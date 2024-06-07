@@ -162,52 +162,7 @@ class WelcomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 200),
-                  if (userData.role == 'admin')
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => UserManagementPage()),
-                        );
-                      },
-                      child: Container(
-                        width: w * 0.3,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          image: DecorationImage(
-                            image: AssetImage("assets/images/purple-wallpaper.jpg"),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Gestion des utilisateurs",
-                            style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (userData.role != 'admin' )
-                    ElevatedButton(
-                      onPressed: null, 
-                      child: Text(
-                        "Gestion des utilisateurs",
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey, 
-                      ),
-                    ),
+                  
                 ],
               ),
             );

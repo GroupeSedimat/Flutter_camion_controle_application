@@ -27,7 +27,6 @@ class UserManagementPage extends StatelessWidget {
 
           var users = snapshot.data!.docs.map((doc) {
             var data = doc.data() as Map<String, Object?>;
-            print('Données utilisateur récupérées: $data');
             return MyUser.fromJson(data);
           }).toList();
 
@@ -35,46 +34,75 @@ class UserManagementPage extends StatelessWidget {
             itemCount: users.length,
             itemBuilder: (context, index) {
               var user = users[index];
-              return ListTile(
-                title: Text(user.username),
-                subtitle: Text(user.email),
-                trailing: PopupMenuButton<String>(
-                  onSelected: (String value) {
-                    switch (value) {
-                      case 'view':
-                        Get.to(() => UserDetailsPage(user: user));
-                        break;
-                      case 'edit':
-                        Get.to(() => UserEditPage(user: user));
-                        break;
-                      case 'reset_password':
-                        _resetPassword(user.username);
-                        break;
-                      case 'delete':
-                        _deleteUser(context, user.username);
-                        break;
-                    }
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem(
-                        value: 'view',
-                        child: Text('Voir les détails'),
-                      ),
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Text('Modifier'),
-                      ),
-                      PopupMenuItem(
-                        value: 'reset_password',
-                        child: Text('Réinitialiser le mot de passe'),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text('Supprimer'),
-                      ),
-                    ];
-                  },
+              return Card(
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                elevation: 3,
+                child: ListTile(
+                  title: Text(user.username),
+                  subtitle: Text(user.email),
+                  trailing: PopupMenuButton<String>(
+                    icon: Icon(Icons.more_vert),
+                    onSelected: (String value) {
+                      switch (value) {
+                        case 'view':
+                          Get.to(() => UserDetailsPage(user: user));
+                          break;
+                        case 'edit':
+                          Get.to(() => UserEditPage(user: user));
+                          break;
+                        case 'reset_password':
+                          _resetPassword(user.username);
+                          break;
+                        case 'delete':
+                          _deleteUser(context, user.username);
+                          break;
+                      }
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        PopupMenuItem(
+                          value: 'view',
+                          child: Row(
+                            children: [
+                              Icon(Icons.visibility),
+                              SizedBox(width: 8),
+                              Text('Voir les détails'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit),
+                              SizedBox(width: 8),
+                              Text('Modifier'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'reset_password',
+                          child: Row(
+                            children: [
+                              Icon(Icons.lock),
+                              SizedBox(width: 8),
+                              Text('Réinitialiser le mot de passe'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete),
+                              SizedBox(width: 8),
+                              Text('Supprimer'),
+                            ],
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
                 ),
               );
             },
@@ -84,70 +112,65 @@ class UserManagementPage extends StatelessWidget {
     );
   }
 
-  void _deleteUser(BuildContext context,  String username) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text("Confirmer la suppression"),
-        content: Text("Êtes-vous sûr de vouloir supprimer cet utilisateur ?"),
-        actions: [
-          TextButton(
-            child: Text("Non"),
-            onPressed: () {
-              Navigator.of(context).pop(); 
-            },
-          ),
-          TextButton(
-            child: Text("Oui"),
-            onPressed: () {
-              Navigator.of(context).pop(); 
-              _deleteUserConfirmed(username); 
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+  void _deleteUser(BuildContext context, String username) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirmer la suppression"),
+          content: Text("Êtes-vous sûr de vouloir supprimer cet utilisateur ?"),
+          actions: [
+            TextButton(
+              child: Text("Non"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Oui"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteUserConfirmed(username);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-void _deleteUserConfirmed(String username) async {
-  try {
-    var userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: username)
-        .get();
+  void _deleteUserConfirmed(String username) async {
+    try {
+      var userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username', isEqualTo: username)
+          .get();
 
-    if (userDoc.docs.isNotEmpty) {
-      //var userData = userDoc.docs[0].data() as Map<String, dynamic>;
-        //String userId = userDoc.docs[0].id;
-        //String uid = userData['uid'];
+      if (userDoc.docs.isNotEmpty) {
         await FirebaseFirestore.instance.collection('users').doc(userDoc.docs[0].id).delete();
-         
-        //await FirebaseAuth.instance.currentUser!.delete();
+        Get.snackbar(
+          "Utilisateur supprimé",
+          "L'utilisateur a été supprimé avec succès.",
+          backgroundColor: Colors.green,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          "Erreur",
+          "Utilisateur non trouvé.",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
       Get.snackbar(
-        "Utilisateur supprimé",
-        "L'utilisateur a été supprimé avec succès.",
-        backgroundColor: Colors.green,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } else {
-      Get.snackbar(
-        "Erreur",
-        "Utilisateur non trouvé.",
+        "Erreur lors de la suppression",
+        e.toString(),
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
       );
     }
-  } catch (e) {
-    Get.snackbar(
-      "Erreur lors de la suppression",
-      e.toString(),
-      backgroundColor: Colors.red,
-      snackPosition: SnackPosition.BOTTOM,
-    );
   }
-}
 
   void _resetPassword(String username) async {
     try {
