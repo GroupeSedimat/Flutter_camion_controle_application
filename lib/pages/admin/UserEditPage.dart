@@ -25,7 +25,7 @@ class _UserEditPageState extends State<UserEditPage> {
   }
 
   @override
-  void dispose() {
+  void dispose() { 
     _usernameController.dispose();
     _emailController.dispose();
     super.dispose();

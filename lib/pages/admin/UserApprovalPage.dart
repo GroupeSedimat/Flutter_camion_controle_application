@@ -37,13 +37,14 @@ class UserApprovalPage extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.check),
                       onPressed: () {
-                        _approveUser(user);
+                        //_approveUser(user);
+                        _showApproveDialog(context, user);
                       },
                     ),
                     IconButton(
                       icon: Icon(Icons.close),
                       onPressed: () {
-                        _disapproveUser(user);
+                         _showDisapproveDialog(context, user);
                       },
                     ),
                   ],
@@ -53,6 +54,58 @@ class UserApprovalPage extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+  void _showApproveDialog(BuildContext context, MyUser user) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirmer l'approbation"),
+          content: Text("Êtes-vous sûr de vouloir approuver cet utilisateur ?"),
+          actions: [
+            TextButton(
+              child: Text("Non"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Oui"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _approveUser(user);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showDisapproveDialog(BuildContext context, MyUser user) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirmer la désapprobation"),
+          content: Text("Êtes-vous sûr de vouloir désapprouver cet utilisateur ?"),
+          actions: [
+            TextButton(
+              child: Text("Non"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Oui"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _disapproveUser(user);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
