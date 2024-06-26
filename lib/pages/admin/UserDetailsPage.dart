@@ -24,12 +24,12 @@ class UserDetailsPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(user.username),
-            SizedBox(height: 16),
+            /*SizedBox(height: 16),
             Text(
               'Email:',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text(user.email),
+            Text(user.email), */
             SizedBox(height: 16),
             Text(
               'Date de naissance:',
