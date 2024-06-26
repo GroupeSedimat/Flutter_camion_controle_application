@@ -119,7 +119,7 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => const CheckList());  
         },
       ),
-      if (role == 'admin' || role == 'superadmin') 
+      if (role == 'admin') 
         ListTile(
           leading: const Icon(Icons.manage_accounts, color: Colors.purple),
           title: const Text('Gestion des utilisateurs'),
