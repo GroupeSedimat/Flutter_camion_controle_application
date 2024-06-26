@@ -4,6 +4,7 @@ import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
+import 'package:flutter_application_1/pages/user/messaging_page.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:get/get.dart';
@@ -83,6 +84,7 @@ class MenuWidget extends StatelessWidget {
         title: const Text('Messagerie'),
         onTap: () {
           Navigator.pop(context);
+          Get.to(() =>  MessagingPage ());
         },
       ),
       ListTile(
