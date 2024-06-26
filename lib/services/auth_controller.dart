@@ -70,6 +70,7 @@ class AuthController extends GetxController {
 
       await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).set({
         'username': username,
+        'email': email,
         'dob': dob,
         'role': role,
         'isApproved': false,

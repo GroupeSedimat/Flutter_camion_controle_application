@@ -5,7 +5,6 @@ import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 class UserEditPage extends StatefulWidget {
   final MyUser user;
 
@@ -26,6 +25,8 @@ class _UserEditPageState extends State<UserEditPage> {
     _usernameController.text = widget.user.username;
     _emailController.text = widget.user.email;
     _selectedRole = widget.user.role.isNotEmpty ? widget.user.role : UserRole.user.toString().split('.').last; // Default role
+
+    // Debugging: Print the initial values
   }
 
   @override
