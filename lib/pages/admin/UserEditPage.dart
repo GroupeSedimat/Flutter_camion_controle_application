@@ -1,8 +1,10 @@
 // ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, prefer_const_constructors_in_immutables, sort_child_properties_last
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class UserEditPage extends StatefulWidget {
   final MyUser user;
@@ -16,16 +18,18 @@ class UserEditPage extends StatefulWidget {
 class _UserEditPageState extends State<UserEditPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  late String _selectedRole;
 
   @override
   void initState() {
     super.initState();
     _usernameController.text = widget.user.username;
     _emailController.text = widget.user.email;
+    _selectedRole = widget.user.role.isNotEmpty ? widget.user.role : UserRole.user.toString().split('.').last; // Default role
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     _usernameController.dispose();
     _emailController.dispose();
     super.dispose();
@@ -33,6 +37,8 @@ class _UserEditPageState extends State<UserEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<String> roles = UserRole.values.map((role) => role.toString().split('.').last).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Modifier utilisateur'),
@@ -54,6 +60,20 @@ class _UserEditPageState extends State<UserEditPage> {
             TextField(
               controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),
+            ),
+            DropdownButton<String>(
+              value: _selectedRole,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedRole = newValue!;
+                });
+              },
+              items: roles.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -79,8 +99,8 @@ class _UserEditPageState extends State<UserEditPage> {
             .doc(userDoc.docs[0].id)
             .update({
           'username': _usernameController.text,
-          'email': _emailController.text, 
-         
+          'email': _emailController.text,
+          'role': _selectedRole, // Update the role
         });
 
         Get.snackbar(

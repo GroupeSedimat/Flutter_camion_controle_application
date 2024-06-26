@@ -51,7 +51,7 @@ class UserManagementPage extends StatelessWidget {
                           Get.to(() => UserEditPage(user: user));
                           break;
                         case 'reset_password':
-                          _resetPassword(user.username);
+                          _resetPassword(user.email);
                           break;
                         case 'delete':
                           _deleteUser(context, user.username);
@@ -172,9 +172,9 @@ class UserManagementPage extends StatelessWidget {
     }
   }
 
-  void _resetPassword(String username) async {
+  void _resetPassword(String email) async {
     try {
-      await authController.resetPassword(username);
+      await authController.resetPassword(email);
     } catch (e) {
       Get.snackbar(
         "Erreur lors de la réinitialisation",

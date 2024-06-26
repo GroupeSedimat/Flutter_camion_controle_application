@@ -167,6 +167,16 @@ class AuthController extends GetxController {
   }
 
   Future<void> resetPassword(String email) async {
+    print("Reset password for: $email");
+    if (email.isEmpty){
+      Get.snackbar(
+   "Erreur",
+   "l'adresse e-mail est vide.",
+   backgroundColor: Colors.red,
+   snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
     try {
       await auth.sendPasswordResetEmail(email: email);
       Get.snackbar(
