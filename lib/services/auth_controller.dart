@@ -56,36 +56,60 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> register(String email, String username, String dob, String password, String confirmPassword, String role) async {
-    try {
-      print('Password: $password, Confirm Password: $confirmPassword');
-      if (password != confirmPassword) {
-        throw "Les mots de passe ne correspondent pas";
-      }
-      if (role != 'user' && role != 'admin' && role != 'superadmin'){
-        throw "Role invalide";
-      }
-
-      await auth.createUserWithEmailAndPassword(email: email, password: password);
-
-      await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).set({
-        'username': username,
-        'email': email,
-        'dob': dob,
-        'role': role,
-        'isApproved': false,
-      });
-
-      Get.offAll(() => LoginPage());
-    } catch (e) {
-      Get.snackbar(
-        "Erreur lors de la création de compte",
-        e.toString(),
-        backgroundColor: Colors.red,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  Future<void> register(String email, String username, String password, String confirmPassword, String role) async {
+  try {
+    print('Password: $password, Confirm Password: $confirmPassword');
+    if (password != confirmPassword) {
+      throw "Les mots de passe ne correspondent pas";
     }
+
+    if (!isValidPassword(password)) {
+      throw "Le mot de passe doit contenir au moins 8 caractères, y compris une majuscule, une minuscule, un chiffre et un caractère spécial.";
+    }
+
+    if (role != 'user' && role != 'admin' && role != 'superadmin') {
+      throw "Role invalide";
+    }
+
+    await auth.createUserWithEmailAndPassword(email: email, password: password);
+
+    await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).set({
+      'username': username,
+      'email': email,
+      'role': role,
+      'isApproved': false,
+    });
+
+    Get.offAll(() => LoginPage());
+  } catch (e) {
+    Get.snackbar(
+      "Erreur lors de la création de compte",
+      e.toString(),
+      backgroundColor: Colors.red,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
+}
+//augmentation securité mot de passe pour inscription
+bool isValidPassword(String password) {
+  // La longueur du mot de passe doit être d'au moins 8 caractères
+  if (password.length < 8) return false;
+
+  // Doit contenir au moins une majuscule
+  if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
+
+  // Doit contenir au moins une minuscule
+  if (!RegExp(r'[a-z]').hasMatch(password)) return false;
+
+  // Doit contenir au moins un chiffre
+  if (!RegExp(r'\d').hasMatch(password)) return false;
+
+  // Doit contenir au moins un caractère spécial
+  if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) return false;
+
+  return true;
+}
+
 
   Future<void> login(String email, String password) async {
   try {
@@ -202,7 +226,7 @@ class AuthController extends GetxController {
     try {
       await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).update({
         'username': newUsername,
-        'dob': newDob,
+        //'dob': newDob,
         'email': newEmail,
       });
 
