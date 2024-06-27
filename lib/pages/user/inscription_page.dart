@@ -11,6 +11,8 @@ class InscriptionPage extends StatefulWidget {
 
 class _InscriptionPageState extends State<InscriptionPage> {
   late TextEditingController emailController;
+  late TextEditingController nameController;
+  late TextEditingController firstnameController;
   late TextEditingController passwordController;
   late TextEditingController usernameController;
   late TextEditingController confirmPasswordController;
@@ -26,6 +28,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
     emailController = TextEditingController();
     passwordController = TextEditingController();
     usernameController = TextEditingController();
+    nameController = TextEditingController();
+    firstnameController = TextEditingController();
     confirmPasswordController = TextEditingController();
     //dobController = TextEditingController();
   }
@@ -35,6 +39,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
     emailController.dispose();
     passwordController.dispose();
     usernameController.dispose();
+    nameController.dispose();
+    firstnameController.dispose();
     confirmPasswordController.dispose();
     //dobController.dispose();
     super.dispose();
@@ -96,6 +102,15 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     height: 20,
                   ),
                   buildTextField('Nom d\'utilisateur', Icons.person, usernameController),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  buildTextField('Nom', Icons.person, nameController),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  buildTextField('Prenom', Icons.person, firstnameController),
+
                   /*const SizedBox(
                     height: 20,
                   ),
@@ -163,6 +178,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 AuthController.instance.register(
                   emailController.text.trim(),
                   usernameController.text.trim(),
+                  nameController.text.trim(),
+                  firstnameController.text.trim(),
                   //dobController.text.trim(),
                   passwordController.text.trim(),
                   confirmPasswordController.text.trim(),

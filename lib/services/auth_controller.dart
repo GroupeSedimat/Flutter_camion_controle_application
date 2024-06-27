@@ -56,7 +56,7 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> register(String email, String username, String password, String confirmPassword, String role) async {
+  Future<void> register(String email, String username, String name, String firstname, String password, String confirmPassword, String role) async {
   try {
     print('Password: $password, Confirm Password: $confirmPassword');
     if (password != confirmPassword) {
@@ -75,6 +75,8 @@ class AuthController extends GetxController {
 
     await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).set({
       'username': username,
+      'name': name,
+      'firstname': firstname,
       'email': email,
       'role': role,
       'isApproved': false,

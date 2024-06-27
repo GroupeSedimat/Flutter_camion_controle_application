@@ -16,6 +16,8 @@ class UserEditPage extends StatefulWidget {
 
 class _UserEditPageState extends State<UserEditPage> {
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   late String _selectedRole;
 
@@ -23,6 +25,8 @@ class _UserEditPageState extends State<UserEditPage> {
   void initState() {
     super.initState();
     _usernameController.text = widget.user.username;
+    _nameController.text = widget.user.username;
+    _firstnameController.text = widget.user.username;
     _emailController.text = widget.user.email;
     _selectedRole = widget.user.role.isNotEmpty ? widget.user.role : UserRole.user.toString().split('.').last; // Default role
 
@@ -32,6 +36,8 @@ class _UserEditPageState extends State<UserEditPage> {
   @override
   void dispose() {
     _usernameController.dispose();
+    _nameController.dispose();
+    _firstnameController.dispose();
     _emailController.dispose();
     super.dispose();
   }
@@ -57,6 +63,14 @@ class _UserEditPageState extends State<UserEditPage> {
             TextField(
               controller: _usernameController,
               decoration: InputDecoration(labelText: 'Nom d\'utilisateur'),
+            ),
+             TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Nom'),
+            ),
+             TextField(
+              controller: _firstnameController,
+              decoration: InputDecoration(labelText: 'Prenom'),
             ),
             TextField(
               controller: _emailController,
@@ -100,6 +114,8 @@ class _UserEditPageState extends State<UserEditPage> {
             .doc(userDoc.docs[0].id)
             .update({
           'username': _usernameController.text,
+          'name': _nameController.text,
+          'firstname': _firstnameController.text,
           'email': _emailController.text,
           'role': _selectedRole, // Update the role
         });
