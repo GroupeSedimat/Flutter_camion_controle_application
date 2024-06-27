@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
-import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
+import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
+import 'package:flutter_application_1/pages/pdf/pdf_show_list.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get.dart';
@@ -96,6 +97,42 @@ class MenuWidget extends StatelessWidget {
           ));
           },
           ), */
+
+      // ListTile(
+      //   leading: const Icon(Icons.data_exploration, color: Colors.purple),
+      //   title: const Text('Get datas'),
+      //   onTap: () {
+      //     Navigator.pop(context);
+      //     Get.to(() => const LoadingData());
+      //   },
+      // ),
+      ListTile(
+        leading: const Icon(Icons.view_list, color: Colors.purple),
+        title: const Text('Go to checklist'),
+        onTap: () {
+          Navigator.pop(context);
+          Get.to(() => const CheckList());
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        title: const Text('Go to PDF list'),
+        onTap: () {
+          Navigator.pop(context);
+          Get.to(() => const PDFShowList());
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        title: const Text('Go to admins PDF list new'),
+        onTap: () {
+          Navigator.pop(context);
+          Get.to(() => AdminPdfListView());
+        },
+      ),
+
+      const Divider(color: Colors.purple),
+
       ListTile(
         leading: const Icon(Icons.edit, color: Colors.purple),
         title: const Text('Modifier vos informations'),
@@ -109,7 +146,7 @@ class MenuWidget extends StatelessWidget {
         title: const Text('Messagerie'),
         onTap: () {
           Navigator.pop(context);
-          //Get.to(() => ModifyProfilePage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
+          //Get.to(() => ModifyProfilePage());
         },
       ),
       ListTile(
@@ -117,38 +154,19 @@ class MenuWidget extends StatelessWidget {
         title: const Text('Accéder au shop'),
         onTap: () {
           Navigator.pop(context);
-          //Get.to(() => ModifyProfilePage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
+          //Get.to(() => ModifyProfilePage());
         },
       ),
-
       ListTile(
         leading: const Icon(Icons.lock, color: Colors.purple),
         title: const Text('Modifier mot de passe'),
         onTap: () {
           Navigator.pop(context);
-          Get.to(() => ResetPasswordPage());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
+          Get.to(() => ResetPasswordPage());
         },
       ),
 
-      const Divider(color: Colors.purple),
 
-      ListTile(
-        leading: const Icon(Icons.data_exploration, color: Colors.purple),
-        title: const Text('Get datas'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => const LoadingData());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
-        },
-      ),
-
-      ListTile(
-        leading: const Icon(Icons.view_list, color: Colors.purple),
-        title: const Text('Go to checklist'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => const CheckList());  // Pousser une nouvelle route vers la page de réinitialisation de mot de passe
-        },
-      ),
     ]
   );
 }

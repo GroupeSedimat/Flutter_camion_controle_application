@@ -26,6 +26,12 @@ class DatabaseBlueprintsService{
     return _blueprintRef.doc(blueprintID).snapshots();
   }
 
+  // Stream<QuerySnapshot> getBlueprintsOnList(int nrOfList) {
+  //   return _blueprintRef
+  //       .where('nrOfList', isEqualTo: nrOfList)
+  //       .snapshots();
+  // }
+
   void addBlueprint(Blueprint blueprint) async {
     _blueprintRef.add(blueprint);
   }

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
-import 'package:flutter_application_1/services/database_image_service.dart';
-import 'package:flutter_application_1/services/database_tasks_service.dart';
+import 'package:flutter_application_1/services/check_list/database_image_service.dart';
+import 'package:flutter_application_1/services/check_list/database_tasks_service.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ValidateTask extends StatefulWidget {

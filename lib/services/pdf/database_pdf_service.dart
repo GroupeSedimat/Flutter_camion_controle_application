@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 const String PDF_STORAGE_REF = "pdf";
 
@@ -11,6 +12,10 @@ class DatabasePDFService{
 
   DatabasePDFService(){
     _referencePdf = _fireReference.child(PDF_STORAGE_REF);
+  }
+
+  Reference firePdfReference(){
+    return _referencePdf;
   }
 
   Future<String> addPdfToFirebase(String path, String fileName) async {
@@ -50,8 +55,9 @@ class DatabasePDFService{
     }
   }
 
-  Future<Map<String, String>> getUserListOfPDF(String company, String userID) async {
+  Future<Map<String, String>> getUserListOfPDF(String company) async {
     Map<String, String> pdfList = HashMap();
+    String userID = UserService().userID!;
     try {
       final userRef = _referencePdf.child(company).child(userID);
       final userSnapshot = await userRef.listAll();
@@ -61,7 +67,6 @@ class DatabasePDFService{
           String downloadURL = await pdfRef.getDownloadURL();
           pdfList[pdfRef.name] = downloadURL;
       }
-      print(pdfList);
       return pdfList;
 
     } catch (error) {
