@@ -84,7 +84,7 @@ class _LoginPagestate  extends State<LoginPage> {
                     child: TextField(
                       controller: emailController,
                       decoration: InputDecoration(
-                        hintText: 'Entrez votre email ou votre nom d/utilisateur', 
+                        hintText: 'Entrez votre email', 
                         prefixIcon: const Icon(Icons.email, color:Colors.purpleAccent),
                         hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), 
                         focusedBorder: OutlineInputBorder(
