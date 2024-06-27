@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api, use_super_parameters, unused_local_variable
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 
 class InscriptionPage extends StatefulWidget {
@@ -15,7 +14,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
   late TextEditingController passwordController;
   late TextEditingController usernameController;
   late TextEditingController confirmPasswordController;
-  late TextEditingController dobController;
+  //late TextEditingController dobController;
   String selectedRole = 'user';
 
   bool obscurePassword = true;
@@ -28,7 +27,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
     passwordController = TextEditingController();
     usernameController = TextEditingController();
     confirmPasswordController = TextEditingController();
-    dobController = TextEditingController();
+    //dobController = TextEditingController();
   }
 
   @override
@@ -37,7 +36,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
     passwordController.dispose();
     usernameController.dispose();
     confirmPasswordController.dispose();
-    dobController.dispose();
+    //dobController.dispose();
     super.dispose();
   }
 
@@ -97,7 +96,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     height: 20,
                   ),
                   buildTextField('Nom d\'utilisateur', Icons.person, usernameController),
-                  const SizedBox(
+                  /*const SizedBox(
                     height: 20,
                   ),
                   GestureDetector(
@@ -116,7 +115,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     child: AbsorbPointer(
                       child: buildTextField('Date de naissance', Icons.calendar_today, dobController),
                     ),
-                  ),
+                  ),*/
                   const SizedBox(
                     height: 20,
                   ),
@@ -164,7 +163,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 AuthController.instance.register(
                   emailController.text.trim(),
                   usernameController.text.trim(),
-                  dobController.text.trim(),
+                  //dobController.text.trim(),
                   passwordController.text.trim(),
                   confirmPasswordController.text.trim(),
                   selectedRole,

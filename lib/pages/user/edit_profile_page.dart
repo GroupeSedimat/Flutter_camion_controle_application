@@ -11,7 +11,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  DateTime selectedDate = DateTime.now();
+  //DateTime selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
                 labelText: 'Nouveau nom d\'utilisateur',
               ),
             ),
-            SizedBox(height: 20),
+            /*SizedBox(height: 20),
             TextFormField(
               controller: dobController,
               readOnly: true,
@@ -51,7 +51,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
                   });
                 }
               },
-            ),
+            ),*/
             SizedBox(height: 20),
             TextField(
               controller: emailController,
