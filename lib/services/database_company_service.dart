@@ -23,13 +23,22 @@ class DatabaseCompanyService{
   Future<Map<String, Company>> getAllCompanies() async {
     try {
       final querySnapshot = await _companyRef.get();
-
       List companySnapshotList = querySnapshot.docs;
+
       Map<String, Company> companies = HashMap();
       for (var companySnapshot in companySnapshotList){
         companies.addAll({companySnapshot.id: companySnapshot.data()});
       }
-      return companies;
+      var sortedKeys = companies.keys.toList(growable: false)
+        ..sort((k1, k2) => companies[k1]!.name.compareTo(companies[k2]!.name));
+
+      LinkedHashMap<String, Company> sortedCompanies = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => companies[k]!,
+      );
+
+      return sortedCompanies;
 
     } catch (e) {
       print("Error getting companies: $e");
@@ -55,6 +64,7 @@ class DatabaseCompanyService{
       return Company(name: '', description: '', sirene: '', siret: '', address: '', responsible: '', admin: '', tel: '', email: '', logo: '');
     }
   }
+
   Future<String> getCompanyIDByName(String name) async {
     try {
       final querySnapshot = await _firestore
@@ -71,6 +81,18 @@ class DatabaseCompanyService{
       // Gérez l’erreur
       print("Error retrieving company ID: $error");
       return '';
+    }
+  }
+
+  Future<Company> getCompanyByID(String id) async {
+    try {
+      final querySnapshot = await _companyRef.doc(id).get();
+      return querySnapshot.data() as Company;
+
+    } catch (error) {
+      // Gérez l’erreur
+      print("Error retrieving company ID: $error");
+      return Company(name: 'Error', description: '$error', sirene: '', siret: '', address: '', responsible: '', admin: '', tel: '', email: '', logo: '');
     }
   }
 

@@ -23,14 +23,6 @@ class _PDFShowListState extends State<PDFShowList> {
 
   Widget body(BuildContext context) {
     DatabasePDFService databasePDFService = DatabasePDFService();
-    double w = MediaQuery
-        .of(context)
-        .size
-        .width;
-    double h = MediaQuery
-        .of(context)
-        .size
-        .height;
     return FutureBuilder<MyUser>(
         future: UserService().getCurrentUserData(),
         builder: (context, snapshot) {
@@ -56,21 +48,6 @@ class _PDFShowListState extends State<PDFShowList> {
                         final entry = pdfList.entries.toList()[index];
                         final fileName = entry.key;
                         final url = entry.value;
-                        // return Container(
-                        //   padding: EdgeInsets.all(8.0),
-                        //   margin: EdgeInsets.only(bottom: 20.0),
-                        //   height: 150,
-                        //   color: Colors.amber,
-                        //   child: Center(child:
-                        //   Text(
-                        //     "File Name: $fileName, Download URL: $url",
-                        //     style: const TextStyle(
-                        //       color: Colors.black,
-                        //       fontSize: 20,
-                        //     ),
-                        //   )),
-                        // );
-                        //
                         return PDFShowTemplate(fileName: fileName, url: url, userData: userData,);
                       },
                     );

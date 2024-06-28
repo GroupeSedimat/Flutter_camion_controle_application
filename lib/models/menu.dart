@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
+import 'package:flutter_application_1/pages/company/company_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_list.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
@@ -128,6 +129,14 @@ class MenuWidget extends StatelessWidget {
         onTap: () {
           Navigator.pop(context);
           Get.to(() => AdminPdfListView());
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        title: const Text('Go to admins Company list'),
+        onTap: () {
+          Navigator.pop(context);
+          Get.to(() => CompanyList());
         },
       ),
 

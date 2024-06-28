@@ -22,8 +22,9 @@ class _PDFViewerPageState extends State<PDFViewerPage> {
   }
 
   Future<void> downloadFile() async {
-    final pdfDownload = PdfDownload(name: "temp", url: widget.url);
+
     try {
+      PdfDownload pdfDownload = PdfDownload(name: "temp", url: widget.url);
       await pdfDownload.downloadFile();
       setState(() {
         localPath = pdfDownload.localPath;

@@ -59,7 +59,8 @@ class _CheckListState extends State<CheckList> {
     );
   }
 
-  void showBlueprintModal({
+  void
+  showBlueprintModal({
     required int nrOfList,
     required int nrEntryPosition,
     Blueprint? blueprint,
@@ -277,10 +278,10 @@ class _CheckListState extends State<CheckList> {
                         heroTag: "makePDFHero",
                         onPressed: () async {
                           MyUser user = await userService.getCurrentUserData();
-                          String company = user.company;
+                          String companyID = user.company;
                           Map<String, TaskChecklist> tasks = await validatedTask;
                           final data = await pdfService.createInvoice(tasks , sortedBlueprints, list);
-                          await pdfService.savePdfFile(company, data);
+                          await pdfService.savePdfFile(companyID, data);
                           // final data = await pdfService.createInvoice();
                           // await pdfService.savePdfFile(company, data);
                         },

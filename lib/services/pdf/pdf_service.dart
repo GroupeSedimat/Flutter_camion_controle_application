@@ -5,8 +5,10 @@ import 'dart:typed_data';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
+import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/pdf/database_pdf_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +21,7 @@ class PdfService {
   DatabasePDFService databasePDFService = DatabasePDFService();
   AuthController authController = AuthController.instance;
   UserService userService = UserService();
+  DatabaseCompanyService companyService = DatabaseCompanyService();
 
   Future<pw.Font> loadFont() async {
     final fontData = await rootBundle.load("assets/fonts/roboto/Roboto-Regular.ttf");
@@ -29,6 +32,7 @@ class PdfService {
   Future<Uint8List> createInvoice(Map<String, TaskChecklist> tasks, Map<String, Blueprint> sortedBlueprints, ListOfLists list) async {
     String? userID = authController.getCurrentUserUID();
     MyUser user = await userService.getUserData(userID!);
+    Company company = await companyService.getCompanyByID(user.company);
     final pdf = pw.Document();
     final font = await loadFont();
     Map<Blueprint,TaskChecklist> blueprintTaskList = HashMap();
@@ -51,7 +55,7 @@ class PdfService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   userDatas(user, font),
-                  companyDatas(user, font)
+                  companyDatas(company, font)
                 ],
               ),
               pw.SizedBox(height: 20,),
@@ -116,13 +120,12 @@ class PdfService {
     );
   }
 
-  pw.Column companyDatas(MyUser user, pw.Font font) {
+  pw.Column companyDatas(Company company, pw.Font font) {
     return pw.Column(
                   children: [
-                    pw.Text("Company ${user.company}", style: pw.TextStyle(font: font)),
-                    pw.Text("Company image", style: pw.TextStyle(font: font)),
-                    pw.Text("Company adress", style: pw.TextStyle(font: font)),
-                    pw.Text("Company contact", style: pw.TextStyle(font: font)),
+                    pw.Text("Company ${company.name}", style: pw.TextStyle(font: font)),
+                    pw.Text("Sirene ${company.sirene}", style: pw.TextStyle(font: font)),
+                    pw.Text("Tel ${company.tel}", style: pw.TextStyle(font: font)),
                   ]
                 );
   }
@@ -135,7 +138,6 @@ class PdfService {
                   children: [
                     pw.Text("User ${user.username}", style: pw.TextStyle(font: font)),
                     pw.Text("Role ${user.role}", style: pw.TextStyle(font: font)),
-                    pw.Text("In company ${user.company}", style: pw.TextStyle(font: font)),
                     pw.Text("Created $formattedTime", style: pw.TextStyle(font: font)),
                   ]
                 );
@@ -159,14 +161,17 @@ class PdfService {
     return pdf.save();
   }
 
-  Future<void> savePdfFile(String company, Uint8List data) async {
+  Future<void> savePdfFile(String companyID, Uint8List data) async {
     int time = DateTime.now().millisecondsSinceEpoch;
     String? userID = authController.getCurrentUserUID();
-    String fileName = "$company/$userID/${time.toString()}";
+    MyUser user = await userService.getUserData(userID!);
+    Company company = await companyService.getCompanyByID(companyID);
+    String fileName = "${company.name}/${user.username}/${time.toString()}";
     String documentsPath = "/storage/emulated/0/Documents";
     String filePath = "$documentsPath/$fileName.pdf";
+    String filePathDatabase = "${user.company}/$userID/${time.toString()}";
 
-    final directory = Directory("$documentsPath/$company/$userID");
+    final directory = Directory("$documentsPath/${company.name}/${user.username}");
     if (!(await directory.exists())) {
       await directory.create(recursive: true);
     }
@@ -174,7 +179,7 @@ class PdfService {
     final file = File(filePath);
     await file.writeAsBytes(data);
 
-    await databasePDFService.addPdfToFirebase(filePath, fileName);
+    await databasePDFService.addPdfToFirebase(filePath, filePathDatabase);
     await OpenDocument.openDocument(filePath: filePath);
   }
 

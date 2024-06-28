@@ -1,6 +1,9 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api, use_super_parameters, unused_local_variable
 
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/company/company.dart';
+import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 
@@ -18,7 +21,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
   late TextEditingController confirmPasswordController;
   late TextEditingController dobController;
   String selectedRole = 'user';
-  String selectedCompany = 'porsche';
+  String? selectedCompany;
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
@@ -45,6 +48,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
+    Future<Map<String, Company>> allCompanies = databaseCompanyService.getAllCompanies();
     List<String> images = ["google.png", "facebook.png", "twitter.png"];
 
     double w = MediaQuery.of(context).size.width;
@@ -154,31 +160,46 @@ class _InscriptionPageState extends State<InscriptionPage> {
                       });
                     },
                   ),
-                  DropdownButtonFormField<String>(
-                    // value: selectedCompany,
-                    hint: Text('company'),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: const BorderSide(color: Colors.white, width: 1.0),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: const BorderSide(color: Colors.white, width: 1.0),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    items: [
-                      DropdownMenuItem(value: 'mercedes', child: Text('Mercedes')),
-                      DropdownMenuItem(value: 'bmw', child: Text('BMW')),
-                      DropdownMenuItem(value: 'audi', child: Text('Audi')),
-                      DropdownMenuItem(value: 'porsche', child: Text('Porsche')),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedCompany = value!;
-                      });
+                  FutureBuilder<Map<String, Company>>(
+                    future: databaseCompanyService.getAllCompanies(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No companies found.');
+                      } else {
+                        Map<String, Company> companies = snapshot.data!;
+                        List<DropdownMenuItem<String>> companyItems = companies.entries
+                            .map((entry) => DropdownMenuItem(
+                          value: entry.key,
+                          child: Text(entry.value.name),
+                        ))
+                            .toList();
+                        return DropdownButtonFormField<String>(
+                          value: selectedCompany,
+                          hint: const Text('Select Company'),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                          items: companyItems,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCompany = value!;
+                            });
+                          },
+                        );
+                      }
                     },
                   ),
                 ],
@@ -196,7 +217,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   passwordController.text.trim(),
                   confirmPasswordController.text.trim(),
                   selectedRole,
-                  selectedCompany,
+                  selectedCompany!,
                 );
               },
               child: Container(

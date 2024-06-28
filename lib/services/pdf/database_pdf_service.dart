@@ -29,10 +29,10 @@ class DatabasePDFService{
     }
   }
 
-  Future<Map<String, String>> getCompanyListOfPDF(String company) async {
+  Future<Map<String, String>> getCompanyListOfPDF(String companyID) async {
     Map<String, String> pdfList = HashMap();
     try {
-      final companyRef = _referencePdf.child(company);
+      final companyRef = _referencePdf.child(companyID);
       final companySnapshot = await companyRef.listAll();
 
       // Iterate through the subfolders (prefixes)
@@ -50,22 +50,22 @@ class DatabasePDFService{
 
     } catch (error) {
       // Gérez l’erreur
-      print("Error retrieving $company pdf list: $error");
+      print("Error retrieving $companyID pdf list: $error");
       return pdfList;
     }
   }
 
-  Future<Map<String, String>> getUserListOfPDF(String company) async {
+  Future<Map<String, String>> getUserListOfPDF(String companyID) async {
     Map<String, String> pdfList = HashMap();
     String userID = UserService().userID!;
     try {
-      final userRef = _referencePdf.child(company).child(userID);
+      final userRef = _referencePdf.child(companyID).child(userID);
       final userSnapshot = await userRef.listAll();
 
-        // Iterate through the files (items) in each subfolder
-        for (var pdfRef in userSnapshot.items) {
-          String downloadURL = await pdfRef.getDownloadURL();
-          pdfList[pdfRef.name] = downloadURL;
+      // Iterate through the files (items) in each subfolder
+      for (var pdfRef in userSnapshot.items) {
+        String downloadURL = await pdfRef.getDownloadURL();
+        pdfList[pdfRef.name] = downloadURL;
       }
       return pdfList;
 
