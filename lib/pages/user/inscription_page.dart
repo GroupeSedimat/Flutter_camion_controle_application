@@ -79,15 +79,16 @@ class _InscriptionPageState extends State<InscriptionPage> {
               child: Column(
                 children: [
                   SizedBox(height: h * 0.12),
-                  const CircleAvatar(
+                 /*const CircleAvatar(
                     radius: 100,
                     backgroundImage: AssetImage(
                       "assets/images/836.jpg",
                     ),
-                  )
+                  )*/
                 ],
               ),
             ),
+            
             Container(
               margin: const EdgeInsets.only(left: 20, right: 20),
               width: w,
@@ -191,9 +192,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 height: 50,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
-                    image: const DecorationImage(
-                        image: AssetImage("assets/images/purple-wallpaper.jpg"),
-                        fit: BoxFit.cover)),
+                    color: Colors.purple[300],
+                    ),
                 child: const Center(
                   child: Text(
                     "S'inscrire",
