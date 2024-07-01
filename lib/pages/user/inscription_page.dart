@@ -57,7 +57,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
     double h = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 231, 208, 236),
+      backgroundColor: Color.fromARGB(255, 236, 221, 239),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -74,7 +74,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
               width: w,
               height: h * 0.3,
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 233, 210, 237),
+                color: Color.fromARGB(255, 214, 198, 216),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(50),
                   bottomRight: Radius.circular(50),
