@@ -33,6 +33,10 @@
     <string>We need access to your camera to allow you to take photos.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>We need access to your microphone to allow you to record audio.</string>
+    <key>UIFileSharingEnabled</key>
+<true/>
+<key>LSSupportsOpeningDocumentsInPlace</key>
+<true/>
 
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
