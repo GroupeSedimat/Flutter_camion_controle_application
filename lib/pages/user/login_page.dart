@@ -1,11 +1,9 @@
 // ignore_for_file: use_super_parameters, unnecessary_import, prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/pages/user/inscription_page.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'reset_password_page.dart';
 
@@ -86,7 +84,7 @@ class _LoginPagestate  extends State<LoginPage> {
                     child: TextField(
                       controller: emailController,
                       decoration: InputDecoration(
-                        hintText: 'Entrez votre email ', 
+                        hintText: 'Entrez votre email', 
                         prefixIcon: const Icon(Icons.email, color:Colors.purpleAccent),
                         hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)), 
                         focusedBorder: OutlineInputBorder(
@@ -203,12 +201,13 @@ class _LoginPagestate  extends State<LoginPage> {
             height: 50,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
-              image: const DecorationImage(
+              color: Colors.purple[300],
+              /*image: const DecorationImage(
                 image: AssetImage(
                   "assets/images/purple-wallpaper.jpg"
                 ),
                 fit: BoxFit.cover
-              )
+              )*/
             ),
           
             

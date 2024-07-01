@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors_in_immutables, avoid_print
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';

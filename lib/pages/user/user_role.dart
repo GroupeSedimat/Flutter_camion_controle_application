@@ -1,7 +1,9 @@
 // user_role.dart
-
 enum UserRole {
   admin,
-  user
+  user,
+  superadmin,
+  // ignore: constant_identifier_names
+  truck_manager
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 
+// ignore: must_be_immutable
 class BlueprintTemplate extends StatelessWidget{
 
   final Blueprint blueprint;
@@ -8,7 +9,7 @@ class BlueprintTemplate extends StatelessWidget{
   final Function edit;
   final Function validate;
   bool? isDone;
-  BlueprintTemplate({ required this.blueprint, required this.delete, required this.edit, required this.validate, this.isDone });
+  BlueprintTemplate({super.key,  required this.blueprint, required this.delete, required this.edit, required this.validate, this.isDone });
 
   @override
   Widget build(BuildContext context){

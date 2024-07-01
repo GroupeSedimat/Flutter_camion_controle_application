@@ -1,5 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print, prefer_const_constructors
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -45,7 +45,7 @@ class _CheckListState extends State<CheckList> {
       length: listOfLists.length,
       child: BasePage(
         appBar: appBar(),
-        body: body(),
+        body: body(), username: '', role: '',
       ),
     );
   }
@@ -168,8 +168,21 @@ class _CheckListState extends State<CheckList> {
     return StreamBuilder(
         stream: databaseService.getBlueprints(),
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: const CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData || snapshot.data == null) {
+            return Center(child: Text("No data found"));
+          }
+
           String? userUID = authController.getCurrentUserUID();
-          Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID!);
+          if (userUID == null) {
+            return Center(child: Text("User not logged in"));
+          }
+          Future<Map<String, TaskChecklist>> validatedTask = databaseService.getAllTasks(userUID);
           List blueprintsSnapshotList = snapshot.data?.docs ?? [];
           Map<String, Blueprint> blueprints = HashMap();
           Map<String, Blueprint> sortedBlueprints = HashMap();
@@ -224,14 +237,38 @@ class _CheckListState extends State<CheckList> {
                                   return BlueprintTemplate(
                                     isDone: isDone,
                                     blueprint: blueprint,
-                                    delete: (){
-                                      // Find the key corresponding to the blueprint
-                                      String key = sortedBlueprints.keys.firstWhere(
-                                              (k) => sortedBlueprints[k] == blueprint
-                                      );
-                                      // If key found, delete blueprint using key
-                                      databaseService.deleteBlueprint(key);
-                                    },
+                                   delete: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text("Confirmer la suppression"),
+                                              content: Text("Êtes-vous sûr de vouloir supprimer ce blueprint ?"),
+                                              actions: [
+                                                TextButton(
+                                                  child: Text("Non"),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                                                  },
+                                                ),
+                                                TextButton(
+                                                  child: Text("Oui"),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                                                    // Find the key corresponding to the blueprint
+                                                    String key = sortedBlueprints.keys.firstWhere(
+                                                      (k) => sortedBlueprints[k] == blueprint
+                                                    );
+                                                    // If key found, delete blueprint using key
+                                                    databaseService.deleteBlueprint(key);
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+
                                     validate: (){
                                       showTask(blueprint);
                                     },
