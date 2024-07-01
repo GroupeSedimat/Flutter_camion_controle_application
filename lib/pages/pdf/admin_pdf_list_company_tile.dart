@@ -4,8 +4,9 @@ import 'package:flutter_application_1/pages/pdf/admin_pdf_list_user_tile.dart';
 
 class CompanyTile extends StatelessWidget {
   final Reference companyRef;
+  final String companyName;
 
-  CompanyTile({required this.companyRef});
+  CompanyTile({required this.companyRef, required this.companyName});
 
   @override
   Widget build(BuildContext context) {
@@ -14,25 +15,25 @@ class CompanyTile extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return ListTile(
-            title: Text(companyRef.name),
+            title: Text(companyName),
             subtitle: Text("Loading users..."),
           );
         } else if (snapshot.hasError) {
           return ListTile(
-            title: Text(companyRef.name),
+            title: Text(companyName),
             subtitle: Text("Error: ${snapshot.error}"),
           );
         } else if (snapshot.hasData) {
           final userList = snapshot.data!.prefixes;
           return ExpansionTile(
-            title: Text(companyRef.name),
+            title: Text(companyName),
             children: userList.map((userRef) {
               return UserTile(userRef: userRef);
             }).toList(),
           );
         } else {
           return ListTile(
-            title: Text(companyRef.name),
+            title: Text(companyName),
             subtitle: Text("No users available"),
           );
         }

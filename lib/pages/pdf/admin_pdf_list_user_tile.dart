@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_download.dart';
-import 'package:flutter_application_1/pages/pdf/pdf_view.dart';
+import 'package:flutter_application_1/pages/pdf/pdf_open.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:intl/intl.dart';
 
@@ -74,13 +74,9 @@ class UserTile extends StatelessWidget {
                               alignment: WrapAlignment.spaceEvenly,
                               children: [
                                 TextButton.icon(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PDFViewerPage(url: urlSnapshot.data!),
-                                      ),
-                                    );
+                                  onPressed: () async {
+                                    PDFOpen open = PDFOpen(url: urlSnapshot.data!);
+                                    await open.openPDF();
                                   },
                                   label: const Text('Open PDF'),
                                   icon: const Icon(
