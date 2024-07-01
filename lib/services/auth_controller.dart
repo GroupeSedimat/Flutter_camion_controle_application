@@ -15,8 +15,8 @@ class AuthController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
   late String _username;
   late String _role;
-  
-  
+
+
   @override
   void onReady() {
     super.onReady();
@@ -39,7 +39,7 @@ class AuthController extends GetxController {
         if (documentSnapshot.exists) {
           _username = documentSnapshot.get('username');
           _role = documentSnapshot.get('role');
-          
+
           print( "username : $_username, role: $_role");
           //Get.offAll(() => WelcomePage());
            if (_role == 'superadmin') {
@@ -56,7 +56,7 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> register(String email, String username, String name, String firstname, String password, String confirmPassword, String role) async {
+  Future<void> register(String email, String username, String name, String firstname, String password, String confirmPassword, String role, String company) async {
   try {
     print('Password: $password, Confirm Password: $confirmPassword');
     if (password != confirmPassword) {
@@ -79,6 +79,7 @@ class AuthController extends GetxController {
       'firstname': firstname,
       'email': email,
       'role': role,
+      'company': company,
       'isApproved': false,
     });
 
@@ -115,7 +116,7 @@ bool isValidPassword(String password) {
 
   Future<void> login(String email, String password) async {
   try {
-    
+
     UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
     DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).get();
     var currentUser = auth.currentUser;
@@ -131,7 +132,7 @@ bool isValidPassword(String password) {
     }
 
     if (userDoc.exists) {
-      bool isApproved = userDoc.get('isApproved') ?? false; 
+      bool isApproved = userDoc.get('isApproved') ?? false;
 
       if (isApproved) {
         Get.snackbar(
@@ -180,11 +181,11 @@ bool isValidPassword(String password) {
             Get.snackbar(
                 "Erreur",
                 "Votre compte est en attente de validation par un administrateur.",
-                backgroundColor: Colors.yellow, 
+                backgroundColor: Colors.yellow,
                 snackPosition: SnackPosition.BOTTOM,
             );
-  } 
-  } 
+  }
+  }
 }
 
 
@@ -249,7 +250,7 @@ bool isValidPassword(String password) {
   }
 
   String? getCurrentUserUID() {
-    return _user.value?.uid; 
+    return _user.value?.uid;
   }
 
   String getUserName(){
@@ -259,7 +260,7 @@ bool isValidPassword(String password) {
   String getRole(){
     return _role;
   }
-  
+
 Future<bool> isSuperAdmin(String userId) async {
   try {
     var userDoc = await FirebaseFirestore.instance

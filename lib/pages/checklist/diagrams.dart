@@ -36,7 +36,7 @@ class _DiagramsState extends State<Diagrams> {
   Widget build(BuildContext context) {
     return loading ? const Loading() : BasePage(
       appBar: appBar(),
-      body: body(context), username: '', role: '',
+      body: body(context),
     );
   }
 

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors 
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
 import 'package:flutter_application_1/pages/wrapper.dart';
@@ -10,9 +10,6 @@ import 'package:get/get.dart';
 import 'pages/splash_screen.dart';
 
 void main() async {
-  //WidgetsFlutterBinding.ensureInitialized();
-  //await Firebase.initializeApp();
-  //Get.put(AuthController());
   runApp(MyApp());
 } 
 

@@ -39,4 +39,9 @@ class UserService{
     return _userRef.doc(userID).snapshots();
   }
 
+  Future<MyUser> getUserData(String userID) async {
+    DocumentSnapshot doc = await _userRef.doc(userID).get();
+    return doc.data() as MyUser;
+  }
+
 }

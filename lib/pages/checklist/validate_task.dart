@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
-import 'package:flutter_application_1/services/database_service.dart';
+import 'package:flutter_application_1/services/check_list/database_image_service.dart';
+import 'package:flutter_application_1/services/check_list/database_tasks_service.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ValidateTask extends StatefulWidget {
 
-  DatabaseService databaseService;
+  DatabaseTasksService databaseTasksService;
   Blueprint blueprint;
   TaskChecklist validate;
   String keyId;
@@ -18,7 +19,7 @@ class ValidateTask extends StatefulWidget {
 
   ValidateTask({
     super.key,
-    required this.databaseService,
+    required this.databaseTasksService,
     required this.blueprint,
     required this.validate,
     required this.keyId,
@@ -84,6 +85,8 @@ class ValidateTaskState extends State<ValidateTask> {
     Size screenSize = MediaQuery.of(context).size;
     screenWidth = screenSize.width;
     screenHeight = screenSize.height;
+    DatabaseImageService databaseImageService = DatabaseImageService();
+
     return Form(
         key: _formKey,
         child: ListView(
@@ -254,8 +257,9 @@ class ValidateTaskState extends State<ValidateTask> {
                   onPressed: () async {
                     validationDate = Timestamp.now();
                     if (imageGalery != null) {
+                      print(imageGalery);
                       try {
-                        String photoFilePath = await widget.databaseService.addImageToFirebase(imageGalery!.path);
+                        String photoFilePath = await databaseImageService.addImageToFirebase(imageGalery!.path);
                         if (mounted) {
                           setState(() {
                             this.photoFilePath = photoFilePath;
@@ -277,9 +281,9 @@ class ValidateTaskState extends State<ValidateTask> {
                         userId: widget.userUID
                     );
                     if(widget.keyId == ""){
-                      widget.databaseService.addTask(task);
+                      widget.databaseTasksService.addTask(task);
                     }else{
-                      widget.databaseService.updateTask(widget.keyId, task);
+                      widget.databaseTasksService.updateTask(widget.keyId, task);
                     }
                     if (mounted) {
                       Navigator.pop(context);

@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors_in_immutables
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/menu.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -6,10 +5,7 @@ import 'package:flutter_application_1/services/auth_controller.dart';
 class BasePage extends StatelessWidget {
   final Widget body;
   final PreferredSizeWidget? appBar;
-  final String username;
-  final String role;
-
-  BasePage({super.key, required this.body, this.appBar, required this.username, required this.role});
+  BasePage({super.key, required this.body, this.appBar});
 
 
   @override
@@ -33,7 +29,7 @@ class BasePage extends StatelessWidget {
           ),
         ],
       ),
-      drawer: MenuWidget(username: username, role: role,),
+      drawer: MenuWidget(),
       body: body,
     );
   }
