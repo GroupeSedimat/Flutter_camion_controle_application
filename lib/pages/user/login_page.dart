@@ -201,12 +201,13 @@ class _LoginPagestate  extends State<LoginPage> {
             height: 50,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
-              image: const DecorationImage(
+              color: Colors.purple[300],
+              /*image: const DecorationImage(
                 image: AssetImage(
                   "assets/images/purple-wallpaper.jpg"
                 ),
                 fit: BoxFit.cover
-              )
+              )*/
             ),
           
             

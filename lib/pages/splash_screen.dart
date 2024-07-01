@@ -1,7 +1,10 @@
 // ignore_for_file: use_super_parameters, prefer_const_constructors, unused_import, library_private_types_in_public_api, avoid_print
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/pages/user/login_page.dart';
-import 'package:firebase_core/firebase_core.dart'; // Importez Firebase Core
+import 'package:flutter_application_1/services/auth_controller.dart'; 
+import 'package:get/get.dart';
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -12,23 +15,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool firebaseInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    initializeFirebase();
-  }
-
-  void initializeFirebase() async {
-    try {
-      await Firebase.initializeApp();
-      setState(() {
-        firebaseInitialized = true;
-      });
-    } catch (e) {
-      print('Error initializing Firebase: $e');
-    }
-  }
+  bool firebaseError = false;
 
   @override
   Widget build(BuildContext context) {
@@ -36,38 +23,126 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/image9.jpg'), 
+            image: AssetImage('assets/images/truck.jpg'), 
             fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop), // Opacité réduite
+            colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.dstATop), // Opacité réduite
           ),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // Texte d'indication
+              // Ajout du logo
+              Image.asset(
+                'assets/images/keybas_logo.png', // Assurez-vous que le chemin est correct
+                height: 100, // Ajustez la taille du logo selon vos besoins
+                
+              ),
+              SizedBox(height: 20),
+              
+              // Ajout du texte
               Text(
-                'Bienvenue sur Mobility corner  application',
+                'Bienvenue sur notre application ',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 30,
                   fontWeight: FontWeight.bold,
-                  color: Colors.purple, // Couleur du texte
+                  color: Colors.white, 
+                  // Couleur du texte
+                  shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
+                  offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
+                  blurRadius: 5, // Rayon du flou de l'ombre
                 ),
-              ),
-              SizedBox(height: 20), // Espacement entre le texte et le bouton
+  ],
+                ),
+                textAlign: TextAlign.center, 
+              ), 
+              SizedBox(height: 20),
 
-              // Bouton de redirection vers la page de connexion
-              ElevatedButton(
-                onPressed: () {
-                  if (firebaseInitialized) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginPage()), // Redirige vers la page de connexion
-                    );
-                  }
-                },
-                child: Text('Connectez-vous'), // Texte du bouton
-              ),
+               if (firebaseError)
+                Text(
+                  'Erreur lors de l\'initialisation de Firebase',
+                  style: TextStyle(color: Colors.red),
+                )
+              else if (!firebaseInitialized)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () async {
+                      try {
+                        await Firebase.initializeApp();
+                        Get.put(AuthController());
+                        setState(() {
+                          firebaseInitialized = true;
+                        });
+                        Get.to(() => LoginPage());
+                      } catch (e) {
+                        print('Error initializing Firebase: $e');
+                        setState(() {
+                          firebaseError = true;
+                        });
+                      }
+                    },
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5), // Couleur personnalisée avec transparence
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1.0,
+                         
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                        child: Text(
+                          'Connectez-vous',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold, 
+                            color: Color.fromARGB(255, 254, 254, 254),
+                           shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
+                              offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
+                              blurRadius: 5, // Rayon du flou de l'ombre
+                            ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              if (firebaseInitialized)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      Get.to(() => LoginPage());
+                    },
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3), // Couleur personnalisée avec transparence
+                        
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                        child: Text(
+                          'Connectez-vous',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
