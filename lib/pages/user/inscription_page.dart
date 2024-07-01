@@ -16,7 +16,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
   late TextEditingController passwordController;
   late TextEditingController usernameController;
   late TextEditingController confirmPasswordController;
-  //late TextEditingController dobController;
   String selectedRole = 'user';
 
   bool obscurePassword = true;
@@ -31,7 +30,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
     nameController = TextEditingController();
     firstnameController = TextEditingController();
     confirmPasswordController = TextEditingController();
-    //dobController = TextEditingController();
   }
 
   @override
@@ -42,19 +40,16 @@ class _InscriptionPageState extends State<InscriptionPage> {
     nameController.dispose();
     firstnameController.dispose();
     confirmPasswordController.dispose();
-    //dobController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<String> images = ["google.png", "facebook.png", "twitter.png"];
-
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: Colors.purple[99],
+      backgroundColor: const Color.fromARGB(255, 231, 208, 236),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -70,110 +65,61 @@ class _InscriptionPageState extends State<InscriptionPage> {
             Container(
               width: w,
               height: h * 0.3,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/images/image2.webp"),
-                  fit: BoxFit.cover,
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 233, 210, 237),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(50),
+                  bottomRight: Radius.circular(50),
                 ),
               ),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: h * 0.12),
-                 /*const CircleAvatar(
-                    radius: 100,
-                    backgroundImage: AssetImage(
-                      "assets/images/836.jpg",
+                  Icon(
+                    Icons.app_registration,
+                    size: 100,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Inscrivez-vous!",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(2.0, 2.0),
+                          blurRadius: 3.0,
+                          color: Color.fromARGB(255, 0, 0, 0),
+                        ),
+                      ],
                     ),
-                  )*/
+                  ),
                 ],
               ),
             ),
-            
             Container(
-              margin: const EdgeInsets.only(left: 20, right: 20),
+              margin: const EdgeInsets.only(left: 20, right: 20, top: 30),
               width: w,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    height: 50,
-                  ),
                   buildTextField('Entrez votre email', Icons.email, emailController),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   buildTextField('Nom d\'utilisateur', Icons.person, usernameController),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   buildTextField('Nom', Icons.person, nameController),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   buildTextField('Prenom', Icons.person, firstnameController),
-
-                  /*const SizedBox(
-                    height: 20,
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      DateTime? selectedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                      );
-
-                      if (selectedDate != null) {
-                        dobController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
-                      }
-                    },
-                    child: AbsorbPointer(
-                      child: buildTextField('Date de naissance', Icons.calendar_today, dobController),
-                    ),
-                  ),*/
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   buildPasswordTextField('Entrez votre mot de passe', passwordController, obscurePassword),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   buildPasswordTextField('Confirmer le mot de passe', confirmPasswordController, obscureConfirmPassword),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  /*DropdownButtonFormField<String>(
-                    value: selectedRole,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: const BorderSide(color: Colors.white, width: 1.0),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: const BorderSide(color: Colors.white, width: 1.0),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    //items: [
-                      //DropdownMenuItem(value: 'user', child: Text('User')),
-                      //DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                      //DropdownMenuItem(value: 'superadmin', child: Text('SuperAdmin')),
-                    //],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedRole = value!;
-                      });
-                    },
-                  ), */
                 ],
               ),
-            ), 
-            const SizedBox(
-              height: 65,
             ),
+            const SizedBox(height: 65),
             GestureDetector(
               onTap: () {
                 AuthController.instance.register(
@@ -181,19 +127,18 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   usernameController.text.trim(),
                   nameController.text.trim(),
                   firstnameController.text.trim(),
-                  //dobController.text.trim(),
                   passwordController.text.trim(),
                   confirmPasswordController.text.trim(),
                   selectedRole,
                 );
               },
               child: Container(
-                width: w * 0.3,
+                width: w * 0.6,
                 height: 50,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    color: Colors.purple[300],
-                    ),
+                  borderRadius: BorderRadius.circular(30),
+                  color: Colors.purple[300],
+                ),
                 child: const Center(
                   child: Text(
                     "S'inscrire",
@@ -201,6 +146,13 @@ class _InscriptionPageState extends State<InscriptionPage> {
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(2.0, 2.0),
+                          blurRadius: 3.0,
+                          color: Color.fromARGB(255, 0, 0, 0),
+                        ),
+                      ],
                     ),
                   ),
                 ),
