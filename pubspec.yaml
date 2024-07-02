@@ -27,7 +27,7 @@ dependencies:
     sdk: flutter
 
 
-  
+  dropdown_search: ^5.0.3
   cupertino_icons: ^1.0.6
   get:
   flutter_native_splash: ^2.4.0
