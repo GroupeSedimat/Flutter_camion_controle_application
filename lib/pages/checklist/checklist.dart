@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print, prefer_const_constructors
+
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -188,7 +190,7 @@ class _CheckListState extends State<CheckList> {
           if (userUID == null) {
             return Center(child: Text("User not logged in"));
           }
-          Future<Map<String, TaskChecklist>> validatedTask = databaseTasksService.getAllTasks(userUID!);
+          Future<Map<String, TaskChecklist>> validatedTask = databaseTasksService.getAllTasks(userUID);
           List blueprintsSnapshotList = snapshot.data?.docs ?? [];
           Map<String, Blueprint> blueprints = HashMap();
           Map<String, Blueprint> sortedBlueprints = HashMap();

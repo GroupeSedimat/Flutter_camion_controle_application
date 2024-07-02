@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names, avoid_print
+
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';

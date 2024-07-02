@@ -37,6 +37,8 @@ class Company {
     logo: json['logo']! as String,
   );
 
+  String? get id => null;
+
   Company copyWith({
     String? name,
     String? description,

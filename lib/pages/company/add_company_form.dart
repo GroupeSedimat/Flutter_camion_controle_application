@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors_in_immutables, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
