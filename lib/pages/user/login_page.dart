@@ -86,7 +86,7 @@ class _LoginPagestate extends State<LoginPage> {
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.purpleAccent,
+                        color: Colors.deepPurple,
                       ),
                       onPressed: () {
                         setState(() {
@@ -107,7 +107,7 @@ class _LoginPagestate extends State<LoginPage> {
                           "Mot de passe oublié?",
                           style: TextStyle(
                             decoration: TextDecoration.underline,
-                            color: Colors.purpleAccent,
+                            color: Colors.deepPurple,
                             fontSize: 15,
                           ),
                         ),
@@ -127,7 +127,7 @@ class _LoginPagestate extends State<LoginPage> {
                       height: 50,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
-                        color: Colors.purpleAccent,
+                        color: Color.fromARGB(255, 105, 82, 146),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
@@ -172,7 +172,7 @@ class _LoginPagestate extends State<LoginPage> {
                             text: "Inscrivez-vous",
                             style: TextStyle(
                               decoration: TextDecoration.underline,
-                              color: Colors.purpleAccent,
+                              color: Colors.deepPurple,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -214,11 +214,11 @@ class _LoginPagestate extends State<LoginPage> {
         obscureText: obscureText,
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: Icon(icon, color: Colors.purpleAccent),
+          prefixIcon: Icon(icon, color: Colors.deepPurple),
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.0),
+            borderSide: const BorderSide(color: Colors.deepPurple, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),

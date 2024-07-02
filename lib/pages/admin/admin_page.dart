@@ -39,7 +39,7 @@ class AdminPage extends StatelessWidget {
       children: [
         DrawerHeader(
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
+            color: Colors.deepPurple,
           ),
           child: Center(
             child: Icon(
@@ -167,7 +167,7 @@ class AdminPage extends StatelessWidget {
               Icon(
                 icon,
                 size: 50,
-                color: Colors.purpleAccent, // Couleur de l'icône
+                color: Colors.deepPurple, // Couleur de l'icône
               ),
               SizedBox(height: 10),
               Text(
