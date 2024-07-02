@@ -1,8 +1,8 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api, use_super_parameters, unused_local_variable
+// ignore_for_file: use_super_parameters, library_private_types_in_public_api, prefer_const_constructors, unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 
 class InscriptionPage extends StatefulWidget {
@@ -21,6 +21,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
   late TextEditingController confirmPasswordController;
   String selectedRole = 'user';
   String? selectedCompany;
+  String? errorMessage;
+  List<Company> companies = []; // Liste vide au départ
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
@@ -34,6 +36,21 @@ class _InscriptionPageState extends State<InscriptionPage> {
     nameController = TextEditingController();
     firstnameController = TextEditingController();
     confirmPasswordController = TextEditingController();
+    loadCompanies();
+  }
+
+  Future<void> loadCompanies() async {
+    final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
+    try {
+      Map<String, Company> companyMap = await databaseCompanyService.getAllCompanies();
+      setState(() {
+        companies = companyMap.values.toList();
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Erreur lors du chargement des entreprises.';
+      });
+    }
   }
 
   @override
@@ -49,15 +66,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-
-    final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-    Future<Map<String, Company>> allCompanies = databaseCompanyService.getAllCompanies();
-
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 236, 221, 239),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -66,40 +79,46 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 Navigator.of(context).pop();
               },
               child: Container(
-                padding: const EdgeInsets.only(left: 10.0, top: 30.0),
-                child: Icon(Icons.arrow_back),
+                margin: EdgeInsets.only(left: 10, top: 40),
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purpleAccent,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Icon(Icons.arrow_back, color: Colors.white, size: 25),
+                ),
               ),
             ),
             Container(
-              width: w,
-              height: h * 0.3,
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 214, 198, 216),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(50),
-                  bottomRight: Radius.circular(50),
-                ),
-              ),
+              padding: EdgeInsets.only(top: 50),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.app_registration,
-                    size: 100,
-                    color: Colors.white,
+                    size: 70,
+                    color: Colors.purpleAccent,
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 20),
                   Text(
                     "Inscrivez-vous!",
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.purpleAccent,
                       shadows: [
                         Shadow(
                           offset: Offset(2.0, 2.0),
                           blurRadius: 3.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
+                          color: Colors.black.withOpacity(0.3),
                         ),
                       ],
                     ),
@@ -107,6 +126,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 ],
               ),
             ),
+            SizedBox(height: 20),
             Container(
               margin: const EdgeInsets.only(left: 20, right: 20, top: 30),
               width: w,
@@ -119,79 +139,86 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   const SizedBox(height: 20),
                   buildTextField('Nom', Icons.person, nameController),
                   const SizedBox(height: 20),
-                  buildTextField('Prenom', Icons.person, firstnameController),
+                  buildTextField('Prénom', Icons.person, firstnameController),
                   const SizedBox(height: 20),
                   buildPasswordTextField('Entrez votre mot de passe', passwordController, obscurePassword),
                   const SizedBox(height: 20),
-                  buildPasswordTextField('Confirmer le mot de passe', confirmPasswordController, obscureConfirmPassword),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  FutureBuilder<Map<String, Company>>(
-                    future: databaseCompanyService.getAllCompanies(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Text('No companies found.');
-                      } else {
-                        Map<String, Company> companies = snapshot.data!;
-                        List<DropdownMenuItem<String>> companyItems = companies.entries
-                            .map((entry) => DropdownMenuItem(
-                          value: entry.key,
-                          child: Text(entry.value.name),
-                        ))
-                            .toList();
-                        return DropdownButtonFormField<String>(
-                          value: selectedCompany,
-                          hint: const Text('Select Company'),
+                  buildPasswordTextField('Confirmez le mot de passe', confirmPasswordController, obscureConfirmPassword),
+                  const SizedBox(height: 20),
+                  companies.isNotEmpty
+                      ? DropdownButtonFormField<String>(
                           decoration: InputDecoration(
+                            labelText: 'Sélectionnez une entreprise',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                              borderSide: const BorderSide(color: Colors.grey, width: 1.0),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                              borderSide: const BorderSide(color: Colors.grey, width: 1.0),
                             ),
                             filled: true,
                             fillColor: Colors.white,
                           ),
-                          items: companyItems,
-                          onChanged: (value) {
+                          items: companies.map((Company company) {
+                            return DropdownMenuItem<String>(
+                              value: company.id,
+                              child: Text(company.name),
+                            );
+                          }).toList(),
+                          onChanged: (String? value) {
                             setState(() {
-                              selectedCompany = value!;
+                              selectedCompany = value;
+                              errorMessage = null; // Clear error message when company is selected
                             });
                           },
-                        );
-                      }
-                    },
-                  ),
+                          value: selectedCompany,
+                        )
+                      : Center(child: Text('Aucune entreprise trouvée')),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Text(
+                        errorMessage!,
+                        style: TextStyle(color: Colors.red, fontSize: 14),
+                      ),
+                    ),
                 ],
               ),
             ),
             const SizedBox(height: 65),
             GestureDetector(
               onTap: () {
-                AuthController.instance.register(
-                  emailController.text.trim(),
-                  usernameController.text.trim(),
-                  nameController.text.trim(),
-                  firstnameController.text.trim(),
-                  passwordController.text.trim(),
-                  confirmPasswordController.text.trim(),
-                  selectedRole,
-                  selectedCompany!,
-                );
+                if (selectedCompany == null) {
+                  setState(() {
+                    errorMessage = 'Veuillez sélectionner une entreprise.';
+                  });
+                } else {
+                  AuthController.instance.register(
+                    emailController.text.trim(),
+                    usernameController.text.trim(),
+                    nameController.text.trim(),
+                    firstnameController.text.trim(),
+                    passwordController.text.trim(),
+                    confirmPasswordController.text.trim(),
+                    selectedRole,
+                    selectedCompany!,
+                  );
+                }
               },
               child: Container(
                 width: w * 0.6,
                 height: 50,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
-                  color: Colors.purple[300],
+                  color: Colors.purpleAccent,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
                 ),
                 child: const Center(
                   child: Text(
@@ -204,7 +231,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                         Shadow(
                           offset: Offset(2.0, 2.0),
                           blurRadius: 3.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
+                          color: Colors.black,
                         ),
                       ],
                     ),
@@ -229,7 +256,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
             spreadRadius: 7,
             offset: const Offset(1, 1),
             color: Colors.grey.withOpacity(0.3),
-          )
+          ),
         ],
       ),
       child: TextField(
@@ -240,11 +267,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.white, width: 1.0),
+            borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.white, width: 1.0),
+            borderSide: const BorderSide(color: Colors.grey, width: 1.0),
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
@@ -265,7 +292,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
             spreadRadius: 7,
             offset: const Offset(1, 1),
             color: Colors.grey.withOpacity(0.3),
-          )
+          ),
         ],
       ),
       child: TextField(
@@ -273,11 +300,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
         obscureText: obscureText,
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: const Icon(Icons.password, color: Colors.purpleAccent),
+          prefixIcon: const Icon(Icons.lock, color: Colors.purpleAccent),
           suffixIcon: IconButton(
             icon: Icon(
               obscureText ? Icons.visibility_off : Icons.visibility,
-              color: Colors.purple,
+              color: Colors.purpleAccent,
             ),
             onPressed: () {
               setState(() {
@@ -292,11 +319,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.white, width: 1.0),
+            borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.white, width: 1.0),
+            borderSide: const BorderSide(color: Colors.grey, width: 1.0),
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),

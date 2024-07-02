@@ -18,88 +18,164 @@ class AdminPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Page d\'administration'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.account_circle),
+            onPressed: () {
+              // Ajoutez ici la navigation vers la page de profil utilisateur
+            },
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Bienvenue sur la page du super administrateur',
-              style: TextStyle(fontSize: 24),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () {
-                Get.to(() => WelcomePage());
-              },
-              child: Text('Aller dans la welcome page'),
-            ),
-            SizedBox(height: 20),
-            if (userRole == UserRole.superadmin) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: CardButton(
-                      title: 'Gestion des utilisateurs',
-                      onPressed: () {
-                        Get.to(() => UserManagementPage());
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: CardButton(
-                      title: 'Approuver un compte',
-                      onPressed: () {
-                        Get.to(() => UserApprovalPage());
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                AuthController.instance.logOut();
-              },
-              child: Text('Déconnexion'),
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(context),
+      body: _buildDashboard(),
     );
   }
+
+  Widget _buildDrawer(BuildContext context) {
+  return Drawer(
+    child: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        DrawerHeader(
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+          ),
+          child: Center(
+            child: Icon(
+              Icons.account_circle,
+              size: 100,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        _buildListTile(
+          context,
+          'Welcome Page',
+          Icons.home,
+          () {
+            Get.to(() => WelcomePage());
+          },
+        ),
+        if (userRole == UserRole.superadmin) ...[
+          _buildListTile(
+            context,
+            'Gestion des utilisateurs',
+            Icons.supervised_user_circle,
+            () {
+              Get.to(() => UserManagementPage());
+            },
+          ),
+          _buildListTile(
+            context,
+            'Approuver un compte',
+            Icons.approval,
+            () {
+              Get.to(() => UserApprovalPage());
+            },
+          ),
+        ],
+        _buildListTile(
+          context,
+          'Checklist',
+          Icons.checklist,
+          () {
+           // Get.to(() => ChecklistPage());
+          },
+        ),
+        ListTile(
+          title: Text('Déconnexion'),
+          leading: Icon(Icons.exit_to_app),
+          onTap: () {
+            AuthController.instance.logOut();
+          },
+        ),
+      ],
+    ),
+  );
 }
 
-class CardButton extends StatelessWidget {
-  final String title;
-  final VoidCallback onPressed;
+  Widget _buildListTile(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return ListTile(
+      title: Text(title),
+      leading: Icon(icon),
+      onTap: onTap,
+    );
+  }
 
-  const CardButton({
-    Key? key,
-    required this.title,
-    required this.onPressed,
-  }) : super(key: key);
+  Widget _buildDashboard() {
+    return GridView.count(
+      crossAxisCount: 2,
+      padding: EdgeInsets.all(20),
+      mainAxisSpacing: 20,
+      crossAxisSpacing: 20,
+      children: [
+        _buildDashboardItem(
+          'Gestion des utilisateurs',
+          Icons.supervised_user_circle,
+          () {
+            Get.to(() => UserManagementPage());
+          },
+        ),
+        _buildDashboardItem(
+          'Approuver un compte',
+          Icons.approval,
+          () {
+            Get.to(() => UserApprovalPage());
+          },
+        ),
+        _buildDashboardItem(
+          'Checklist',
+          Icons.checklist,
+          () {
+            //Get.to(() => ChecklistPage());
+          },
+        ),
+        _buildDashboardItem(
+          'Welcome Page',
+          Icons.home,
+          () {
+            Get.to(() => WelcomePage());
+          },
+        ),
+      ],
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildDashboardItem(
+    String title,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
     return Card(
       elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
       child: InkWell(
-        onTap: onPressed,
-        child: Container(
-          padding: EdgeInsets.all(16),
-          child: Center(
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 50,
+                color: Colors.purpleAccent, // Couleur de l'icône
+              ),
+              SizedBox(height: 10),
+              Text(
+                title,
+                style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),
