@@ -1,4 +1,4 @@
-// ignore_for_file: use_super_parameters, library_private_types_in_public_api, prefer_const_constructors, unused_local_variable
+// ignore_for_file: use_super_parameters, library_private_types_in_public_api, unused_local_variable, prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
@@ -22,7 +22,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
   String selectedRole = 'user';
   String? selectedCompany;
   String? errorMessage;
-  List<Company> companies = []; // Liste vide au départ
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
@@ -36,21 +35,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
     nameController = TextEditingController();
     firstnameController = TextEditingController();
     confirmPasswordController = TextEditingController();
-    loadCompanies();
-  }
 
-  Future<void> loadCompanies() async {
-    final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-    try {
-      Map<String, Company> companyMap = await databaseCompanyService.getAllCompanies();
-      setState(() {
-        companies = companyMap.values.toList();
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Erreur lors du chargement des entreprises.';
-      });
-    }
+      
   }
 
   @override
@@ -66,6 +52,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
+    Future<Map<String, Company>> allCompanies = databaseCompanyService.getAllCompanies();
+
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
 
@@ -145,44 +134,48 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   const SizedBox(height: 20),
                   buildPasswordTextField('Confirmez le mot de passe', confirmPasswordController, obscureConfirmPassword),
                   const SizedBox(height: 20),
-                  companies.isNotEmpty
-                      ? DropdownButtonFormField<String>(
+                  FutureBuilder<Map<String, Company>>(
+                    future: databaseCompanyService.getAllCompanies(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No companies found.');
+                      } else {
+                        Map<String, Company> companies = snapshot.data!;
+                        List<DropdownMenuItem<String>> companyItems = companies.entries
+                            .map((entry) => DropdownMenuItem(
+                          value: entry.key,
+                          child: Text(entry.value.name),
+                        ))
+                            .toList();
+                        return DropdownButtonFormField<String>(
+                          value: selectedCompany,
+                          hint: const Text('Select Company'),
                           decoration: InputDecoration(
-                            labelText: 'Sélectionnez une entreprise',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+                              borderSide: const BorderSide(color: Colors.white, width: 1.0),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+                              borderSide: const BorderSide(color: Colors.white, width: 1.0),
                             ),
                             filled: true,
                             fillColor: Colors.white,
                           ),
-                          items: companies.map((Company company) {
-                            return DropdownMenuItem<String>(
-                              value: company.id,
-                              child: Text(company.name),
-                            );
-                          }).toList(),
-                          onChanged: (String? value) {
+                          items: companyItems,
+                          onChanged: (value) {
                             setState(() {
-                              selectedCompany = value;
-                              errorMessage = null; // Clear error message when company is selected
-                            });
+                              selectedCompany = value!;
+                   });
                           },
-                          value: selectedCompany,
-                        )
-                      : Center(child: Text('Aucune entreprise trouvée')),
-                  if (errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Text(
-                        errorMessage!,
-                        style: TextStyle(color: Colors.red, fontSize: 14),
-                      ),
-                    ),
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
