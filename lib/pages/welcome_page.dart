@@ -12,7 +12,7 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return BasePage(
-      appBar: appBar(),
+      // appBar: appBar(),
       body: body(context),
     );
   }

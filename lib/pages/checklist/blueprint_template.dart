@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 
-// ignore: must_be_immutable
 class BlueprintTemplate extends StatelessWidget{
 
   final Blueprint blueprint;
   final Function delete;
   final Function edit;
   final Function validate;
+  final String role;
   bool? isDone;
-  BlueprintTemplate({super.key,  required this.blueprint, required this.delete, required this.edit, required this.validate, this.isDone });
+  BlueprintTemplate({super.key,  required this.blueprint, required this.delete, required this.edit, required this.validate, required this.role, this.isDone });
 
   @override
   Widget build(BuildContext context){
@@ -41,6 +41,7 @@ class BlueprintTemplate extends StatelessWidget{
             Wrap(
               alignment: WrapAlignment.spaceEvenly,
               children: [
+                if(role == "admin" || role == "superadmin")
                 TextButton.icon(
                   onPressed: () => edit(),
                   style: TextButton.styleFrom(
@@ -53,6 +54,7 @@ class BlueprintTemplate extends StatelessWidget{
                     color: Colors.red,
                   ),
                 ),
+                if(role == "user")
                 TextButton.icon(
                   onPressed: () => validate(),
                   style: TextButton.styleFrom(
@@ -65,6 +67,7 @@ class BlueprintTemplate extends StatelessWidget{
                     color: Colors.red,
                   ),
                 ),
+                if(role == "admin" || role == "superadmin")
                 TextButton.icon(
                   onPressed: () => delete(),
                   style: TextButton.styleFrom(

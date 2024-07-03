@@ -30,6 +30,7 @@ class _CheckListState extends State<CheckList> {
   final DatabaseImageService databaseImageService = DatabaseImageService();
   final PdfService pdfService = PdfService();
   final UserService userService = UserService();
+  // final MyUser user;
   AuthController authController = AuthController.instance;
 
   List<ListOfLists> listOfLists = [
@@ -128,7 +129,6 @@ class _CheckListState extends State<CheckList> {
       }
     } catch (e) {
       print("Error showing task: $e");
-      // Obsłuż błąd, na przykład wyświetlając komunikat użytkownikowi
     }
   }
 
@@ -175,18 +175,18 @@ class _CheckListState extends State<CheckList> {
         stream: databaseBlueprintsService.getBlueprints(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: const CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text("No data found"));
+            return const Center(child: Text("No data found"));
           }
 
           String? userUID = authController.getCurrentUserUID();
           if (userUID == null) {
-            return Center(child: Text("User not logged in"));
+            return const Center(child: Text("User not logged in"));
           }
           Future<Map<String, TaskChecklist>> validatedTask = databaseTasksService.getAllTasks(userUID!);
           List blueprintsSnapshotList = snapshot.data?.docs ?? [];
@@ -206,66 +206,78 @@ class _CheckListState extends State<CheckList> {
               }
             }
           }
-          return TabBarView(
-            children: <Widget>[
-              for (var list in listOfLists)
-                ListView(
-                  padding: const EdgeInsets.all(16.0),
-                  scrollDirection: Axis.vertical,
-                  children: [
-                    for (Blueprint blueprint in sortedBlueprints.values)
-                      if (blueprint.nrOfList == list.listNr)
-                        Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: FutureBuilder<bool?>(
-                              future: validatedTask.then((v) {
-                                TaskChecklist? task = v.values.cast().firstWhere(
-                                        (element) =>
-                                    element.nrEntryPosition == blueprint.nrEntryPosition &&
-                                        element.nrOfList == blueprint.nrOfList,
-                                    orElse: () => null
-                                );
-                                if (task != null) {
-                                  return task.isDone;
-                                } else {
-                                  return null;
-                                }
-                              }),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return Container(
-                                    // child: CircularProgressIndicator()
+
+          return FutureBuilder<MyUser>(
+            future: userService.getCurrentUserData(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+              }
+              if (userSnapshot.hasError) {
+              return Center(child: Text('Error: ${userSnapshot.error}'));
+              }
+              if (!userSnapshot.hasData || userSnapshot.data == null) {
+              return const Center(child: Text("User data not found"));
+              }
+
+              final user = userSnapshot.data!;
+              return TabBarView(
+                children: <Widget>[
+                  for (var list in listOfLists)
+                    ListView(
+                      padding: const EdgeInsets.all(16.0),
+                      scrollDirection: Axis.vertical,
+                      children: [
+                        for (Blueprint blueprint in sortedBlueprints.values)
+                          if (blueprint.nrOfList == list.listNr)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: FutureBuilder<bool?>(
+                                future: validatedTask.then((v) {
+                                  TaskChecklist? task = v.values.cast().firstWhere(
+                                          (element) =>
+                                      element.nrEntryPosition == blueprint.nrEntryPosition &&
+                                          element.nrOfList == blueprint.nrOfList,
+                                      orElse: () => null
                                   );
-                                } else if (snapshot.hasError) {
-                                  return Text('Error: ${snapshot.error}');
-                                } else {
-                                  final isDone = snapshot.data;
-                                  return BlueprintTemplate(
-                                    isDone: isDone,
-                                    blueprint: blueprint,
-                                   delete: () {
+                                  if (task != null) {
+                                    return task.isDone;
+                                  } else {
+                                    return null;
+                                  }
+                                }),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return Container();
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    final isDone = snapshot.data;
+                                    return BlueprintTemplate(
+                                      isDone: isDone,
+                                      blueprint: blueprint,
+                                      role: user.role,
+                                      delete: () {
                                         showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
                                             return AlertDialog(
-                                              title: Text("Confirmer la suppression"),
-                                              content: Text("Êtes-vous sûr de vouloir supprimer ce blueprint ?"),
+                                              title: const Text("Confirmer la suppression"),
+                                              content: const Text("Êtes-vous sûr de vouloir supprimer ce blueprint ?"),
                                               actions: [
                                                 TextButton(
-                                                  child: Text("Non"),
+                                                  child: const Text("Non"),
                                                   onPressed: () {
-                                                    Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                                                    Navigator.of(context).pop();
                                                   },
                                                 ),
                                                 TextButton(
-                                                  child: Text("Oui"),
+                                                  child: const Text("Oui"),
                                                   onPressed: () {
-                                                    Navigator.of(context).pop(); // Fermer la boîte de dialogue
-                                                    // Find the key corresponding to the blueprint
+                                                    Navigator.of(context).pop();
                                                     String key = sortedBlueprints.keys.firstWhere(
-                                                      (k) => sortedBlueprints[k] == blueprint
+                                                            (k) => sortedBlueprints[k] == blueprint
                                                     );
-                                                    // If key found, delete blueprint using key
                                                     databaseBlueprintsService.deleteBlueprint(key);
                                                   },
                                                 ),
@@ -274,53 +286,53 @@ class _CheckListState extends State<CheckList> {
                                           },
                                         );
                                       },
-
-                                    validate: (){
-                                      showTask(blueprint);
-                                    },
-                                    edit: (){
-                                      String blueprintID = sortedBlueprints.keys.firstWhere(
-                                              (k) => sortedBlueprints[k] == blueprint
-                                      );
-                                      showBlueprintModal(
-                                        nrOfList: blueprint.nrOfList,
-                                        nrEntryPosition: blueprint.nrEntryPosition,
-                                        blueprint: blueprint,
-                                        blueprintID: blueprintID,
-                                      );
-                                    },
-                                  );
-                                }
-                              },
-                            )
+                                      validate: () {
+                                        showTask(blueprint);
+                                      },
+                                      edit: () {
+                                        String blueprintID = sortedBlueprints.keys.firstWhere(
+                                                (k) => sortedBlueprints[k] == blueprint
+                                        );
+                                        showBlueprintModal(
+                                          nrOfList: blueprint.nrOfList,
+                                          nrEntryPosition: blueprint.nrEntryPosition,
+                                          blueprint: blueprint,
+                                          blueprintID: blueprintID,
+                                        );
+                                      },
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                        const SizedBox(height: 10),
+                        if (user.role == 'admin' || user.role == 'superadmin') // Sprawdzenie roli użytkownika
+                          FloatingActionButton(
+                            heroTag: "addBlueprintHero",
+                            onPressed: () async {
+                              showBlueprintModal(
+                                nrOfList: list.listNr,
+                                nrEntryPosition: (counter[list.listNr] + 1),
+                                blueprint: null,
+                                blueprintID: null,
+                              );
+                            },
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            child: const Icon(
+                              Icons.add,
+                              color: Colors.lightGreenAccent,
+                            ),
                           ),
-                      const SizedBox(height: 10,),
-                      FloatingActionButton(
-                        heroTag: "addBlueprintHero",
-                        onPressed: () async {
-                          showBlueprintModal( nrOfList: list.listNr,
-                            nrEntryPosition: (counter[list.listNr] + 1),
-                            blueprint: null,
-                            blueprintID: null,
-                          );
-                        },
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.lightGreenAccent,
-                        ),
-                      ),
-                      const SizedBox(height: 20,),
-                      FloatingActionButton(
+                        const SizedBox(height: 20),
+                        if (user.role == 'user')
+                        FloatingActionButton(
                         heroTag: "makePDFHero",
                         onPressed: () async {
                           MyUser user = await userService.getCurrentUserData();
                           String companyID = user.company;
                           Map<String, TaskChecklist> tasks = await validatedTask;
-                          final data = await pdfService.createInvoice(tasks , sortedBlueprints, list);
+                          final data = await pdfService.createInvoice(tasks, sortedBlueprints, list);
                           await pdfService.savePdfFile(companyID, data);
-                          // final data = await pdfService.createInvoice();
-                          // await pdfService.savePdfFile(company, data);
                         },
                         backgroundColor: Colors.red,
                         child: const Row(
@@ -330,19 +342,21 @@ class _CheckListState extends State<CheckList> {
                               Icons.picture_as_pdf,
                               color: Colors.white,
                             ),
-                            SizedBox(width: 10,),
-                            Text('Create PDF',
+                            SizedBox(width: 10),
+                            Text(
+                              'Create PDF',
                               style: TextStyle(
                                 color: Colors.white,
-
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-            ],
+                    ],
+                  ),
+                ],
+              );
+            },
           );
         }
     );

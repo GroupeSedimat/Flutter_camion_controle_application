@@ -119,6 +119,7 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => const CheckList());
         },
       ),
+      if (role == 'user')
       ListTile(
         leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
         title: const Text('Go to PDF list'),
@@ -127,6 +128,7 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => const PDFShowList());
         },
       ),
+      if (role == 'admin' || role == 'superadmin' )
       ListTile(
         leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
         title: const Text('Go to admins PDF list new'),
@@ -135,6 +137,7 @@ class MenuWidget extends StatelessWidget {
           Get.to(() => AdminPdfListView());
         },
       ),
+      if (role == 'admin' || role == 'superadmin' )
       ListTile(
         leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
         title: const Text('Go to admins Company list'),
