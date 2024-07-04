@@ -1,4 +1,4 @@
-// ignore_for_file: use_super_parameters, prefer_const_constructors_in_immutables, sort_child_properties_last
+// ignore_for_file: sort_child_properties_last, prefer_const_constructors, prefer_const_literals_to_create_immutables, use_super_parameters, prefer_const_constructors_in_immutables
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -12,14 +12,13 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return BasePage(
-      appBar: appBar(),
-      body: body(context),
+      appBar: _buildAppBar(),
+      body: _buildBody(context),
     );
   }
 
-  PreferredSizeWidget appBar(){
+  PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: const Text('Welcome Page'),
       backgroundColor: Colors.purple,
@@ -34,7 +33,7 @@ class WelcomePage extends StatelessWidget {
     );
   }
 
-  Widget body(BuildContext context) {
+  Widget _buildBody(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return FutureBuilder<MyUser>(
@@ -54,62 +53,56 @@ class WelcomePage extends StatelessWidget {
               children: [
                 Container(
                   width: w,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/image2.webp"),
-                      fit: BoxFit.cover,
+                  height: h * 0.3,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.purple, Colors.deepPurpleAccent],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                     ),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: h * 0.05),
                       const CircleAvatar(
-                        radius: 100,
+                        radius: 80,
                         backgroundImage: AssetImage("assets/images/836.jpg"),
                       ),
-                      SizedBox(height: h * 0.05),
+                      const SizedBox(height: 10),
+                      Text(
+                        userData.username,
+                        style: const TextStyle(
+                          fontSize: 27,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 65),
+                const SizedBox(height: 20),
                 Text(
                   welcomeMessage,
                   style: const TextStyle(
-                    fontSize: 36,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.purple,
+                    color: Colors.black,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                Text(
-                  userData.username,
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.purple[300],
-                  ),
+                const SizedBox(height: 20),
+                _buildButton(
+                  context,
+                  'Go to data',
+                  Icons.bar_chart,
+                  '/loadingdata',
                 ),
                 const SizedBox(height: 200),
-                Container(
-                  width: w * 0.3,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    image: const DecorationImage(
-                      image: AssetImage("assets/images/purple-wallpaper.jpg"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: TextButton.icon(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/loadingdata');
-                    },
-                    label: const Text('Go to data'),
-                    icon: const Icon(Icons.bar_chart),
-                  ),
-                ),
-                const SizedBox(height: 200),
-                GestureDetector(
+                _buildButton(
+                  context,
+                  "Se déconnecter",
+                  Icons.logout,
+                  null,
                   onTap: () {
                     AuthController.instance.logOut();
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -119,77 +112,19 @@ class WelcomePage extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Container(
-                    width: w * 0.3,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      image: const DecorationImage(
-                        image: AssetImage("assets/images/purple-wallpaper.jpg"),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Se déconnecter",
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
                 ),
-                const SizedBox(height: 200),
                 if (userData.role == 'admin')
-                  GestureDetector(
-                    onTap: () {
-                      AuthController.instance.logOut();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Vous avez été déconnecté'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: w * 0.3,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        image: const DecorationImage(
-                          image: AssetImage("assets/images/purple-wallpaper.jpg"),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "Test",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                  const SizedBox(height: 20),
+                if (userData.role == 'admin')
+                  _buildButton(
+                    context,
+                    "Admin Page",
+                    Icons.admin_panel_settings,
+                    '/adminpage',
                   ),
-                if (userData.role != 'admin')
-                  ElevatedButton(
-                    onPressed: null, // Disabled state
-                    child: const Text(
-                      "Test",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey, // Disabled color
-                    ),
-                  ),
+                const SizedBox(height: 20),
+                
+                 
               ],
             ),
           );
@@ -197,6 +132,31 @@ class WelcomePage extends StatelessWidget {
           return const Center(child: Text("No data available"));
         }
       },
+    );
+  }
+
+  Widget _buildButton(BuildContext context, String text, IconData icon, String? route, {VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white, backgroundColor: Colors.purple,
+          minimumSize: const Size(double.infinity, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+        icon: Icon(icon),
+        label: Text(
+          text,
+          style: const TextStyle(fontSize: 18),
+        ),
+        onPressed: onTap ?? () {
+          if (route != null) {
+            Navigator.pushReplacementNamed(context, route);
+          }
+        },
+      ),
     );
   }
 }
