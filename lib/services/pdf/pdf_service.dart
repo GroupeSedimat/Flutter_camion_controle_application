@@ -14,6 +14,7 @@ import 'package:flutter_application_1/services/user_service.dart';
 import 'package:intl/intl.dart';
 import 'package:open_document/open_document.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -167,7 +168,20 @@ class PdfService {
     MyUser user = await userService.getUserData(userID!);
     Company company = await companyService.getCompanyByID(companyID);
     String fileName = "${company.name}/${user.username}/${time.toString()}";
-    String documentsPath = "/storage/emulated/0/Documents/camion_appli";
+    String documentsPath;
+    if (Platform.isAndroid) {
+      documentsPath = "/storage/emulated/0/Documents/camion_appli";
+      Directory downloadDir = Directory(documentsPath);
+      if (!await downloadDir.exists()) {
+        await downloadDir.create(recursive: true);
+      }
+    } else if (Platform.isIOS) {
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      documentsPath = "${appDocDir.path}/camion_appli";
+      print(documentsPath);
+    } else {
+      throw Exception("Unsupported platform");
+    }
     String filePath = "$documentsPath/$fileName.pdf";
     String filePathDatabase = "${user.company}/$userID/${time.toString()}";
 

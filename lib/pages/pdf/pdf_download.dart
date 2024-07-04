@@ -19,7 +19,21 @@ class PdfDownload {
         savePath = "${appDocDir.path}/$name.pdf";
         deleteFile(File(savePath));
       }else{
-        savePath = "/storage/emulated/0/Documents/camion_appli/$name.pdf";
+        if (Platform.isAndroid) {
+          // Ensure the directory exists
+          String downloadDirPath = "/storage/emulated/0/Documents/camion_appli";;
+          Directory downloadDir = Directory(downloadDirPath);
+          if (!await downloadDir.exists()) {
+            await downloadDir.create(recursive: true);
+          }
+          savePath = "$downloadDirPath/$name.pdf";
+        } else if (Platform.isIOS) {
+          Directory appDocDir = await getApplicationDocumentsDirectory();
+          savePath = "${appDocDir.path}/camion_appli/$name.pdf";
+        } else {
+          throw Exception("Unsupported platform");
+        }
+        print(savePath);
         File file = File(savePath);
         if (await file.exists()) {
           return; // Exit the method if the file already exists
