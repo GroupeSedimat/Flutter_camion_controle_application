@@ -39,8 +39,8 @@ class DatabaseTasksService{
     }
   }
 
-  Future<Map<String, TaskChecklist>> getOneListOfTasks(int nrList, String userUID) async {
-    Map<String, TaskChecklist> tasks = HashMap();
+  Future<List<String>> getOneListOfTasks(int nrList, String userUID) async {
+    final tasksList = <String>[];
     try {
       final querySnapshot = await _firestore
           .collection(TASK_COLLECTION_REF)
@@ -50,15 +50,15 @@ class DatabaseTasksService{
       if (querySnapshot.docs.isNotEmpty) {
         List tasksSnapshotList = querySnapshot.docs;
         for (var taskSnapshot in tasksSnapshotList){
-          tasks.addAll({taskSnapshot.id: taskSnapshot.data()});
+          tasksList.add(taskSnapshot.id);
         }
       }
-      return tasks;
+      return tasksList;
 
     } catch (error) {
       // Gérez l’erreur
       print("Error retrieving task: $error");
-      return tasks;
+      return tasksList;
     }
   }
 
@@ -92,6 +92,11 @@ class DatabaseTasksService{
 
   void deleteTask(String taskID){
     _tasksRef.doc(taskID).delete();
+  }
+
+  Future<void> deleteTaskFuture(String taskID) async {
+    print("Delete task with id: $taskID");
+    await _tasksRef.doc(taskID).delete();
   }
 
 }

@@ -1,5 +1,3 @@
-// ignore_for_file: sort_child_properties_last, prefer_const_constructors, prefer_const_literals_to_create_immutables, use_super_parameters, prefer_const_constructors_in_immutables
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -123,8 +121,8 @@ class WelcomePage extends StatelessWidget {
                     '/adminpage',
                   ),
                 const SizedBox(height: 20),
-                
-                 
+
+
               ],
             ),
           );
