@@ -20,12 +20,12 @@ class PDFShowTemplate extends StatefulWidget {
 }
 
 class _PDFShowTemplateState extends State<PDFShowTemplate> {
-  late Future<Company> companyFuture; // zmieniono
+  late Future<Company> companyFuture;
 
   @override
   void initState() {
     super.initState();
-    companyFuture = DatabaseCompanyService().getCompanyByID(widget.userData.company); // zmieniono
+    companyFuture = DatabaseCompanyService().getCompanyByID(widget.userData.company);
   }
 
   @override
@@ -47,80 +47,95 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
 
         Company company = snapshot.data!;
 
-        return Card(
-          margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-          color: Colors.grey[800],
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  "User ${widget.userData.username}",
-                  style: const TextStyle(
-                    fontSize: 22.0,
-                    color: Colors.amber,
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  "Company ${company.name}", // zmieniono
-                  style: const TextStyle(
-                    fontSize: 22.0,
-                    color: Colors.amber,
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  "Creation date: $formattedDate",
-                  style: const TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.amber,
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                Wrap(
-                  alignment: WrapAlignment.spaceEvenly,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () {
-                        PDFOpen open = PDFOpen(url: widget.url);
-                        open.openPDF();
-                      },
-                      label: const Text('Open PDF'),
-                      icon: const Icon(
-                        Icons.picture_as_pdf,
-                        color: Colors.red,
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.person, color: Colors.deepPurple, size: 50),
+                    title: Text(
+                      "User: ${widget.userData.username}",
+                      style: TextStyle(
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
                       ),
                     ),
-                    TextButton.icon(
-                      onPressed: () {
-                        PdfDownload(
-                            name: "${widget.userData.username}.${widget.fileName}",
-                            url: widget.url)
-                            .downloadFile();
-                        showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('PDF downloaded'),
-                              content: Text(
-                                  'Your PDF file has been saved under the name: ${widget.userData.username}.${widget.fileName}.pdf'),
-                              actions: [
-                                TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('Ok'))
-                              ],
-                            ));
-                      },
-                      label: const Text('Download PDF'),
-                      icon: const Icon(
-                        Icons.picture_as_pdf,
-                        color: Colors.red,
+                    subtitle: Text(
+                      "Company: ${company.name}",
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.grey[700],
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  Text(
+                    "Creation date: $formattedDate",
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        onPressed: () {
+                          PDFOpen open = PDFOpen(url: widget.url);
+                          open.openPDF();
+                        },
+                        icon: Icon(Icons.picture_as_pdf),
+                        label: Text('Open PDF'),
+                      ),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        onPressed: () {
+                          PdfDownload(
+                              name: "${widget.userData.username}.${widget.fileName}",
+                              url: widget.url)
+                              .downloadFile();
+                          showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('PDF downloaded'),
+                                content: Text(
+                                    'Your PDF file has been saved under the name: ${widget.userData.username}.${widget.fileName}.pdf'),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Ok'))
+                                ],
+                              ));
+                        },
+                        icon: Icon(Icons.download),
+                        label: Text('Download PDF'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );

@@ -12,7 +12,6 @@ class CompanyList extends StatefulWidget {
 }
 
 class _CompanyListState extends State<CompanyList> {
-
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
 
   @override
@@ -45,8 +44,8 @@ class _CompanyListState extends State<CompanyList> {
 
     return Scaffold(
       body: BasePage(
-        appBar: appBar(),
-        body: body(context),
+        appBar: _buildAppBar(),
+        body: _buildBody(context),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "addCompanyHero",
@@ -56,13 +55,13 @@ class _CompanyListState extends State<CompanyList> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(
           Icons.add,
-          color: Colors.lightGreenAccent,
+          color: Colors.white,
         ),
       ),
     );
   }
 
-  Widget body(BuildContext context) {
+  Widget _buildBody(BuildContext context) {
     return FutureBuilder<Map<String, Company>>(
       future: databaseCompanyService.getAllCompanies(),
       builder: (context, snapshot) {
@@ -75,26 +74,86 @@ class _CompanyListState extends State<CompanyList> {
         }
 
         Map<String, Company> companies = snapshot.data!;
-        return ListView(
-          children: companies.values.map((company) {
-            return ListTile(
-              title: Text(company.name),
+        return ListView.builder(
+          itemCount: companies.length,
+          itemBuilder: (context, index) {
+            String companyID = companies.keys.elementAt(index);
+            Company company = companies[companyID]!;
+
+            return Card(
+              margin: const EdgeInsets.all(10),
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: Text(
+                    company.name[0],
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                title: Text(
+                  company.name,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[900],
+                  ),
+                ),
+                subtitle: Text(
+                  'ID: $companyID',
+                  style: TextStyle(color: Colors.grey[700]),
+                ),
+                trailing: Wrap(
+                  spacing: 12, // space between two icons
+                 
+                ),
+              ),
             );
-          }).toList(),
+          },
         );
       },
     );
   }
 
-  appBar() {
+  void _showDeleteConfirmation(BuildContext context, String companyID) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Company'),
+        content: Text('Are you sure you want to delete this company?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              databaseCompanyService.deleteCompant(companyID);
+              setState(() {});
+              Navigator.pop(context);
+            },
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  AppBar _buildAppBar() {
     return AppBar(
-      title: const Text('List of all Companies',
+      title: const Text(
+        'List of all Companies',
         style: TextStyle(
-          color: Colors.amber,
+          color: Colors.white,
         ),
       ),
       centerTitle: true,
       backgroundColor: Colors.blue[900],
     );
   }
+  
+  void showCompanyModal({required Company company, required String companyID}) {}
 }
