@@ -54,7 +54,7 @@ class WelcomePage extends StatelessWidget {
                   height: h * 0.3,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.purple, Colors.deepPurpleAccent],
+                      colors: [Colors.purple, Colors.deepPurple],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -138,7 +138,7 @@ class WelcomePage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white, backgroundColor: Colors.purple,
+          foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
