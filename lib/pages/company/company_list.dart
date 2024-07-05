@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors, unused_element
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
@@ -118,7 +120,7 @@ class _CompanyListState extends State<CompanyList> {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, String companyID) {
+  /*void _showDeleteConfirmation(BuildContext context, String companyID) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -140,7 +142,7 @@ class _CompanyListState extends State<CompanyList> {
         ],
       ),
     );
-  }
+  } */
 
   AppBar _buildAppBar() {
     return AppBar(
