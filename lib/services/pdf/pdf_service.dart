@@ -162,7 +162,7 @@ class PdfService {
     return pdf.save();
   }
 
-  Future<void> savePdfFile(String companyID, Uint8List data) async {
+  Future<void> savePdfFile(String companyID, Uint8List data, Future<void> Function() deleteOneTaskListOfUser) async {
     int time = DateTime.now().millisecondsSinceEpoch;
     String? userID = authController.getCurrentUserUID();
     MyUser user = await userService.getUserData(userID!);
@@ -194,6 +194,7 @@ class PdfService {
     await file.writeAsBytes(data);
 
     await databasePDFService.addPdfToFirebase(filePath, filePathDatabase);
+    await deleteOneTaskListOfUser();
     await OpenDocument.openDocument(filePath: filePath);
   }
 
