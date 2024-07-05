@@ -168,8 +168,7 @@ class PdfService {
     int time = DateTime.now().millisecondsSinceEpoch;
     String? userID = authController.getCurrentUserUID();
     MyUser user = await userService.getUserData(userID!);
-    Company company = await companyService.getCompanyByID(companyID);
-    String fileName = "camion_appli/${user.username}.${time.toString()}";
+    String fileName = "${user.username}.${time.toString()}";
     String documentsPath;
     if (Platform.isAndroid) {
       documentsPath = "/storage/emulated/0/Documents/camion_appli";
@@ -179,7 +178,7 @@ class PdfService {
       }
     } else if (Platform.isIOS) {
       Directory appDocDir = await getApplicationDocumentsDirectory();
-      documentsPath = "${appDocDir.path}/camion_appli";
+      documentsPath = appDocDir.path;
       print(documentsPath);
     } else {
       throw Exception("Unsupported platform");
@@ -187,7 +186,7 @@ class PdfService {
     String filePath = "$documentsPath/$fileName.pdf";
     String filePathDatabase = "${user.company}/$userID/${time.toString()}";
 
-    final directory = Directory("$documentsPath/${company.name}/${user.username}");
+    final directory = Directory(documentsPath);
     if (!(await directory.exists())) {
       await directory.create(recursive: true);
     }
