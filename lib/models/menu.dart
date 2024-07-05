@@ -51,7 +51,7 @@ class MenuWidget extends StatelessWidget {
   );
 
   Widget buildHeader(BuildContext context) => Material(
-    color: Colors.purple,
+    color: Colors.deepPurple,
     child: InkWell(
       onTap: () {
         Navigator.pop(context);
@@ -114,7 +114,7 @@ class MenuWidget extends StatelessWidget {
       //   },
       // ),
       ListTile(
-        leading: const Icon(Icons.view_list, color: Colors.purple),
+        leading: const Icon(Icons.view_list, color: Colors.deepPurple),
         title: const Text('Go to checklist'),
         onTap: () {
           Navigator.pop(context);
@@ -122,7 +122,7 @@ class MenuWidget extends StatelessWidget {
         },
       ),
       ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
         title: const Text('Go to PDF list'),
         onTap: () {
           Navigator.pop(context);
@@ -130,7 +130,7 @@ class MenuWidget extends StatelessWidget {
         },
       ),
       ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
         title: const Text('Go to admins PDF list new'),
         onTap: () {
           Navigator.pop(context);
@@ -138,7 +138,7 @@ class MenuWidget extends StatelessWidget {
         },
       ),
       ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
         title: const Text('Go to admins Company list'),
         onTap: () {
           Navigator.pop(context);
@@ -146,10 +146,10 @@ class MenuWidget extends StatelessWidget {
         },
       ),
 
-      const Divider(color: Colors.purple),
+      const Divider(color: Colors.deepPurple),
 
       ListTile(
-        leading: const Icon(Icons.edit, color: Colors.purple),
+        leading: const Icon(Icons.edit, color: Colors.deepPurple),
         title: const Text('Modifier vos informations'),
         onTap: () {
           Navigator.pop(context);
@@ -157,7 +157,7 @@ class MenuWidget extends StatelessWidget {
         },
       ),
       ListTile(
-        leading: const Icon(Icons.mail, color: Colors.purple),
+        leading: const Icon(Icons.mail, color: Colors.deepPurple),
         title: const Text('Messagerie'),
         onTap: () {
           Navigator.pop(context);
@@ -165,14 +165,14 @@ class MenuWidget extends StatelessWidget {
         },
       ),
       ListTile(
-        leading: const Icon(Icons.shopping_cart, color: Colors.purple),
+        leading: const Icon(Icons.shopping_cart, color: Colors.deepPurple),
         title: const Text('Accéder au shop'),
         onTap: () {
           Navigator.pop(context);
         },
       ),
       ListTile(
-        leading: const Icon(Icons.lock, color: Colors.purple),
+        leading: const Icon(Icons.lock, color: Colors.deepPurple),
         title: const Text('Modifier mot de passe'),
         onTap: () {
           Navigator.pop(context);
@@ -190,7 +190,7 @@ class MenuWidget extends StatelessWidget {
         ),
       if (role == 'superadmin' )
         ListTile(
-          leading: const Icon(Icons.man_3_outlined, color: Colors.purple),
+          leading: const Icon(Icons.man_3_outlined, color: Colors.deepPurple),
           title: const Text('Page du super admin'),
           onTap: () {
             Navigator.pop(context);
