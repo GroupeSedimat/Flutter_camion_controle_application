@@ -53,7 +53,7 @@ class ResetPasswordPage extends StatelessWidget {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
-                          borderSide: BorderSide(color: Colors.purpleAccent),
+                          borderSide: BorderSide(color: Colors.deepPurpleAccent),
                         ),
                       ),
                       keyboardType: TextInputType.emailAddress,
