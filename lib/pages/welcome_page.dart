@@ -1,9 +1,15 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_super_parameters
+
+//import 'dart:js';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 
 import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/settings_page.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class WelcomePage extends StatelessWidget {
   WelcomePage({Key? key}) : super(key: key);
@@ -24,7 +30,7 @@ class WelcomePage extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.settings),
           onPressed: () {
-            // Handle settings button press
+           Get.to(() => SettingsPage());
           },
         ),
       ],
@@ -53,11 +59,9 @@ class WelcomePage extends StatelessWidget {
                   width: w,
                   height: h * 0.3,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.purple, Colors.deepPurple],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
+                   
+                      color: Color.fromARGB(255, 214, 189, 239),
+                   
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
