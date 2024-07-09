@@ -6,6 +6,7 @@ import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/settings_page.dart';
 import 'package:get/get.dart';
 
 class AdminPage extends StatelessWidget {
@@ -20,9 +21,9 @@ class AdminPage extends StatelessWidget {
         title: Text('Page d\'administration'),
         actions: [
           IconButton(
-            icon: Icon(Icons.account_circle),
+            icon: Icon(Icons.settings),
             onPressed: () {
-              // Ajoutez ici la navigation vers la page de profil utilisateur
+              Get.to(() => SettingsPage());
             },
           ),
         ],
@@ -80,7 +81,7 @@ class AdminPage extends StatelessWidget {
           'Checklist',
           Icons.checklist,
           () {
-           // Get.to(() => ChecklistPage());
+           Get.to(() => const CheckList());
           },
         ),
         ListTile(
@@ -133,7 +134,7 @@ class AdminPage extends StatelessWidget {
           'Checklist',
           Icons.checklist,
           () {
-            //Get.to(() => ChecklistPage());
+            Get.to(() => const CheckList());
           },
         ),
         _buildDashboardItem(
