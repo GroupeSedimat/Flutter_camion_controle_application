@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_super_parameters
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_super_parameters, unnecessary_import
 
 //import 'dart:js';
 import 'package:flutter/material.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_application_1/services/user_service.dart';
 
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/settings_page.dart';
+
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
@@ -30,7 +31,8 @@ class WelcomePage extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.settings),
           onPressed: () {
-           Get.to(() => SettingsPage());
+            Get.to(() => SettingsPage());
+          
           },
         ),
       ],
@@ -95,9 +97,9 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildButton(
                   context,
-                  'Go to data',
-                  Icons.bar_chart,
-                  '/loadingdata',
+                  'Go to maps',
+                  Icons.map,
+                  '/map',
                 ),
                 const SizedBox(height: 200),
                 _buildButton(
