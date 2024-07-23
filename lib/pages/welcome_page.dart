@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_super_parameters, unnecessary_import
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_super_parameters, unnecessary_import, prefer_const_literals_to_create_immutables
 
 //import 'dart:js';
 import 'package:flutter/material.dart';
@@ -73,14 +73,14 @@ class WelcomePage extends StatelessWidget {
                         backgroundImage: AssetImage("assets/images/836.jpg"),
                       ),
                       const SizedBox(height: 10),
-                      Text(
+                      /*Text(
                         userData.username,
                         style: const TextStyle(
                           fontSize: 27,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                 ),
