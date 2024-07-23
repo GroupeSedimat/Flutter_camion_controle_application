@@ -56,7 +56,7 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
             ),
             color: Colors.white,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(14.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
@@ -87,53 +87,60 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                  Row(
+                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
+                          onPressed: () {
+                            PDFOpen open = PDFOpen(url: widget.url);
+                            open.openPDF();
+                          },
+                          icon: Icon(Icons.picture_as_pdf),
+                          label: Text('Open PDF'),
                         ),
-                        onPressed: () {
-                          PDFOpen open = PDFOpen(url: widget.url);
-                          open.openPDF();
-                        },
-                        icon: Icon(Icons.picture_as_pdf),
-                        label: Text('Open PDF'),
                       ),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                      SizedBox(width: 10), // Ajouter un espace entre les boutons
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
+                          onPressed: () {
+                            PdfDownload(
+                                name: "${widget.userData.username}.${widget.fileName}",
+                                url: widget.url)
+                                .downloadFile();
+                            showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('PDF downloaded'),
+                                  content: Text(
+                                      'Your PDF file has been saved under the name: ${widget.userData.username}.${widget.fileName}.pdf'),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Ok'))
+                                  ],
+                                ));
+                          },
+                          icon: Icon(Icons.download),
+                          label: Text('Download PDF'),
                         ),
-                        onPressed: () {
-                          PdfDownload(
-                              name: "${widget.userData.username}.${widget.fileName}",
-                              url: widget.url)
-                              .downloadFile();
-                          showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('PDF downloaded'),
-                                content: Text(
-                                    'Your PDF file has been saved under the name: ${widget.userData.username}.${widget.fileName}.pdf'),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Ok'))
-                                ],
-                              ));
-                        },
-                        icon: Icon(Icons.download),
-                        label: Text('Download PDF'),
                       ),
                     ],
-                  ),
+                  )
+
+
                 ],
               ),
             ),
