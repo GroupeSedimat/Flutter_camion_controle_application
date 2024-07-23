@@ -117,15 +117,15 @@ class WelcomePage extends StatelessWidget {
                     );
                   },
                 ),
-                if (userData.role == 'admin')
-                  const SizedBox(height: 20),
+                /*if (userData.role == 'admin')
+                  const SizedBox(height: 20),c
                 if (userData.role == 'admin')
                   _buildButton(
                     context,
                     "Admin Page",
                     Icons.admin_panel_settings,
                     '/adminpage',
-                  ),
+                  ),*/
                 const SizedBox(height: 20),
 
 
