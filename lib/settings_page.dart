@@ -1,6 +1,9 @@
 // ignore_for_file: use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
+import 'package:flutter_application_1/pages/user/reset_password_page.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import '../theme_provider.dart';
 import '../locale_provider.dart';
@@ -44,6 +47,23 @@ class SettingsPage extends StatelessWidget {
                   );
                 }).toList(),
               ),
+            ),
+            ListTile(
+              title: Text('Modifier vos informations'),
+              trailing: Icon(Icons.edit),
+              onTap: () {
+               Navigator.pop(context);
+               Get.to(() => ModifyProfilePage());
+              },
+            ),
+            ListTile(
+              trailing: Icon(Icons.lock),
+              title: Text('Modifier mot de passe'),
+              
+              onTap: () {
+                  Navigator.pop(context);
+                 Get.to(() => ResetPasswordPage());
+              },
             ),
           ],
         ),

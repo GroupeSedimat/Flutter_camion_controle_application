@@ -13,8 +13,6 @@ import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
-import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 
 class MenuWidget extends StatelessWidget {
   String username = "";
@@ -151,14 +149,14 @@ class MenuWidget extends StatelessWidget {
 
       const Divider(color: Colors.deepPurple),
 
-      ListTile(
+      /*ListTile(
         leading: const Icon(Icons.edit, color: Colors.deepPurple),
         title: const Text('Modifier vos informations'),
         onTap: () {
           Navigator.pop(context);
           Get.to(() => ModifyProfilePage());
         },
-      ),
+      ),*/
       ListTile(
         leading: const Icon(Icons.mail, color: Colors.deepPurple),
         title: const Text('Messagerie'),
@@ -167,21 +165,14 @@ class MenuWidget extends StatelessWidget {
           Get.to(() =>  MessagingPage ());
         },
       ),
-      ListTile(
+      /*ListTile(
         leading: const Icon(Icons.shopping_cart, color: Colors.deepPurple),
         title: const Text('Accéder au shop'),
         onTap: () {
           Navigator.pop(context);
         },
-      ),
-      ListTile(
-        leading: const Icon(Icons.lock, color: Colors.deepPurple),
-        title: const Text('Modifier mot de passe'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => ResetPasswordPage());
-        },
-      ),
+      ),*/
+      
       if (role == 'admin')
         ListTile(
           leading: const Icon(Icons.manage_accounts, color: Colors.purple),
