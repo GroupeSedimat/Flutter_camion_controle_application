@@ -33,8 +33,7 @@ class AdminPage extends StatelessWidget {
       body: _buildDashboard(),
     );
   }
-
-  Widget _buildDrawer(BuildContext context) {
+Widget _buildDrawer(BuildContext context) {
   return Drawer(
     child: ListView(
       padding: EdgeInsets.zero,
@@ -90,6 +89,12 @@ class AdminPage extends StatelessWidget {
           leading: Icon(Icons.exit_to_app),
           onTap: () {
             AuthController.instance.logOut();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+              content: Text('Vous avez été déconnecté'),
+              backgroundColor: Colors.green,
+              ),
+            );
           },
         ),
       ],
