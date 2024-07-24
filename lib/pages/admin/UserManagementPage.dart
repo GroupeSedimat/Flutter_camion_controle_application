@@ -6,11 +6,16 @@ import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
+import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:get/get.dart';
-
 
 class UserManagementPage extends StatelessWidget {
   final AuthController authController = Get.find();
+  final DatabaseCompanyService companyService = DatabaseCompanyService();
+
+  Future<Map<String, String>> getCompanyNames() async {
+    return await companyService.getAllCompaniesNames();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,80 +35,108 @@ class UserManagementPage extends StatelessWidget {
             return MyUser.fromJson(data);
           }).toList();
 
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              var user = users[index];
-              return Card(
-                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                elevation: 3,
-                child: ListTile(
-                  title: Text(user.username),
-                  subtitle: Text(user.email),
-                  trailing: PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert),
-                    onSelected: (String value) {
-                      switch (value) {
-                        case 'view':
-                          Get.to(() => UserDetailsPage(user: user));
-                          break;
-                        case 'edit':
-                          Get.to(() => UserEditPage(user: user));
-                          break;
-                        case 'reset_password':
-                          _resetPassword(user.email);
-                          break;
-                        case 'delete':
-                          _deleteUser(context, user.username);
-                          break;
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        PopupMenuItem(
-                          value: 'view',
-                          child: Row(
-                            children: [
-                              Icon(Icons.visibility),
-                              SizedBox(width: 8),
-                              Text('Voir les détails'),
-                            ],
+         
+          return FutureBuilder<Map<String, String>>(
+            future: getCompanyNames(),
+            builder: (context, companySnapshot) {
+              if (!companySnapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              var companyNames = companySnapshot.data!;
+
+              var usersByCompany = <String, List<MyUser>>{};
+              for (var user in users) {
+                var companyName = companyNames[user.company] ?? 'Unknown';
+                if (usersByCompany[companyName] == null) {
+                  usersByCompany[companyName] = [];
+                }
+                usersByCompany[companyName]!.add(user);
+              }
+
+              return ListView.builder(
+                itemCount: usersByCompany.length,
+                itemBuilder: (context, index) {
+                  var company = usersByCompany.keys.elementAt(index);
+                  var companyUsers = usersByCompany[company]!;
+
+                  return ExpansionTile(
+                    title: Text(company),
+                    children: companyUsers.map((user) {
+                      return Card(
+                        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        elevation: 3,
+                        child: ListTile(
+                          title: Text(user.username),
+                          subtitle: Text(user.email),
+                          trailing: PopupMenuButton<String>(
+                            icon: Icon(Icons.more_vert),
+                            onSelected: (String value) {
+                              switch (value) {
+                                case 'view':
+                                  Get.to(() => UserDetailsPage(user: user));
+                                  break;
+                                case 'edit':
+                                  Get.to(() => UserEditPage(user: user));
+                                  break;
+                                case 'reset_password':
+                                  _resetPassword(user.email);
+                                  break;
+                                case 'delete':
+                                  _deleteUser(context, user.username);
+                                  break;
+                              }
+                            },
+                            itemBuilder: (BuildContext context) {
+                              return [
+                                PopupMenuItem(
+                                  value: 'view',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.visibility),
+                                      SizedBox(width: 8),
+                                      Text('Voir les détails'),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.edit),
+                                      SizedBox(width: 8),
+                                      Text('Modifier'),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'reset_password',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.lock),
+                                      SizedBox(width: 8),
+                                      Text('Réinitialiser le mot de passe'),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.delete),
+                                      SizedBox(width: 8),
+                                      Text('Supprimer'),
+                                    ],
+                                  ),
+                                ),
+                              ];
+                            },
                           ),
                         ),
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit),
-                              SizedBox(width: 8),
-                              Text('Modifier'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'reset_password',
-                          child: Row(
-                            children: [
-                              Icon(Icons.lock),
-                              SizedBox(width: 8),
-                              Text('Réinitialiser le mot de passe'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete),
-                              SizedBox(width: 8),
-                              Text('Supprimer'),
-                            ],
-                          ),
-                        ),
-                      ];
-                    },
-                  ),
-                ),
+                      );
+                    }).toList(),
+                  );
+                },
               );
             },
           );
