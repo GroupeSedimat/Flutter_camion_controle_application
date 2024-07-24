@@ -2,7 +2,6 @@
 
 //import 'dart:js';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 
@@ -38,8 +37,7 @@ class WelcomePage extends StatelessWidget {
       ],
     );
   }
-
-  Widget _buildBody(BuildContext context) {
+Widget _buildBody(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return FutureBuilder<MyUser>(
@@ -101,7 +99,7 @@ class WelcomePage extends StatelessWidget {
                   Icons.map,
                   '/map',
                 ),
-                const SizedBox(height: 200),
+                /*const SizedBox(height: 200),
                 _buildButton(
                   context,
                   "Se déconnecter",
@@ -116,7 +114,7 @@ class WelcomePage extends StatelessWidget {
                       ),
                     );
                   },
-                ),
+                ), */
                 /*if (userData.role == 'admin')
                   const SizedBox(height: 20),c
                 if (userData.role == 'admin')
