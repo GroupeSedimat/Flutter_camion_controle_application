@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
+import 'package:flutter_application_1/pages/admin/UserManagementAdmin.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/user/messaging_page.dart';
@@ -11,6 +11,7 @@ import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_list.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get.dart';
 
@@ -19,7 +20,7 @@ class MenuWidget extends StatelessWidget {
   String role = "";
   MenuWidget({super.key});
 
-  @override
+@override
   Widget build(BuildContext context) => FutureBuilder<MyUser>(
     future: UserService().getCurrentUserData(),
     builder: (context, snapshot) {
@@ -172,14 +173,13 @@ class MenuWidget extends StatelessWidget {
           Navigator.pop(context);
         },
       ),*/
-      
-      if (role == 'admin')
+       if (role == 'admin')
         ListTile(
-          leading: const Icon(Icons.manage_accounts, color: Colors.purple),
+          leading: const Icon(Icons.manage_accounts, color: Colors.deepPurple),
           title: const Text('Gestion des utilisateurs'),
           onTap: () {
             Navigator.pop(context);
-            Get.to(() => UserManagementPage());
+            Get.to(() => UserManagementAdmin());
           },
         ),
       if (role == 'superadmin' )
@@ -192,6 +192,20 @@ class MenuWidget extends StatelessWidget {
           },
         ),
 
+      ListTile(
+        leading: const Icon(Icons.logout, color: Colors.deepPurple),
+        title: const Text('Deconnexion'),
+        onTap: () {
+                    AuthController.instance.logOut();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Vous avez été déconnecté'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+      ),
+     
     ]
   );
 }
