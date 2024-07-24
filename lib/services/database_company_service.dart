@@ -18,11 +18,10 @@ class DatabaseCompanyService{
         fromFirestore: (snapshots, _)=> Company.fromJson(
           snapshots.data()!,
         ),
-        toFirestore: (company, _) => company.toJson()
+        toFirestore: (company, _) => company.toJson()                         
     );
   }
-
-  Future<Map<String, Company>> getAllCompanies() async {
+Future<Map<String, Company>> getAllCompanies() async {
     try {
       final querySnapshot = await _companyRef.get();
       List companySnapshotList = querySnapshot.docs;
@@ -47,6 +46,32 @@ class DatabaseCompanyService{
       rethrow; // Gérez l’erreur le cas échéant.
     }
   }
+  Future<Map<String, String>> getAllCompaniesNames() async {
+  try {
+    final querySnapshot = await _companyRef.get();
+    List companySnapshotList = querySnapshot.docs;
+
+    Map<String, String> companies = HashMap();
+    for (var companySnapshot in companySnapshotList){
+      Company company = companySnapshot.data();
+      companies.addAll({companySnapshot.id: company.name});
+    }
+    var sortedKeys = companies.keys.toList(growable: false)
+      ..sort((k1, k2) => companies[k1]!.compareTo(companies[k2]!));
+
+    LinkedHashMap<String, String> sortedCompanies = LinkedHashMap.fromIterable(
+      sortedKeys,
+      key: (k) => k,
+      value: (k) => companies[k]!,
+    );
+
+    return sortedCompanies;
+
+  } catch (e) {
+    print("Error getting companies: $e");
+    rethrow; // Gérez l’erreur le cas échéant.
+  }
+}
 
   Future<Company> getOneCompanyByName(String name) async {
     try {
