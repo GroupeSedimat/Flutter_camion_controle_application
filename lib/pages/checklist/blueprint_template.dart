@@ -41,7 +41,7 @@ class BlueprintTemplate extends StatelessWidget{
             Wrap(
               alignment: WrapAlignment.spaceEvenly,
               children: [
-                if(role == "admin" || role == "superadmin")
+                if(role == "superadmin")
                 TextButton.icon(
                   onPressed: () => edit(),
                   style: TextButton.styleFrom(
@@ -54,7 +54,7 @@ class BlueprintTemplate extends StatelessWidget{
                     color: Colors.red,
                   ),
                 ),
-                if(role == "user")
+                if(role == "admin" || role == "user")
                 TextButton.icon(
                   onPressed: () => validate(),
                   style: TextButton.styleFrom(
@@ -67,7 +67,7 @@ class BlueprintTemplate extends StatelessWidget{
                     color: Colors.red,
                   ),
                 ),
-                if(role == "admin" || role == "superadmin")
+                if(role == "superadmin")
                 TextButton.icon(
                   onPressed: () => delete(),
                   style: TextButton.styleFrom(
