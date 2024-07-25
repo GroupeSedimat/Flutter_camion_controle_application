@@ -58,7 +58,7 @@ class DatabaseListOfListsService{
     return listOfList;
   }
 
-  void addList(ListOfLists listItem) async {
+  Future<void> addList(ListOfLists listItem) async {
     _listRef.add(listItem);
   }
 
@@ -66,8 +66,20 @@ class DatabaseListOfListsService{
     _listRef.doc(listItemID).update(listItem.toJson());
   }
 
+  Future<void> updateListItemByListNr(int listNr, ListOfLists listItem) async {
+    await _listRef.where("listNr", isEqualTo: listNr).get().then((value) => value.docs.forEach((element) async {
+      await element.reference.update(listItem.toJson());
+    }));
+  }
+
   void deleteListItem(String listItemID){
     _listRef.doc(listItemID).delete();
+  }
+  
+  Future<void> deleteListItemByListNr(int listNr) async {
+    await _listRef.where("listNr", isEqualTo: listNr).get().then((value) => value.docs.forEach((element) async {
+      await element.reference.delete();
+    }));
   }
 
   Future<void> deleteListItemFuture(String listItemID) async {
