@@ -26,7 +26,6 @@ class UserManagementAdmin extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-
         var currentUserData = snapshot.data!.data() as Map<String, Object?>;
         var currentUserCompany = currentUserData['company'];
 

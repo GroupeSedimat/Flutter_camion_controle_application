@@ -39,17 +39,14 @@ Widget _buildDrawer(BuildContext context) {
       padding: EdgeInsets.zero,
       children: [
         DrawerHeader(
-          decoration: BoxDecoration(
-            color: Colors.deepPurple,
-          ),
-          child: Center(
-            child: Icon(
-              Icons.account_circle,
-              size: 100,
-              color: Colors.white,
-            ),
-          ),
-        ),
+  decoration: BoxDecoration(
+    color: Colors.deepPurple,
+  ),
+  child: Center(
+    child: Container(), // Un conteneur vide
+  ),
+),
+
         _buildListTile(
           context,
           'Welcome Page',
