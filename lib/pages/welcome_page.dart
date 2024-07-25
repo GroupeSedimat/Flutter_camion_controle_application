@@ -1,9 +1,15 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, use_super_parameters, unnecessary_import, prefer_const_literals_to_create_immutables
+
+//import 'dart:js';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 
 import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/settings_page.dart';
+
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class WelcomePage extends StatelessWidget {
   WelcomePage({Key? key}) : super(key: key);
@@ -24,14 +30,14 @@ class WelcomePage extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.settings),
           onPressed: () {
-            // Handle settings button press
+            Get.to(() => SettingsPage());
+          
           },
         ),
       ],
     );
   }
-
-  Widget _buildBody(BuildContext context) {
+Widget _buildBody(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return FutureBuilder<MyUser>(
@@ -53,11 +59,9 @@ class WelcomePage extends StatelessWidget {
                   width: w,
                   height: h * 0.3,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.purple, Colors.deepPurpleAccent],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
+                   
+                      color: Color.fromARGB(255, 214, 189, 239),
+                   
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -67,14 +71,14 @@ class WelcomePage extends StatelessWidget {
                         backgroundImage: AssetImage("assets/images/836.jpg"),
                       ),
                       const SizedBox(height: 10),
-                      Text(
+                      /*Text(
                         userData.username,
                         style: const TextStyle(
                           fontSize: 27,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                 ),
@@ -91,11 +95,11 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildButton(
                   context,
-                  'Go to data',
-                  Icons.bar_chart,
-                  '/loadingdata',
+                  'Go to maps',
+                  Icons.map,
+                  '/map',
                 ),
-                const SizedBox(height: 200),
+                /*const SizedBox(height: 200),
                 _buildButton(
                   context,
                   "Se déconnecter",
@@ -110,16 +114,16 @@ class WelcomePage extends StatelessWidget {
                       ),
                     );
                   },
-                ),
-                if (userData.role == 'admin')
-                  const SizedBox(height: 20),
+                ), */
+                /*if (userData.role == 'admin')
+                  const SizedBox(height: 20),c
                 if (userData.role == 'admin')
                   _buildButton(
                     context,
                     "Admin Page",
                     Icons.admin_panel_settings,
                     '/adminpage',
-                  ),
+                  ),*/
                 const SizedBox(height: 20),
 
 
@@ -138,7 +142,7 @@ class WelcomePage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white, backgroundColor: Colors.purple,
+          foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),

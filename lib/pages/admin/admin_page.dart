@@ -6,6 +6,8 @@ import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/settings_page.dart';
+
 import 'package:get/get.dart';
 
 class AdminPage extends StatelessWidget {
@@ -20,9 +22,9 @@ class AdminPage extends StatelessWidget {
         title: Text('Page d\'administration'),
         actions: [
           IconButton(
-            icon: Icon(Icons.account_circle),
+            icon: Icon(Icons.settings),
             onPressed: () {
-              // Ajoutez ici la navigation vers la page de profil utilisateur
+          Get.to(() => SettingsPage());
             },
           ),
         ],
@@ -31,24 +33,20 @@ class AdminPage extends StatelessWidget {
       body: _buildDashboard(),
     );
   }
-
-  Widget _buildDrawer(BuildContext context) {
+Widget _buildDrawer(BuildContext context) {
   return Drawer(
     child: ListView(
       padding: EdgeInsets.zero,
       children: [
         DrawerHeader(
-          decoration: BoxDecoration(
-            color: Colors.deepPurple,
-          ),
-          child: Center(
-            child: Icon(
-              Icons.account_circle,
-              size: 100,
-              color: Colors.white,
-            ),
-          ),
-        ),
+  decoration: BoxDecoration(
+    color: Colors.deepPurple,
+  ),
+  child: Center(
+    child: Container(), // Un conteneur vide
+  ),
+),
+
         _buildListTile(
           context,
           'Welcome Page',
@@ -80,7 +78,7 @@ class AdminPage extends StatelessWidget {
           'Checklist',
           Icons.checklist,
           () {
-           // Get.to(() => ChecklistPage());
+           Get.to(() => const CheckList());
           },
         ),
         ListTile(
@@ -88,6 +86,12 @@ class AdminPage extends StatelessWidget {
           leading: Icon(Icons.exit_to_app),
           onTap: () {
             AuthController.instance.logOut();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+              content: Text('Vous avez été déconnecté'),
+              backgroundColor: Colors.green,
+              ),
+            );
           },
         ),
       ],
@@ -133,7 +137,7 @@ class AdminPage extends StatelessWidget {
           'Checklist',
           Icons.checklist,
           () {
-            //Get.to(() => ChecklistPage());
+            Get.to(() => const CheckList());
           },
         ),
         _buildDashboardItem(

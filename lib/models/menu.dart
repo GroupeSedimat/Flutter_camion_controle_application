@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
+import 'package:flutter_application_1/pages/admin/UserManagementAdmin.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/user/messaging_page.dart';
@@ -11,17 +11,16 @@ import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_list.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get.dart';
-import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
-import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 
 class MenuWidget extends StatelessWidget {
   String username = "";
   String role = "";
   MenuWidget({super.key});
 
-  @override
+@override
   Widget build(BuildContext context) => FutureBuilder<MyUser>(
     future: UserService().getCurrentUserData(),
     builder: (context, snapshot) {
@@ -51,7 +50,7 @@ class MenuWidget extends StatelessWidget {
   );
 
   Widget buildHeader(BuildContext context) => Material(
-    color: Colors.purple,
+    color: Colors.deepPurple,
     child: InkWell(
       onTap: () {
         Navigator.pop(context);
@@ -114,7 +113,7 @@ class MenuWidget extends StatelessWidget {
       //   },
       // ),
       ListTile(
-        leading: const Icon(Icons.view_list, color: Colors.purple),
+        leading: const Icon(Icons.view_list, color: Colors.deepPurple),
         title: const Text('Go to checklist'),
         onTap: () {
           Navigator.pop(context);
@@ -123,7 +122,7 @@ class MenuWidget extends StatelessWidget {
       ),
       if (role == 'user')
       ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
         title: const Text('Go to PDF list'),
         onTap: () {
           Navigator.pop(context);
@@ -132,7 +131,7 @@ class MenuWidget extends StatelessWidget {
       ),
       if (role == 'admin' || role == 'superadmin' )
       ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
         title: const Text('Go to admins PDF list new'),
         onTap: () {
           Navigator.pop(context);
@@ -141,7 +140,7 @@ class MenuWidget extends StatelessWidget {
       ),
       if (role == 'admin' || role == 'superadmin' )
       ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.purple),
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
         title: const Text('Go to admins Company list'),
         onTap: () {
           Navigator.pop(context);
@@ -149,51 +148,43 @@ class MenuWidget extends StatelessWidget {
         },
       ),
 
-      const Divider(color: Colors.purple),
+      const Divider(color: Colors.deepPurple),
 
-      ListTile(
-        leading: const Icon(Icons.edit, color: Colors.purple),
+      /*ListTile(
+        leading: const Icon(Icons.edit, color: Colors.deepPurple),
         title: const Text('Modifier vos informations'),
         onTap: () {
           Navigator.pop(context);
           Get.to(() => ModifyProfilePage());
         },
-      ),
+      ),*/
       ListTile(
-        leading: const Icon(Icons.mail, color: Colors.purple),
+        leading: const Icon(Icons.mail, color: Colors.deepPurple),
         title: const Text('Messagerie'),
         onTap: () {
           Navigator.pop(context);
           Get.to(() =>  MessagingPage ());
         },
       ),
-      ListTile(
-        leading: const Icon(Icons.shopping_cart, color: Colors.purple),
+      /*ListTile(
+        leading: const Icon(Icons.shopping_cart, color: Colors.deepPurple),
         title: const Text('Accéder au shop'),
         onTap: () {
           Navigator.pop(context);
         },
-      ),
-      ListTile(
-        leading: const Icon(Icons.lock, color: Colors.purple),
-        title: const Text('Modifier mot de passe'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => ResetPasswordPage());
-        },
-      ),
-      if (role == 'admin')
+      ),*/
+       if (role == 'admin')
         ListTile(
-          leading: const Icon(Icons.manage_accounts, color: Colors.purple),
+          leading: const Icon(Icons.manage_accounts, color: Colors.deepPurple),
           title: const Text('Gestion des utilisateurs'),
           onTap: () {
             Navigator.pop(context);
-            Get.to(() => UserManagementPage());
+            Get.to(() => UserManagementAdmin());
           },
         ),
       if (role == 'superadmin' )
         ListTile(
-          leading: const Icon(Icons.man_3_outlined, color: Colors.purple),
+          leading: const Icon(Icons.man_3_outlined, color: Colors.deepPurple),
           title: const Text('Page du super admin'),
           onTap: () {
             Navigator.pop(context);
@@ -201,6 +192,20 @@ class MenuWidget extends StatelessWidget {
           },
         ),
 
+      ListTile(
+        leading: const Icon(Icons.logout, color: Colors.deepPurple),
+        title: const Text('Deconnexion'),
+        onTap: () {
+                    AuthController.instance.logOut();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Vous avez été déconnecté'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+      ),
+     
     ]
   );
 }
