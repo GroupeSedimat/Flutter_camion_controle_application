@@ -46,7 +46,7 @@ class _CompanyListState extends State<CompanyList> {
 
     return Scaffold(
       body: BasePage(
-        appBar: _buildAppBar(),
+        title: "Companies list",
         body: _buildBody(context),
       ),
       floatingActionButton: FloatingActionButton(
@@ -143,19 +143,6 @@ class _CompanyListState extends State<CompanyList> {
       ),
     );
   } */
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: const Text(
-        'List of all Companies',
-        style: TextStyle(
-          color: Colors.white,
-        ),
-      ),
-      centerTitle: true,
-      backgroundColor: Colors.blue[900],
-    );
-  }
   
   void showCompanyModal({required Company company, required String companyID}) {}
 }

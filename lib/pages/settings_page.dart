@@ -5,8 +5,8 @@ import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
 import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import '../theme_provider.dart';
-import '../locale_provider.dart';
+import '../../theme_provider.dart';
+import '../../locale_provider.dart';
 
 class SettingsPage extends StatelessWidget {
   @override

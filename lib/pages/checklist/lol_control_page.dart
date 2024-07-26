@@ -39,6 +39,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
               initialIndex: 0,
               length: listOfLists.length,
               child: BasePage(
+                title: "List of Lists",
                 body: body(listOfLists, userMap),
               ),
             );

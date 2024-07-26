@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_company_tile.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_user_tile.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
@@ -13,13 +14,17 @@ class AdminPdfListView extends StatelessWidget {
   final DatabaseCompanyService _databaseCompanyService = DatabaseCompanyService();
   late MyUser user;
   late Company company;
+
   @override
   Widget build(BuildContext context) {
+    return BasePage(
+      title: "PDF list by company",
+      body: _buildBody(context),
+    );
+  }
+
+  _buildBody(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Liste des fichiers PDF", textAlign: TextAlign.center),
-        backgroundColor: Colors.teal,
-      ),
       body: FutureBuilder<ListResult>(
         future: getCompanyPdfData(),
         builder: (context, snapshot) {
@@ -82,3 +87,5 @@ class AdminPdfListView extends StatelessWidget {
     }
   }
 }
+
+

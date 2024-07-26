@@ -2,12 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/menu.dart';
-import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/pages/settings_page.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 
 class BasePage extends StatelessWidget {
   final Widget body;
   final PreferredSizeWidget? appBar;
-  BasePage({super.key, required this.body, this.appBar});
+  final String? title;
+  BasePage({super.key, required this.body, this.appBar, this.title});
 
 
   @override
@@ -17,17 +20,18 @@ class BasePage extends StatelessWidget {
       backgroundColor: Colors.purple[50],
       appBar: appBar ?? AppBar(
         backgroundColor: Colors.purple,
-        elevation: 0,
-        actions: <Widget>[
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+        title: Text(
+            title ?? "",
+            style: TextStyle(
+              color: Colors.amber,
             ),
-            onPressed: () async {
-              AuthController.instance.logOut();
-              Navigator.pushReplacementNamed(context, '/wrapper');
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Get.to(() => SettingsPage());
             },
-            child: const Text('Logout'),
           ),
         ],
       ),

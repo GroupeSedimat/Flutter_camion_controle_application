@@ -5,6 +5,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/pages/settings_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/checklist/add_blueprint_form.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
@@ -18,6 +19,8 @@ import 'package:flutter_application_1/services/check_list/database_list_of_lists
 import 'package:flutter_application_1/services/check_list/database_tasks_service.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 
 class CheckList extends StatefulWidget {
   const CheckList({super.key});
@@ -175,8 +178,16 @@ class _CheckListState extends State<CheckList> {
           color: Colors.amber,
         ),
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Get.to(() => SettingsPage());
+          },
+        ),
+      ],
       centerTitle: true,
-      backgroundColor: Colors.blue[900],
+      backgroundColor: Colors.purple,
       bottom: TabBar(
         dividerColor: Colors.transparent,
         unselectedLabelColor: Colors.lightGreenAccent,

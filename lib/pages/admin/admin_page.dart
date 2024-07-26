@@ -2,11 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/UserApprovalPage.dart';
 import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
+import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/settings_page.dart';
+import 'package:flutter_application_1/pages/settings_page.dart';
 
 import 'package:get/get.dart';
 
@@ -17,98 +18,10 @@ class AdminPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Page d\'administration'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-          Get.to(() => SettingsPage());
-            },
-          ),
-        ],
-      ),
-      drawer: _buildDrawer(context),
+    return BasePage(
+      // drawer: _buildDrawer(context),
+      title: "Admin page",
       body: _buildDashboard(),
-    );
-  }
-Widget _buildDrawer(BuildContext context) {
-  return Drawer(
-    child: ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        DrawerHeader(
-  decoration: BoxDecoration(
-    color: Colors.deepPurple,
-  ),
-  child: Center(
-    child: Container(), // Un conteneur vide
-  ),
-),
-
-        _buildListTile(
-          context,
-          'Welcome Page',
-          Icons.home,
-          () {
-            Get.to(() => WelcomePage());
-          },
-        ),
-        if (userRole == UserRole.superadmin) ...[
-          _buildListTile(
-            context,
-            'Gestion des utilisateurs',
-            Icons.supervised_user_circle,
-            () {
-              Get.to(() => UserManagementPage());
-            },
-          ),
-          _buildListTile(
-            context,
-            'Approuver un compte',
-            Icons.approval,
-            () {
-              Get.to(() => UserApprovalPage());
-            },
-          ),
-        ],
-        _buildListTile(
-          context,
-          'Checklist',
-          Icons.checklist,
-          () {
-           Get.to(() => const CheckList());
-          },
-        ),
-        ListTile(
-          title: Text('Déconnexion'),
-          leading: Icon(Icons.exit_to_app),
-          onTap: () {
-            AuthController.instance.logOut();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-              content: Text('Vous avez été déconnecté'),
-              backgroundColor: Colors.green,
-              ),
-            );
-          },
-        ),
-      ],
-    ),
-  );
-}
-
-  Widget _buildListTile(
-    BuildContext context,
-    String title,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return ListTile(
-      title: Text(title),
-      leading: Icon(icon),
-      onTap: onTap,
     );
   }
 

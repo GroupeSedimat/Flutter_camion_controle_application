@@ -19,6 +19,7 @@ class _PDFShowListState extends State<PDFShowList> {
   @override
   Widget build(BuildContext context) {
     return BasePage(
+      title: "My PDF files",
       body: body(context),
     );
   }

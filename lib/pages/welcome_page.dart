@@ -6,10 +6,6 @@ import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 
 import 'package:flutter_application_1/pages/base_page.dart';
-import 'package:flutter_application_1/settings_page.dart';
-
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 class WelcomePage extends StatelessWidget {
   WelcomePage({Key? key}) : super(key: key);
@@ -17,26 +13,11 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      appBar: _buildAppBar(),
+      title: "Welcome Page",
       body: _buildBody(context),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      title: const Text('Welcome Page'),
-      backgroundColor: Colors.purple,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.settings),
-          onPressed: () {
-            Get.to(() => SettingsPage());
-          
-          },
-        ),
-      ],
-    );
-  }
 Widget _buildBody(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;

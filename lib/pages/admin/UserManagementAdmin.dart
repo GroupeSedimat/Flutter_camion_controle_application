@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
 import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
+import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -29,10 +30,8 @@ class UserManagementAdmin extends StatelessWidget {
         var currentUserData = snapshot.data!.data() as Map<String, Object?>;
         var currentUserCompany = currentUserData['company'];
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('Gestion des utilisateurs'),
-          ),
+        return BasePage(
+          title: 'Gestion des utilisateurs',
           body: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('users')

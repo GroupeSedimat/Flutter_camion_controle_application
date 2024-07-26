@@ -2,16 +2,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 
 class UserApprovalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Approuver les utilisateurs'),
-      ),
+    return BasePage(
+      title: 'Approuver les utilisateurs',
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('users').where('isApproved', isEqualTo: false).snapshots(),
         builder: (context, snapshot) {
@@ -56,6 +55,7 @@ class UserApprovalPage extends StatelessWidget {
       ),
     );
   }
+
   void _showApproveDialog(BuildContext context, MyUser user) {
     showDialog(
       context: context,

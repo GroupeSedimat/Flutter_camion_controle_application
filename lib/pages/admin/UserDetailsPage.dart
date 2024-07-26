@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, prefer_const_constructors_in_immutables, avoid_print
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
 
 class UserDetailsPage extends StatelessWidget {
@@ -16,11 +17,8 @@ class UserDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Détails de l\'utilisateur: ${user.toJson()}');
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Détails de l\'utilisateur'),
-      ),
+    return BasePage(
+      title: 'Détails de l\'utilisateur',
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
