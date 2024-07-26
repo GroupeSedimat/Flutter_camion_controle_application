@@ -15,7 +15,7 @@ class MapPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: 'Carte Simple',
+      title: 'Carte Map',
       body: _body(context),
     );
   }
