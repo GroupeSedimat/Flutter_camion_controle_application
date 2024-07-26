@@ -132,7 +132,7 @@ class MenuWidget extends StatelessWidget {
       ),
       if (role == 'superadmin')
       ListTile(
-        leading: const Icon(Icons.lock, color: Colors.purple),
+        leading: const Icon(Icons.lock, color: Colors.deepPurple),
         title: const Text('List of lists'),
         onTap: () {
           Navigator.pop(context);
