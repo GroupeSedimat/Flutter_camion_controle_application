@@ -23,7 +23,7 @@ class BasePage extends StatelessWidget {
         title: Text(
             title ?? "",
             style: TextStyle(
-              color: Colors.amber,
+              color: Colors.black,
             ),
         ),
         actions: [
