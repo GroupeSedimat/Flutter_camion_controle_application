@@ -5,6 +5,7 @@ import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/admin/UserManagementAdmin.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
+import 'package:flutter_application_1/pages/checklist/lol_control_page.dart';
 import 'package:flutter_application_1/pages/user/messaging_page.dart';
 import 'package:flutter_application_1/pages/company/company_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
@@ -127,6 +128,15 @@ class MenuWidget extends StatelessWidget {
         onTap: () {
           Navigator.pop(context);
           Get.to(() => const PDFShowList());
+        },
+      ),
+      if (role == 'superadmin')
+      ListTile(
+        leading: const Icon(Icons.lock, color: Colors.purple),
+        title: const Text('List of lists'),
+        onTap: () {
+          Navigator.pop(context);
+          Get.to(() => ListOfListsControlPage());
         },
       ),
       if (role == 'admin' || role == 'superadmin' )

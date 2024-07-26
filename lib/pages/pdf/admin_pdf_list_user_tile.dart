@@ -3,10 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/pdf/pdf_download.dart';
-import 'package:flutter_application_1/pages/pdf/pdf_open.dart';
+import 'package:flutter_application_1/pages/pdf/pdf_show_template.dart';
 import 'package:flutter_application_1/services/user_service.dart';
-import 'package:intl/intl.dart';
+
 
 class UserTile extends StatelessWidget {
   final Reference userRef;
@@ -32,7 +31,7 @@ class UserTile extends StatelessWidget {
           );
         } else if (snapshot.hasData) {
           final user = snapshot.data!;
-          final userName = user.username; // Assuming MyUser has a 'name' field
+          final userName = user.username;
 
           return FutureBuilder<ListResult>(
             future: userRef.listAll(),
@@ -50,65 +49,52 @@ class UserTile extends StatelessWidget {
               } else if (snapshot.hasData) {
                 final docList = snapshot.data!.items;
                 return ExpansionTile(
-                  title: Text(userName),
+                  // leading: Icon(Icons.person, color: Colors.black, size: 50),
+                  backgroundColor: Colors.lightBlueAccent,
+                  collapsedBackgroundColor: Colors.lightBlue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  collapsedShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  title: Text(
+                    userName,
+                    style: TextStyle(
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                   children: docList.map((docRef) {
                     return FutureBuilder<String>(
                       future: docRef.getDownloadURL(),
                       builder: (context, urlSnapshot) {
                         if (urlSnapshot.connectionState == ConnectionState.waiting) {
                           return ListTile(
-                            title: Text(docRef.name),
+                            title: Text(
+                              docRef.name,
+                            ),
                             subtitle: Text("Loading URL..."),
                           );
                         } else if (urlSnapshot.hasError) {
                           return ListTile(
-                            title: Text(docRef.name),
+                            title: Text(
+                              docRef.name,
+                            ),
                             subtitle: Text("Error: ${urlSnapshot.error}"),
                           );
                         } else if (urlSnapshot.hasData) {
-                          int timestamp = int.parse(docRef.name);
-                          DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-                          String formattedDate = DateFormat('dd/MM/yyyy HH:mm:ss').format(date);
-                          return ListTile(
-                            title: Text(formattedDate),
-                            // subtitle: Text(urlSnapshot.data!),
-                            subtitle: Wrap(
-                              alignment: WrapAlignment.spaceEvenly,
-                              children: [
-                                TextButton.icon(
-                                  onPressed: () async {
-                                    PDFOpen open = PDFOpen(url: urlSnapshot.data!);
-                                    await open.openPDF();
-                                  },
-                                  label: const Text('Open PDF'),
-                                  icon: const Icon(
-                                    Icons.picture_as_pdf,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                TextButton.icon(
-                                  onPressed: () {
-                                    //Save PDF on url: urlSnapshot.data!).downloadFile() with name: "$userName.$timestamp"
-                                    PdfDownload(name: "$userName.$timestamp", url: urlSnapshot.data!).downloadFile();
-                                    showDialog(context: context, builder: (context)=>AlertDialog(
-                                      title: const Text('PDF downloaded'),
-                                      content: Text('Your PDF file has been saved under the name: $userName.$timestamp.pdf'),
-                                      actions: [TextButton(onPressed: ()=>Navigator.pop(context), child: const Text('Ok'))],
-                                    ));
-
-                                  },
-                                  label: const Text('Download PDF'),
-                                  icon: const Icon(
-                                    Icons.picture_as_pdf,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          return PDFShowTemplate(
+                            fileName: docRef.name,
+                            url: urlSnapshot.data!,
+                            userData: user,
                           );
                         } else {
                           return ListTile(
-                            title: Text(docRef.name),
+                            title: Text(
+                              docRef.name,
+                            ),
                             subtitle: Text("No URL available"),
                           );
                         }
