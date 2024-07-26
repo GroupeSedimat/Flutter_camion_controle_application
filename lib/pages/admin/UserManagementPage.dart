@@ -70,7 +70,7 @@ class UserManagementPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey[700],
+                          color: Colors.black,
                         ),
                       ),
                       children: companyUsers.map((user) {
