@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 class AddListForm extends StatefulWidget {
   final ListOfLists? listItem; // Nullable, bo może być używany do edycji lub dodawania
@@ -92,25 +93,48 @@ class _AddListFormState extends State<AddListForm> {
                   return null;
                 },
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _typeControllers.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: TextFormField(
-                        controller: _typeControllers[index],
-                        decoration: InputDecoration(labelText: 'Type ${index + 1}'),
-                        onChanged: (value) {
-                          _types[index] = value;
+              FutureBuilder<Map<String, String>>(
+                future: UserService().getUsersIdAndName(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Text("No users found");
+                  } else {
+                    Map<String, String> _userMap = snapshot.data!;
+                    return Expanded(
+                      child: ListView.builder(
+                        itemCount: _typeControllers.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: DropdownButtonFormField<String>(
+                              value: _typeControllers[index].text.isNotEmpty ? _typeControllers[index].text : null,
+                              decoration: InputDecoration(labelText: 'Type ${index + 1}'),
+                              items: _userMap.entries.map((entry) {
+                                return DropdownMenuItem<String>(
+                                  value: entry.key,
+                                  child: Text(entry.value),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _typeControllers[index].text = value ?? '';
+                                  _types[index] = value ?? '';
+                                });
+                              },
+                            ),
+                            trailing: IconButton(
+                              icon: Icon(Icons.remove_circle),
+                              onPressed: () => _removeTypeField(index),
+                            ),
+                          );
                         },
                       ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.remove_circle),
-                        onPressed: () => _removeTypeField(index),
-                      ),
                     );
-                  },
-                ),
+                  }
+                },
               ),
               ElevatedButton(
                 onPressed: _addTypeField,

@@ -3,6 +3,7 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/checklist/add_list_form.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 class ListOfListsControlPage extends StatefulWidget {
   const ListOfListsControlPage({super.key});
@@ -14,26 +15,31 @@ class ListOfListsControlPage extends StatefulWidget {
 class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
 
   final DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
+  final UserService userService = UserService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-        future: databaseListOfListsService.getAllLists(),
+        future: Future.wait([
+          databaseListOfListsService.getAllLists(),
+          userService.getUsersIdAndName()
+        ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data == null) {
             return const Center(child: Text("No data found"));
           } else {
-            List<ListOfLists> listOfLists = snapshot.data!;
+            List<ListOfLists> listOfLists = snapshot.data![0] as List<ListOfLists>;
+            Map<String, String> userMap = snapshot.data![1] as Map<String, String>;
             return DefaultTabController(
               initialIndex: 0,
               length: listOfLists.length,
               child: BasePage(
-                body: body(listOfLists),
+                body: body(listOfLists, userMap),
               ),
             );
           }
@@ -55,15 +61,15 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
     );
   }
 
-  Widget body(List<ListOfLists> listOfLists) {
+  Widget body(List<ListOfLists> listOfLists, Map<String, String> userMap) {
     return ListView.builder(
-      padding: EdgeInsets.all(8),
+      padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
       itemCount: listOfLists.length,
       itemBuilder: (_, index) {
         return Padding(
           padding: EdgeInsets.all(8),
           child: ExpansionTile(
-            leading: Icon(Icons.edit, color: Colors.deepPurple, size: 50),
+            leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
             title: Text("${listOfLists[index].listNr}. ${listOfLists[index].listName}"),
             subtitle: Text('Tap here for details'),
             trailing: PopupMenuButton(
@@ -81,11 +87,11 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                 setState(() {});
               },
               itemBuilder: (context) => [
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'edit',
                   child: Text('Edit'),
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'delete',
                   child: Text('Delete'),
                 ),
@@ -93,7 +99,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
             ),
             children: listOfLists[index].types.map<Widget>((type) {
               return ListTile(
-                title: Text(type),
+                title: Text(userMap[type] ?? type),
               );
             }).toList(),
           ),

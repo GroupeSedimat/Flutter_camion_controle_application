@@ -1,4 +1,6 @@
 // ignore_for_file: constant_identifier_names
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -24,6 +26,21 @@ class UserService{
 
   Stream<QuerySnapshot> getUsersData(){
     return _userRef.snapshots();
+  }
+
+  Future<Map<String,String>> getUsersIdAndName() async {
+    Map<String, String> users = HashMap();
+    try {
+      final userSnapshot = await _userRef.get();
+      for (var doc in userSnapshot.docs) {
+        MyUser user = doc.data() as MyUser;
+        users[doc.id] = user.username;
+      }
+    } catch (error) {
+      // Gérez l’erreur
+      print("Error retrieving Users list: $error");
+    }
+    return users;
   }
 
   Future<MyUser> getCurrentUserData() async {
