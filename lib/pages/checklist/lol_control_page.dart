@@ -30,8 +30,6 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text("No data found"));
           } else {
             List<ListOfLists> listOfLists = snapshot.data![0] as List<ListOfLists>;
             Map<String, String> userMap = snapshot.data![1] as Map<String, String>;
@@ -72,7 +70,6 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
           child: ExpansionTile(
             leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
             title: Text("${listOfLists[index].listNr}. ${listOfLists[index].listName}"),
-            subtitle: Text('Tap here for details'),
             trailing: PopupMenuButton(
               onSelected: (value) async {
                 if (value == 'edit') {

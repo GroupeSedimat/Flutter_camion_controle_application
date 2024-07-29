@@ -113,6 +113,15 @@ class MenuWidget extends StatelessWidget {
       //     Get.to(() => const LoadingData());
       //   },
       // ),
+      if (role == 'superadmin' )
+      ListTile(
+        leading: const Icon(Icons.man_3_outlined, color: Colors.deepPurple),
+        title: const Text('Page du super admin'),
+        onTap: () {
+          Navigator.pop(context);
+          Get.to(() => AdminPage(userRole: UserRole.superadmin,));
+        },
+      ),
       ListTile(
         leading: const Icon(Icons.view_list, color: Colors.deepPurple),
         title: const Text('Go to checklist'),
@@ -190,15 +199,6 @@ class MenuWidget extends StatelessWidget {
           onTap: () {
             Navigator.pop(context);
             Get.to(() => UserManagementAdmin());
-          },
-        ),
-      if (role == 'superadmin' )
-        ListTile(
-          leading: const Icon(Icons.man_3_outlined, color: Colors.deepPurple),
-          title: const Text('Page du super admin'),
-          onTap: () {
-            Navigator.pop(context);
-            Get.to(() => AdminPage(userRole: UserRole.superadmin,));
           },
         ),
 

@@ -46,6 +46,7 @@ Future<Map<String, Company>> getAllCompanies() async {
       rethrow; // Gérez l’erreur le cas échéant.
     }
   }
+
   Future<Map<String, String>> getAllCompaniesNames() async {
   try {
     final querySnapshot = await _companyRef.get();
@@ -127,11 +128,11 @@ Future<Map<String, Company>> getAllCompanies() async {
     _companyRef.add(company);
   }
 
-  void updateTask(String companyID, Company company) {
+  void updateCompany(String companyID, Company company) {
     _companyRef.doc(companyID).update(company.toJson());
   }
 
-  void deleteCompant(String companyID){
+  Future<void> deleteCompany(String companyID) async {
     _companyRef.doc(companyID).delete();
   }
 
