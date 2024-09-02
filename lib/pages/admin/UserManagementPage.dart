@@ -70,7 +70,7 @@ class UserManagementPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey[700],
+                          color: Colors.black,
                         ),
                       ),
                       children: companyUsers.map((user) {
@@ -83,7 +83,7 @@ class UserManagementPage extends StatelessWidget {
                           child: ListTile(
                             contentPadding: EdgeInsets.all(16),
                             leading: CircleAvatar(
-                              backgroundColor: Colors.purple,
+                              backgroundColor: Colors.blue,
                               child: Text(
                                 user.username[0],
                                 style: TextStyle(color: Colors.white),

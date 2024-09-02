@@ -27,7 +27,6 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
     super.initState();
     companyFuture = DatabaseCompanyService().getCompanyByID(widget.userData.company);
   }
-
   @override
   Widget build(BuildContext context) {
     int timestamp = int.parse(widget.fileName);
@@ -106,7 +105,7 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                           label: Text('Open PDF'),
                         ),
                       ),
-                      SizedBox(width: 10), // Ajouter un espace entre les boutons
+                      SizedBox(width: 10), 
                       Expanded(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(

@@ -28,7 +28,7 @@ class CompanyTile extends StatelessWidget {
           return ExpansionTile(
             title: Text(companyName, textAlign: TextAlign.center),
             backgroundColor: Colors.lightGreen,
-            collapsedBackgroundColor: Colors.grey,
+            collapsedBackgroundColor: Colors.white,
             children: userList.map((userRef) {
               return UserTile(userRef: userRef);
             }).toList(),

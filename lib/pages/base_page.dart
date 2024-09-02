@@ -17,13 +17,13 @@ class BasePage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: Colors.purple[50],
+      backgroundColor: Colors.white,
       appBar: appBar ?? AppBar(
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.blue,
         title: Text(
             title ?? "",
             style: TextStyle(
-              color: Colors.amber,
+              color: Colors.black,
             ),
         ),
         actions: [

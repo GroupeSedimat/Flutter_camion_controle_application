@@ -38,7 +38,7 @@ class PdfDownload {
         print(savePath);
         File file = File(savePath);
         if (await file.exists()) {
-          return; // Exit the method if the file already exists
+          return; 
         }
       }
       await Dio().download(url, savePath);

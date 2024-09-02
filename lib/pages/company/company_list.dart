@@ -46,7 +46,7 @@ class _CompanyListState extends State<CompanyList> {
 
     return Scaffold(
       body: BasePage(
-        title: "Companies list",
+        title: "La liste des compagnies",
         body: _buildBody(context),
       ),
       floatingActionButton: FloatingActionButton(
@@ -54,7 +54,7 @@ class _CompanyListState extends State<CompanyList> {
         onPressed: () {
           showCompanyModal();
         },
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Colors.blue,
         child: const Icon(
           Icons.add,
           color: Colors.white,
@@ -90,7 +90,7 @@ class _CompanyListState extends State<CompanyList> {
               ),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  backgroundColor: Colors.blue,
                   child: Text(
                     company.name[0],
                     style: TextStyle(color: Colors.white),
