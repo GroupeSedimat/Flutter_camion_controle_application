@@ -1,5 +1,3 @@
-// ignore_for_file: use_super_parameters, library_private_types_in_public_api, unused_local_variable, prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
@@ -35,8 +33,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
     nameController = TextEditingController();
     firstnameController = TextEditingController();
     confirmPasswordController = TextEditingController();
-
-      
   }
 
   @override
@@ -50,17 +46,27 @@ class _InscriptionPageState extends State<InscriptionPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-    Future<Map<String, Company>> allCompanies = databaseCompanyService.getAllCompanies();
+@override
+@override
+Widget build(BuildContext context) {
+  final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
+  Future<Map<String, Company>> allCompanies = databaseCompanyService.getAllCompanies();
 
-    double w = MediaQuery.of(context).size.width;
-    double h = MediaQuery.of(context).size.height;
+  double w = MediaQuery.of(context).size.width;
+  double h = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
+  return Scaffold(
+    backgroundColor: Colors.transparent, 
+    body: Container(
+      width: double.infinity, 
+      height: double.infinity, 
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/truck.jpg'), 
+          fit: BoxFit.cover, 
+        ),
+      ),
+      child: SingleChildScrollView(
         child: Column(
           children: [
             GestureDetector(
@@ -73,7 +79,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 child: Container(
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.deepPurple,
+                    color: Colors.blue.withOpacity(0.8), 
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
@@ -94,7 +100,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   Icon(
                     Icons.app_registration,
                     size: 70,
-                    color: Colors.deepPurple,
+                    color: Colors.blue,
                   ),
                   SizedBox(height: 20),
                   Text(
@@ -102,7 +108,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                      color: Colors.blue,
                       shadows: [
                         Shadow(
                           offset: Offset(2.0, 2.0),
@@ -170,7 +176,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                           onChanged: (value) {
                             setState(() {
                               selectedCompany = value!;
-                   });
+                            });
                           },
                         );
                       }
@@ -204,7 +210,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 height: 50,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
-                  color: Color.fromARGB(255, 105, 82, 146),
+                  color: Colors.blue,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.2),
@@ -235,8 +241,10 @@ class _InscriptionPageState extends State<InscriptionPage> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget buildTextField(String hintText, IconData icon, TextEditingController controller) {
     return Container(
@@ -256,11 +264,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
         controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: Icon(icon, color: Colors.deepPurple),
+          prefixIcon: Icon(icon, color: Colors.blue),
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.deepPurple, width: 1.0),
+            borderSide: const BorderSide(color: Colors.blue, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
@@ -293,11 +301,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
         obscureText: obscureText,
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: const Icon(Icons.lock, color: Colors.deepPurple),
+          prefixIcon: const Icon(Icons.lock, color: Colors.blue),
           suffixIcon: IconButton(
             icon: Icon(
               obscureText ? Icons.visibility_off : Icons.visibility,
-              color: Colors.deepPurple,
+              color: Colors.blue,
             ),
             onPressed: () {
               setState(() {
@@ -312,7 +320,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.deepPurple, width: 1.0),
+            borderSide: const BorderSide(color: Colors.blue, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),

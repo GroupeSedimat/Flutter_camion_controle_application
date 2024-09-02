@@ -31,7 +31,7 @@ class _LoginPagestate extends State<LoginPage> {
               height: h * 0.3,
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("assets/images/image2.webp"),
+                  image: AssetImage("assets/images/truck.jpg"),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -41,7 +41,7 @@ class _LoginPagestate extends State<LoginPage> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+                    colors: [Colors.white.withOpacity(0.4), Colors.transparent],
                   ),
                 ),
                 child: Column(
@@ -86,7 +86,7 @@ class _LoginPagestate extends State<LoginPage> {
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.deepPurple,
+                        color: Colors.blue,
                       ),
                       onPressed: () {
                         setState(() {
@@ -107,7 +107,7 @@ class _LoginPagestate extends State<LoginPage> {
                           "Mot de passe oublié?",
                           style: TextStyle(
                             decoration: TextDecoration.underline,
-                            color: Colors.deepPurple,
+                            color: Colors.blue,
                             fontSize: 15,
                           ),
                         ),
@@ -127,7 +127,7 @@ class _LoginPagestate extends State<LoginPage> {
                       height: 50,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
-                        color: Color.fromARGB(255, 105, 82, 146),
+                        color: Colors.blue,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
@@ -172,7 +172,7 @@ class _LoginPagestate extends State<LoginPage> {
                             text: "Inscrivez-vous",
                             style: TextStyle(
                               decoration: TextDecoration.underline,
-                              color: Colors.deepPurple,
+                              color: Colors.blue,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -214,11 +214,11 @@ class _LoginPagestate extends State<LoginPage> {
         obscureText: obscureText,
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: Icon(icon, color: Colors.deepPurple),
+          prefixIcon: Icon(icon, color: Colors.blue),
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.deepPurple, width: 1.0),
+            borderSide: const BorderSide(color: Colors.blue, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),

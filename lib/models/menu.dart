@@ -21,201 +21,175 @@ class MenuWidget extends StatelessWidget {
   String role = "";
   MenuWidget({super.key});
 
-@override
+  @override
   Widget build(BuildContext context) => FutureBuilder<MyUser>(
-    future: UserService().getCurrentUserData(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (snapshot.hasError) {
-        return Center(child: Text("Error: ${snapshot.error}"));
-      } else if (snapshot.hasData) {
-        final MyUser userData = snapshot.data!;
-        username = userData.username;
-        role = userData.role;
-        return Drawer(
-          child: SingleChildScrollView(
+        future: UserService().getCurrentUserData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          } else if (snapshot.hasData) {
+            final MyUser userData = snapshot.data!;
+            username = userData.username;
+            role = userData.role;
+            return Drawer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade700, Colors.blue.shade400],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: <Widget>[
+                    buildHeader(context),
+                    buildMenuItems(context),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            return const Center(child: Text("No data available"));
+          }
+        },
+      );
+
+  Widget buildHeader(BuildContext context) => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade900, Colors.blue.shade600],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+            Get.to(() => WelcomePage());
+          },
+          child: Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 16,
+              bottom: 24,
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget> [
-                buildHeader(context),
-                buildMenuItems(context),
+              children: [
+                
+                SizedBox(height: 12),
+                Text(
+                  username,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  'Role: $role',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
               ],
             ),
           ),
-        );
-      } else {
-        return const Center(child: Text("No data available"));
-      }
-    },
-  );
-
-  Widget buildHeader(BuildContext context) => Material(
-    color: Colors.deepPurple,
-    child: InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        Get.to(() => WelcomePage());
-      },
-      child: Container(
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top,
-          bottom: 24,
         ),
-        child: Column(
-          children: [
-            const CircleAvatar(
-              radius: 100,
-              backgroundImage: AssetImage("assets/images/836.jpg"),
+      );
+
+  Widget buildMenuItems(BuildContext context) => Column(
+        children: [
+          buildMenuItem(
+            context,
+            icon: Icons.checklist_outlined,
+            text: 'Go to checklist',
+            onClicked: () => Get.to(() => const CheckList()),
+          ),
+          if (role == 'user')
+            buildMenuItem(
+              context,
+              icon: Icons.picture_as_pdf_outlined,
+              text: 'Go to PDF list',
+              onClicked: () => Get.to(() => const PDFShowList()),
             ),
-            const SizedBox(height: 12),
-            Text(
-              username,
-              style: const TextStyle(
-                fontSize: 28,
-                color: Colors.black,
-              ),
+          if (role == 'superadmin')
+            buildMenuItem(
+              context,
+              icon: Icons.lock_outline,
+              text: 'List of lists',
+              onClicked: () => Get.to(() => ListOfListsControlPage()),
             ),
-            Text(
-              'Role: $role',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-              ),
+          if (role == 'admin' || role == 'superadmin')
+            buildMenuItem(
+              context,
+              icon: Icons.picture_as_pdf_outlined,
+              text: 'Go to admins PDF list new',
+              onClicked: () => Get.to(() => AdminPdfListView()),
             ),
-          ],
-        ),
-      ),
-    ),
-  );
+          if (role == 'admin' || role == 'superadmin')
+            buildMenuItem(
+              context,
+              icon: Icons.business_outlined,
+              text: 'Go to admins Company list',
+              onClicked: () => Get.to(() => CompanyList()),
+            ),
+          const Divider(color: Colors.white54, thickness: 1),
+          buildMenuItem(
+            context,
+            icon: Icons.mail_outline,
+            text: 'Messagerie',
+            onClicked: () => Get.to(() => MessagingPage()),
+          ),
+          if (role == 'admin')
+            buildMenuItem(
+              context,
+              icon: Icons.manage_accounts_outlined,
+              text: 'Gestion des utilisateurs',
+              onClicked: () => Get.to(() => UserManagementAdmin()),
+            ),
+          if (role == 'superadmin')
+            buildMenuItem(
+              context,
+              icon: Icons.admin_panel_settings_outlined,
+              text: 'Page du super admin',
+              onClicked: () =>
+                  Get.to(() => AdminPage(userRole: UserRole.superadmin)),
+            ),
+          const Divider(color: Colors.white54, thickness: 1),
+          buildMenuItem(
+            context,
+            icon: Icons.logout,
+            text: 'Déconnexion',
+            onClicked: () {
+              AuthController.instance.logOut();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Vous avez été déconnecté'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+          ),
+        ],
+      );
 
-  Widget buildMenuItems(BuildContext context) => Wrap(
-    runSpacing: 16, // vertical spacing
-    children: [
-      /**   ListTile(
-          leading: Icon(Icons.slideshow, color: Colors.purple),
-          title: Text('Voir mes informations'),
-          onTap: () {
-          Navigator.pop(context);
-          Get.to(() => ProfileInfoPage(
-          username: 'NomUtilisateur',
-          dob: 'DateDeNaissance',
-          email: 'adresse@example.com',
-          ));
-          },
-          ), */
-
-      // ListTile(
-      //   leading: const Icon(Icons.data_exploration, color: Colors.purple),
-      //   title: const Text('Get datas'),
-      //   onTap: () {
-      //     Navigator.pop(context);
-      //     Get.to(() => const LoadingData());
-      //   },
-      // ),
-      ListTile(
-        leading: const Icon(Icons.view_list, color: Colors.deepPurple),
-        title: const Text('Go to checklist'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => const CheckList());
-        },
+  Widget buildMenuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    required VoidCallback onClicked,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(
+        text,
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
       ),
-      if (role == 'user')
-      ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
-        title: const Text('Go to PDF list'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => const PDFShowList());
-        },
-      ),
-      if (role == 'superadmin')
-      ListTile(
-        leading: const Icon(Icons.lock, color: Colors.deepPurple),
-        title: const Text('List of lists'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => ListOfListsControlPage());
-        },
-      ),
-      if (role == 'admin' || role == 'superadmin' )
-      ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
-        title: const Text('Go to admins PDF list new'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => AdminPdfListView());
-        },
-      ),
-      if (role == 'admin' || role == 'superadmin' )
-      ListTile(
-        leading: const Icon(Icons.picture_as_pdf, color: Colors.deepPurple),
-        title: const Text('Go to admins Company list'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => CompanyList());
-        },
-      ),
-
-      const Divider(color: Colors.deepPurple),
-
-      /*ListTile(
-        leading: const Icon(Icons.edit, color: Colors.deepPurple),
-        title: const Text('Modifier vos informations'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() => ModifyProfilePage());
-        },
-      ),*/
-      ListTile(
-        leading: const Icon(Icons.mail, color: Colors.deepPurple),
-        title: const Text('Messagerie'),
-        onTap: () {
-          Navigator.pop(context);
-          Get.to(() =>  MessagingPage ());
-        },
-      ),
-      /*ListTile(
-        leading: const Icon(Icons.shopping_cart, color: Colors.deepPurple),
-        title: const Text('Accéder au shop'),
-        onTap: () {
-          Navigator.pop(context);
-        },
-      ),*/
-       if (role == 'admin')
-        ListTile(
-          leading: const Icon(Icons.manage_accounts, color: Colors.deepPurple),
-          title: const Text('Gestion des utilisateurs'),
-          onTap: () {
-            Navigator.pop(context);
-            Get.to(() => UserManagementAdmin());
-          },
-        ),
-      if (role == 'superadmin' )
-        ListTile(
-          leading: const Icon(Icons.man_3_outlined, color: Colors.deepPurple),
-          title: const Text('Page du super admin'),
-          onTap: () {
-            Navigator.pop(context);
-            Get.to(() => AdminPage(userRole: UserRole.superadmin,));
-          },
-        ),
-
-      ListTile(
-        leading: const Icon(Icons.logout, color: Colors.deepPurple),
-        title: const Text('Deconnexion'),
-        onTap: () {
-                    AuthController.instance.logOut();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Vous avez été déconnecté'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  },
-      ),
-     
-    ]
-  );
+      hoverColor: const Color.fromARGB(255, 184, 209, 229),
+      onTap: onClicked,
+    );
+  }
 }

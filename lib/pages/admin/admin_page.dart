@@ -20,7 +20,7 @@ class AdminPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BasePage(
       // drawer: _buildDrawer(context),
-      title: "Admin page",
+      title: "Page d'administration",
       body: _buildDashboard(),
     );
   }
@@ -84,7 +84,7 @@ class AdminPage extends StatelessWidget {
               Icon(
                 icon,
                 size: 50,
-                color: Colors.deepPurple, // Couleur de l'icône
+                color: Colors.blue, // Couleur de l'icône
               ),
               SizedBox(height: 10),
               Text(
