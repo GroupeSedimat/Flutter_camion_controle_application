@@ -21,6 +21,7 @@ class DatabaseCompanyService{
         toFirestore: (company, _) => company.toJson()                         
     );
   }
+
 Future<Map<String, Company>> getAllCompanies() async {
     try {
       final querySnapshot = await _companyRef.get();

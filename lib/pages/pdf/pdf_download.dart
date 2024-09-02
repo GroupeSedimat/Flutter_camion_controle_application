@@ -23,7 +23,7 @@ class PdfDownload {
       }else{
         if (Platform.isAndroid) {
           // Ensure the directory exists
-          String downloadDirPath = "/storage/emulated/0/Documents/camion_appli";;
+          String downloadDirPath = "/storage/emulated/0/Documents/camion_appli";
           Directory downloadDir = Directory(downloadDirPath);
           if (!await downloadDir.exists()) {
             await downloadDir.create(recursive: true);

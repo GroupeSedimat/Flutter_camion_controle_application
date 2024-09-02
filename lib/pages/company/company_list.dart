@@ -1,10 +1,14 @@
 // ignore_for_file: prefer_const_constructors, unused_element
 
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
+import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/company/add_company_form.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 class CompanyList extends StatefulWidget {
   const CompanyList({super.key});
@@ -15,46 +19,89 @@ class CompanyList extends StatefulWidget {
 
 class _CompanyListState extends State<CompanyList> {
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
+  Future<MyUser>? _futureUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureUser = getUser();
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      body: FutureBuilder(
-        future: databaseCompanyService.getAllCompanies(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            Map<String, Company> companyMap = snapshot.data!;
-            return DefaultTabController(
-              initialIndex: 0,
-              length: companyMap.length,
-              child: BasePage(
-                title: "Companies list",
-                body: _buildBody(companyMap),
+    return FutureBuilder<MyUser>(
+      future: _futureUser,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (snapshot.hasData) {
+          MyUser user = snapshot.data!;
+          return Scaffold(
+              body: FutureBuilder(
+                future: getCompanyPdfData(user),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    Map<String, Company> companyMap = snapshot.data!;
+                    return DefaultTabController(
+                      initialIndex: 0,
+                      length: companyMap.length,
+                      child: BasePage(
+                        title: title(user),
+                        body: _buildBody(companyMap, user),
+                      ),
+                    );
+                  }
+                },
               ),
-            );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: "addCompanyHero",
-        onPressed: () {
-          showCompanyModal();
-        },
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(
-          Icons.add_home_work,
-          color: Colors.white,
-        ),
-      ),
+              floatingActionButton: Visibility(
+                visible: user.role == 'superadmin',
+                child: FloatingActionButton(
+                  heroTag: "addCompanyHero",
+                  onPressed: () {
+                    showCompanyModal();
+                  },
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: const Icon(
+                    Icons.add_home_work,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 
-  Widget _buildBody(Map<String, Company> companyMap) {
+  Future<MyUser> getUser() async {
+    UserService userService = UserService();
+    return await userService.getCurrentUserData();
+  }
+
+  Future<Map<String, Company>> getCompanyPdfData(MyUser user) async {
+    if (user.role == 'superadmin') {
+      return databaseCompanyService.getAllCompanies();
+    } else if (user.role == 'admin') {
+      Map<String, Company> companies = HashMap();
+      String companyId = user.company;
+      Company company = await databaseCompanyService.getCompanyByID(companyId);
+      companies.addAll({companyId: company});
+      return companies;
+    } else {
+      Map<String, Company> companies = HashMap();
+      return companies;
+    }
+  }
+
+  Widget _buildBody(Map<String, Company> companyMap, MyUser user) {
     return ListView.builder(
       padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
       itemCount: companyMap.length,
@@ -90,10 +137,11 @@ class _CompanyListState extends State<CompanyList> {
                   value: 'edit',
                   child: Text('Edit'),
                 ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Text('Delete'),
-                ),
+                if(user.role == "superadmin")
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Text('Delete'),
+                  ),
               ],
             ),
             children: [
@@ -142,6 +190,13 @@ class _CompanyListState extends State<CompanyList> {
     );
   }
 
+  String title(MyUser user) {
+    if(user.role == "superadmin"){
+      return "Companies list";
+    }else{
+      return "Company data";
+    }
+  }
   void showCompanyModal({
     Company? company,
     String? companyID,

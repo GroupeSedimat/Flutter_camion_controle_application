@@ -19,9 +19,9 @@ class GetData {
   GetData({
     required this.signature,    // required data
     required this.precision,    // required data
-    this.start = '1701352817',  // not required data (if not provided, default data will be apply - '1701352817')
+    this.start = '0',  // not required data (if not provided, default data will be apply - '1701352817')
     this.end = '0',
-    this.interval = '2hours',
+    this.interval = '',
     this.type = ''
   });
 
@@ -56,7 +56,7 @@ class GetData {
       if(dataFromServer.keys.last == 'error_code'){
         data = dataFromServer.toString();
       }else{
-        data = dataFromServer['records']['bs'].toString();
+        data = dataFromServer['records'].toString();
       }
     }
     catch (e){
