@@ -17,7 +17,7 @@ class _DiagramsState extends State<Diagrams> {
   bool loading = true;
 
   void setupGetData() async {
-    GetData instance = GetData(signature: "219757", precision: "/stats");
+    GetData instance = GetData(signature: "381831", precision: "/stats");
     await instance.getData();
     setState(() {
       loading = false;

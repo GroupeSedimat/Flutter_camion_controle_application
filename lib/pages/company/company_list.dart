@@ -1,10 +1,14 @@
 // ignore_for_file: prefer_const_constructors, unused_element
 
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
+import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/company/add_company_form.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 
 class CompanyList extends StatefulWidget {
   const CompanyList({super.key});
@@ -15,112 +19,212 @@ class CompanyList extends StatefulWidget {
 
 class _CompanyListState extends State<CompanyList> {
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
+  Future<MyUser>? _futureUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureUser = getUser();
+  }
 
   @override
   Widget build(BuildContext context) {
-    void showCompanyModal({
-      Company? company,
-      String? companyID,
-    }) {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (context) {
-          return Container(
-            padding: const EdgeInsets.all(10),
-            color: Colors.white,
-            margin: EdgeInsets.fromLTRB(
-                10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
-            child: AddCompany(
-              company: company,
-              companyID: companyID,
-              onCompanyAdded: () {
-                setState(() {});
-                Navigator.pop(context);
-              },
-            ),
-          );
-        },
-      );
-    }
-
-    return Scaffold(
-      body: BasePage(
-        title: "La liste des compagnies",
-        body: _buildBody(context),
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: "addCompanyHero",
-        onPressed: () {
-          showCompanyModal();
-        },
-        backgroundColor: Colors.blue,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context) {
-    return FutureBuilder<Map<String, Company>>(
-      future: databaseCompanyService.getAllCompanies(),
+    return FutureBuilder<MyUser>(
+      future: _futureUser,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No companies found.'));
+        } else if (snapshot.hasData) {
+          MyUser user = snapshot.data!;
+          return Scaffold(
+              body: FutureBuilder(
+                future: getCompanyPdfData(user),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    Map<String, Company> companyMap = snapshot.data!;
+                    return DefaultTabController(
+                      initialIndex: 0,
+                      length: companyMap.length,
+                      child: BasePage(
+                        title: title(user),
+                        body: _buildBody(companyMap, user),
+                      ),
+                    );
+                  }
+                },
+              ),
+              floatingActionButton: Visibility(
+                visible: user.role == 'superadmin',
+                child: FloatingActionButton(
+                  heroTag: "addCompanyHero",
+                  onPressed: () {
+                    showCompanyModal();
+                  },
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: const Icon(
+                    Icons.add_home_work,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
         }
+      },
+    );
+  }
 
-        Map<String, Company> companies = snapshot.data!;
-        return ListView.builder(
-          itemCount: companies.length,
-          itemBuilder: (context, index) {
-            String companyID = companies.keys.elementAt(index);
-            Company company = companies[companyID]!;
+  Future<MyUser> getUser() async {
+    UserService userService = UserService();
+    return await userService.getCurrentUserData();
+  }
 
-            return Card(
-              margin: const EdgeInsets.all(10),
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.blue,
-                  child: Text(
-                    company.name[0],
-                    style: TextStyle(color: Colors.white),
+  Future<Map<String, Company>> getCompanyPdfData(MyUser user) async {
+    if (user.role == 'superadmin') {
+      return databaseCompanyService.getAllCompanies();
+    } else if (user.role == 'admin') {
+      Map<String, Company> companies = HashMap();
+      String companyId = user.company;
+      Company company = await databaseCompanyService.getCompanyByID(companyId);
+      companies.addAll({companyId: company});
+      return companies;
+    } else {
+      Map<String, Company> companies = HashMap();
+      return companies;
+    }
+  }
+
+  Widget _buildBody(Map<String, Company> companyMap, MyUser user) {
+    return ListView.builder(
+      padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
+      itemCount: companyMap.length,
+      itemBuilder: (_, index) {
+        Widget leading;
+        if (companyMap.values.elementAt(index).logo == "") {
+          leading = Icon(Icons.home_work, color: Colors.deepPurple, size: 50);
+        } else {
+          leading = Image.network(
+            companyMap.values.elementAt(index).logo,
+            width: 50,
+            height: 50,
+          );
+        }
+        return Padding(
+          padding: EdgeInsets.all(8),
+          child: ExpansionTile(
+            leading: leading,
+            title: Text(companyMap.values.elementAt(index).name),
+            trailing: PopupMenuButton(
+              onSelected: (value) async {
+                if (value == 'edit') {
+                  showCompanyModal(
+                    company: companyMap.values.elementAt(index),
+                    companyID: companyMap.keys.elementAt(index),
+                  );
+                } else if (value == 'delete') {
+                  _showDeleteConfirmation(companyMap.keys.elementAt(index));
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Text('Edit'),
+                ),
+                if(user.role == "superadmin")
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Text('Delete'),
                   ),
-                ),
-                title: Text(
-                  company.name,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[900],
+              ],
+            ),
+            children: [
+              Wrap(
+                spacing: 15,
+                children: [
+                  SizedBox(
+                    child: Text(
+                        "Siret: ${companyMap.values.elementAt(index).siret}"),
                   ),
-                ),
-                subtitle: Text(
-                  'ID: $companyID',
-                  style: TextStyle(color: Colors.grey[700]),
-                ),
-                trailing: Wrap(
-                  spacing: 12, // space between two icons
-                 
-                ),
+                  SizedBox(
+                    child: Text(
+                        "Sirene: ${companyMap.values.elementAt(index).sirene}"),
+                  ),
+                  if (companyMap.values.elementAt(index).description != "")
+                    SizedBox(
+                      child: Text(
+                          "Description: ${companyMap.values.elementAt(index).description}"),
+                    ),
+                  if (companyMap.values.elementAt(index).tel != "")
+                    SizedBox(
+                      child: Text(
+                          "Tel number: ${companyMap.values.elementAt(index).tel}"),
+                    ),
+                  if (companyMap.values.elementAt(index).email != "")
+                    SizedBox(
+                      child: Text(
+                          "E-mail: ${companyMap.values.elementAt(index).email}"),
+                    ),
+                  if (companyMap.values.elementAt(index).address != "")
+                    SizedBox(
+                      child: Text(
+                          "Address: ${companyMap.values.elementAt(index).address}"),
+                    ),
+                  if (companyMap.values.elementAt(index).responsible != "")
+                    SizedBox(
+                      child: Text(
+                          "Responsible person: ${companyMap.values.elementAt(index).responsible}"),
+                    ),
+                ],
               ),
-            );
-          },
+            ],
+          ),
         );
       },
     );
   }
 
-  /*void _showDeleteConfirmation(BuildContext context, String companyID) {
+  String title(MyUser user) {
+    if(user.role == "superadmin"){
+      return "Companies list";
+    }else{
+      return "Company data";
+    }
+  }
+  void showCompanyModal({
+    Company? company,
+    String? companyID,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(10),
+          color: Colors.white,
+          margin: EdgeInsets.fromLTRB(
+              10, 50, 10, MediaQuery.of(context).viewInsets.bottom
+          ),
+          child: AddCompany(
+            company: company,
+            companyID: companyID,
+            onCompanyAdded: () {
+              setState(() {});
+              Navigator.pop(context);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(String companyID) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -133,7 +237,7 @@ class _CompanyListState extends State<CompanyList> {
           ),
           TextButton(
             onPressed: () {
-              databaseCompanyService.deleteCompant(companyID);
+              databaseCompanyService.deleteCompany(companyID);
               setState(() {});
               Navigator.pop(context);
             },
@@ -142,7 +246,5 @@ class _CompanyListState extends State<CompanyList> {
         ],
       ),
     );
-  } */
-  
-  void showCompanyModal({required Company company, required String companyID}) {}
+  }
 }

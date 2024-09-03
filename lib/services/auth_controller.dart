@@ -198,10 +198,10 @@ bool isValidPassword(String password) {
     print("Reset password for: $email");
     if (email.isEmpty){
       Get.snackbar(
-   "Erreur",
-   "l'adresse e-mail est vide.",
-   backgroundColor: Colors.red,
-   snackPosition: SnackPosition.BOTTOM,
+        "Erreur",
+        "l'adresse e-mail est vide.",
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
