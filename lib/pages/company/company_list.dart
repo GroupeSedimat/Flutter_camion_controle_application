@@ -108,19 +108,19 @@ class _CompanyListState extends State<CompanyList> {
       itemBuilder: (_, index) {
         Widget leading;
         if (companyMap.values.elementAt(index).logo == "") {
-          leading = Icon(Icons.home_work, color: Colors.deepPurple, size: 50);
+          leading = Icon(Icons.home_work, color: Colors.deepPurple, size: 80);
         } else {
           leading = Image.network(
             companyMap.values.elementAt(index).logo,
-            width: 50,
-            height: 50,
+            width: 80,
+            height: 80,
           );
         }
         return Padding(
           padding: EdgeInsets.all(8),
           child: ExpansionTile(
             leading: leading,
-            title: Text(companyMap.values.elementAt(index).name),
+            title: Text(companyMap.values.elementAt(index).name, style: TextStyle(fontSize: 30),),
             trailing: PopupMenuButton(
               onSelected: (value) async {
                 if (value == 'edit') {
@@ -150,36 +150,36 @@ class _CompanyListState extends State<CompanyList> {
                 children: [
                   SizedBox(
                     child: Text(
-                        "Siret: ${companyMap.values.elementAt(index).siret}"),
+                        "Siret: ${companyMap.values.elementAt(index).siret}", style: textStyle(),),
                   ),
                   SizedBox(
                     child: Text(
-                        "Sirene: ${companyMap.values.elementAt(index).sirene}"),
+                        "Sirene: ${companyMap.values.elementAt(index).sirene}", style: textStyle(),),
                   ),
                   if (companyMap.values.elementAt(index).description != "")
                     SizedBox(
                       child: Text(
-                          "Description: ${companyMap.values.elementAt(index).description}"),
+                          "Description: ${companyMap.values.elementAt(index).description}", style: textStyle(),),
                     ),
                   if (companyMap.values.elementAt(index).tel != "")
                     SizedBox(
                       child: Text(
-                          "Tel number: ${companyMap.values.elementAt(index).tel}"),
+                          "Tel number: ${companyMap.values.elementAt(index).tel}", style: textStyle(),),
                     ),
                   if (companyMap.values.elementAt(index).email != "")
                     SizedBox(
                       child: Text(
-                          "E-mail: ${companyMap.values.elementAt(index).email}"),
+                          "E-mail: ${companyMap.values.elementAt(index).email}", style: textStyle(),),
                     ),
                   if (companyMap.values.elementAt(index).address != "")
                     SizedBox(
                       child: Text(
-                          "Address: ${companyMap.values.elementAt(index).address}"),
+                          "Address: ${companyMap.values.elementAt(index).address}", style: textStyle(),),
                     ),
                   if (companyMap.values.elementAt(index).responsible != "")
                     SizedBox(
                       child: Text(
-                          "Responsible person: ${companyMap.values.elementAt(index).responsible}"),
+                          "Responsible person: ${companyMap.values.elementAt(index).responsible}", style: textStyle(),),
                     ),
                 ],
               ),
@@ -190,11 +190,15 @@ class _CompanyListState extends State<CompanyList> {
     );
   }
 
+  TextStyle textStyle(){
+    return TextStyle(fontSize: 20);
+  }
+
   String title(MyUser user) {
     if(user.role == "superadmin"){
       return "Companies list";
     }else{
-      return "Company data";
+      return "Détails de l'entreprise";
     }
   }
   void showCompanyModal({

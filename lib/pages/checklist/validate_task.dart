@@ -93,9 +93,9 @@ class ValidateTaskState extends State<ValidateTask> {
           children: <Widget>[
             Text(
               widget.blueprint.title,
-              style: const TextStyle(
+              style: TextStyle(
                   backgroundColor: Colors.white,
-                  fontSize: 30,
+                  fontSize: screenWidth * 0.08,
                   color: Colors.green,
                   letterSpacing: 4,
                   fontWeight: FontWeight.bold
@@ -127,22 +127,6 @@ class ValidateTaskState extends State<ValidateTask> {
               validator: (val) {return (val == null || val.isEmpty) ? 'Enter description!' : null;},
               onChanged: (val) => descriptionOfProblem = val,
             ),
-            TextFormField(
-              initialValue: task?.photoFilePath,
-              decoration: const InputDecoration(
-                hintText: "Give me link!",
-                labelText: "Add Link to photo:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: UnderlineInputBorder(),
-              ),
-              validator: (val) {return (val == null || val.isEmpty) ? 'Enter photoFilePath!' : null;},
-              onChanged: (val) => photoFilePath = val,
-            ),
             const SizedBox(height: 40),
 
             Transform.scale(                                                      // validation button
@@ -161,6 +145,21 @@ class ValidateTaskState extends State<ValidateTask> {
                   });
                 },
               ),
+            ),
+            
+            const SizedBox(height: 30),
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: screenWidth * 0.7,
+                maxHeight: screenHeight * 0.7,
+              ),
+              child: imageGalery != null
+                ? Image.file(imageGalery!)
+                :(
+                  (photoFilePath != "" && photoFilePath != null)
+                    ? Image.network(photoFilePath!)
+                    : Text("No photo yet", style: TextStyle(fontSize: screenWidth * 0.03,),)
+                ),
             ),
             const SizedBox(height: 30),
             ElevatedButton(
@@ -183,18 +182,6 @@ class ValidateTaskState extends State<ValidateTask> {
                 )
             ),
 
-            const SizedBox(height: 30),
-            Container(
-              constraints: BoxConstraints(
-                maxWidth: screenWidth * 0.7,
-                maxHeight: screenHeight * 0.7,
-              ),
-              child: imageGalery != null
-                  ? Image.file(imageGalery!)
-                  : ((photoFilePath != "" && photoFilePath != null)
-                    ? Image.network(photoFilePath!)
-                    : const FlutterLogo()),
-            ),
             const SizedBox(height: 20),
 
             ElevatedButton(
@@ -219,24 +206,6 @@ class ValidateTaskState extends State<ValidateTask> {
                   ),
                 ],
               )
-            ),
-            const SizedBox(height: 30),
-            Text(
-              "Nbr of list: ${widget.blueprint.nrOfList}",
-              style: const TextStyle(
-                backgroundColor: Colors.white,
-                fontSize: 20,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "Nbr of entry position: ${widget.blueprint.nrEntryPosition}",
-              style: const TextStyle(
-                backgroundColor: Colors.white,
-                fontSize: 20,
-                color: Colors.grey,
-              ),
             ),
             const SizedBox(height: 20),
             Wrap(

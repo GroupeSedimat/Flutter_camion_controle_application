@@ -1,5 +1,7 @@
 // ignore_for_file: must_be_immutable
 
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 
@@ -18,25 +20,25 @@ class BlueprintTemplate extends StatelessWidget{
 
     return Card(
       margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-      color: isDone == null ? Colors.grey[800] : isDone! ? Colors.green : Colors.red,
+      color: colorColor("card_background"),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(15.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
               blueprint.title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20.0,
-                color: Colors.amber ,
+                color: colorColor("card_text") ,
               ),
             ),
             const SizedBox(height: 8.0,),
             Text(
               blueprint.description,
-              style: const TextStyle(
-                fontSize: 12.0,
-                color: Colors.amber,
+              style: TextStyle(
+                fontSize: 15.0,
+                color: colorColor("card_text"),
               ),
             ),
             const SizedBox(height: 8.0,),
@@ -85,5 +87,15 @@ class BlueprintTemplate extends StatelessWidget{
         ),
       ),
     );
+  }
+
+  Color? colorColor(String dest){
+    if(dest == "card_background"){
+      return isDone == null ? Colors.grey[800] : isDone! ? Colors.green : Colors.red.shade400;
+    }else if(dest == "card_text"){
+      return isDone == null ? Colors.white : isDone! ? Colors.black : Colors.black;
+    }else{
+      return Colors.red.shade50;
+    }
   }
 }

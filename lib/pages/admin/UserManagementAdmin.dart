@@ -36,7 +36,6 @@ class UserManagementAdmin extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection('users')
                 .where('company', isEqualTo: currentUserCompany)
-                .where('role', isNotEqualTo: 'superadmin')
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {

@@ -175,7 +175,7 @@ class _CheckListState extends State<CheckList> {
     return AppBar(
       title: const Text('Check list: the begining',
         style: TextStyle(
-          color: Colors.amber,
+          color: Colors.black,
         ),
       ),
       actions: [
@@ -187,10 +187,10 @@ class _CheckListState extends State<CheckList> {
         ),
       ],
       centerTitle: true,
-      backgroundColor: Colors.purple,
+      backgroundColor: Colors.blue,
       bottom: TabBar(
         dividerColor: Colors.transparent,
-        unselectedLabelColor: Colors.lightGreenAccent,
+        unselectedLabelColor: Colors.white,
         indicatorPadding: const EdgeInsets.only(left: -10, right: -10),
         indicatorWeight: 5,
         indicatorColor: Colors.red,
@@ -229,7 +229,7 @@ class _CheckListState extends State<CheckList> {
           for (var blueprintSnapshot in blueprintsSnapshotList) {
             blueprints.addAll({blueprintSnapshot.id: blueprintSnapshot.data()});
           }
-          counter = List<int>.filled(listOfLists.length, 0);
+          counter = List<int>.filled(100000, 0);
           for (var i = 0; i < listOfLists.length; i++) {
             sortedBlueprints = Map.fromEntries(
                 blueprints.entries.toList()..sort((e1, e2) => (e1.value.nrEntryPosition).compareTo(e2.value.nrEntryPosition)));
