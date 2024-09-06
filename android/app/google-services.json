@@ -1,32 +1,13 @@
 {
   "project_info": {
-    "project_number": "885253354272",
-    "project_id": "fir-mobility-corner-app",
-    "storage_bucket": "fir-mobility-corner-app.appspot.com"
+    "project_number": "1023285541885",
+    "project_id": "mctruckcheck",
+    "storage_bucket": "mctruckcheck.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:885253354272:android:0c4646449b0969da349d45",
-        "android_client_info": {
-          "package_name": "com.example.flutter_application_1"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyB92fGsRaW3TZTHZwif45o4h9jdJSgJYSc"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:885253354272:android:c2d2c63ea7c8558f349d45",
+        "mobilesdk_app_id": "1:1023285541885:android:454510dcc8c14fc99db794",
         "android_client_info": {
           "package_name": "com.mobility.corner.app.flutterApplication1"
         }
@@ -34,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB92fGsRaW3TZTHZwif45o4h9jdJSgJYSc"
+          "current_key": "AIzaSyCmeTUEn8NvuGC85RXbdbB-7xyz6gbm6tQ"
         }
       ],
       "services": {
