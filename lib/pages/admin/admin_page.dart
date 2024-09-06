@@ -57,13 +57,8 @@ class AdminPage extends StatelessWidget {
           },
         ),
         _buildDashboardItem(
-<<<<<<< HEAD
-          'Page d\'accueil',
-          Icons.home,
-=======
           'Gestion des Lists',
           Icons.list_alt,
->>>>>>> f5c294ae56e8059749a330654fc1533024924aa0
           () {
             Get.to(() => const ListOfListsControlPage());
           },
