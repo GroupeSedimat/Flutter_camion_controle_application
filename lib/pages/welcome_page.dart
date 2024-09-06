@@ -47,7 +47,7 @@ Widget _buildBody(BuildContext context) {
                     image: AssetImage("assets/images/truck.jpg"), 
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      Colors.white.withOpacity(0.8), 
+                      Colors.black.withOpacity(0.7), 
                       BlendMode.dstATop,
                     ),
                   ),
@@ -56,9 +56,9 @@ Widget _buildBody(BuildContext context) {
                   child: Text(
                     welcomeMessage,
                     style: const TextStyle(
-                      fontSize: 28,
+                      fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 12, 12, 12),
                     ),
                     textAlign: TextAlign.center,
                   ),

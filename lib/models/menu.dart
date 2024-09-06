@@ -105,35 +105,35 @@ class MenuWidget extends StatelessWidget {
           buildMenuItem(
             context,
             icon: Icons.checklist_outlined,
-            text: 'Go to checklist',
+            text: 'Voir checklist',
             onClicked: () => Get.to(() => const CheckList()),
           ),
           if (role == 'user')
             buildMenuItem(
               context,
               icon: Icons.picture_as_pdf_outlined,
-              text: 'Go to PDF list',
+              text: 'La liste des PDFs',
               onClicked: () => Get.to(() => const PDFShowList()),
             ),
           if (role == 'superadmin')
             buildMenuItem(
               context,
               icon: Icons.lock_outline,
-              text: 'List of lists',
+              text: 'La liste des listes',
               onClicked: () => Get.to(() => ListOfListsControlPage()),
             ),
           if (role == 'admin' || role == 'superadmin')
             buildMenuItem(
               context,
               icon: Icons.picture_as_pdf_outlined,
-              text: 'Go to admins PDF list new',
+              text: 'Admin liste de PDFs ',
               onClicked: () => Get.to(() => AdminPdfListView()),
             ),
           if (role == 'admin' || role == 'superadmin')
             buildMenuItem(
               context,
               icon: Icons.business_outlined,
-              text: 'Go to admins Company list',
+              text: 'Entreprise',
               onClicked: () => Get.to(() => CompanyList()),
             ),
           const Divider(color: Colors.white54, thickness: 1),
