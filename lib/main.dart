@@ -11,7 +11,6 @@ import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/diagrams.dart';
 import 'package:flutter_application_1/pages/splash_screen.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
-
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:get/get.dart';
