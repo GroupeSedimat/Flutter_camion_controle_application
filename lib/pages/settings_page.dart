@@ -31,23 +31,23 @@ class SettingsPage extends StatelessWidget {
                 },
               ),
             ),
-            ListTile(
-              title: Text('Langue'),
-              trailing: DropdownButton<String>(
-                value: localeProvider.locale.languageCode,
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    localeProvider.setLocale(newValue);
-                  }
-                },
-                items: <String>['en', 'fr'].map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value == 'en' ? 'Anglais' : 'Français'),
-                  );
-                }).toList(),
-              ),
-            ),
+            // ListTile(
+            //   title: Text('Langue'),
+            //   trailing: DropdownButton<String>(
+            //     value: localeProvider.locale.languageCode,
+            //     onChanged: (String? newValue) {
+            //       if (newValue != null) {
+            //         localeProvider.setLocale(newValue);
+            //       }
+            //     },
+            //     items: <String>['en', 'fr'].map<DropdownMenuItem<String>>((String value) {
+            //       return DropdownMenuItem<String>(
+            //         value: value,
+            //         child: Text(value == 'en' ? 'Anglais' : 'Français'),
+            //       );
+            //     }).toList(),
+            //   ),
+            // ),
             ListTile(
               title: Text('Modifier vos informations'),
               trailing: Icon(Icons.edit),

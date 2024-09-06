@@ -287,7 +287,7 @@ class PdfService {
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text("TruckCheck by Mobility Corner", style: pw.TextStyle(font: font, fontSize: 14)),
+            pw.Text("Créé avec MCTruckCheck", style: pw.TextStyle(font: font, fontSize: 14)),
             pw.Image(pw.MemoryImage(mobilityLogo), height: 50),
           ]
         ),

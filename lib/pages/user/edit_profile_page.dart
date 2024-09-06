@@ -53,12 +53,12 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
               },
             ),*/
             SizedBox(height: 20),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: 'Nouvelle adresse e-mail',
-              ),
-            ),
+            // TextField(
+            //   controller: emailController,
+            //   decoration: InputDecoration(
+            //     labelText: 'Nouvelle adresse e-mail',
+            //   ),
+            // ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {

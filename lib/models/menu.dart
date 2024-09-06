@@ -87,6 +87,7 @@ class MenuWidget extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+                if(role!="user")
                 Text(
                   'Role: $role',
                   style: TextStyle(

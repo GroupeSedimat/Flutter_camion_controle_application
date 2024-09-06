@@ -46,13 +46,21 @@ class _LoginPagestate extends State<LoginPage> {
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
                       "Bonjour!",
                       style: TextStyle(
-                        fontSize: 50,
+                        fontSize: 30,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
+                        // Couleur du texte
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
+                            offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
+                            blurRadius: 5, // Rayon du flou de l'ombre
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(height: 10),
@@ -61,6 +69,13 @@ class _LoginPagestate extends State<LoginPage> {
                       style: TextStyle(
                         fontSize: 20,
                         color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
+                            offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
+                            blurRadius: 5, // Rayon du flou de l'ombre
+                          ),
+                        ],
                       ),
                     ),
                   ],

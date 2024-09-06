@@ -229,8 +229,8 @@ bool isValidPassword(String password) {
     try {
       await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).update({
         'username': newUsername,
-        //'dob': newDob,
-        'email': newEmail,
+        // 'dob': newDob,
+        // 'email': newEmail,
       });
 
       Get.snackbar(

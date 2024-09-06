@@ -55,23 +55,31 @@ Widget _buildBody(BuildContext context) {
                 child: Center(
                   child: Text(
                     welcomeMessage,
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 12, 12, 12),
-                    ),
+                    style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    // Couleur du texte
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
+                        offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
+                        blurRadius: 5, // Rayon du flou de l'ombre
+                      ),
+                    ],
+                  ),
                     textAlign: TextAlign.center,
                   ),
                 ),
               ),
               const SizedBox(height: 20),
-              _buildButton(
-                context,
-                'Voir maps',
-                Icons.map,
-                '/map',
-              ),
-              const SizedBox(height: 20),
+              // _buildButton(
+              //   context,
+              //   'Voir maps',
+              //   Icons.map,
+              //   '/map',
+              // ),
+              // const SizedBox(height: 20),
             ],
           ),
         );
