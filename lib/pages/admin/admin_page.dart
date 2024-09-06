@@ -4,6 +4,9 @@ import 'package:flutter_application_1/pages/admin/UserApprovalPage.dart';
 import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
+import 'package:flutter_application_1/pages/checklist/lol_control_page.dart';
+import 'package:flutter_application_1/pages/company/company_list.dart';
+import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -47,17 +50,36 @@ class AdminPage extends StatelessWidget {
           },
         ),
         _buildDashboardItem(
-          'Checklist',
+          'Gestion des Check list blueprints',
           Icons.checklist,
           () {
             Get.to(() => const CheckList());
           },
         ),
         _buildDashboardItem(
+<<<<<<< HEAD
           'Page d\'accueil',
           Icons.home,
+=======
+          'Gestion des Lists',
+          Icons.list_alt,
+>>>>>>> f5c294ae56e8059749a330654fc1533024924aa0
           () {
-            Get.to(() => WelcomePage());
+            Get.to(() => const ListOfListsControlPage());
+          },
+        ),
+        _buildDashboardItem(
+          'Gestion des Companies',
+          Icons.home_work,
+          () {
+            Get.to(() => CompanyList());
+          },
+        ),
+        _buildDashboardItem(
+          'Gestion des Companies PDFs',
+          Icons.picture_as_pdf,
+          () {
+            Get.to(() => AdminPdfListView());
           },
         ),
       ],

@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 
 const String IMAGES_STORAGE_REF = "images";
 
@@ -25,4 +26,16 @@ class DatabaseImageService{
       return '';
     }
   }
+
+  Future<Uint8List?> downloadImageFromFirebase(String url) async {
+    try {
+      final Reference imageRef = FirebaseStorage.instance.refFromURL(url);
+      final Uint8List? data = await imageRef.getData();
+      return data;
+    } catch (e) {
+      print('Error downloading image: $e');
+      return null;
+    }
+  }
+
 }

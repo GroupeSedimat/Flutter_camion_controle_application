@@ -48,6 +48,8 @@ class UserTile extends StatelessWidget {
                 );
               } else if (snapshot.hasData) {
                 final docList = snapshot.data!.items;
+                docList.sort((a, b) => b.name.compareTo(a.name));
+
                 return ExpansionTile(
                  
                   backgroundColor: Colors.lightBlueAccent,

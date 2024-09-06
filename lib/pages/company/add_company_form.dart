@@ -30,219 +30,265 @@ class _AddCompanyState extends State<AddCompany> {
   String tel = "";
   String email = "";
   String logo = "";
+  String pageTile = "Add new company!";
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.company != null) {
+      name = widget.company!.name;
+      description = widget.company!.description;
+      sirene = widget.company!.sirene;
+      siret = widget.company!.siret;
+      address = widget.company!.address;
+      responsible = widget.company!.responsible;
+      admin = widget.company!.admin;
+      tel = widget.company!.tel;
+      email = widget.company!.email;
+      logo = widget.company!.logo;
+      pageTile = "Edit company";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
-        key: _formKey,
-        child: ListView(
-          scrollDirection: Axis.vertical,
-          children: <Widget> [
-            const Text(
-              "Add new company!",
+      key: _formKey,
+      child: ListView(
+        scrollDirection: Axis.vertical,
+        children: <Widget> [
+          Text(
+            pageTile,
+            style: TextStyle(
+                backgroundColor: Colors.white,
+                fontSize: 30,
+                color: Colors.green,
+                letterSpacing: 4,
+                fontWeight: FontWeight.bold
+            ),
+          ),
+
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: name,
+            decoration: const InputDecoration(
+              hintText: "Give me name!",
+              labelText: "Company name:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company name:' : null;},
+            onChanged: (val) => setState(() {name = val;}),
+          ),
+
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: description,
+            decoration: const InputDecoration(
+              hintText: "Give me description!",
+              labelText: "Company description:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            onChanged: (val) => setState(() {
+              description = val;
+            }),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: sirene,
+            decoration: const InputDecoration(
+              hintText: "Give me sirene!",
+              labelText: "Company sirene:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            validator: (val) =>
+            (val == null || val.isEmpty || val == "") ? 'Enter company sirene:' : null,
+            onChanged: (val) => setState(() {
+              sirene = val;
+            }),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: siret,
+            decoration: const InputDecoration(
+              hintText: "Give me siret!",
+              labelText: "Company siret:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            validator: (val) =>
+            (val == null || val.isEmpty || val == "") ? 'Enter company siret:' : null,
+            onChanged: (val) => setState(() {
+              siret = val;
+            }),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: address,
+            decoration: const InputDecoration(
+              hintText: "Give me address!",
+              labelText: "Company address:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            onChanged: (val) => setState(() {
+              address = val;
+            }),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: responsible,
+            decoration: const InputDecoration(
+              hintText: "Give me responsible!",
+              labelText: "Company responsible:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            onChanged: (val) => setState(() {
+              responsible = val;
+            }),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: admin,
+            decoration: const InputDecoration(
+              hintText: "Give me admin!",
+              labelText: "Company admin:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            onChanged: (val) => setState(() {
+              admin = val;
+            }),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: tel,
+            decoration: const InputDecoration(
+              hintText: "Give me tel!",
+              labelText: "Company tel:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            onChanged: (val) => setState(() {
+              tel = val;
+            }),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: email,
+            decoration: const InputDecoration(
+              hintText: "Give me email!",
+              labelText: "Company email:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            onChanged: (val) => setState(() {
+              email = val;
+            }),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            initialValue: logo,
+            decoration: const InputDecoration(
+              hintText: "Give me logo!",
+              labelText: "Company logo:",
+              labelStyle: TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: OutlineInputBorder(gapPadding: 15),
+              border: OutlineInputBorder(gapPadding: 5),
+            ),
+            onChanged: (val) => setState(() {
+              logo = val;
+            }),
+          ),
+          const SizedBox(height: 50),
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.blue,
+              minimumSize: const Size(250, 60),
+            ),
+            child: const Text(
+              'Save company',
               style: TextStyle(
-                  backgroundColor: Colors.white,
-                  fontSize: 30,
-                  color: Colors.green,
-                  letterSpacing: 4,
-                  fontWeight: FontWeight.bold
+                color: Colors.white,
               ),
             ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me name!",
-                labelText: "Company name:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company name:' : null;},
-              onChanged: (val) => setState(() {name = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me description!",
-                labelText: "Company description:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              // validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company description:' : null;},
-              onChanged: (val) => setState(() {description = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me sirene!",
-                labelText: "Company sirene:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company sirene:' : null;},
-              onChanged: (val) => setState(() {sirene = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me siret!",
-                labelText: "Company siret:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company siret:' : null;},
-              onChanged: (val) => setState(() {siret = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me address!",
-                labelText: "Company address:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              // validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company address:' : null;},
-              onChanged: (val) => setState(() {address = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me responsible!",
-                labelText: "Company responsible:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              // validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company responsible:' : null;},
-              onChanged: (val) => setState(() {responsible = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me admin!",
-                labelText: "Company admin:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              // validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company admin:' : null;},
-              onChanged: (val) => setState(() {admin = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me tel!",
-                labelText: "Company tel:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              // validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company tel:' : null;},
-              onChanged: (val) => setState(() {tel = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me email!",
-                labelText: "Company email:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              // validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company email:' : null;},
-              onChanged: (val) => setState(() {email = val;}),
-            ),
-
-            const SizedBox(height: 20),
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Give me logo!",
-                labelText: "Company logo:",
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.lightBlue,
-                  backgroundColor: Colors.white,
-                ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
-              ),
-              // validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company logo address:' : null;},
-              onChanged: (val) => setState(() {logo = val;}),
-            ),
-
-            const SizedBox(height: 50),
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.blue,
-                minimumSize: const Size(250, 60),
-              ),
-              child: const Text(
-                'Add company',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  Company newCompany = Company(name: name, description: description, sirene: sirene, siret: siret, address: address, responsible: responsible, admin: admin, tel: tel, email: email, logo: logo);
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                Company newCompany = Company(
+                    name: name,
+                    description: description,
+                    sirene: sirene,
+                    siret: siret,
+                    address: address,
+                    responsible: responsible,
+                    admin: admin,
+                    tel: tel,
+                    email: email,
+                    logo: logo);
+                if (widget.company == null) {
                   databaseCompanyService.addCompany(newCompany);
-                  if (widget.onCompanyAdded != null) {
-                    widget.onCompanyAdded!();
-                  }
+                } else {
+                  databaseCompanyService.updateCompany(widget.companyID!, newCompany);
+                }
+                if (widget.onCompanyAdded != null) {
+                  widget.onCompanyAdded!();
                 }
               }
-            ),
-          ],
-        )
+            }),
+        ],
+      )
     );
   }
 }
