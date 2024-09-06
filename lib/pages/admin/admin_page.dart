@@ -54,7 +54,7 @@ class AdminPage extends StatelessWidget {
           },
         ),
         _buildDashboardItem(
-          'Welcome Page',
+          'Page d\'accueil',
           Icons.home,
           () {
             Get.to(() => WelcomePage());
@@ -64,7 +64,7 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardItem(
+Widget _buildDashboardItem(
     String title,
     IconData icon,
     VoidCallback onTap,
@@ -84,7 +84,7 @@ class AdminPage extends StatelessWidget {
               Icon(
                 icon,
                 size: 50,
-                color: Colors.blue, // Couleur de l'icône
+                color: Colors.blue, 
               ),
               SizedBox(height: 10),
               Text(

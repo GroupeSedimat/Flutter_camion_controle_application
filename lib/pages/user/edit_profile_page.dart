@@ -30,7 +30,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
                 labelText: 'Nouveau nom d\'utilisateur',
               ),
             ),
-            /*SizedBox(height: 20),
+             /*SizedBox(height: 20),
             TextFormField(
               controller: dobController,
               readOnly: true,
@@ -45,7 +45,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
                   lastDate: DateTime.now(),
                 );
                 if (picked != null && picked != selectedDate) {
-                  setState(() {
+                  setState(() {s
                     selectedDate = picked;
                     dobController.text = picked.toString();
                   });
