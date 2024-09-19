@@ -1,6 +1,7 @@
 // ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ResetPasswordPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -9,15 +10,12 @@ class ResetPasswordPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Réinitialiser le mot de passe'),
+        title: Text(AppLocalizations.of(context)!.passReset),
         backgroundColor: Colors.blue,
       ),
       body: Container(
         decoration: BoxDecoration(
-          
-           
             color: Colors.white,
-          
         ),
         child: Center(
           child: Padding(
@@ -33,7 +31,7 @@ class ResetPasswordPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Réinitialiser le mot de passe',
+                      AppLocalizations.of(context)!.passReset,
                       style: TextStyle(
                         fontSize: 24.0,
                         fontWeight: FontWeight.bold,
@@ -45,7 +43,7 @@ class ResetPasswordPage extends StatelessWidget {
                       controller: emailController,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.email, color: Colors.blue),
-                        labelText: 'Adresse e-mail',
+                        labelText: AppLocalizations.of(context)!.eMail,
                         labelStyle: TextStyle(color: Colors.blue),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
@@ -74,7 +72,7 @@ class ResetPasswordPage extends StatelessWidget {
                             horizontal: 30.0, vertical: 15.0),
                       ),
                       child: Text(
-                        'Envoyer l\'e-mail de réinitialisation',
+                        AppLocalizations.of(context)!.eMailSend,
                         style: TextStyle(fontSize: 16.0, color: Colors.white),
                       ),
                     ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class InscriptionPage extends StatefulWidget {
   const InscriptionPage({Key? key}) : super(key: key);
@@ -46,7 +47,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
     super.dispose();
   }
 
-@override
 @override
 Widget build(BuildContext context) {
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
@@ -104,7 +104,7 @@ Widget build(BuildContext context) {
                   ),
                   SizedBox(height: 20),
                   Text(
-                    "Inscrivez-vous!",
+                    AppLocalizations.of(context)!.signIn,
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -128,17 +128,17 @@ Widget build(BuildContext context) {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildTextField('Entrez votre email', Icons.email, emailController),
+                  buildTextField(AppLocalizations.of(context)!.eMailEnter, Icons.email, emailController),
                   const SizedBox(height: 20),
-                  buildTextField('Nom d\'utilisateur', Icons.person, usernameController),
+                  buildTextField(AppLocalizations.of(context)!.userName, Icons.person, usernameController),
                   const SizedBox(height: 20),
-                  buildTextField('Nom', Icons.person, nameController),
+                  buildTextField(AppLocalizations.of(context)!.userFirstName, Icons.person, firstnameController),
                   const SizedBox(height: 20),
-                  buildTextField('Prénom', Icons.person, firstnameController),
+                  buildTextField(AppLocalizations.of(context)!.userLastName, Icons.person, nameController),
                   const SizedBox(height: 20),
-                  buildPasswordTextField('Entrez votre mot de passe', passwordController, obscurePassword),
+                  buildPasswordTextField(AppLocalizations.of(context)!.passEnter, passwordController, obscurePassword),
                   const SizedBox(height: 20),
-                  buildPasswordTextField('Confirmez le mot de passe', confirmPasswordController, obscureConfirmPassword),
+                  buildPasswordTextField(AppLocalizations.of(context)!.passRepeat, confirmPasswordController, obscureConfirmPassword),
                   const SizedBox(height: 20),
                   FutureBuilder<Map<String, Company>>(
                     future: databaseCompanyService.getAllCompanies(),
@@ -159,7 +159,7 @@ Widget build(BuildContext context) {
                             .toList();
                         return DropdownButtonFormField<String>(
                           value: selectedCompany,
-                          hint: const Text('Select Company'),
+                          hint: Text(AppLocalizations.of(context)!.companySelect),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
@@ -190,7 +190,7 @@ Widget build(BuildContext context) {
               onTap: () {
                 if (selectedCompany == null) {
                   setState(() {
-                    errorMessage = 'Veuillez sélectionner une entreprise.';
+                    errorMessage = AppLocalizations.of(context)!.companySelect;
                   });
                 } else {
                   AuthController.instance.register(
@@ -219,14 +219,14 @@ Widget build(BuildContext context) {
                     ),
                   ],
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    "S'inscrire",
+                    AppLocalizations.of(context)!.signIn,
                     style: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      shadows: [
+                      shadows: const [
                         Shadow(
                           offset: Offset(2.0, 2.0),
                           blurRadius: 3.0,
@@ -309,7 +309,7 @@ Widget build(BuildContext context) {
             ),
             onPressed: () {
               setState(() {
-                if (hintText == 'Entrez votre mot de passe') {
+                if (hintText == AppLocalizations.of(context)!.passEnter) {
                   obscurePassword = !obscurePassword;
                 } else {
                   obscureConfirmPassword = !obscureConfirmPassword;

@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "1023285541885",
-    "project_id": "mctruckcheck",
-    "storage_bucket": "mctruckcheck.appspot.com"
+    "project_number": "25240704677",
+    "firebase_url": "https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "camion-controle-appli-v1",
+    "storage_bucket": "camion-controle-appli-v1.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1023285541885:android:454510dcc8c14fc99db794",
+        "mobilesdk_app_id": "1:25240704677:android:a43f9bdbda059a91b6df4c",
         "android_client_info": {
           "package_name": "com.mobility.corner.app.flutterApplication1"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCmeTUEn8NvuGC85RXbdbB-7xyz6gbm6tQ"
+          "current_key": "AIzaSyCB8XBTNbTrrfxO2L_NVmQGdNbfsnY5YTQ"
         }
       ],
       "services": {

@@ -27,10 +27,8 @@ class AuthController extends GetxController {
 
   _initialScreen(User? user) {
     if (user == null) {
-      print("login page");
       Get.offAll(() => LoginPage());
     } else {
-      print("User is authenticated: ${user.uid}");
       FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -39,9 +37,6 @@ class AuthController extends GetxController {
         if (documentSnapshot.exists) {
           _username = documentSnapshot.get('username');
           _role = documentSnapshot.get('role');
-
-          print( "username : $_username, role: $_role");
-          //Get.offAll(() => WelcomePage());
            if (_role == 'superadmin') {
               Get.offAll(() => AdminPage(userRole: UserRole.superadmin,));
             } else {
@@ -58,7 +53,6 @@ class AuthController extends GetxController {
 
   Future<void> register(String email, String username, String name, String firstname, String password, String confirmPassword, String role, String company) async {
   try {
-    print('Password: $password, Confirm Password: $confirmPassword');
     if (password != confirmPassword) {
       throw "Les mots de passe ne correspondent pas";
     }

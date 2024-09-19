@@ -1,9 +1,9 @@
-// ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, prefer_const_constructors_in_immutables, sort_child_properties_last
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserEditPage extends StatefulWidget {
   final MyUser user;
@@ -48,7 +48,7 @@ class _UserEditPageState extends State<UserEditPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Modifier utilisateur'),
+        title: Text(AppLocalizations.of(context)!.userProfileEdit),
         actions: [
           IconButton(
             icon: Icon(Icons.delete),
@@ -62,19 +62,19 @@ class _UserEditPageState extends State<UserEditPage> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Nom d\'utilisateur'),
-            ),
-             TextField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Nom'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userName),
             ),
              TextField(
               controller: _firstnameController,
-              decoration: InputDecoration(labelText: 'Prenom'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userFirstName),
+            ),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userLastName),
             ),
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.eMail),
             ),
             DropdownButton<String>(
               value: _selectedRole,
@@ -93,7 +93,7 @@ class _UserEditPageState extends State<UserEditPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _updateUser,
-              child: Text('Enregistrer'),
+              child: Text(AppLocalizations.of(context)!.confirm),
             ),
           ],
         ),
@@ -121,8 +121,8 @@ class _UserEditPageState extends State<UserEditPage> {
         });
 
         Get.snackbar(
-          "Utilisateur mis à jour",
-          "Les informations de l'utilisateur ont été mises à jour avec succès.",
+          "User updated",
+          "User information has been updated successfully.",
           backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
         );
@@ -130,15 +130,15 @@ class _UserEditPageState extends State<UserEditPage> {
         Get.back();
       } else {
         Get.snackbar(
-          "Erreur",
-          "Utilisateur non trouvé.",
+          "Error",
+          "User not found.",
           backgroundColor: Colors.red,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Get.snackbar(
-        "Erreur lors de la mise à jour",
+        "Error while updating",
         e.toString(),
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
@@ -151,17 +151,17 @@ class _UserEditPageState extends State<UserEditPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirmer la suppression"),
-          content: Text("Êtes-vous sûr de vouloir supprimer cet utilisateur ?"),
+          title: Text(AppLocalizations.of(context)!.confirmDelete),
+          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
           actions: [
             TextButton(
-              child: Text("Non"),
+              child: Text(AppLocalizations.of(context)!.no),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text("Oui"),
+              child: Text(AppLocalizations.of(context)!.yes),
               onPressed: _deleteUser,
             ),
           ],
@@ -185,8 +185,8 @@ class _UserEditPageState extends State<UserEditPage> {
             .delete();
 
         Get.snackbar(
-          "Utilisateur supprimé",
-          "L'utilisateur a été supprimé avec succès.",
+          "User deleted",
+          "User has been deleted successfully.",
           backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
         );
@@ -194,15 +194,15 @@ class _UserEditPageState extends State<UserEditPage> {
         Get.back();
       } else {
         Get.snackbar(
-          "Erreur",
-          "Utilisateur non trouvé.",
+          "Error",
+          "User not found.",
           backgroundColor: Colors.red,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Get.snackbar(
-        "Erreur lors de la suppression",
+        "Error while deleting",
         e.toString(),
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,

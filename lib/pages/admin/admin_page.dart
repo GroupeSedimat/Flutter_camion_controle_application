@@ -11,6 +11,7 @@ import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:get/get.dart';
 
@@ -23,12 +24,12 @@ class AdminPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BasePage(
       // drawer: _buildDrawer(context),
-      title: "Page d'administration",
-      body: _buildDashboard(),
+      title: AppLocalizations.of(context)!.superAdminPage,
+      body: _buildDashboard(context),
     );
   }
 
-  Widget _buildDashboard() {
+  Widget _buildDashboard(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
       padding: EdgeInsets.all(20),
@@ -36,42 +37,42 @@ class AdminPage extends StatelessWidget {
       crossAxisSpacing: 20,
       children: [
         _buildDashboardItem(
-          'Gestion des utilisateurs',
+          AppLocalizations.of(context)!.manageUsers,
           Icons.supervised_user_circle,
           () {
             Get.to(() => UserManagementPage());
           },
         ),
         _buildDashboardItem(
-          'Approuver un compte',
+          AppLocalizations.of(context)!.userApprove,
           Icons.approval,
           () {
             Get.to(() => UserApprovalPage());
           },
         ),
         _buildDashboardItem(
-          'Gestion des Check list blueprints',
+          AppLocalizations.of(context)!.checkList,
           Icons.checklist,
           () {
             Get.to(() => const CheckList());
           },
         ),
         _buildDashboardItem(
-          'Gestion des Lists',
+          AppLocalizations.of(context)!.listOfLists,
           Icons.list_alt,
           () {
             Get.to(() => const ListOfListsControlPage());
           },
         ),
         _buildDashboardItem(
-          'Gestion des Companies',
+          AppLocalizations.of(context)!.company,
           Icons.home_work,
           () {
             Get.to(() => CompanyList());
           },
         ),
         _buildDashboardItem(
-          'Gestion des Companies PDFs',
+          AppLocalizations.of(context)!.pdfListAdmin,
           Icons.picture_as_pdf,
           () {
             Get.to(() => AdminPdfListView());

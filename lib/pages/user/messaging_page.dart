@@ -1,8 +1,7 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MessagingPage extends StatefulWidget {
   const MessagingPage({super.key});
@@ -20,7 +19,7 @@ class _MessagingPageState extends State<MessagingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messagerie'),
+        title: Text(AppLocalizations.of(context)!.messenger),
       ),
       body: Column(
         children: [
@@ -58,8 +57,8 @@ class _MessagingPageState extends State<MessagingPage> {
                 Expanded(
                   child: TextField(
                     controller: _messageController,
-                    decoration: const InputDecoration(
-                      hintText: 'Tapez votre message...',
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.enterMessage,
                     ),
                   ),
                 ),

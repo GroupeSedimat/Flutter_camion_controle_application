@@ -1,9 +1,8 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, prefer_const_literals_to_create_immutables, depend_on_referenced_packages
-
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firebase_options.dart';
+import 'package:flutter_application_1/l10n/l10n.dart';
 import 'package:flutter_application_1/pages/map/map_page.dart';
 import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
 import 'package:flutter_application_1/pages/wrapper.dart';
@@ -15,13 +14,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme_provider.dart';
 import 'locale_provider.dart';
 
 void main() async {
 
-  // WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // await FirebaseAppCheck.instance.activate(
   //   // You can also use a `ReCaptchaEnterpriseProvider` provider instance as an
@@ -43,16 +44,22 @@ void main() async {
   // );
 
 
-  runApp(MyApp());
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? savedLanguageCode = prefs.getString('languageCode');
+
+  runApp(MyApp(savedLanguageCode: savedLanguageCode));
 }
 
 class MyApp extends StatelessWidget {
+  final String? savedLanguageCode;
+  MyApp({this.savedLanguageCode});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider(savedLanguageCode)),
       ],
       child: Consumer2<ThemeProvider, LocaleProvider>(
         builder: (context, themeProvider, localeProvider, child) {
@@ -62,23 +69,22 @@ class MyApp extends StatelessWidget {
             theme: ThemeData.light(),
             darkTheme: ThemeData.dark(),
             locale: localeProvider.locale,
-            supportedLocales: [
-              Locale('en', ''), // English
-              Locale('fr', ''), // French
-            ],
+            supportedLocales: L10n.all,
             localizationsDelegates: [
+              AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
+            fallbackLocale: Locale('en'),
             home: SplashScreen(),
             routes: {
               '/wrapper': (context) => const Wrapper(),
               '/checklist': (context) => const CheckList(),
               '/diagrams': (context) => const Diagrams(),
               '/loadingdata': (context) => const LoadingData(),
-              '/settings': (context) => SettingsPage(), // Page des paramètres
-              '/map': (context) => MapPage(), // Ajoutez cette ligne
+              '/settings': (context) => SettingsPage(),
+              '/map': (context) => MapPage(),
             },
           );
         },

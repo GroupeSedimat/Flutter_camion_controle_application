@@ -1,6 +1,6 @@
-// ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ModifyProfilePage extends StatefulWidget {
   @override
@@ -17,7 +17,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Modifier le profil'),
+        title: Text(AppLocalizations.of(context)!.userProfileEdit),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -27,7 +27,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
             TextField(
               controller: usernameController,
               decoration: InputDecoration(
-                labelText: 'Nouveau nom d\'utilisateur',
+                labelText: AppLocalizations.of(context)!.userNewName,
               ),
             ),
              /*SizedBox(height: 20),
@@ -69,7 +69,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
                   emailController.text.trim(),
                 );
               },
-              child: Text('Enregistrer les modifications'),
+              child: Text(AppLocalizations.of(context)!.confirm),
             ),
           ],
         ),

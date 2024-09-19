@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter_application_1/pages/base_page.dart';
 
@@ -13,7 +14,7 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "Page d'accueil",
+      title: AppLocalizations.of(context)!.homePage,
       body: _buildBody(context),
     );
   }
@@ -32,8 +33,8 @@ Widget _buildBody(BuildContext context) {
       } else if (snapshot.hasData) {
         final MyUser userData = snapshot.data!;
         String welcomeMessage = userData.role == 'admin'
-            ? 'Bienvenue sur la page admin, ${userData.username}!'
-            : 'Bienvenue sur votre profil, ${userData.username}!';
+            ? AppLocalizations.of(context)!.adminHello(userData.username)
+            : AppLocalizations.of(context)!.userHello(userData.username);
         
         return SingleChildScrollView(
           child: Column(

@@ -1,8 +1,8 @@
-// ignore_for_file: file_names, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, prefer_const_constructors_in_immutables, avoid_print
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserDetailsPage extends StatelessWidget {
   final MyUser user;
@@ -18,35 +18,35 @@ class UserDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: 'Détails de l\'utilisateur',
+      title: AppLocalizations.of(context)!.details,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Nom d\'utilisateur:',
+              AppLocalizations.of(context)!.userName,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(user.username),
             SizedBox(height: 16),
             Text(
-              'Email:',
+              AppLocalizations.of(context)!.eMail,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(user.email),
             SizedBox(height: 16),
             Text(
-              'Nom:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(user.name),
-            SizedBox(height: 16),
-            Text(
-              'Prenom:',
+              AppLocalizations.of(context)!.userFirstName,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(user.firstname),
+            SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context)!.userLastName,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(user.name),
             SizedBox(height: 16),
             Text(
               'Role:',
@@ -55,7 +55,7 @@ class UserDetailsPage extends StatelessWidget {
             Text(user.role),
             SizedBox(height: 16),
             Text(
-              'Compagnie:',
+              AppLocalizations.of(context)!.company,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             FutureBuilder<String>(
@@ -64,9 +64,9 @@ class UserDetailsPage extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 } else if (snapshot.hasError) {
-                  return Text('Erreur: ${snapshot.error}');
+                  return Text('Error: ${snapshot.error}');
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Text('Nom de compagnie non trouvé');
+                  return Text('Company name not found');
                 } else {
                   return Text(snapshot.data!);
                 }
