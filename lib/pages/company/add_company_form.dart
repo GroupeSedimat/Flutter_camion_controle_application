@@ -1,8 +1,7 @@
-// ignore_for_file: must_be_immutable
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddCompany extends StatefulWidget {
 
@@ -30,7 +29,7 @@ class _AddCompanyState extends State<AddCompany> {
   String tel = "";
   String email = "";
   String logo = "";
-  String pageTile = "Add new company!";
+  String pageTile = "";
 
   @override
   void initState() {
@@ -46,12 +45,16 @@ class _AddCompanyState extends State<AddCompany> {
       tel = widget.company!.tel;
       email = widget.company!.email;
       logo = widget.company!.logo;
-      pageTile = "Edit company";
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if(widget.company != null){
+      pageTile = AppLocalizations.of(context)!.companyEdit;
+    }else{
+      pageTile = AppLocalizations.of(context)!.companyAdd;
+    }
     return Form(
       key: _formKey,
       child: ListView(
@@ -71,9 +74,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: name,
-            decoration: const InputDecoration(
-              hintText: "Give me name!",
-              labelText: "Company name:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companyName,
+              labelText: AppLocalizations.of(context)!.companyName,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -82,16 +85,16 @@ class _AddCompanyState extends State<AddCompany> {
               focusedBorder: OutlineInputBorder(gapPadding: 15),
               border: OutlineInputBorder(gapPadding: 5),
             ),
-            validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter company name:' : null;},
+            validator: (val) {return (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null;},
             onChanged: (val) => setState(() {name = val;}),
           ),
 
           const SizedBox(height: 20),
           TextFormField(
             initialValue: description,
-            decoration: const InputDecoration(
-              hintText: "Give me description!",
-              labelText: "Company description:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companyDescription,
+              labelText: AppLocalizations.of(context)!.companyDescription,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -107,9 +110,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: sirene,
-            decoration: const InputDecoration(
-              hintText: "Give me sirene!",
-              labelText: "Company sirene:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companySirene,
+              labelText: AppLocalizations.of(context)!.companySirene,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -119,7 +122,7 @@ class _AddCompanyState extends State<AddCompany> {
               border: OutlineInputBorder(gapPadding: 5),
             ),
             validator: (val) =>
-            (val == null || val.isEmpty || val == "") ? 'Enter company sirene:' : null,
+            (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null,
             onChanged: (val) => setState(() {
               sirene = val;
             }),
@@ -127,9 +130,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: siret,
-            decoration: const InputDecoration(
-              hintText: "Give me siret!",
-              labelText: "Company siret:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companySiret,
+              labelText: AppLocalizations.of(context)!.companySiret,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -139,7 +142,7 @@ class _AddCompanyState extends State<AddCompany> {
               border: OutlineInputBorder(gapPadding: 5),
             ),
             validator: (val) =>
-            (val == null || val.isEmpty || val == "") ? 'Enter company siret:' : null,
+            (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null,
             onChanged: (val) => setState(() {
               siret = val;
             }),
@@ -147,9 +150,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: address,
-            decoration: const InputDecoration(
-              hintText: "Give me address!",
-              labelText: "Company address:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companyAddress,
+              labelText: AppLocalizations.of(context)!.companyAddress,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -165,9 +168,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: responsible,
-            decoration: const InputDecoration(
-              hintText: "Give me responsible!",
-              labelText: "Company responsible:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companyResponsible,
+              labelText: AppLocalizations.of(context)!.companyResponsible,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -183,9 +186,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: admin,
-            decoration: const InputDecoration(
-              hintText: "Give me admin!",
-              labelText: "Company admin:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companyAdmin,
+              labelText: AppLocalizations.of(context)!.companyAdmin,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -201,9 +204,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: tel,
-            decoration: const InputDecoration(
-              hintText: "Give me tel!",
-              labelText: "Company tel:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companyPhone,
+              labelText: AppLocalizations.of(context)!.companyPhone,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -219,9 +222,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: email,
-            decoration: const InputDecoration(
-              hintText: "Give me email!",
-              labelText: "Company email:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companyEMail,
+              labelText: AppLocalizations.of(context)!.companyEMail,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -237,9 +240,9 @@ class _AddCompanyState extends State<AddCompany> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: logo,
-            decoration: const InputDecoration(
-              hintText: "Give me logo!",
-              labelText: "Company logo:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.companyLogo,
+              labelText: AppLocalizations.of(context)!.companyLogo,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -258,8 +261,8 @@ class _AddCompanyState extends State<AddCompany> {
               backgroundColor: Colors.blue,
               minimumSize: const Size(250, 60),
             ),
-            child: const Text(
-              'Save company',
+            child: Text(
+              AppLocalizations.of(context)!.confirm,
               style: TextStyle(
                 color: Colors.white,
               ),

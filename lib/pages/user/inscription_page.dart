@@ -148,7 +148,7 @@ Widget build(BuildContext context) {
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Text('No companies found.');
+                        return Text(AppLocalizations.of(context)!.companyNotFound);
                       } else {
                         Map<String, Company> companies = snapshot.data!;
                         List<DropdownMenuItem<String>> companyItems = companies.entries

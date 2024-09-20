@@ -1,5 +1,3 @@
-// ignore_for_file: empty_statements, avoid_print
-
 import 'dart:io';
 
 import 'package:dio/dio.dart';

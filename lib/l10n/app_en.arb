@@ -1,4 +1,5 @@
 {
+    "required": "This field is required!",
     "homePage": "Home page",
     "welcomeToMC": "Welcome to MCTruckCheck",
     "logIn": "Log in",
@@ -6,27 +7,35 @@
     "signIn": "Sign in",
     "logOut": "Log out",
     "logOutText": "You have been logged out",
+    "loading": "Loading...",
+    "ok": "OK",
     "yes": "Yes",
     "no": "No",
     "confirm": "Confirm",
+    "cancel": "Cancel",
+    "open": "Open",
+    "download": "Download",
     "details": "See details",
     "edit": "Edit",
     "delete": "Delete",
     "confirmDelete": "Confirm deletion",
-    "confirmDeleteText": "Are you sure you want to delete this user?",
+    "confirmDeleteText": "Are you sure you want to delete?",
     "confirmApprove": "Approve this user?",
     "confirmApproveText": "Are you sure you want to approve this user?",
     "confirmDisapprove": "Confirm disapproval",
     "confirmDisapproveText": "Are you sure you want to disapprove this user?",
 
     "userProfileEdit": "Edit profile",
-    "userHello": "Welcome {username}",
+    "userLoading": "Loading user(s) data",
+    "userHello": "Welcome {userName}",
+    "userWithName": "User: {userName}",
     "userName": "User name",
     "userNewName": "New user name",
     "userFirstName": "First name",
     "userLastName": "Last name",
-    "adminHello": "Welcome to the admin page, {username}",
+    "adminHello": "Welcome to the admin page, {userName}",
     "userApprove": "Approve a user",
+    "userDataNotFound": "No user data available",
     "role": "Role {userRole}",
 
     "passForgot": "Forgot your password?",
@@ -41,15 +50,36 @@
     "eMailSend": "Send reset e-mail",
 
     "company": "Company",
-    "companySelect": "Select company",
+    "companyList": "Company list",
+    "companyAdd": "Add new company",
+    "companyEdit": "Edit company details",
+    "companySelect": "Choose a company",
+    "companyNotFound": "The company could not be found",
+    "companyWithName": "Company: {companyName}",
+    "companyName": "Company name",
+    "companySiret": "Siret",
+    "companySirene": "Sirene",
+    "companyDescription": "Company description",
+    "companyPhone": "Contact number",
+    "companyEMail": "Contact e-mail",
+    "companyAddress": "Correspondence address",
+    "companyResponsible": "Person responsible for the contact",
+    "companyAdmin": "The company's main admin",
+    "companyLogo": "Company logo",
 
     "checkList": "Checklist",
+    "checkListDescribe": "Describe the problem",
+    "blueprintAdd": "Add a Blueprint",
+    "photoNotYet": "No photo yet",
+    "photoMake": "Make photo",
+    "photoGallery": "Choose a photo from the gallery",
     "pdfList": "PDF file list",
+    "pdfMyFiles": "My PDF files",
     "pdfListAdmin": "Admin PDF file list",
+    "pdfDownloaded": "Your PDF file has been saved as: {fileName1}.{fileName2}.pdf",
     "listOfLists": "The list of lists",
     "manageUsers": "Manage Users",
     "superAdminPage": "Super Admin Page",
-    "adminPage": "Admin Page",
     "adminPage": "Admin Page",
 
     "accountNotYet": "Don't have an account yet?",
@@ -59,6 +89,7 @@
     "editInformation": "Edit your information",
     "messenger": "Instant messenger",
     "enterMessage": "Enter your message",
+    "dateCreation": "Creation date: {formattedDate}",
 
 
     "@homePage": {
@@ -115,7 +146,7 @@
     "@userHello": {
         "description": "Greeting user with username",
         "placeholders": {
-            "username": {
+            "userName": {
                 "type": "String"
             }
         }
@@ -123,7 +154,7 @@
     "@adminHello": {
         "description": "Greeting admin username",
         "placeholders": {
-            "username": {
+            "userName": {
                 "type": "String"
             }
         }
@@ -132,6 +163,41 @@
         "description": "Role of the user",
         "placeholders": {
             "userRole": {
+                "type": "String"
+            }
+        }
+    },
+    "@userWithName": {
+        "description": "A string specifying which user the variable name refers to",
+        "placeholders": {
+            "userName": {
+                "type": "String"
+            }
+        }
+    },
+    "@companyWithName": {
+        "description": "A string specifying which company the variable name refers to",
+        "placeholders": {
+            "companyName": {
+                "type": "String"
+            }
+        }
+    },
+    "@dateCreation": {
+        "description": "Creation date",
+        "placeholders": {
+            "formattedDate": {
+                "type": "String"
+            }
+        }
+    },
+    "@pdfDownloaded": {
+        "description": "Your PDF file has been saved as: {fileName1}.{fileName2}.pdf",
+        "placeholders": {
+            "fileName1": {
+                "type": "String"
+            },
+            "fileName2": {
                 "type": "String"
             }
         }
