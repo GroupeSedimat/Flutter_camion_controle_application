@@ -113,6 +113,11 @@
     "dataReceived": "Got data",
     "dataNoData": "No data, sorry :(",
 
+    "colorLight": "Light",
+    "colorDark": "Dark",
+    "colorAutomatic": "Automatic",
+    "color": "Color",
+
     "@required": {
         "description": "This field is required!"
     },
@@ -391,6 +396,18 @@
     },
     "@dataNoData": {
         "description": "No data, sorry :("
+    },
+    "@colorLight": {
+        "description": "Light"
+    },
+    "@colorDark": {
+        "description": "Dark"
+    },
+    "@colorAutomatic": {
+        "description": "Automatic"
+    },
+    "@color": {
+        "description": "Color"
     },
 
 

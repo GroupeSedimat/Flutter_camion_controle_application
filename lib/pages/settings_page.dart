@@ -43,10 +43,10 @@ class SettingsPage extends StatelessWidget {
                     value: mode,
                     child: Text(
                       mode == ThemeMode.light
-                          ? 'Clair'
+                          ? AppLocalizations.of(context)!.colorLight
                           : mode == ThemeMode.dark
-                              ? 'Sombre'
-                              : 'Automatique',
+                              ? AppLocalizations.of(context)!.colorDark
+                              : AppLocalizations.of(context)!.colorAutomatic,
                       style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   );
@@ -56,7 +56,7 @@ class SettingsPage extends StatelessWidget {
 
             // Sélection de la couleur du thème
             ListTile(
-              title: Text('Couleur'),
+              title: Text(AppLocalizations.of(context)!.color),
               trailing: DropdownButton<AppColor>(
                 value: AppColor.values.firstWhere(
                     (color) => color.color == themeProvider.customColor,
@@ -75,7 +75,6 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
 
-            // Modifier les informations utilisateur
             ListTile(
               title: Text(AppLocalizations.of(context)!.language),
               trailing: DropdownButton<String>(

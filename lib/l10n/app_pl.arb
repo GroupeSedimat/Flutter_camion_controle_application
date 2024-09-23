@@ -111,5 +111,10 @@
 
     "dataFetching": "Pobieranie danych",
     "dataReceived": "Got data",
-    "dataNoData": "Nie ma danych, przykro mi :("
+    "dataNoData": "Nie ma danych, przykro mi :(",
+
+    "colorLight": "Jasny",
+    "colorDark": "Ciemny",
+    "colorAutomatic": "Automatycznie",
+    "color": "Kolor"
 }

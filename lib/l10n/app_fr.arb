@@ -111,5 +111,10 @@
 
     "dataFetching": "Récupération de données",
     "dataReceived": "J'ai des données",
-    "dataNoData": "Aucune donnée, désolé :("
+    "dataNoData": "Aucune donnée, désolé :(",
+
+    "colorLight": "Clair",
+    "colorDark": "Sombre",
+    "colorAutomatic": "Automatique",
+    "color": "Couleur"
 }

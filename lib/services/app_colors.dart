@@ -41,9 +41,6 @@ extension AppColorExtension on AppColor {
         return 'Violet';
       case AppColor.orange:
         return 'Orange';
-   
-        
-      
     }
   }
 
