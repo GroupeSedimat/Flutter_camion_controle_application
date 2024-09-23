@@ -11,6 +11,7 @@
     "ok": "OK",
     "yes": "Waaw",
     "no": "Déedéet",
+    "add": "Add",
     "confirm": "Dëggal",
     "cancel": "Cancel",
     "open": "Open",
@@ -69,15 +70,32 @@
 
     "checkList": "Checklist",
     "checkListDescribe": "Describe the problem",
+    "checkListValidation": "Validation process",
     "blueprintAdd": "Add a Blueprint",
+    "blueprintAddName": "Add Blueprint name",
+    "blueprintAddDescription": "Add Blueprint description",
     "photoNotYet": "No photo yet",
     "photoMake": "Make photo",
     "photoGallery": "Choose a photo from the gallery",
+
+    "pdfCreate": "Create PDF",
     "pdfList": "Limu PDF yi",
     "pdfMyFiles": "My PDF files",
     "pdfListAdmin": "Limu admin bu fichier PDF yi",
     "pdfDownloaded": "Your PDF file has been saved under the name: {fileName1}.{fileName2}.pdf",
+
     "listOfLists": "Limu lim yi",
+    "lOLAdd": "Add List",
+    "lOLEdit": "Edit List",
+    "lOLNumber": "List number",
+    "lOLNumberText": "Please enter list number",
+    "lOLName": "List name",
+    "lOLNameText": "Please enter list name",
+    "lOLAuthorization": "Authorization: {person}",
+    "lOLAddAuthoried": "Add authorized person",
+    "listNumber": "List number: {number}",
+    "listPosition": "List position: {position}",
+
     "manageUsers": "Doxal Jëfandikukat yi",
     "superAdminPage": "Xëtu admin bu baax",
     "adminPage": "Xëtu admin",
@@ -89,5 +107,9 @@
     "editInformation": "Soppi say leeral",
     "messenger": "Mesaas",
     "enterMessage": "Dugal sa mesaas",
-    "dateCreation": "Creation date: {formattedDate}"
+    "dateCreation": "Creation date: {formattedDate}",
+
+    "dataFetching": "Fetching data",
+    "dataReceived": "Got data",
+    "dataNoData": "No data, sorry :("
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Loading extends StatelessWidget {
   const Loading({super.key});
@@ -8,12 +9,12 @@ class Loading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.lightBlue,
-      child: const Center(
+      child: Center(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                  "Loading",
+                  AppLocalizations.of(context)!.loading,
                   style: TextStyle(
                     fontSize: 25,
                     color: Colors.black,

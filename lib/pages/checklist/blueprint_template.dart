@@ -1,9 +1,6 @@
-// ignore_for_file: must_be_immutable
-
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BlueprintTemplate extends StatelessWidget{
 
@@ -52,7 +49,7 @@ class BlueprintTemplate extends StatelessWidget{
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.cyan
                   ),
-                  label: const Text('Edit Blueprint'),
+                  label: Text(AppLocalizations.of(context)!.edit),
                   icon: const Icon(
                     Icons.check_box,
                     color: Colors.red,
@@ -65,7 +62,7 @@ class BlueprintTemplate extends StatelessWidget{
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.cyan
                   ),
-                  label: const Text('Validation process'),
+                  label: Text(AppLocalizations.of(context)!.checkListValidation),
                   icon: const Icon(
                     Icons.check_box,
                     color: Colors.red,
@@ -78,7 +75,7 @@ class BlueprintTemplate extends StatelessWidget{
                       foregroundColor: Colors.white60,
                       backgroundColor: Colors.red[900]
                   ),
-                  label: const Text('Delete Blueprint'),
+                  label: Text(AppLocalizations.of(context)!.delete),
                   icon: const Icon(Icons.delete),
                 ),
               ],

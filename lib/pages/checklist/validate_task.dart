@@ -127,8 +127,8 @@ class ValidateTaskState extends State<ValidateTask> {
             ),
             const SizedBox(height: 40),
 
-            Transform.scale(                                                      // validation button
-              scale: 5,                                                           // zmien skale checkbox
+            Transform.scale(
+              scale: 5,                                                           // Change checkbox scale
               child: Checkbox(
                 value: task?.isDone,
                 checkColor: Colors.red,

@@ -18,7 +18,7 @@ class PopUpInfo extends StatelessWidget {
       title: Text(AppLocalizations.of(context)!.blueprintAdd),
       content: TextField(
         controller: _textEditingController,
-        decoration: const InputDecoration(hintText: "Add Blueprint name"),
+        decoration: InputDecoration(hintText: AppLocalizations.of(context)!.blueprintAddName),
         // expands: true,
       ),
       actions: [

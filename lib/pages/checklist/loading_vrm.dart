@@ -1,7 +1,7 @@
-// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/data_api/get_data.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoadingData extends StatefulWidget {
   const LoadingData({super.key});
@@ -30,15 +30,14 @@ class _LoadingDataState extends State<LoadingData> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Colors.lightBlue,
       body: Center(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Image.asset('assets/sunrise-sunset-facts.jpg'),
               Text(
-                  "Fetching data",
+                  AppLocalizations.of(context)!.dataFetching,
                   style: TextStyle(
                       fontSize: 25
                   )

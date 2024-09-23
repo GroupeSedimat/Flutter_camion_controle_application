@@ -11,6 +11,7 @@
     "ok": "OK",
     "yes": "Tak",
     "no": "Nie",
+    "add": "Dodaj",
     "confirm": "Potwierdź",
     "cancel": "Anuluj",
     "open": "Otwórz",
@@ -69,15 +70,32 @@
 
     "checkList": "Checklist",
     "checkListDescribe": "Opisz problem",
+    "checkListValidation": "Proces walidacji",
     "blueprintAdd": "Dodaj Blueprint",
+    "blueprintAddName": "Dodaj nazwe Blueprinu",
+    "blueprintAddDescription": "Dodaj opis Blueprinu",
     "photoNotYet": "Jeszcze nie ma zdjęcia",
     "photoMake": "Zrób zdjęcie",
-    "photoGallery": "Wybierz zdjęcie z galerii",
+    "photoGallery": "Wybierz z galerii",
+
+    "pdfCreate": "Stwórz plik PDF",
     "pdfList": "Lista plików PDF",
     "pdfMyFiles": "Moje pliki PDF",
-    "pdfListAdmin": "Administratorska Lista plików PDF",
+    "pdfListAdmin": "Lista plików PDF dla Admina",
     "pdfDownloaded": "Twój plik PDF został zapisany pod nazwą: {fileName1}.{fileName2}.pdf",
+
     "listOfLists": "Lista wszystkich list",
+    "lOLAdd": "Dodaj listę",
+    "lOLEdit": "Edytuj listę",
+    "lOLNumber": "Numer listy",
+    "lOLNumberText": "Proszę podaj numer listy",
+    "lOLName": "Nazwa listy",
+    "lOLNameText": "Proszę podaj nazwę listy",
+    "lOLAuthorization": "Autoryzacja: {person}",
+    "lOLAddAuthoried": "Dodaj autoryzowaną osobę",
+    "listNumber": "Numer listy: {number}",
+    "listPosition": "Pozycja na liście: {position}",
+
     "manageUsers": "Zarządzaj użytkownikami",
     "superAdminPage": "Strona SuperAdmina",
     "adminPage": "Strona Admina",
@@ -89,5 +107,9 @@
     "editInformation": "Edytuj swój profil",
     "messenger": "Kominikator",
     "enterMessage": "Wpisz wiadomość",
-    "dateCreation": "Data utworzenia: {formattedDate}"
+    "dateCreation": "Data utworzenia: {formattedDate}",
+
+    "dataFetching": "Pobieranie danych",
+    "dataReceived": "Got data",
+    "dataNoData": "Nie ma danych, przykro mi :("
 }
