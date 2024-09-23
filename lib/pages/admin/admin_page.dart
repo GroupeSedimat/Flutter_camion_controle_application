@@ -11,7 +11,6 @@ import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
-
 import 'package:get/get.dart';
 
 class AdminPage extends StatelessWidget {
@@ -22,13 +21,12 @@ class AdminPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      // drawer: _buildDrawer(context),
       title: "Page d'administration",
-      body: _buildDashboard(),
+      body: _buildDashboard(context), 
     );
   }
 
-  Widget _buildDashboard() {
+  Widget _buildDashboard(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
       padding: EdgeInsets.all(20),
@@ -36,6 +34,7 @@ class AdminPage extends StatelessWidget {
       crossAxisSpacing: 20,
       children: [
         _buildDashboardItem(
+          context, 
           'Gestion des utilisateurs',
           Icons.supervised_user_circle,
           () {
@@ -43,6 +42,7 @@ class AdminPage extends StatelessWidget {
           },
         ),
         _buildDashboardItem(
+          context,
           'Approuver un compte',
           Icons.approval,
           () {
@@ -50,6 +50,7 @@ class AdminPage extends StatelessWidget {
           },
         ),
         _buildDashboardItem(
+          context,
           'Gestion des Check list blueprints',
           Icons.checklist,
           () {
@@ -57,6 +58,7 @@ class AdminPage extends StatelessWidget {
           },
         ),
         _buildDashboardItem(
+          context,
           'Gestion des Lists',
           Icons.list_alt,
           () {
@@ -64,6 +66,7 @@ class AdminPage extends StatelessWidget {
           },
         ),
         _buildDashboardItem(
+          context,
           'Gestion des Companies',
           Icons.home_work,
           () {
@@ -71,6 +74,7 @@ class AdminPage extends StatelessWidget {
           },
         ),
         _buildDashboardItem(
+          context,
           'Gestion des Companies PDFs',
           Icons.picture_as_pdf,
           () {
@@ -81,7 +85,8 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-Widget _buildDashboardItem(
+  Widget _buildDashboardItem(
+    BuildContext context, // Ajouter le BuildContext en paramètre
     String title,
     IconData icon,
     VoidCallback onTap,
@@ -101,7 +106,7 @@ Widget _buildDashboardItem(
               Icon(
                 icon,
                 size: 50,
-                color: Colors.blue, 
+                color: Theme.of(context).primaryColor, 
               ),
               SizedBox(height: 10),
               Text(

@@ -18,8 +18,10 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Modifier le profil'),
+         backgroundColor: Theme.of(context).primaryColor,
       ),
-      body: Padding(
+      body: Container(
+       color: Color.fromARGB(108, 255, 255, 255),
         padding: EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

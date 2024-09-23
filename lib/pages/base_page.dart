@@ -19,7 +19,7 @@ class BasePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appBar ?? AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text(
             title ?? "",
             style: TextStyle(

@@ -18,84 +18,89 @@ class WelcomePage extends StatelessWidget {
     );
   }
 
-Widget _buildBody(BuildContext context) {
-  double w = MediaQuery.of(context).size.width;
-  double h = MediaQuery.of(context).size.height;
-  
-  return FutureBuilder<MyUser>(
-    future: UserService().getCurrentUserData(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (snapshot.hasError) {
-        return Center(child: Text("Error: ${snapshot.error}"));
-      } else if (snapshot.hasData) {
-        final MyUser userData = snapshot.data!;
-        String welcomeMessage = userData.role == 'admin'
-            ? 'Bienvenue sur la page admin, ${userData.username}!'
-            : 'Bienvenue sur votre profil, ${userData.username}!';
-        
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                width: w,
-                height: h * 0.3,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 200, 225, 244),
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/truck.jpg"), 
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.7), 
-                      BlendMode.dstATop,
+  Widget _buildBody(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+
+    // Vérification si le mode sombre est activé
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return FutureBuilder<MyUser>(
+      future: UserService().getCurrentUserData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        } else if (snapshot.hasData) {
+          final MyUser userData = snapshot.data!;
+          String welcomeMessage = userData.role == 'admin'
+              ? 'Bienvenue sur la page admin, ${userData.username}!'
+              : 'Bienvenue sur votre profil, ${userData.username}!';
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  width: w,
+                  height: h * 0.3,
+                  decoration: BoxDecoration(
+                    color: isDarkMode
+                        ? const Color.fromARGB(255, 50, 50, 50) // Couleur pour mode sombre
+                        : const Color.fromARGB(255, 200, 225, 244), // Couleur pour mode clair
+                    image: DecorationImage(
+                      image: const AssetImage("assets/images/truck.jpg"),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.7),
+                        BlendMode.dstATop,
+                      ),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      welcomeMessage,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black,
+                            offset: Offset(2, 2),
+                            blurRadius: 5,
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
-                child: Center(
-                  child: Text(
-                    welcomeMessage,
-                    style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    // Couleur du texte
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
-                        offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
-                        blurRadius: 5, // Rayon du flou de l'ombre
-                      ),
-                    ],
-                  ),
-                    textAlign: TextAlign.center,
-                  ),
+                const SizedBox(height: 20),
+                _buildButton(
+                  context,
+                  'Voir maps',
+                  Icons.map,
+                  '/map',
                 ),
-              ),
-              const SizedBox(height: 20),
-              // _buildButton(
-              //   context,
-              //   'Voir maps',
-              //   Icons.map,
-              //   '/map',
-              // ),
-              // const SizedBox(height: 20),
-            ],
-          ),
-        );
-      } else {
-        return const Center(child: Text("No data available"));
-      }
-    },
-  );
-}
+                const SizedBox(height: 20),
+              ],
+            ),
+          );
+        } else {
+          return const Center(child: Text("No data available"));
+        }
+      },
+    );
+  }
 
   Widget _buildButton(BuildContext context, String text, IconData icon, String? route, {VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white, backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          backgroundColor: Theme.of(context).primaryColor, // S'adapte au thème actif
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
