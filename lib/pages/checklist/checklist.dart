@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
-
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -21,6 +19,7 @@ import 'package:flutter_application_1/services/pdf/pdf_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CheckList extends StatefulWidget {
   const CheckList({super.key});
@@ -59,7 +58,7 @@ class _CheckListState extends State<CheckList> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error1: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No data found"));
+          return Center(child: Text(AppLocalizations.of(context)!.dataNoData));
         } else {
           List<ListOfLists> listOfLists = snapshot.data!;
           return DefaultTabController(
@@ -173,7 +172,7 @@ class _CheckListState extends State<CheckList> {
 
   AppBar appBar(List<ListOfLists> listOfLists) {
     return AppBar(
-      title: const Text('Check list: the begining',
+      title: Text(AppLocalizations.of(context)!.checkList,
         style: TextStyle(
           color: Colors.black,
         ),
@@ -212,7 +211,7 @@ class _CheckListState extends State<CheckList> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error2: ${snapshot.error}'));
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data == null) {
             return const Center(child: Text("No data found"));
@@ -247,7 +246,7 @@ class _CheckListState extends State<CheckList> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (userSnapshot.hasError) {
-                return Center(child: Text('Error3: ${userSnapshot.error}'));
+                return Center(child: Text('Error: ${userSnapshot.error}'));
               }
               if (!userSnapshot.hasData || userSnapshot.data == null) {
                 return const Center(child: Text("User data not found"));
@@ -264,7 +263,7 @@ class _CheckListState extends State<CheckList> {
                           return const Center(child: CircularProgressIndicator());
                         }
                         if (testIfFullSnapshot.hasError) {
-                          return Center(child: Text('Error4: ${testIfFullSnapshot.error}'));
+                          return Center(child: Text('Error: ${testIfFullSnapshot.error}'));
                         }
                         bool isFull = testIfFullSnapshot.data ?? false;
                         return ListView(
@@ -292,7 +291,7 @@ class _CheckListState extends State<CheckList> {
                                       if (snapshot.connectionState == ConnectionState.waiting) {
                                         return Container();
                                       } else if (snapshot.hasError) {
-                                        return Text('Error5: ${snapshot.error}');
+                                        return Text('Error: ${snapshot.error}');
                                       } else {
                                         final isDone = snapshot.data;
                                         return BlueprintTemplate(
@@ -304,17 +303,17 @@ class _CheckListState extends State<CheckList> {
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
-                                                  title: const Text("Confirmer la suppression"),
-                                                  content: const Text("Êtes-vous sûr de vouloir supprimer ce blueprint ?"),
+                                                  title: Text(AppLocalizations.of(context)!.confirmDelete),
+                                                  content: Text(AppLocalizations.of(context)!.confirmDeleteText),
                                                   actions: [
                                                     TextButton(
-                                                      child: const Text("Non"),
+                                                      child: Text(AppLocalizations.of(context)!.no),
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
                                                       },
                                                     ),
                                                     TextButton(
-                                                      child: const Text("Oui"),
+                                                      child: Text(AppLocalizations.of(context)!.yes),
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
                                                         String key = sortedBlueprints.keys
@@ -376,7 +375,7 @@ class _CheckListState extends State<CheckList> {
                                           () async => await deleteOneTaskListOfUser(list.listNr, userUID));
                                 },
                                 backgroundColor: Colors.red,
-                                child: const Row(
+                                child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
@@ -385,7 +384,7 @@ class _CheckListState extends State<CheckList> {
                                     ),
                                     SizedBox(width: 10),
                                     Text(
-                                      'Create PDF',
+                                      AppLocalizations.of(context)!.pdfCreate,
                                       style: TextStyle(
                                         color: Colors.white,
                                       ),

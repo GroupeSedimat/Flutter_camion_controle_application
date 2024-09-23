@@ -4,6 +4,7 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/checklist/add_list_form.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ListOfListsControlPage extends StatefulWidget {
   const ListOfListsControlPage({super.key});
@@ -37,7 +38,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
               initialIndex: 0,
               length: listOfLists.length,
               child: BasePage(
-                title: "List of Lists",
+                title: AppLocalizations.of(context)!.listOfLists,
                 body: body(listOfLists, userMap),
               ),
             );
@@ -54,8 +55,8 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
           );
           setState(() {});
         },
+        tooltip: AppLocalizations.of(context)!.lOLAdd,
         child: Icon(Icons.add),
-        tooltip: 'Add New List',
       ),
     );
   }
@@ -85,13 +86,13 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                 setState(() {});
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'edit',
-                  child: Text('Edit'),
+                  child: Text(AppLocalizations.of(context)!.edit),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
-                  child: Text('Delete'),
+                  child: Text(AppLocalizations.of(context)!.delete),
                 ),
               ],
             ),

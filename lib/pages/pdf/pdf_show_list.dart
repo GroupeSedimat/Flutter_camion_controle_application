@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -8,6 +6,7 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_template.dart';
 import 'package:flutter_application_1/services/pdf/database_pdf_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PDFShowList extends StatefulWidget {
   const PDFShowList({super.key});
@@ -21,7 +20,7 @@ class _PDFShowListState extends State<PDFShowList> {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "My PDF files",
+      title: AppLocalizations.of(context)!.pdfMyFiles,
       body: body(context),
     );
   }

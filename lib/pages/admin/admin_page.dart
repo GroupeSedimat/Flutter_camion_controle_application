@@ -11,6 +11,8 @@ import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:get/get.dart';
 
 class AdminPage extends StatelessWidget {
@@ -21,8 +23,8 @@ class AdminPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "Page d'administration",
-      body: _buildDashboard(context), 
+      title: AppLocalizations.of(context)!.superAdminPage,
+      body: _buildDashboard(context),
     );
   }
 
@@ -34,8 +36,8 @@ class AdminPage extends StatelessWidget {
       crossAxisSpacing: 20,
       children: [
         _buildDashboardItem(
-          context, 
-          'Gestion des utilisateurs',
+          context,
+          AppLocalizations.of(context)!.manageUsers,
           Icons.supervised_user_circle,
           () {
             Get.to(() => UserManagementPage());
@@ -43,7 +45,7 @@ class AdminPage extends StatelessWidget {
         ),
         _buildDashboardItem(
           context,
-          'Approuver un compte',
+          AppLocalizations.of(context)!.userApprove,
           Icons.approval,
           () {
             Get.to(() => UserApprovalPage());
@@ -51,7 +53,7 @@ class AdminPage extends StatelessWidget {
         ),
         _buildDashboardItem(
           context,
-          'Gestion des Check list blueprints',
+          AppLocalizations.of(context)!.checkList,
           Icons.checklist,
           () {
             Get.to(() => const CheckList());
@@ -59,7 +61,7 @@ class AdminPage extends StatelessWidget {
         ),
         _buildDashboardItem(
           context,
-          'Gestion des Lists',
+          AppLocalizations.of(context)!.listOfLists,
           Icons.list_alt,
           () {
             Get.to(() => const ListOfListsControlPage());
@@ -67,7 +69,7 @@ class AdminPage extends StatelessWidget {
         ),
         _buildDashboardItem(
           context,
-          'Gestion des Companies',
+          AppLocalizations.of(context)!.company,
           Icons.home_work,
           () {
             Get.to(() => CompanyList());
@@ -75,7 +77,7 @@ class AdminPage extends StatelessWidget {
         ),
         _buildDashboardItem(
           context,
-          'Gestion des Companies PDFs',
+          AppLocalizations.of(context)!.pdfListAdmin,
           Icons.picture_as_pdf,
           () {
             Get.to(() => AdminPdfListView());
@@ -106,7 +108,7 @@ class AdminPage extends StatelessWidget {
               Icon(
                 icon,
                 size: 50,
-                color: Theme.of(context).primaryColor, 
+                color: Theme.of(context).primaryColor,
               ),
               SizedBox(height: 10),
               Text(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_user_tile.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CompanyTile extends StatelessWidget {
   final Reference companyRef;
@@ -16,7 +17,7 @@ class CompanyTile extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return ListTile(
             title: Text(companyName),
-            subtitle: Text("Loading users..."),
+            subtitle: Text(AppLocalizations.of(context)!.userLoading),
           );
         } else if (snapshot.hasError) {
           return ListTile(
@@ -36,7 +37,7 @@ class CompanyTile extends StatelessWidget {
         } else {
           return ListTile(
             title: Text(companyName),
-            subtitle: Text("No users available"),
+            subtitle: Text(AppLocalizations.of(context)!.userDataNotFound),
           );
         }
       },

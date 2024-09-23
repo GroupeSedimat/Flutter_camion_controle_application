@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors, unused_element
-
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -9,6 +7,7 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/company/add_company_form.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CompanyList extends StatefulWidget {
   const CompanyList({super.key});
@@ -133,15 +132,15 @@ class _CompanyListState extends State<CompanyList> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'edit',
-                  child: Text('Edit'),
+                  child: Text(AppLocalizations.of(context)!.edit),
                 ),
                 if(user.role == "superadmin")
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Delete'),
-                  ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text(AppLocalizations.of(context)!.delete),
+                ),
               ],
             ),
             children: [
@@ -150,37 +149,51 @@ class _CompanyListState extends State<CompanyList> {
                 children: [
                   SizedBox(
                     child: Text(
-                        "Siret: ${companyMap.values.elementAt(index).siret}", style: textStyle(),),
+                      "${AppLocalizations.of(context)!.companySiret}: ${companyMap.values.elementAt(index).siret}",
+                      style: textStyle(),
+                    ),
                   ),
                   SizedBox(
                     child: Text(
-                        "Sirene: ${companyMap.values.elementAt(index).sirene}", style: textStyle(),),
+                      "${AppLocalizations.of(context)!.companySirene}: ${companyMap.values.elementAt(index).sirene}",
+                      style: textStyle(),
+                    ),
                   ),
                   if (companyMap.values.elementAt(index).description != "")
-                    SizedBox(
-                      child: Text(
-                          "Description: ${companyMap.values.elementAt(index).description}", style: textStyle(),),
+                  SizedBox(
+                    child: Text(
+                      "${AppLocalizations.of(context)!.companyDescription}: ${companyMap.values.elementAt(index).description}",
+                      style: textStyle(),
                     ),
+                  ),
                   if (companyMap.values.elementAt(index).tel != "")
-                    SizedBox(
-                      child: Text(
-                          "Tel number: ${companyMap.values.elementAt(index).tel}", style: textStyle(),),
+                  SizedBox(
+                    child: Text(
+                      "${AppLocalizations.of(context)!.companyPhone}: ${companyMap.values.elementAt(index).tel}",
+                      style: textStyle(),
                     ),
+                  ),
                   if (companyMap.values.elementAt(index).email != "")
-                    SizedBox(
-                      child: Text(
-                          "E-mail: ${companyMap.values.elementAt(index).email}", style: textStyle(),),
+                  SizedBox(
+                    child: Text(
+                      "${AppLocalizations.of(context)!.companyEMail}: ${companyMap.values.elementAt(index).email}",
+                      style: textStyle(),
                     ),
+                  ),
                   if (companyMap.values.elementAt(index).address != "")
-                    SizedBox(
-                      child: Text(
-                          "Address: ${companyMap.values.elementAt(index).address}", style: textStyle(),),
+                  SizedBox(
+                    child: Text(
+                      "${AppLocalizations.of(context)!.companyAddress}: ${companyMap.values.elementAt(index).address}",
+                      style: textStyle(),
                     ),
+                  ),
                   if (companyMap.values.elementAt(index).responsible != "")
-                    SizedBox(
-                      child: Text(
-                          "Responsible person: ${companyMap.values.elementAt(index).responsible}", style: textStyle(),),
+                  SizedBox(
+                    child: Text(
+                      "${AppLocalizations.of(context)!.companyResponsible}: ${companyMap.values.elementAt(index).responsible}",
+                      style: textStyle(),
                     ),
+                  ),
                 ],
               ),
             ],
@@ -196,9 +209,9 @@ class _CompanyListState extends State<CompanyList> {
 
   String title(MyUser user) {
     if(user.role == "superadmin"){
-      return "Companies list";
+      return AppLocalizations.of(context)!.companyList;
     }else{
-      return "Détails de l'entreprise";
+      return AppLocalizations.of(context)!.details;
     }
   }
   void showCompanyModal({
@@ -232,12 +245,12 @@ class _CompanyListState extends State<CompanyList> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Company'),
-        content: Text('Are you sure you want to delete this company?'),
+        title: Text(AppLocalizations.of(context)!.confirmDelete),
+        content: Text(AppLocalizations.of(context)!.confirmDeleteText),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.no),
           ),
           TextButton(
             onPressed: () {
@@ -245,7 +258,8 @@ class _CompanyListState extends State<CompanyList> {
               setState(() {});
               Navigator.pop(context);
             },
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
+              // AppLocalizations.of(context)!
           ),
         ],
       ),

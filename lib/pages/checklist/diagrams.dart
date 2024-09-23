@@ -3,6 +3,7 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/checklist/loading.dart';
 import 'package:flutter_application_1/pages/data_api/get_data.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Diagrams extends StatefulWidget {
   const Diagrams({super.key});
@@ -47,7 +48,7 @@ class _DiagramsState extends State<Diagrams> {
           onPressed: () {
             Navigator.pushNamed(context, '/checklist');
           },
-          label: const Text('Go to check list'),
+          label: Text(AppLocalizations.of(context)!.checkList),
 
           icon: const Icon(Icons.check),
         ),
@@ -60,7 +61,7 @@ class _DiagramsState extends State<Diagrams> {
 
   appBar() {
     return AppBar(
-      title: const Text('Got data'),
+      title: Text(AppLocalizations.of(context)!.dataReceived),
       backgroundColor: Colors.blue[800],
       actions: <Widget>[
         ElevatedButton(
@@ -71,7 +72,7 @@ class _DiagramsState extends State<Diagrams> {
             AuthController.instance.logOut();
             Navigator.pushReplacementNamed(context, '/wrapper');
           },
-          child: const Text('Logout'),
+          child: Text(AppLocalizations.of(context)!.logOut),
         ),
       ],
     );

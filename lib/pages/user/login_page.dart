@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/user/inscription_page.dart';
 import 'package:get/get.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'reset_password_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -56,7 +57,7 @@ class _LoginPagestate extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Bonjour!",
+                      AppLocalizations.of(context)!.welcomeToMC,
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
@@ -72,7 +73,7 @@ class _LoginPagestate extends State<LoginPage> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      "Connectez-vous à votre compte",
+                      AppLocalizations.of(context)!.logInText,
                       style: TextStyle(
                         fontSize: 20,
                         color: Colors.white,
@@ -95,14 +96,14 @@ class _LoginPagestate extends State<LoginPage> {
                 children: [
                   _buildTextField(
                     controller: emailController,
-                    hintText: 'Entrez votre email',
+                    hintText: AppLocalizations.of(context)!.eMailEnter,
                     icon: Icons.email,
                     isDarkMode: isDarkMode,
                   ),
                   const SizedBox(height: 40),
                   _buildTextField(
                     controller: passwordController,
-                    hintText: 'Entrez votre mot de passe',
+                    hintText: AppLocalizations.of(context)!.passEnter,
                     icon: Icons.lock,
                     obscureText: !_isPasswordVisible,
                     suffixIcon: IconButton(
@@ -127,7 +128,7 @@ class _LoginPagestate extends State<LoginPage> {
                           Get.to(() => ResetPasswordPage());
                         },
                         child: Text(
-                          "Mot de passe oublié?",
+                          AppLocalizations.of(context)!.passForgot,
                           style: TextStyle(
                             decoration: TextDecoration.underline,
                             color: Theme.of(context).primaryColor,
@@ -159,9 +160,9 @@ class _LoginPagestate extends State<LoginPage> {
                           ),
                         ],
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          "Se connecter",
+                          AppLocalizations.of(context)!.logIn,
                           style: TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
@@ -188,11 +189,11 @@ class _LoginPagestate extends State<LoginPage> {
                     },
                     child: RichText(
                       text: TextSpan(
-                        text: "Vous n'avez pas encore un compte? ",
+                        text: "${AppLocalizations.of(context)!.accountNotYet}   ",
                         style: TextStyle(color: Colors.grey[500], fontSize: 15),
                         children: [
                           TextSpan(
-                            text: "Inscrivez-vous",
+                            text: AppLocalizations.of(context)!.signIn,
                             style: TextStyle(
                               decoration: TextDecoration.underline,
                               color: Theme.of(context).primaryColor,

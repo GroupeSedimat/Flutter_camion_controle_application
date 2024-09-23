@@ -1,9 +1,9 @@
-// ignore_for_file: prefer_const_constructors_in_immutables, avoid_print
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/services/check_list/database_blueprints_service.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddBlueprintForm extends StatefulWidget {
   final int nrOfList;
@@ -38,15 +38,14 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
     if(widget.blueprint != null){
       oldTitle = widget.blueprint!.title;
       oldDescription = widget.blueprint!.description;
-      print("Blueprint ID: ${widget.blueprintID!}");
     }
     return Form(
       key: _formKey,
       child: ListView(
         scrollDirection: Axis.vertical,
         children: <Widget> [
-          const Text(
-            "Add new blueprint",
+          Text(
+            AppLocalizations.of(context)!.blueprintAdd,
             style: TextStyle(
               backgroundColor: Colors.white,
               fontSize: 30,
@@ -59,9 +58,9 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: oldTitle,
-            decoration: const InputDecoration(
-              hintText: "Give me name!",
-              labelText: "Blueprint name:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.blueprintAddName,
+              labelText: AppLocalizations.of(context)!.blueprintAddName,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -70,16 +69,16 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
               focusedBorder: OutlineInputBorder(gapPadding: 15),
               border: OutlineInputBorder(gapPadding: 5),
             ),
-            validator: (val) {return (val == null || val.isEmpty || val == "") ? 'Enter blueprint name:' : null;},
+            validator: (val) {return (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.blueprintAddName : null;},
             onChanged: (val) => setState(() {title = val;}),
           ),
 
           const SizedBox(height: 20),
           TextFormField(
             initialValue: oldDescription,
-            decoration: const InputDecoration(
-              hintText: "Description go here!",
-              labelText: "Enter description:",
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.blueprintAddDescription,
+              labelText: AppLocalizations.of(context)!.blueprintAddDescription,
               labelStyle: TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -88,19 +87,19 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
               focusedBorder: OutlineInputBorder(gapPadding: 50),
               border: OutlineInputBorder(gapPadding: 20),
             ),
-            validator: (val) {return (val == null || val.isEmpty) ? 'Enter description please' : null;},
+            validator: (val) {return (val == null || val.isEmpty) ? AppLocalizations.of(context)!.blueprintAddDescription : null;},
             onChanged: (val) => setState(() {description = val;}),
           ),
           const SizedBox(height: 20),
           Text(
-            "List number: ${widget.nrOfList}",
+            AppLocalizations.of(context)!.listNumber(widget.nrOfList),
             style: const TextStyle(
               fontSize: 15,
               backgroundColor: Colors.white,
             ),
           ),
           Text(
-            "List position: ${widget.nrEntryPosition}",
+            AppLocalizations.of(context)!.listPosition(widget.nrEntryPosition),
             style: const TextStyle(
               fontSize: 15,
               backgroundColor: Colors.white,
@@ -120,8 +119,8 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
               backgroundColor: Colors.blue,
               minimumSize: const Size(250, 60),
             ),
-            child: const Text(
-              'Add',
+            child: Text(
+              AppLocalizations.of(context)!.add,
               style: TextStyle(
                 color: Colors.white,
               ),

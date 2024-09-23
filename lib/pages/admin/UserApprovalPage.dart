@@ -1,16 +1,16 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, file_names
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserApprovalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: 'Approuver les utilisateurs',
+      title: AppLocalizations.of(context)!.userApprove,
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('users').where('isApproved', isEqualTo: false).snapshots(),
         builder: (context, snapshot) {
@@ -61,17 +61,17 @@ class UserApprovalPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirmer l'approbation"),
-          content: Text("Êtes-vous sûr de vouloir approuver cet utilisateur ?"),
+          title: Text(AppLocalizations.of(context)!.confirmApprove),
+          content: Text(AppLocalizations.of(context)!.confirmApproveText),
           actions: [
             TextButton(
-              child: Text("Non"),
+              child: Text(AppLocalizations.of(context)!.no),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text("Oui"),
+              child: Text(AppLocalizations.of(context)!.yes),
               onPressed: () {
                 Navigator.of(context).pop();
                 _approveUser(user);
@@ -87,17 +87,17 @@ class UserApprovalPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirmer la désapprobation"),
-          content: Text("Êtes-vous sûr de vouloir désapprouver cet utilisateur ?"),
+          title: Text(AppLocalizations.of(context)!.confirmDisapprove),
+          content: Text(AppLocalizations.of(context)!.confirmDisapproveText),
           actions: [
             TextButton(
-              child: Text("Non"),
+              child: Text(AppLocalizations.of(context)!.no),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text("Oui"),
+              child: Text(AppLocalizations.of(context)!.yes),
               onPressed: () {
                 Navigator.of(context).pop();
                 _disapproveUser(user);
@@ -123,22 +123,22 @@ class UserApprovalPage extends StatelessWidget {
             .update({'isApproved': true});
 
         Get.snackbar(
-          "Utilisateur approuvé",
-          "L'utilisateur ${user.username} a été approuvé.",
+          "Approved user",
+          "The user ${user.username} has been approved.",
           backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
         );
       } else {
         Get.snackbar(
-          "Erreur",
-          "Utilisateur non trouvé.",
+          "Error",
+          "User not found.",
           backgroundColor: Colors.red,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Get.snackbar(
-        "Erreur lors de l'approbation",
+        "Error while approving",
         e.toString(),
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
@@ -160,22 +160,22 @@ class UserApprovalPage extends StatelessWidget {
             .update({'isApproved': false});
 
         Get.snackbar(
-          "Utilisateur désapprouvé",
-          "L'utilisateur ${user.username} a été désapprouvé.",
+          "Disapproved user",
+          "User ${user.username} has been disapproved.",
           backgroundColor: Colors.red,
           snackPosition: SnackPosition.BOTTOM,
         );
       } else {
         Get.snackbar(
-          "Erreur",
-          "Utilisateur non trouvé.",
+          "Error",
+          "User not found.",
           backgroundColor: Colors.red,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Get.snackbar(
-        "Erreur lors de la désapprobation",
+        "Error while disapproving",
         e.toString(),
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,

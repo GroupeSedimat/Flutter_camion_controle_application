@@ -1,10 +1,9 @@
-// ignore_for_file: unnecessary_import, must_be_immutable
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/services/check_list/database_blueprints_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PopUpInfo extends StatelessWidget {
   final TextEditingController _textEditingController = TextEditingController();
@@ -16,17 +15,17 @@ class PopUpInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Add a Blueprint"),
+      title: Text(AppLocalizations.of(context)!.blueprintAdd),
       content: TextField(
         controller: _textEditingController,
-        decoration: const InputDecoration(hintText: "Add Blueprint name"),
+        decoration: InputDecoration(hintText: AppLocalizations.of(context)!.blueprintAddName),
         // expands: true,
       ),
       actions: [
         MaterialButton(
           color: Theme.of(context).colorScheme.primary,
           textColor: Colors.lime,
-          child: const Text("Ok"),
+          child: Text(AppLocalizations.of(context)!.ok),
           onPressed: (){
             Blueprint task = Blueprint(
               title: _textEditingController.text,

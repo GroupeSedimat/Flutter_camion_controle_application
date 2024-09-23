@@ -1,4 +1,3 @@
-// ignore_for_file: must_be_immutable, avoid_print, use_build_context_synchronously
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/services/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/check_list/database_tasks_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ValidateTask extends StatefulWidget {
 
@@ -43,8 +43,6 @@ class ValidateTaskState extends State<ValidateTask> {
   File? imageGalery;
   double screenWidth = 50;
   double screenHeight = 50;
-
-  // bool _isLoading = true; // Dodaj zmienną do śledzenia stanu ładowania
 
   @override
   void initState() {
@@ -113,9 +111,9 @@ class ValidateTaskState extends State<ValidateTask> {
             const SizedBox(height: 20),
             TextFormField(
               initialValue: task?.descriptionOfProblem,
-              decoration: const InputDecoration(
-                hintText: "Give me description!",
-                labelText: "Add description of problem:",
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.checkListDescribe,
+                labelText: AppLocalizations.of(context)!.checkListDescribe,
                 labelStyle: TextStyle(
                   fontSize: 20,
                   color: Colors.lightBlue,
@@ -124,13 +122,13 @@ class ValidateTaskState extends State<ValidateTask> {
                 focusedBorder: OutlineInputBorder(gapPadding: 15),
                 border: UnderlineInputBorder(),
               ),
-              validator: (val) {return (val == null || val.isEmpty) ? 'Enter description!' : null;},
+              validator: (val) {return (val == null || val.isEmpty) ? AppLocalizations.of(context)!.required : null;},
               onChanged: (val) => descriptionOfProblem = val,
             ),
             const SizedBox(height: 40),
 
-            Transform.scale(                                                      // validation button
-              scale: 5,                                                           // zmien skale checkbox
+            Transform.scale(
+              scale: 5,                                                           // Change checkbox scale
               child: Checkbox(
                 value: task?.isDone,
                 checkColor: Colors.red,
@@ -158,7 +156,7 @@ class ValidateTaskState extends State<ValidateTask> {
                 :(
                   (photoFilePath != "" && photoFilePath != null)
                     ? Image.network(photoFilePath!)
-                    : Text("No photo yet", style: TextStyle(fontSize: screenWidth * 0.03,),)
+                    : Text(AppLocalizations.of(context)!.photoNotYet, style: TextStyle(fontSize: screenWidth * 0.03,),)
                 ),
             ),
             const SizedBox(height: 30),
@@ -168,7 +166,7 @@ class ValidateTaskState extends State<ValidateTask> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Make photo",
+                      AppLocalizations.of(context)!.photoMake,
                       style: TextStyle(
                         fontSize: screenWidth * 0.04,
                       ),
@@ -194,7 +192,7 @@ class ValidateTaskState extends State<ValidateTask> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Take photo from gallery",
+                    AppLocalizations.of(context)!.photoGallery,
                     style: TextStyle(
                       fontSize: screenWidth * 0.04,
                     ),
@@ -215,10 +213,9 @@ class ValidateTaskState extends State<ValidateTask> {
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.green,
                     minimumSize: const Size(250, 60),
-                    padding: const EdgeInsets.only(bottom: 8.0),
                   ),
-                  child: const Text(
-                    'Validate task',
+                  child: Text(
+                    AppLocalizations.of(context)!.confirm,
                     style: TextStyle(
                       color: Colors.white,
                     ),
@@ -226,7 +223,6 @@ class ValidateTaskState extends State<ValidateTask> {
                   onPressed: () async {
                     validationDate = Timestamp.now();
                     if (imageGalery != null) {
-                      print(imageGalery);
                       try {
                         String photoFilePath = await databaseImageService.addImageToFirebase(imageGalery!.path);
                         if (mounted) {
@@ -264,8 +260,8 @@ class ValidateTaskState extends State<ValidateTask> {
                     backgroundColor: Colors.red,
                     minimumSize: const Size(250, 60),
                   ),
-                  child: const Text(
-                    'Abandon task',
+                  child: Text(
+                    AppLocalizations.of(context)!.cancel,
                     style: TextStyle(
                       color: Colors.white,
                     ),

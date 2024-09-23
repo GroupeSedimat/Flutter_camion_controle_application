@@ -8,6 +8,7 @@ import 'package:flutter_application_1/pages/pdf/admin_pdf_list_user_tile.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/pdf/database_pdf_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AdminPdfListView extends StatelessWidget {
   final Reference _firePdfReference = DatabasePDFService().firePdfReference();
@@ -18,7 +19,7 @@ class AdminPdfListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "PDF list by company",
+      title: AppLocalizations.of(context)!.pdfListAdmin,
       body: _buildBody(context),
     );
   }
@@ -53,7 +54,7 @@ class AdminPdfListView extends StatelessWidget {
                       }).toList(),
                     );
                   } else {
-                    return Center(child: Text("No companies available"));
+                    return Center(child: Text(AppLocalizations.of(context)!.companyNotFound));
                   }
                 },
               );

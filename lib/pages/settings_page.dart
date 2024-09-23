@@ -6,18 +6,19 @@ import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 import 'package:flutter_application_1/services/app_colors.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme_provider.dart';
-//import '../../locale_provider.dart';
+import '../../locale_provider.dart';
 
 class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    //final localeProvider = Provider.of<LocaleProvider>(context);
+    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Paramètres'),
+        title: Text(AppLocalizations.of(context)!.settings),
         backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Container(
@@ -27,7 +28,7 @@ class SettingsPage extends StatelessWidget {
           children: [
             ListTile(
               title: Text(
-                'Mode',
+                AppLocalizations.of(context)!.darkMode,
                 style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
               trailing: DropdownButton<ThemeMode>(
@@ -52,31 +53,14 @@ class SettingsPage extends StatelessWidget {
                 }).toList(),
               ),
             ),
-          
-            // ListTile(
-            //   title: Text('Langue'),
-            //   trailing: DropdownButton<String>(
-            //     value: localeProvider.locale.languageCode,
-            //     onChanged: (String? newValue) {
-            //       if (newValue != null) {
-            //         localeProvider.setLocale(newValue);
-            //       }
-            //     },
-            //     items: <String>['en', 'fr'].map<DropdownMenuItem<String>>((String value) {
-            //       return DropdownMenuItem<String>(
-            //         value: value,
-            //         child: Text(value == 'en' ? 'Anglais' : 'Français'),
-            //       );
-            //     }).toList(),
-            //   ),
-            // ),
+
             // Sélection de la couleur du thème
             ListTile(
               title: Text('Couleur'),
               trailing: DropdownButton<AppColor>(
                 value: AppColor.values.firstWhere(
                     (color) => color.color == themeProvider.customColor,
-                    orElse: () => AppColor.blue), 
+                    orElse: () => AppColor.blue),
                 onChanged: (AppColor? newColor) {
                   if (newColor != null) {
                     themeProvider.changeColor(newColor.color);
@@ -85,7 +69,7 @@ class SettingsPage extends StatelessWidget {
                 items: AppColor.values.map<DropdownMenuItem<AppColor>>((AppColor color) {
                   return DropdownMenuItem<AppColor>(
                     value: color,
-                    child: Text(color.name), 
+                    child: Text(color.name),
                   );
                 }).toList(),
               ),
@@ -93,7 +77,26 @@ class SettingsPage extends StatelessWidget {
 
             // Modifier les informations utilisateur
             ListTile(
-              title: Text('Modifier vos informations'),
+              title: Text(AppLocalizations.of(context)!.language),
+              trailing: DropdownButton<String>(
+                value: localeProvider.locale.languageCode,
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    localeProvider.setLocale(newValue);
+                    Get.updateLocale(Locale(newValue));
+                  }
+                },
+                items: <String>['en', 'fr', 'pl']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(_getLanguageName(value)),
+                  );
+                }).toList(),
+              ),
+            ),
+            ListTile(
+              title: Text(AppLocalizations.of(context)!.editInformation),
               trailing: Icon(Icons.edit),
               onTap: () {
                 Navigator.pop(context);
@@ -104,7 +107,8 @@ class SettingsPage extends StatelessWidget {
             // Modifier le mot de passe
             ListTile(
               trailing: Icon(Icons.lock),
-              title: Text('Modifier mot de passe'),
+              title: Text(AppLocalizations.of(context)!.passChange),
+
               onTap: () {
                 Navigator.pop(context);
                 Get.to(() => ResetPasswordPage());
@@ -114,5 +118,21 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // A function that returns the names of languages in selected languages
+  String _getLanguageName(String code) {
+    switch (code) {
+      case 'en':
+        return 'English';
+      case 'fr':
+        return 'Français';
+      case 'pl':
+        return 'Polski';
+      case 'wo':
+        return 'Wolof';
+      default:
+        return '';
+    }
   }
 }

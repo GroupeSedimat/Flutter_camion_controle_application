@@ -14,6 +14,7 @@ import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get/get.dart';
 
 class MenuWidget extends StatelessWidget {
@@ -91,7 +92,7 @@ class MenuWidget extends StatelessWidget {
                 ),
                 if(role!="user")
                 Text(
-                  'Role: $role',
+                  AppLocalizations.of(context)!.role(role),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
@@ -108,56 +109,56 @@ class MenuWidget extends StatelessWidget {
           buildMenuItem(
             context,
             icon: Icons.checklist_outlined,
-            text: 'Voir checklist',
+            text: AppLocalizations.of(context)!.checkList,
             onClicked: () => Get.to(() => const CheckList()),
           ),
           if (role == 'user')
             buildMenuItem(
               context,
               icon: Icons.picture_as_pdf_outlined,
-              text: 'La liste des PDFs',
+              text: AppLocalizations.of(context)!.pdfList,
               onClicked: () => Get.to(() => const PDFShowList()),
             ),
           if (role == 'superadmin')
             buildMenuItem(
               context,
               icon: Icons.lock_outline,
-              text: 'La liste des listes',
+              text: AppLocalizations.of(context)!.listOfLists,
               onClicked: () => Get.to(() => ListOfListsControlPage()),
             ),
           if (role == 'admin' || role == 'superadmin')
             buildMenuItem(
               context,
               icon: Icons.picture_as_pdf_outlined,
-              text: 'Admin liste de PDFs ',
+              text: AppLocalizations.of(context)!.pdfListAdmin,
               onClicked: () => Get.to(() => AdminPdfListView()),
             ),
           if (role == 'admin' || role == 'superadmin')
             buildMenuItem(
               context,
               icon: Icons.business_outlined,
-              text: 'Entreprise',
+              text: AppLocalizations.of(context)!.company,
               onClicked: () => Get.to(() => CompanyList()),
             ),
           const Divider(color: Colors.white54, thickness: 1),
           buildMenuItem(
             context,
             icon: Icons.mail_outline,
-            text: 'Messagerie',
+            text: AppLocalizations.of(context)!.messenger,
             onClicked: () => Get.to(() => MessagingPage()),
           ),
           if (role == 'admin')
             buildMenuItem(
               context,
               icon: Icons.manage_accounts_outlined,
-              text: 'Gestion des utilisateurs',
+              text: AppLocalizations.of(context)!.manageUsers,
               onClicked: () => Get.to(() => UserManagementAdmin()),
             ),
           if (role == 'superadmin')
             buildMenuItem(
               context,
               icon: Icons.admin_panel_settings_outlined,
-              text: 'Page du super admin',
+              text: AppLocalizations.of(context)!.superAdminPage,
               onClicked: () =>
                   Get.to(() => AdminPage(userRole: UserRole.superadmin)),
             ),
@@ -165,12 +166,12 @@ class MenuWidget extends StatelessWidget {
           buildMenuItem(
             context,
             icon: Icons.logout,
-            text: 'Déconnexion',
+            text: AppLocalizations.of(context)!.logOut,
             onClicked: () {
               AuthController.instance.logOut();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Vous avez été déconnecté'),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.logOutText),
                   backgroundColor: Colors.green,
                 ),
               );

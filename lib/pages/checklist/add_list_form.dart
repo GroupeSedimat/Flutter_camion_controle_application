@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddListForm extends StatefulWidget {
-  final ListOfLists? listItem; // Nullable, bo może być używany do edycji lub dodawania
+  final ListOfLists? listItem;
   final DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
 
-  AddListForm({Key? key, this.listItem}) : super(key: key);
+  AddListForm({super.key, this.listItem});
 
   @override
   _AddListFormState createState() => _AddListFormState();
@@ -63,7 +64,7 @@ class _AddListFormState extends State<AddListForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.listItem == null ? 'Add New List' : 'Edit List'),
+        title: Text(widget.listItem == null ? AppLocalizations.of(context)!.lOLAdd : AppLocalizations.of(context)!.lOLEdit),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -74,21 +75,21 @@ class _AddListFormState extends State<AddListForm> {
             children: [
               TextFormField(
                 controller: _listNrController,
-                decoration: InputDecoration(labelText: 'List Number'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.lOLNumber),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter list number';
+                    return AppLocalizations.of(context)!.lOLNumberText;
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _listNameController,
-                decoration: InputDecoration(labelText: 'List Name'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.lOLName),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter list name';
+                    return AppLocalizations.of(context)!.lOLNameText;
                   }
                   return null;
                 },
@@ -101,7 +102,7 @@ class _AddListFormState extends State<AddListForm> {
                   } else if (snapshot.hasError) {
                     return Text("Error: ${snapshot.error}");
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text("No users found");
+                    return Text(AppLocalizations.of(context)!.userDataNotFound);
                   } else {
                     Map<String, String> _userMap = snapshot.data!;
                     return Expanded(
@@ -111,7 +112,7 @@ class _AddListFormState extends State<AddListForm> {
                           return ListTile(
                             title: DropdownButtonFormField<String>(
                               value: _typeControllers[index].text.isNotEmpty ? _typeControllers[index].text : null,
-                              decoration: InputDecoration(labelText: 'Type ${index + 1}'),
+                              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.lOLAuthorization(index + 1)),
                               items: _userMap.entries.map((entry) {
                                 return DropdownMenuItem<String>(
                                   value: entry.key,
@@ -138,7 +139,7 @@ class _AddListFormState extends State<AddListForm> {
               ),
               ElevatedButton(
                 onPressed: _addTypeField,
-                child: Text('Add Type'),
+                child: Text(AppLocalizations.of(context)!.lOLAddAuthoried),
               ),
               SizedBox(height: 16),
               ElevatedButton(
@@ -156,13 +157,13 @@ class _AddListFormState extends State<AddListForm> {
                         await widget.databaseListOfListsService.addList(listItem);
                       } else {
                         await widget.databaseListOfListsService
-                            .updateListItemByListNr(int.parse(_listNrController.text), listItem); // Używaj metody `updateList` z odpowiednim ID
+                            .updateListItemByListNr(int.parse(_listNrController.text), listItem);
                       }
                       Navigator.pop(context);
                     }
                   }
                 },
-                child: Text(widget.listItem == null ? 'Add List' : 'Update List'),
+                child: Text(widget.listItem == null ? AppLocalizations.of(context)!.lOLAdd : AppLocalizations.of(context)!.confirm),
               ),
             ],
           ),

@@ -2,8 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/pages/user/login_page.dart';
-import 'package:flutter_application_1/services/auth_controller.dart'; 
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/locale_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -19,6 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -42,27 +46,42 @@ class _SplashScreenState extends State<SplashScreen> {
               
               // Ajout du texte
               Text(
-                'Bienvenue sur notre application ',
+                AppLocalizations.of(context)!.welcomeToMC,
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white, 
-                  // Couleur du texte
+                  color: Colors.white,
                   shadows: [
-                Shadow(
-                  color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
-                  offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
-                  blurRadius: 5, // Rayon du flou de l'ombre
-                ),
-  ],
+                    Shadow(
+                      color: Colors.black.withOpacity(1.0),
+                      offset: Offset(2, 2),
+                      blurRadius: 5,
+                    ),
+                  ],
                 ),
                 textAlign: TextAlign.center, 
               ), 
               SizedBox(height: 20),
-
+              DropdownButton<String>(
+                value: localeProvider.locale.languageCode,
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    localeProvider.setLocale(newValue);
+                    Get.updateLocale(Locale(newValue));
+                  }
+                },
+                items: <String>['en', 'fr', 'pl']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(_getLanguageName(value)),
+                  );
+                }).toList(),
+              ),
+              SizedBox(height: 20),
                if (firebaseError)
                 Text(
-                  'Erreur lors de l\'initialisation de Firebase',
+                  'Error initializing Firebase',
                   style: TextStyle(color: Colors.red),
                 )
               else if (!firebaseInitialized)
@@ -98,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         padding: EdgeInsets.symmetric(
                             vertical: 10, horizontal: 20),
                         child: Text(
-                          'Connectez-vous',
+                          AppLocalizations.of(context)!.logIn,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold, 
@@ -133,7 +152,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         padding: EdgeInsets.symmetric(
                             vertical: 10, horizontal: 20),
                         child: Text(
-                          'Connectez-vous',
+                          AppLocalizations.of(context)!.logIn,
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
@@ -148,5 +167,19 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ),
     );
+  }
+  String _getLanguageName(String code) {
+    switch (code) {
+      case 'en':
+        return 'English';
+      case 'fr':
+        return 'Français';
+      case 'pl':
+        return 'Polski';
+      case 'wo':
+        return 'Wolof';
+      default:
+        return '';
+    }
   }
 }

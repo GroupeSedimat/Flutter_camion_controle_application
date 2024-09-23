@@ -1,11 +1,10 @@
-// ignore_for_file: prefer_const_constructors_in_immutables, prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_download.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_open.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 class PDFShowTemplate extends StatefulWidget {
@@ -41,7 +40,7 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData) {
-          return Center(child: Text('Company not found'));
+          return Center(child: Text(AppLocalizations.of(context)!.companyNotFound));
         }
 
         Company company = snapshot.data!;
@@ -70,7 +69,7 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                       ),
                     ),
                     subtitle: Text(
-                      "Company: ${company.name}",
+                    AppLocalizations.of(context)!.companyWithName(company.name),
                       style: TextStyle(
                         fontSize: 18.0,
                         color: Colors.grey[700],
@@ -79,7 +78,7 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                   ),
                   const SizedBox(height: 16.0),
                   Text(
-                    "Creation date: $formattedDate",
+                    AppLocalizations.of(context)!.dateCreation(formattedDate),
                     style: TextStyle(
                       fontSize: 18.0,
                       color: Colors.grey[700],
@@ -102,7 +101,7 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                             open.openPDF();
                           },
                           icon: Icon(Icons.picture_as_pdf),
-                          label: Text('Open PDF'),
+                          label: Text(AppLocalizations.of(context)!.open),
                         ),
                       ),
                       SizedBox(width: 10), 
@@ -122,18 +121,17 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                             showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Text('PDF downloaded'),
-                                  content: Text(
-                                      'Your PDF file has been saved under the name: ${widget.userData.username}.${widget.fileName}.pdf'),
+                                  title: Text(AppLocalizations.of(context)!.download),
+                                  content: Text(AppLocalizations.of(context)!.pdfDownloaded(widget.userData.username, widget.fileName)),
                                   actions: [
                                     TextButton(
                                         onPressed: () => Navigator.pop(context),
-                                        child: const Text('Ok'))
+                                        child: Text(AppLocalizations.of(context)!.ok))
                                   ],
                                 ));
                           },
                           icon: Icon(Icons.download),
-                          label: Text('Download PDF'),
+                          label: Text(AppLocalizations.of(context)!.download),
                         ),
                       ),
                     ],

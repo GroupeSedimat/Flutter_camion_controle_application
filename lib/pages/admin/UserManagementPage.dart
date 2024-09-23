@@ -1,5 +1,4 @@
-// ignore_for_file: use_key_in_widget_constructors, file_names, prefer_const_constructors, avoid_print, prefer_const_literals_to_create_immutables
-//import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get/get.dart';
 
 class UserManagementPage extends StatelessWidget {
@@ -21,7 +21,7 @@ class UserManagementPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: 'Gestion des utilisateurs',
+      title: AppLocalizations.of(context)!.manageUsers,
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('users').snapshots(),
         builder: (context, snapshot) {
@@ -123,7 +123,7 @@ class UserManagementPage extends StatelessWidget {
                                       children: [
                                         Icon(Icons.visibility, color: Colors.blueAccent),
                                         SizedBox(width: 8),
-                                        Text('Voir les détails'),
+                                        Text(AppLocalizations.of(context)!.details),
                                       ],
                                     ),
                                   ),
@@ -133,7 +133,7 @@ class UserManagementPage extends StatelessWidget {
                                       children: [
                                         Icon(Icons.edit, color: Colors.orange),
                                         SizedBox(width: 8),
-                                        Text('Modifier'),
+                                        Text(AppLocalizations.of(context)!.edit),
                                       ],
                                     ),
                                   ),
@@ -143,7 +143,7 @@ class UserManagementPage extends StatelessWidget {
                                       children: [
                                         Icon(Icons.lock, color: Colors.purple),
                                         SizedBox(width: 8),
-                                        Text('Réinitialiser le mot de passe'),
+                                        Text(AppLocalizations.of(context)!.passReset),
                                       ],
                                     ),
                                   ),
@@ -153,7 +153,7 @@ class UserManagementPage extends StatelessWidget {
                                       children: [
                                         Icon(Icons.delete, color: Colors.red),
                                         SizedBox(width: 8),
-                                        Text('Supprimer'),
+                                        Text(AppLocalizations.of(context)!.delete),
                                       ],
                                     ),
                                   ),
@@ -179,17 +179,17 @@ class UserManagementPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirmer la suppression"),
-          content: Text("Êtes-vous sûr de vouloir supprimer cet utilisateur ?"),
+          title: Text(AppLocalizations.of(context)!.confirmDelete),
+          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
           actions: [
             TextButton(
-              child: Text("Non"),
+              child: Text(AppLocalizations.of(context)!.no),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text("Oui"),
+              child: Text(AppLocalizations.of(context)!.yes),
               onPressed: () {
                 Navigator.of(context).pop();
                 _deleteUserConfirmed(username);
@@ -211,22 +211,22 @@ class UserManagementPage extends StatelessWidget {
       if (userDoc.docs.isNotEmpty) {
         await FirebaseFirestore.instance.collection('users').doc(userDoc.docs[0].id).delete();
         Get.snackbar(
-          "Utilisateur supprimé",
-          "L'utilisateur a été supprimé avec succès.",
+          "User deleted",
+          "User has been deleted successfully.",
           backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
         );
       } else {
         Get.snackbar(
-          "Erreur",
-          "Utilisateur non trouvé.",
+          "Error!",
+          "User not found.",
           backgroundColor: Colors.red,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Get.snackbar(
-        "Erreur lors de la suppression",
+        "Error while deleting",
         e.toString(),
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
@@ -239,7 +239,7 @@ class UserManagementPage extends StatelessWidget {
       await authController.resetPassword(email);
     } catch (e) {
       Get.snackbar(
-        "Erreur lors de la réinitialisation",
+        "Error while resetting",
         e.toString(),
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,

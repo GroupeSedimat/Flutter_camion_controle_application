@@ -1,0 +1,481 @@
+{
+    "required": "This field is required!",
+    "homePage": "Home page",
+    "welcomeToMC": "Welcome to MCTruckCheck",
+    "logIn": "Log in",
+    "logInText": "Log in to your account",
+    "signIn": "Sign in",
+    "logOut": "Log out",
+    "logOutText": "You have been logged out",
+    "loading": "Loading...",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "add": "Add",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "open": "Open",
+    "download": "Download",
+    "details": "See details",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Confirm deletion",
+    "confirmDeleteText": "Are you sure you want to delete?",
+    "confirmApprove": "Approve this user?",
+    "confirmApproveText": "Are you sure you want to approve this user?",
+    "confirmDisapprove": "Confirm disapproval",
+    "confirmDisapproveText": "Are you sure you want to disapprove this user?",
+
+    "userProfileEdit": "Edit profile",
+    "userLoading": "Loading user(s) data",
+    "userHello": "Welcome {userName}",
+    "userWithName": "User: {userName}",
+    "userName": "User name",
+    "userNewName": "New user name",
+    "userFirstName": "First name",
+    "userLastName": "Last name",
+    "adminHello": "Welcome to the admin page, {userName}",
+    "userApprove": "Approve a user",
+    "userDataNotFound": "No user data available",
+    "role": "Role {userRole}",
+
+    "passForgot": "Forgot your password?",
+    "passNotMatch": "Passwords do not match",
+    "passReset": "Reset Password",
+    "passChange": "Change password",
+    "passEnter": "Enter your password",
+    "passRepeat": "Repeat password",
+
+    "eMail": "E-mail address",
+    "eMailEnter": "Enter your e-mail",
+    "eMailSend": "Send reset e-mail",
+
+    "company": "Company",
+    "companyList": "Company list",
+    "companyAdd": "Add new company",
+    "companyEdit": "Edit company details",
+    "companySelect": "Choose a company",
+    "companyNotFound": "The company could not be found",
+    "companyWithName": "Company: {companyName}",
+    "companyName": "Company name",
+    "companySiret": "Siret",
+    "companySirene": "Sirene",
+    "companyDescription": "Company description",
+    "companyPhone": "Contact number",
+    "companyEMail": "Contact e-mail",
+    "companyAddress": "Correspondence address",
+    "companyResponsible": "Person responsible for the contact",
+    "companyAdmin": "The company's main admin",
+    "companyLogo": "Company logo",
+
+    "checkList": "Checklist",
+    "checkListDescribe": "Describe the problem",
+    "checkListValidation": "Validation process",
+    "blueprintAdd": "Add a Blueprint",
+    "blueprintAddName": "Add Blueprint name",
+    "blueprintAddDescription": "Add Blueprint description",
+    "photoNotYet": "No photo yet",
+    "photoMake": "Make photo",
+    "photoGallery": "Choose from gallery",
+
+    "pdfCreate": "Create PDF",
+    "pdfList": "PDF file list",
+    "pdfMyFiles": "My PDF files",
+    "pdfListAdmin": "Admin PDF file list",
+    "pdfDownloaded": "Your PDF file has been saved as: {fileName1}.{fileName2}.pdf",
+
+    "listOfLists": "The list of lists",
+    "lOLAdd": "Add List",
+    "lOLEdit": "Edit List",
+    "lOLNumber": "List number",
+    "lOLNumberText": "Please enter list number",
+    "lOLName": "List name",
+    "lOLNameText": "Please enter list name",
+    "lOLAuthorization": "Authorization: {person}",
+    "lOLAddAuthoried": "Add authorized person",
+    "listNumber": "List number: {number}",
+    "listPosition": "List position: {position}",
+
+    "manageUsers": "Manage Users",
+    "superAdminPage": "Super Admin Page",
+    "adminPage": "Admin Page",
+
+    "accountNotYet": "Don't have an account yet?",
+    "settings": "Settings",
+    "darkMode": "Dark Mode",
+    "language": "Language",
+    "editInformation": "Edit your information",
+    "messenger": "Instant messenger",
+    "enterMessage": "Enter your message",
+    "dateCreation": "Creation date: {formattedDate}",
+
+    "dataFetching": "Fetching data",
+    "dataReceived": "Got data",
+    "dataNoData": "No data, sorry :(",
+
+    "@required": {
+        "description": "This field is required!"
+    },
+    "@homePage": {
+        "description": "Home page"
+    },
+    "@welcomeToMC": {
+        "description": "Welcome to MCTruckCheck"
+    },
+    "@logIn": {
+        "description": "Log in"
+    },
+    "@logInText": {
+        "description": "Log in to your account"
+    },
+    "@signIn": {
+        "description": "Sign in"
+    },
+    "@logOut": {
+        "description": "Log out"
+    },
+    "@logOutText": {
+        "description": "You have been logged out"
+    },
+    "@loading": {
+        "description": "Loading..."
+    },
+    "@ok": {
+        "description": "OK"
+    },
+    "@yes": {
+        "description": "Yes"
+    },
+    "@no": {
+        "description": "No"
+    },
+    "@add": {
+        "description": "Add"
+    },
+    "@confirm": {
+        "description": "Confirm"
+    },
+    "@cancel": {
+        "description": "Cancel"
+    },
+    "@open": {
+        "description": "Open"
+    },
+    "@download": {
+        "description": "Download"
+    },
+    "@details": {
+        "description": "See details"
+    },
+    "@edit": {
+        "description": "Edit"
+    },
+    "@delete": {
+        "description": "Delete"
+    },
+    "@confirmDelete": {
+        "description": "Confirm deletion"
+    },
+    "@confirmDeleteText": {
+        "description": "Are you sure you want to delete?"
+    },
+    "@confirmApprove": {
+        "description": "Approve this user?"
+    },
+    "@confirmApproveText": {
+        "description": "Are you sure you want to approve this user?"
+    },
+    "@confirmDisapprove": {
+        "description": "Confirm disapproval"
+    },
+    "@confirmDisapproveText": {
+        "description": "Are you sure you want to disapprove this user?"
+    },
+    "@userProfileEdit": {
+        "description": "Edit profile"
+    },
+    "@userLoading": {
+        "description": "Loading user(s) data"
+    },
+    "@userName": {
+        "description": "User name"
+    },
+    "@userNewName": {
+        "description": "New user name"
+    },
+    "@userFirstName": {
+        "description": "First name"
+    },
+    "@userLastName": {
+        "description": "Last name"
+    },
+    "@userApprove": {
+        "description": "Approve a user"
+    },
+    "@userDataNotFound": {
+        "description": "No user data available"
+    },
+    "@passForgot": {
+        "description": "Forgot your password?"
+    },
+    "@passNotMatch": {
+        "description": "Passwords do not match"
+    },
+    "@passReset": {
+        "description": "Reset Password"
+    },
+    "@passChange": {
+        "description": "Change password"
+    },
+    "@passEnter": {
+        "description": "Enter your password"
+    },
+    "@passRepeat": {
+        "description": "Repeat password"
+    },
+    "@eMail": {
+        "description": "E-mail address"
+    },
+    "@eMailEnter": {
+        "description": "Enter your e-mail"
+    },
+    "@eMailSend": {
+        "description": "Send reset e-mail"
+    },
+    "@company": {
+        "description": "Company"
+    },
+    "@companyList": {
+        "description": "Company list"
+    },
+    "@companyAdd": {
+        "description": "Add new company"
+    },
+    "@companyEdit": {
+        "description": "Edit company details"
+    },
+    "@companySelect": {
+        "description": "Choose a company"
+    },
+    "@companyNotFound": {
+        "description": "The company could not be found"
+    },
+    "@companyName": {
+        "description": "Company name"
+    },
+    "@companySiret": {
+        "description": "Siret"
+    },
+    "@companySirene": {
+        "description": "Sirene"
+    },
+    "@companyDescription": {
+        "description": "Company description"
+    },
+    "@companyPhone": {
+        "description": "Contact number"
+    },
+    "@companyEMail": {
+        "description": "Contact e-mail"
+    },
+    "@companyAddress": {
+        "description": "Correspondence address"
+    },
+    "@companyResponsible": {
+        "description": "Person responsible for the contact"
+    },
+    "@companyAdmin": {
+        "description": "The company's main admin"
+    },
+    "@companyLogo": {
+        "description": "Company logo"
+    },
+    "@checkList": {
+        "description": "Checklist"
+    },
+    "@checkListDescribe": {
+        "description": "Describe the problem"
+    },
+    "@checkListValidation": {
+        "description": "Validation process"
+    },
+    "@blueprintAdd": {
+        "description": "Add a Blueprint"
+    },
+    "@blueprintAddName": {
+        "description": "Add Blueprint name"
+    },
+    "@blueprintAddDescription": {
+        "description": "Add Blueprint description"
+    },
+    "@photoNotYet": {
+        "description": "No photo yet"
+    },
+    "@photoMake": {
+        "description": "Make photo"
+    },
+    "@photoGallery": {
+        "description": "Choose from gallery"
+    },
+    "@pdfCreate": {
+        "description": "Create PDF"
+    },
+    "@pdfList": {
+        "description": "PDF file list"
+    },
+    "@pdfMyFiles": {
+        "description": "My PDF files"
+    },
+    "@pdfListAdmin": {
+        "description": "Admin PDF file list"
+    },
+    "@listOfLists": {
+        "description": "The list of lists"
+    },
+    "@lOLAdd": {
+        "description": "Add List"
+    },
+    "@lOLEdit": {
+        "description": "Edit List"
+    },
+    "@lOLNumber": {
+        "description": "List number"
+    },
+    "@lOLNumberText": {
+        "description": "Please enter list number"
+    },
+    "@lOLName": {
+        "description": "List name"
+    },
+    "@lOLNameText": {
+        "description": "Please enter list name"
+    },
+    "@lOLAddAuthoried": {
+        "description": "Add authorized person"
+    },
+    "@manageUsers": {
+        "description": "Manage Users"
+    },
+    "@superAdminPage": {
+        "description": "Super Admin Page"
+    },
+    "@adminPage": {
+        "description": "Admin Page"
+    },
+    "@accountNotYet": {
+        "description": "Don't have an account yet?"
+    },
+    "@settings": {
+        "description": "Settings"
+    },
+    "@darkMode": {
+        "description": "Dark Mode"
+    },
+    "@language": {
+        "description": "Language"
+    },
+    "@editInformation": {
+        "description": "Edit your information"
+    },
+    "@messenger": {
+        "description": "Instant messenger"
+    },
+    "@enterMessage": {
+        "description": "Enter your message"
+    },
+    "@dataFetching": {
+        "description": "Fetching data"
+    },
+    "@dataReceived": {
+        "description": "Got data"
+    },
+    "@dataNoData": {
+        "description": "No data, sorry :("
+    },
+
+
+
+    "@userHello": {
+        "description": "Greeting user with username",
+        "placeholders": {
+            "userName": {
+                "type": "String"
+            }
+        }
+    },
+    "@adminHello": {
+        "description": "Greeting admin by username",
+        "placeholders": {
+            "userName": {
+                "type": "String"
+            }
+        }
+    },
+    "@role": {
+        "description": "Role of the user",
+        "placeholders": {
+            "userRole": {
+                "type": "String"
+            }
+        }
+    },
+    "@userWithName": {
+        "description": "A string specifying which user the variable name refers to",
+        "placeholders": {
+            "userName": {
+                "type": "String"
+            }
+        }
+    },
+    "@companyWithName": {
+        "description": "A string specifying which company the variable name refers to",
+        "placeholders": {
+            "companyName": {
+                "type": "String"
+            }
+        }
+    },
+    "@dateCreation": {
+        "description": "Creation date",
+        "placeholders": {
+            "formattedDate": {
+                "type": "String"
+            }
+        }
+    },
+    "@pdfDownloaded": {
+        "description": "Your PDF file has been saved as: {fileName1}.{fileName2}.pdf",
+        "placeholders": {
+            "fileName1": {
+                "type": "String"
+            },
+            "fileName2": {
+                "type": "String"
+            }
+        }
+    },
+    "@lOLAuthorization": {
+        "description": "Person authorized to see the list",
+        "placeholders": {
+            "person": {
+                "type": "int"
+            }
+        }
+    },
+    "@listNumber": {
+        "description": "The list number to which the blueprint is assigned",
+        "placeholders": {
+            "number": {
+                "type": "int"
+            }
+        }
+    },
+    "@listPosition": {
+        "description": "The number of the position on the list to which the blueprint is assigned",
+        "placeholders": {
+            "position": {
+                "type": "int"
+            }
+        }
+    }
+}

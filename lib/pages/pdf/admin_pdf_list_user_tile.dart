@@ -1,10 +1,9 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors_in_immutables, prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_template.dart';
 import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 
 class UserTile extends StatelessWidget {
@@ -22,7 +21,7 @@ class UserTile extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return ListTile(
             title: Text(userRef.name),
-            subtitle: Text("Loading user data..."),
+            subtitle: Text(AppLocalizations.of(context)!.userLoading),
           );
         } else if (snapshot.hasError) {
           return ListTile(
@@ -39,7 +38,7 @@ class UserTile extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return ListTile(
                   title: Text(userName),
-                  subtitle: Text("Loading documents..."),
+                  subtitle: Text(AppLocalizations.of(context)!.loading),
                 );
               } else if (snapshot.hasError) {
                 return ListTile(
@@ -77,7 +76,7 @@ class UserTile extends StatelessWidget {
                             title: Text(
                               docRef.name,
                             ),
-                            subtitle: Text("Loading URL..."),
+                            subtitle: Text(AppLocalizations.of(context)!.loading),
                           );
                         } else if (urlSnapshot.hasError) {
                           return ListTile(
@@ -107,7 +106,7 @@ class UserTile extends StatelessWidget {
               } else {
                 return ListTile(
                   title: Text(userName),
-                  subtitle: Text("No documents available"),
+                  subtitle: Text(AppLocalizations.of(context)!.userDataNotFound),
                 );
               }
             },
@@ -115,7 +114,7 @@ class UserTile extends StatelessWidget {
         } else {
           return ListTile(
             title: Text(userRef.name),
-            subtitle: Text("No user data available"),
+            subtitle: Text(AppLocalizations.of(context)!.userDataNotFound),
           );
         }
       },
