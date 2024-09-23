@@ -41,49 +41,47 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCJoXk7jRHaQcUdZggsL7Xjf48osBd9VTo',
-    appId: '1:1023285541885:web:ba5836f2b96df7ad9db794',
-    messagingSenderId: '1023285541885',
-    projectId: 'mctruckcheck',
-    authDomain: 'mctruckcheck.firebaseapp.com',
-    storageBucket: 'mctruckcheck.appspot.com',
-    measurementId: 'G-B984F3PDMJ',
+    apiKey: 'AIzaSyC6FhnKUtiIQ8EoyXTR3Q1fblubdQA_2DY',
+    appId: '1:885253354272:web:4a851fc0599b1702349d45',
+    messagingSenderId: '885253354272',
+    projectId: 'fir-mobility-corner-app',
+    authDomain: 'fir-mobility-corner-app.firebaseapp.com',
+    storageBucket: 'fir-mobility-corner-app.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCmeTUEn8NvuGC85RXbdbB-7xyz6gbm6tQ',
-    appId: '1:1023285541885:android:454510dcc8c14fc99db794',
-    messagingSenderId: '1023285541885',
-    projectId: 'mctruckcheck',
-    storageBucket: 'mctruckcheck.appspot.com',
+    apiKey: 'AIzaSyB92fGsRaW3TZTHZwif45o4h9jdJSgJYSc',
+    appId: '1:885253354272:android:c2d2c63ea7c8558f349d45',
+    messagingSenderId: '885253354272',
+    projectId: 'fir-mobility-corner-app',
+    storageBucket: 'fir-mobility-corner-app.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCx5JU75krSnZqfYMREV9hlaBPTSPTWHos',
-    appId: '1:1023285541885:ios:abe874716d9734ca9db794',
-    messagingSenderId: '1023285541885',
-    projectId: 'mctruckcheck',
-    storageBucket: 'mctruckcheck.appspot.com',
+    apiKey: 'AIzaSyAnZozvUordb1qpCXy68PV-yk1CT8ESsmo',
+    appId: '1:885253354272:ios:dbf3da147a64fe2a349d45',
+    messagingSenderId: '885253354272',
+    projectId: 'fir-mobility-corner-app',
+    storageBucket: 'fir-mobility-corner-app.appspot.com',
     iosBundleId: 'com.mobility.corner.app.flutterApplication1',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCx5JU75krSnZqfYMREV9hlaBPTSPTWHos',
-    appId: '1:1023285541885:ios:774333ae3d3a75319db794',
-    messagingSenderId: '1023285541885',
-    projectId: 'mctruckcheck',
-    storageBucket: 'mctruckcheck.appspot.com',
+    apiKey: 'AIzaSyAnZozvUordb1qpCXy68PV-yk1CT8ESsmo',
+    appId: '1:885253354272:ios:9bc15a21e94fe473349d45',
+    messagingSenderId: '885253354272',
+    projectId: 'fir-mobility-corner-app',
+    storageBucket: 'fir-mobility-corner-app.appspot.com',
     iosBundleId: 'com.example.flutterApplication1',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCJoXk7jRHaQcUdZggsL7Xjf48osBd9VTo',
-    appId: '1:1023285541885:web:e7342c65f7f7a7969db794',
-    messagingSenderId: '1023285541885',
-    projectId: 'mctruckcheck',
-    authDomain: 'mctruckcheck.firebaseapp.com',
-    storageBucket: 'mctruckcheck.appspot.com',
-    measurementId: 'G-QMHBC9F4RE',
+    apiKey: 'AIzaSyC6FhnKUtiIQ8EoyXTR3Q1fblubdQA_2DY',
+    appId: '1:885253354272:web:915446f8cfb6b4e4349d45',
+    messagingSenderId: '885253354272',
+    projectId: 'fir-mobility-corner-app',
+    authDomain: 'fir-mobility-corner-app.firebaseapp.com',
+    storageBucket: 'fir-mobility-corner-app.appspot.com',
   );
 
 }

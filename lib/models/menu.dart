@@ -37,7 +37,8 @@ class MenuWidget extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade700, Colors.blue.shade400],
+                    colors: [Theme.of(context).primaryColor.withOpacity(0.8), // Teinte plus foncée
+                        Theme.of(context).primaryColor.withOpacity(0.4),],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -60,7 +61,8 @@ class MenuWidget extends StatelessWidget {
   Widget buildHeader(BuildContext context) => Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade900, Colors.blue.shade600],
+            colors: [Theme.of(context).primaryColor.withOpacity(0.8), // Teinte plus foncée
+        Theme.of(context).primaryColor.withOpacity(0.4),],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

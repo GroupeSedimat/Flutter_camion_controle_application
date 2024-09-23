@@ -10,15 +10,12 @@ class ResetPasswordPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Réinitialiser le mot de passe'),
-        backgroundColor: Colors.blue,
+        backgroundColor:  Theme.of(context).primaryColor,
       ),
       body: Container(
         decoration: BoxDecoration(
-          
-           
-            color: Colors.white,
-          
-        ),
+           color: Colors.white,
+          ),
         child: Center(
           child: Padding(
             padding: EdgeInsets.all(16.0),
@@ -37,27 +34,27 @@ class ResetPasswordPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24.0,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+                        color:  Theme.of(context).primaryColor,
                       ),
                     ),
                     SizedBox(height: 20),
                     TextField(
                       controller: emailController,
                       decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.email, color: Colors.blue),
+                        prefixIcon: Icon(Icons.email, color:  Theme.of(context).primaryColor,),
                         labelText: 'Adresse e-mail',
-                        labelStyle: TextStyle(color: Colors.blue),
+                        labelStyle: TextStyle(color:  Theme.of(context).primaryColor,),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
-                          borderSide: BorderSide(color: Colors.blue),
+                          borderSide: BorderSide(color:  Theme.of(context).primaryColor,),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
-                          borderSide: BorderSide(color: Colors.blue),
+                          borderSide: BorderSide(color:  Theme.of(context).primaryColor,),
                         ),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      style: TextStyle(color: Colors.blue),
+                      style: TextStyle(color:  Theme.of(context).primaryColor,),
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
@@ -66,7 +63,7 @@ class ResetPasswordPage extends StatelessWidget {
                             .resetPassword(emailController.text.trim());
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Theme.of(context).primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.0),
                         ),

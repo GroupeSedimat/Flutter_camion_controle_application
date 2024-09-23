@@ -22,7 +22,12 @@ class _LoginPagestate extends State<LoginPage> {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
+    
+    // Vérifiez si le mode sombre est activé
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -41,7 +46,10 @@ class _LoginPagestate extends State<LoginPage> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.white.withOpacity(0.4), Colors.transparent],
+                    colors: [
+                      Colors.white.withOpacity(0.4),
+                      Colors.transparent,
+                    ],
                   ),
                 ),
                 child: Column(
@@ -53,17 +61,16 @@ class _LoginPagestate extends State<LoginPage> {
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        // Couleur du texte
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
-                            offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
-                            blurRadius: 5, // Rayon du flou de l'ombre
+                            color: Colors.black.withOpacity(1.0),
+                            offset: Offset(2, 2),
+                            blurRadius: 5,
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       "Connectez-vous à votre compte",
                       style: TextStyle(
@@ -71,9 +78,8 @@ class _LoginPagestate extends State<LoginPage> {
                         color: Colors.white,
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(1.0), // Couleur de l'ombre avec opacité
-                            offset: Offset(2, 2), // Décalage de l'ombre par rapport au texte
-                            blurRadius: 5, // Rayon du flou de l'ombre
+                            color: Colors.black.withOpacity(1.0),
+                            offset: Offset(2, 2),
                           ),
                         ],
                       ),
@@ -91,6 +97,7 @@ class _LoginPagestate extends State<LoginPage> {
                     controller: emailController,
                     hintText: 'Entrez votre email',
                     icon: Icons.email,
+                    isDarkMode: isDarkMode,
                   ),
                   const SizedBox(height: 40),
                   _buildTextField(
@@ -101,7 +108,7 @@ class _LoginPagestate extends State<LoginPage> {
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                       ),
                       onPressed: () {
                         setState(() {
@@ -109,6 +116,7 @@ class _LoginPagestate extends State<LoginPage> {
                         });
                       },
                     ),
+                    isDarkMode: isDarkMode,
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -122,7 +130,7 @@ class _LoginPagestate extends State<LoginPage> {
                           "Mot de passe oublié?",
                           style: TextStyle(
                             decoration: TextDecoration.underline,
-                            color: Colors.blue,
+                            color: Theme.of(context).primaryColor,
                             fontSize: 15,
                           ),
                         ),
@@ -142,12 +150,12 @@ class _LoginPagestate extends State<LoginPage> {
                       height: 50,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
                             blurRadius: 10,
-                            offset: Offset(0, 5),
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
@@ -182,12 +190,12 @@ class _LoginPagestate extends State<LoginPage> {
                       text: TextSpan(
                         text: "Vous n'avez pas encore un compte? ",
                         style: TextStyle(color: Colors.grey[500], fontSize: 15),
-                        children: const [
+                        children: [
                           TextSpan(
                             text: "Inscrivez-vous",
                             style: TextStyle(
                               decoration: TextDecoration.underline,
-                              color: Colors.blue,
+                              color: Theme.of(context).primaryColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -210,10 +218,11 @@ class _LoginPagestate extends State<LoginPage> {
     required IconData icon,
     bool obscureText = false,
     Widget? suffixIcon,
+    required bool isDarkMode, // Ajout de cette propriété pour adapter le style
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? Colors.black26 : Colors.white, // Changement en fonction du thème
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -227,13 +236,14 @@ class _LoginPagestate extends State<LoginPage> {
       child: TextField(
         controller: controller,
         obscureText: obscureText,
+        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: Icon(icon, color: Colors.blue),
+          prefixIcon: Icon(icon, color: Theme.of(context).primaryColor),
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.blue, width: 1.0),
+            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),

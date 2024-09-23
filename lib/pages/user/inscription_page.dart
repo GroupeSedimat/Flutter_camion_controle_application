@@ -35,7 +35,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
     confirmPasswordController = TextEditingController();
   }
 
-  @override
+  @override  
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
@@ -79,7 +79,7 @@ Widget build(BuildContext context) {
                 child: Container(
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.8), 
+                    color: Theme.of(context).primaryColor.withOpacity(0.8), 
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
@@ -100,7 +100,7 @@ Widget build(BuildContext context) {
                   Icon(
                     Icons.app_registration,
                     size: 70,
-                    color: Colors.blue,
+                    color: Theme.of(context).primaryColor,
                   ),
                   SizedBox(height: 20),
                   Text(
@@ -108,7 +108,7 @@ Widget build(BuildContext context) {
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Theme.of(context).primaryColor,
                       shadows: [
                         Shadow(
                           offset: Offset(2.0, 2.0),
@@ -210,7 +210,7 @@ Widget build(BuildContext context) {
                 height: 50,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
-                  color: Colors.blue,
+                  color: Theme.of(context).primaryColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.2),
@@ -262,13 +262,14 @@ Widget build(BuildContext context) {
       ),
       child: TextField(
         controller: controller,
+         style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: Icon(icon, color: Colors.blue),
+          prefixIcon: Icon(icon, color: Theme.of(context).primaryColor),
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.blue, width: 1.0),
+            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
@@ -299,13 +300,14 @@ Widget build(BuildContext context) {
       child: TextField(
         controller: controller,
         obscureText: obscureText,
+         style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: const Icon(Icons.lock, color: Colors.blue),
+          prefixIcon:  Icon(Icons.lock, color: Theme.of(context).primaryColor),
           suffixIcon: IconButton(
             icon: Icon(
               obscureText ? Icons.visibility_off : Icons.visibility,
-              color: Colors.blue,
+              color: Theme.of(context).primaryColor,
             ),
             onPressed: () {
               setState(() {
@@ -320,7 +322,7 @@ Widget build(BuildContext context) {
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(color: Colors.blue, width: 1.0),
+            borderSide:  BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),

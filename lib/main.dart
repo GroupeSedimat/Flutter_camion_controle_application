@@ -57,10 +57,57 @@ class MyApp extends StatelessWidget {
       child: Consumer2<ThemeProvider, LocaleProvider>(
         builder: (context, themeProvider, localeProvider, child) {
           return GetMaterialApp(
-            title: "Mobility corner app",
+            title: "Mobility Corner App",
             themeMode: themeProvider.themeMode,
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
+            
+            // Thème clair
+            theme: ThemeData(
+              primaryColor: themeProvider.customColor,
+              brightness: Brightness.light,
+              scaffoldBackgroundColor: Colors.white,
+              colorScheme: ColorScheme.light(
+                primary: themeProvider.customColor,
+                secondary: themeProvider.customColor.shade300,
+                background: Colors.white,
+                surface: Colors.white,
+                onSurface: Colors.black, // Texte sombre
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                labelStyle: TextStyle(color: Colors.black),
+                hintStyle: TextStyle(color: Colors.grey),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: themeProvider.customColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: themeProvider.customColor),
+                ),
+              ),
+            ),
+
+            // Thème sombre
+            darkTheme: ThemeData(
+              primaryColor: themeProvider.customColor,
+              brightness: Brightness.dark,
+              scaffoldBackgroundColor: Colors.black,
+              colorScheme: ColorScheme.dark(
+                primary: themeProvider.customColor,
+                secondary: themeProvider.customColor.shade300,
+                background: Colors.black,
+                surface: Colors.black,
+                onSurface: Colors.white, // Texte clair
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                labelStyle: TextStyle(color: Colors.white),
+                hintStyle: TextStyle(color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: themeProvider.customColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: themeProvider.customColor),
+                ),
+              ),
+            ),
+
             locale: localeProvider.locale,
             supportedLocales: [
               Locale('en', ''), // English
@@ -77,8 +124,8 @@ class MyApp extends StatelessWidget {
               '/checklist': (context) => const CheckList(),
               '/diagrams': (context) => const Diagrams(),
               '/loadingdata': (context) => const LoadingData(),
-              '/settings': (context) => SettingsPage(), // Page des paramètres
-              '/map': (context) => MapPage(), // Ajoutez cette ligne
+              '/settings': (context) => SettingsPage(),
+              '/map': (context) => MapPage(),
             },
           );
         },
