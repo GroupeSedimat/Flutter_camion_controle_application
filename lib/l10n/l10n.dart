@@ -6,5 +6,6 @@ class L10n {
     const Locale('fr'), // French
     const Locale('pl'), // Polish
     const Locale('wo'), // Wolof
+    const Locale('ar'), // Arabic
   ];
 }

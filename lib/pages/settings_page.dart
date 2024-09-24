@@ -85,7 +85,7 @@ class SettingsPage extends StatelessWidget {
                     Get.updateLocale(Locale(newValue));
                   }
                 },
-                items: <String>['en', 'fr', 'pl']
+                items: <String>['en', 'fr', 'pl', 'ar']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -130,6 +130,8 @@ class SettingsPage extends StatelessWidget {
         return 'Polski';
       case 'wo':
         return 'Wolof';
+      case 'ar':
+        return 'Arabic';
       default:
         return '';
     }

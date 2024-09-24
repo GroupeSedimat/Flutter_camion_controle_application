@@ -117,7 +117,7 @@ class MyApp extends StatelessWidget {
 
             locale: localeProvider.locale,
             supportedLocales: L10n.all,
-            localizationsDelegates: [
+            localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
