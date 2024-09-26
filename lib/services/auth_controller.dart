@@ -1,4 +1,3 @@
-  // ignore_for_file: prefer_const_constructors, avoid_print
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
@@ -75,6 +74,8 @@ class AuthController extends GetxController {
       'role': role,
       'company': company,
       'isApproved': false,
+      'apresFormation': false,
+      'apresFormationDoc': "",
     });
 
     Get.offAll(() => LoginPage());

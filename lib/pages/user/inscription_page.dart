@@ -50,10 +50,10 @@ class _InscriptionPageState extends State<InscriptionPage> {
 @override
 Widget build(BuildContext context) {
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-  Future<Map<String, Company>> allCompanies = databaseCompanyService.getAllCompanies();
+  // Future<Map<String, Company>> allCompanies = databaseCompanyService.getAllCompanies();
 
   double w = MediaQuery.of(context).size.width;
-  double h = MediaQuery.of(context).size.height;
+  // double h = MediaQuery.of(context).size.height;
 
   return Scaffold(
     backgroundColor: Colors.transparent, 
@@ -152,10 +152,11 @@ Widget build(BuildContext context) {
                       } else {
                         Map<String, Company> companies = snapshot.data!;
                         List<DropdownMenuItem<String>> companyItems = companies.entries
-                            .map((entry) => DropdownMenuItem(
-                          value: entry.key,
-                          child: Text(entry.value.name),
-                        ))
+                          .map((entry) => DropdownMenuItem(
+                            value: entry.key,
+                            child: Text(entry.value.name),
+                          )
+                        )
                             .toList();
                         return DropdownButtonFormField<String>(
                           value: selectedCompany,

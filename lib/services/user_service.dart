@@ -37,7 +37,6 @@ class UserService{
         users[doc.id] = user.username;
       }
     } catch (error) {
-      // Gérez l’erreur
       print("Error retrieving Users list: $error");
     }
     return users;

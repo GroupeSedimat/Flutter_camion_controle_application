@@ -5,6 +5,8 @@ class MyUser {
   String name;
   String firstname;
   String company;
+  bool apresFormation;
+  String apresFormationDoc;
 
   MyUser({
     required this.role,
@@ -13,6 +15,8 @@ class MyUser {
     required this.name,
     required this.firstname,
     required this.company,
+    required this.apresFormation,
+    required this.apresFormationDoc,
   });
 
   MyUser.fromJson(Map<String, Object?> json): this (
@@ -22,6 +26,8 @@ class MyUser {
     name: json['name']! as String,
     firstname: json['firstname']! as String,
     company: json['company']! as String,
+    apresFormation: json['apresFormation']! as bool,
+    apresFormationDoc: json['apresFormationDoc']! as String,
   );
 
   MyUser copyWith({
@@ -31,6 +37,8 @@ class MyUser {
     String? name,
     String? firstname,
     String? company,
+    bool? apresFormation,
+    String? apresFormationDoc,
   }) {
     return MyUser(
       role: role ?? this.role,
@@ -39,6 +47,8 @@ class MyUser {
       name: name ?? this.name,
       firstname: firstname ?? this.firstname,
       company: company ?? this.company,
+      apresFormation: apresFormation ?? this.apresFormation,
+      apresFormationDoc: apresFormationDoc ?? this.apresFormationDoc,
     );
   }
 
@@ -50,6 +60,8 @@ class MyUser {
       'name': name,
       'firstname': firstname,
       'company': company,
+      'apresFormation': apresFormation,
+      'apresFormationDoc': apresFormationDoc,
     };
   }
 }

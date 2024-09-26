@@ -6,7 +6,7 @@ import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/services/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/check_list/database_tasks_service.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_application_1/services/pick_image_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ValidateTask extends StatefulWidget {
@@ -30,8 +30,6 @@ class ValidateTask extends StatefulWidget {
 }
 
 class ValidateTaskState extends State<ValidateTask> {
-
-
   final _formKey = GlobalKey<FormState>();
   late String descriptionOfProblem;
   String? photoFilePath;
@@ -44,6 +42,8 @@ class ValidateTaskState extends State<ValidateTask> {
   double screenWidth = 50;
   double screenHeight = 50;
 
+  final PickImageService _pickImageService = PickImageService();
+
   @override
   void initState() {
     super.initState();
@@ -54,27 +54,17 @@ class ValidateTaskState extends State<ValidateTask> {
     isDone = task?.isDone;
   }
 
-  Future pickImageFromGallery() async{
-    try {
-      final image =  await ImagePicker().pickImage(source: ImageSource.gallery);
-      if(image == null) return;
-
-      final imageTemp = File(image.path);
-      setState(() => imageGalery = imageTemp);
-    } on PlatformException catch (e) {
-      print('Failed to pick image from gallery: $e');
+  Future pickImageFromGallery() async {
+    final image = await _pickImageService.pickImageFromGallery();
+    if (image != null) {
+      setState(() => imageGalery = image);
     }
   }
 
-  Future pickImageFromCamera() async{
-    try {
-      final image =  await ImagePicker().pickImage(source: ImageSource.camera);
-      if(image == null) return;
-
-      final imageTemp = File(image.path);
-      setState(() => imageGalery = imageTemp);
-    } on PlatformException catch (e) {
-      print('Failed to pick image from camera: $e');
+  Future pickImageFromCamera() async {
+    final image = await _pickImageService.pickImageFromCamera();
+    if (image != null) {
+      setState(() => imageGalery = image);
     }
   }
   
