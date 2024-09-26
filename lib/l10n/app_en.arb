@@ -34,6 +34,7 @@
     "userNewName": "New user name",
     "userFirstName": "First name",
     "userLastName": "Last name",
+    "usernameTaken": "Username is already taken",
     "adminHello": "Welcome to the admin page, {userName}",
     "userApprove": "Approve a user",
     "userDataNotFound": "No user data available",
@@ -48,6 +49,7 @@
 
     "eMail": "E-mail address",
     "eMailEnter": "Enter your e-mail",
+    "eMailOrUsernameEnter": "Enter your email or username",
     "eMailSend": "Send reset e-mail",
 
     "company": "Company",

@@ -34,6 +34,7 @@
     "userNewName": "Nowa nazwa użytkownika",
     "userFirstName": "Imię",
     "userLastName": "Nazwisko",
+    "usernameTaken": "Nazwa użytkownika jest już zajęta",
     "adminHello": "Witaj na profilu admina {userName}!",
     "userApprove": "Zatwierdź użytkownika",
     "userDataNotFound": "Nie znaleziono danych użytkownika",
@@ -48,6 +49,7 @@
 
     "eMail": "Adres e-mail",
     "eMailEnter": "Wpisz e-mail",
+    "eMailOrUsernameEnter": "Wprowadź swój e-mail lub nazwę użytkownika",
     "eMailSend": "Wyślij e-mail resetujący hasło",
 
     "company": "Firma",

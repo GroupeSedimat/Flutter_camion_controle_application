@@ -34,6 +34,7 @@
     "userNewName": "Turu jëfandikukat bu bees",
     "userFirstName": "Tur",
     "userLastName": "Sant",
+    "usernameTaken": "Tur bi mujj na ci génne",
     "adminHello": "Dalal jàmm ci xëtu admin bi, {userName}",
     "userApprove": "Nangu ab jëfandikukat",
     "userDataNotFound": "No user data available",
@@ -48,6 +49,7 @@
 
     "eMail": "Adres e-mail",
     "eMailEnter": "Dugalal sa e-mail",
+    "eMailOrUsernameEnter": "Dugalal sa email wala turu jëfandikukat bi",
     "eMailSend": "Yonnee imeel reset",
 
     "company": "Company",
