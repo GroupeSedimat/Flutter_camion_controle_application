@@ -15,7 +15,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPagestate extends State<LoginPage> {
-  var emailController = TextEditingController();
+  var identifierController = TextEditingController(); 
   var passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
@@ -23,7 +23,7 @@ class _LoginPagestate extends State<LoginPage> {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
-    
+
     // Vérifiez si le mode sombre est activé
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -90,14 +90,14 @@ class _LoginPagestate extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 50),
-            Padding(
+              Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
                   _buildTextField(
-                    controller: emailController,
-                    hintText: AppLocalizations.of(context)!.eMailEnter,
-                    icon: Icons.email,
+                    controller: identifierController,
+                    hintText: AppLocalizations.of(context)!.eMailOrUsernameEnter,
+                    icon: Icons.person, 
                     isDarkMode: isDarkMode,
                   ),
                   const SizedBox(height: 40),
@@ -119,30 +119,11 @@ class _LoginPagestate extends State<LoginPage> {
                     ),
                     isDarkMode: isDarkMode,
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Get.to(() => ResetPasswordPage());
-                        },
-                        child: Text(
-                          AppLocalizations.of(context)!.passForgot,
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 50),
                   GestureDetector(
                     onTap: () {
                       AuthController.instance.login(
-                        emailController.text.trim(),
+                        identifierController.text.trim(), 
                         passwordController.text.trim(),
                       );
                     },
@@ -152,13 +133,6 @@ class _LoginPagestate extends State<LoginPage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
                         color: Theme.of(context).primaryColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
                       ),
                       child: Center(
                         child: Text(
@@ -166,7 +140,7 @@ class _LoginPagestate extends State<LoginPage> {
                           style: TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Colors.white, //ici
                             shadows: [
                               Shadow(
                                 offset: Offset(2.0, 2.0),
@@ -219,11 +193,11 @@ class _LoginPagestate extends State<LoginPage> {
     required IconData icon,
     bool obscureText = false,
     Widget? suffixIcon,
-    required bool isDarkMode, // Ajout de cette propriété pour adapter le style
+    required bool isDarkMode, 
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.black26 : Colors.white, // Changement en fonction du thème
+        color: isDarkMode ? Colors.black26 : Colors.white, 
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
