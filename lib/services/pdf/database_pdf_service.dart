@@ -47,11 +47,9 @@ class DatabasePDFService{
           pdfList[pdfRef.name] = downloadURL;
         }
       }
-      print(pdfList);
       return pdfList;
 
     } catch (error) {
-      // Gérez l’erreur
       print("Error retrieving $companyID pdf list: $error");
       return pdfList;
     }
@@ -72,7 +70,6 @@ class DatabasePDFService{
       return pdfList;
 
     } catch (error) {
-      // Gérez l’erreur
       print("Error retrieving User $userID pdf list: $error");
       return pdfList;
     }

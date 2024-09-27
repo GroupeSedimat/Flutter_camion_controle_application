@@ -107,12 +107,11 @@ class _CompanyListState extends State<CompanyList> {
       itemBuilder: (_, index) {
         Widget leading;
         if (companyMap.values.elementAt(index).logo == "") {
-          leading = Icon(Icons.home_work, color: Colors.deepPurple, size: 80);
+          leading = Icon(Icons.home_work, color: Colors.deepPurple, size: 60);
         } else {
           leading = Image.network(
             companyMap.values.elementAt(index).logo,
-            width: 80,
-            height: 80,
+            height: 60,
           );
         }
         return Padding(
@@ -224,7 +223,6 @@ class _CompanyListState extends State<CompanyList> {
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(10),
-          color: Colors.white,
           margin: EdgeInsets.fromLTRB(
               10, 50, 10, MediaQuery.of(context).viewInsets.bottom
           ),

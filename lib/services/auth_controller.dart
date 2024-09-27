@@ -1,4 +1,3 @@
-  // ignore_for_file: prefer_const_constructors, avoid_print
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
@@ -106,6 +105,8 @@ class AuthController extends GetxController {
       'role': role,
       'company': company,
       'isApproved': false,
+      'apresFormation': false,
+      'apresFormationDoc': "",
     });
 
     Get.offAll(() => LoginPage());
@@ -299,22 +300,20 @@ bool isValidPassword(String password) {
     return _role;
   }
 
-Future<bool> isSuperAdmin(String userId) async {
-  try {
-    var userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get();
+  Future<bool> isSuperAdmin(String userId) async {
+    try {
+      var userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
 
-    if (userDoc.exists) {
-      var role = userDoc.get('role');
-      return role == 'superadmin';
+      if (userDoc.exists) {
+        var role = userDoc.get('role');
+        return role == 'superadmin';
+      }
+    } catch (e) {
+      print('Erreur lors de la vérification du rôle de superadministrateur: $e');
     }
-  } catch (e) {
-    print('Erreur lors de la vérification du rôle de superadministrateur: $e');
+    return false;
   }
-  return false;
-}
-
-
 }

@@ -1,26 +1,24 @@
-// ignore_for_file: constant_identifier_names
 import 'dart:collection';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:get/get.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const String USERS_COLLECTION_REF = "users";
 
 class UserService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _userRef;
-  final User? user = AuthController().auth.currentUser;
   final String? userID = AuthController().auth.currentUser?.uid;
 
-  UserService(){
-    _userRef = _firestore.collection(USERS_COLLECTION_REF)
-        .withConverter<MyUser>(
-        fromFirestore: (snapshots, _)=> MyUser.fromJson(
-          snapshots.data()!,
-        ),
-        toFirestore: (myuser, _) => myuser.toJson()
+  UserService() {
+    _userRef = _firestore.collection(USERS_COLLECTION_REF).withConverter<MyUser>(
+      fromFirestore: (snapshots, _) => MyUser.fromJson(
+        snapshots.data()!,
+      ),
+      toFirestore: (myuser, _) => myuser.toJson(),
     );
   }
 
@@ -37,7 +35,6 @@ class UserService{
         users[doc.id] = user.username;
       }
     } catch (error) {
-      // Gérez l’erreur
       print("Error retrieving Users list: $error");
     }
     return users;
@@ -61,4 +58,64 @@ class UserService{
     return doc.data() as MyUser;
   }
 
+  Future<void> deleteUser(String username) async {
+    try {
+      var userDoc = await _firestore
+          .collection('users')
+          .where('username', isEqualTo: username)
+          .get();
+
+      if (userDoc.docs.isNotEmpty) {
+        await _firestore.collection('users').doc(userDoc.docs[0].id).delete();
+
+        Get.snackbar(
+          "User deleted",
+          "User has been deleted successfully.",
+          backgroundColor: Colors.green,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          "Error!",
+          "User not found.",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error while deleting",
+        e.toString(),
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> confirmDeleteUser(BuildContext context, String username) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.confirmDelete),
+          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
+          actions: [
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.no),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.yes),
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteUser(username);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

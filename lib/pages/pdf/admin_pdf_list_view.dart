@@ -46,6 +46,7 @@ class AdminPdfListView extends StatelessWidget {
                   } else if (companySnapshot.hasData) {
                     final companies = companySnapshot.data!;
                     return ListView(
+                      // padding: EdgeInsets.all(25),
                       children: companyList.map((companyRef) {
                         return CompanyTile(
                           companyRef: companyRef,

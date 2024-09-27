@@ -14,7 +14,6 @@ class ListOfListsControlPage extends StatefulWidget {
 }
 
 class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
-
   final DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
   final UserService userService = UserService();
 
@@ -62,67 +61,95 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
   }
 
   Widget body(List<ListOfLists> listOfLists, Map<String, String> userMap) {
-  return ListView.builder(
-    padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
-    itemCount: listOfLists.length,
-    itemBuilder: (_, index) {
-      return Padding(
-        padding: EdgeInsets.all(8),
-        child: Card(
-          color: Theme.of(context).cardColor, 
-          child: ExpansionTile(
-            leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
-            title: Text(
-              "${listOfLists[index].listNr}. ${listOfLists[index].listName}",
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).textTheme.bodyLarge?.color, 
-                  ),
-            ),
-            trailing: PopupMenuButton(
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddListForm(listItem: listOfLists[index]),
+    return ListView.builder(
+      padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
+      itemCount: listOfLists.length,
+      itemBuilder: (_, index) {
+        return Padding(
+          padding: EdgeInsets.all(8),
+          child: Card(
+            color: Theme.of(context).cardColor,
+            child: ExpansionTile(
+              leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
+              title: Text(
+                "${listOfLists[index].listNr}. ${listOfLists[index].listName}",
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
-                  );
-                } else if (value == 'delete') {
-                  await databaseListOfListsService.deleteListItemByListNr(listOfLists[index].listNr);
-                }
-                setState(() {});
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Text(
-                    AppLocalizations.of(context)!.edit,
-                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Text(
-                    AppLocalizations.of(context)!.delete,
-                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
-                  ),
-                ),
-              ],
-            ),
-            children: listOfLists[index].types.map<Widget>((type) {
-              return ListTile(
-                title: Text(
-                  userMap[type] ?? type,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).textTheme.bodyLarge?.color, // Text color adapts to theme
+              ),
+              trailing: PopupMenuButton(
+                onSelected: (value) async {
+                  if (value == 'edit') {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddListForm(listItem: listOfLists[index]),
                       ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      );
-    },
-  );
-}
+                    );
+                  } else if (value == 'delete') {
+                    bool confirmed = await _showConfirmationDialog(context);
+                    if (confirmed) {
+                      await databaseListOfListsService.deleteListItemByListNr(listOfLists[index].listNr);
+                    }
+                  }
+                  setState(() {});
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Text(
+                      AppLocalizations.of(context)!.edit,
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      AppLocalizations.of(context)!.delete,
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
+                    ),
+                  ),
+                ],
+              ),
+              children: listOfLists[index].types.map<Widget>((type) {
+                return ListTile(
+                  title: Text(
+                    userMap[type] ?? type,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).textTheme.bodyLarge?.color, // Text color adapts to theme
+                        ),
+                  ),
+                );
+              }).toList(),
+            ),
+          )
+        );
+      },
+    );
+  }
+  Future<bool> _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.confirmDelete),
+          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
+          actions: [
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.no),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.yes),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+  }
 }

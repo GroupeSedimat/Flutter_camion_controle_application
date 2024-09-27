@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     Get.updateLocale(Locale(newValue));
                   }
                 },
-                items: <String>['en', 'fr', 'pl']
+                items: <String>['en', 'fr', 'pl', 'ar']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -178,6 +178,8 @@ class _SplashScreenState extends State<SplashScreen> {
         return 'Polski';
       case 'wo':
         return 'Wolof';
+      case 'ar':
+        return 'Arabic';
       default:
         return '';
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
 import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserManagementAdmin extends StatelessWidget {
   final AuthController authController = Get.find<AuthController>();
+  final UserService userService = UserService();
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +64,7 @@ class UserManagementAdmin extends StatelessWidget {
                         onSelected: (String value) {
                           switch (value) {
                             case 'view':
-                              Get.to(() => UserDetailsPage(user: user, ));
+                              Get.to(() => UserDetailsPage(user: user));
                               break;
                             case 'edit':
                               Get.to(() => UserEditPage(user: user));
@@ -71,7 +73,7 @@ class UserManagementAdmin extends StatelessWidget {
                               _resetPassword(user.email);
                               break;
                             case 'delete':
-                              _deleteUser(context, user.username);
+                              userService.confirmDeleteUser(context, user.username);
                               break;
                           }
                         },
@@ -129,69 +131,6 @@ class UserManagementAdmin extends StatelessWidget {
         );
       },
     );
-  }
-
-  void _deleteUser(BuildContext context, String username) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.confirmDelete),
-          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
-          actions: [
-            TextButton(
-              child: Text(AppLocalizations.of(context)!.no),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text(AppLocalizations.of(context)!.yes),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _deleteUserConfirmed(username);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _deleteUserConfirmed(String username) async {
-    try {
-      var userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .where('username', isEqualTo: username)
-          .get();
-
-      if (userDoc.docs.isNotEmpty) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userDoc.docs[0].id)
-            .delete();
-        Get.snackbar(
-          "User deleted",
-          "User has been deleted successfully.",
-          backgroundColor: Colors.green,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } else {
-        Get.snackbar(
-          "Error!",
-          "User not found.",
-          backgroundColor: Colors.red,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        "Error while deleting",
-        e.toString(),
-        backgroundColor: Colors.red,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
   }
 
   void _resetPassword(String email) async {
