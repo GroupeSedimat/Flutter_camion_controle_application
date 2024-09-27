@@ -54,17 +54,48 @@ class AuthController extends GetxController {
   Future<void> register(String email, String username, String name, String firstname, String password, String confirmPassword, String role, String company) async {
   try {
     if (password != confirmPassword) {
-      throw "Les mots de passe ne correspondent pas";
+      
+      Get.snackbar(
+        "les mots de passe ne correspondent pas", 
+        "Veuillez modifier.", 
+        backgroundColor: Colors.orange, 
+        snackPosition: SnackPosition.BOTTOM, 
+        duration: Duration(seconds: 5), 
+      );
+      
     }
 
     if (!isValidPassword(password)) {
-      throw "Le mot de passe doit contenir au moins 8 caractères, y compris une majuscule, une minuscule, un chiffre et un caractère spécial.";
+      Get.snackbar(
+        "Le mot de passe doit contenir au moins 8 caractères, y compris une majuscule, une minuscule, un chiffre et un caractère spécial.", 
+        "Veuillez en choisir un autre.", 
+        backgroundColor: Colors.orange, 
+        snackPosition: SnackPosition.BOTTOM, 
+        duration: Duration(seconds: 5), 
+      );
+      return;
     }
 
     if (role != 'user' && role != 'admin' && role != 'superadmin') {
       throw "Role invalide";
     }
+   
+    var usersWithSameUsername = await FirebaseFirestore.instance
+        .collection('users')
+        .where('username', isEqualTo: username)
+        .get();
 
+    if (usersWithSameUsername.docs.isNotEmpty) {
+      Get.snackbar(
+        "Nom d'utilisateur déjà pris", 
+        "Veuillez en choisir un autre.", 
+        backgroundColor: Colors.orange, 
+        snackPosition: SnackPosition.BOTTOM, 
+        duration: Duration(seconds: 5), 
+      );
+      return;
+      
+    }
     await auth.createUserWithEmailAndPassword(email: email, password: password);
 
     await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).set({
@@ -108,11 +139,39 @@ bool isValidPassword(String password) {
 }
 
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String identifier, String password) async {
   try {
+    UserCredential userCredential;
 
-    UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).get();
+    // Vérifier si l'identifiant est un e-mail ou un nom d'utilisateur
+    if (identifier.contains('@')) {
+      // Si c'est un e-mail, authentifier directement avec FirebaseAuth
+      userCredential = await auth.signInWithEmailAndPassword(email: identifier, password: password);
+    } else {
+      // Si c'est un nom d'utilisateur, rechercher l'utilisateur dans Firestore
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username', isEqualTo: identifier)
+          .get();
+
+      if (userSnapshot.docs.isNotEmpty) {
+        // Récupérer l'e-mail correspondant
+        String email = userSnapshot.docs.first.get('email');
+
+        // Authentifier avec l'e-mail récupéré
+        userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
+      } else {
+        Get.snackbar(
+          "Erreur",
+          "Nom d'utilisateur introuvable.",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+    }
+
+    // Vérifier si l'utilisateur est super admin
     var currentUser = auth.currentUser;
     if (currentUser != null && await isSuperAdmin(currentUser.uid)) {
       Get.snackbar(
@@ -121,10 +180,12 @@ bool isValidPassword(String password) {
         backgroundColor: Colors.green,
         snackPosition: SnackPosition.BOTTOM,
       );
-      Get.offAll(() => AdminPage(userRole: UserRole.superadmin,));
+      Get.offAll(() => AdminPage(userRole: UserRole.superadmin));
       return;
     }
 
+    // Vérification des données utilisateur dans Firestore
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).get();
     if (userDoc.exists) {
       bool isApproved = userDoc.get('isApproved') ?? false;
 
@@ -135,7 +196,6 @@ bool isValidPassword(String password) {
           backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
         );
-
         Get.offAll(() => WelcomePage());
       } else {
         Get.snackbar(
@@ -144,7 +204,7 @@ bool isValidPassword(String password) {
           backgroundColor: Colors.red,
           snackPosition: SnackPosition.TOP,
         );
-       await FirebaseAuth.instance.signOut();
+        await FirebaseAuth.instance.signOut();
       }
     } else {
       Get.snackbar(
@@ -153,32 +213,16 @@ bool isValidPassword(String password) {
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
       );
-
       await FirebaseAuth.instance.signOut();
     }
   } catch (e) {
-        if (e is FirebaseAuthException) {
-            Get.snackbar(
-                "Erreur de connexion",
-                e.message ?? "Erreur inconnue",
-                backgroundColor: Colors.red,
-                snackPosition: SnackPosition.BOTTOM,
-            );
-        } else if (e is FirebaseException) {
-            Get.snackbar(
-                "Erreur Firestore",
-                e.message ?? "Erreur de permission Firestore",
-                backgroundColor: Colors.red,
-                snackPosition: SnackPosition.BOTTOM,
-            );
-        } else {
-            Get.snackbar(
-                "Erreur",
-                "Votre compte est en attente de validation par un administrateur.",
-                backgroundColor: Colors.yellow,
-                snackPosition: SnackPosition.BOTTOM,
-            );
-  }
+    // Gestion des erreurs
+    Get.snackbar(
+      "Erreur de connexion",
+      e is FirebaseAuthException ? e.message ?? "Erreur inconnue" : "Erreur lors de la connexion.",
+      backgroundColor: Colors.red,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
 }
 

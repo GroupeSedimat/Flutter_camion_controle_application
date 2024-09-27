@@ -94,7 +94,7 @@ class MyApp extends StatelessWidget {
             // Thème sombre
             darkTheme: ThemeData(
               primaryColor: themeProvider.customColor,
-              brightness: Brightness.dark,
+              brightness: Brightness.dark, 
               scaffoldBackgroundColor: Colors.black,
               colorScheme: ColorScheme.dark(
                 primary: themeProvider.customColor,

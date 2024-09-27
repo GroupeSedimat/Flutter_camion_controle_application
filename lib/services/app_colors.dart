@@ -8,6 +8,11 @@ enum AppColor {
   green,
   purple,
   orange,
+  yellow,
+  brown,
+  cyan,
+  pink,
+  indigo
 
   
 }
@@ -25,6 +30,17 @@ extension AppColorExtension on AppColor {
         return Colors.purple;
       case AppColor.orange:
         return Colors.orange;
+      case AppColor.yellow:
+        return Colors.yellow;
+      case AppColor.brown:
+        return Colors.brown;  
+      case AppColor.cyan:
+        return Colors.cyan;   
+      case AppColor.pink:
+        return Colors.pink;    
+      case AppColor.indigo:
+        return Colors.indigo;
+      
       
     }
   }
@@ -41,6 +57,16 @@ extension AppColorExtension on AppColor {
         return 'Violet';
       case AppColor.orange:
         return 'Orange';
+      case AppColor.yellow:
+        return 'Jaune';  
+      case AppColor.brown:
+        return 'Marron'; 
+      case AppColor.cyan:
+        return 'Cyan';   
+      case AppColor.pink:
+        return 'Rose';   
+      case AppColor.indigo:
+        return 'Indigo';
     }
   }
 
@@ -57,6 +83,16 @@ extension AppColorExtension on AppColor {
         return AppColor.purple;
       case Colors.orange:
         return AppColor.orange;
+      case Colors.yellow:
+        return AppColor.yellow; 
+      case Colors.brown:
+        return AppColor.brown;   
+      case Colors.cyan:
+        return AppColor.cyan;  
+      case Colors.pink:
+        return AppColor.pink;  
+      case Colors.indigo:
+        return AppColor.indigo;  
      
       default:
         return AppColor.blue;  
