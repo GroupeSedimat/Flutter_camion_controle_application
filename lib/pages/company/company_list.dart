@@ -65,7 +65,7 @@ class _CompanyListState extends State<CompanyList> {
                   onPressed: () {
                     showCompanyModal();
                   },
-                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  // backgroundColor: Theme.of(context).colorScheme.primary,
                   child: const Icon(
                     Icons.add_home_work,
                     color: Colors.white,

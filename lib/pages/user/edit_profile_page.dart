@@ -18,7 +18,7 @@ class _ModifyProfilePageState extends State<ModifyProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.userProfileEdit),
-         backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Container(
        color: Color.fromARGB(108, 255, 255, 255),

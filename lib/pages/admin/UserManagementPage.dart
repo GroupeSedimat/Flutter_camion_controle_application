@@ -83,7 +83,7 @@ class UserManagementPage extends StatelessWidget {
                           child: ListTile(
                             contentPadding: EdgeInsets.all(16),
                             leading: CircleAvatar(
-                              backgroundColor:  Theme.of(context).primaryColor,
+                              // backgroundColor:  Theme.of(context).primaryColor,
                               child: Text(
                                 user.username[0],
                                 style: TextStyle(color: Colors.white),

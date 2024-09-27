@@ -358,7 +358,7 @@ class _CheckListState extends State<CheckList> {
                                   blueprintID: null,
                                 );
                               },
-                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              // backgroundColor: Theme.of(context).colorScheme.primary,
                               child: const Icon(
                                 Icons.add,
                                 color: Colors.lightGreenAccent,
