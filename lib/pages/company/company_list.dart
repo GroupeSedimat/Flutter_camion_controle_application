@@ -119,7 +119,7 @@ class _CompanyListState extends State<CompanyList> {
           padding: EdgeInsets.all(8),
           child: ExpansionTile(
             leading: leading,
-            title: Text(companyMap.values.elementAt(index).name, style: TextStyle(fontSize: 30),),
+            title: Text(companyMap.values.elementAt(index).name, style: TextStyle(fontSize: 30, color:Theme.of(context).primaryColor, ),),
             trailing: PopupMenuButton(
               onSelected: (value) async {
                 if (value == 'edit') {
