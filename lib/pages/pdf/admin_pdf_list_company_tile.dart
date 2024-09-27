@@ -27,9 +27,10 @@ class CompanyTile extends StatelessWidget {
         } else if (snapshot.hasData) {
           final userList = snapshot.data!.prefixes;
           return ExpansionTile(
+            // childrenPadding: EdgeInsets.all(15),
             title: Text(companyName, textAlign: TextAlign.center),
             backgroundColor: Colors.lightGreen,
-            collapsedBackgroundColor: Colors.white,
+            collapsedBackgroundColor: Theme.of(context).primaryColor.withOpacity(0.4),
             children: userList.map((userRef) {
               return UserTile(userRef: userRef);
             }).toList(),
