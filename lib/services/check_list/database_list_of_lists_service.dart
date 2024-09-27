@@ -77,14 +77,44 @@ class DatabaseListOfListsService{
   }
   
   Future<void> deleteListItemByListNr(int listNr) async {
-    await _listRef.where("listNr", isEqualTo: listNr).get().then((value) => value.docs.forEach((element) async {
-      await element.reference.delete();
-    }));
+    try {
+      await _listRef.where("listNr", isEqualTo: listNr).get().then((value) => value.docs.forEach((element) async {
+        await element.reference.delete();
+      }));
+    } catch (e) {
+      print("Error deleting list item: $e");
+      rethrow;
+    }
   }
 
   Future<void> deleteListItemFuture(String listItemID) async {
-    print("Delete listItem with id: $listItemID");
     await _listRef.doc(listItemID).delete();
   }
 
+  Future<int> findFirstFreeListNr() async {
+    try {
+      final querySnapshot = await _listRef.get();
+      List<int> listNrs = [];
+
+      for (var doc in querySnapshot.docs) {
+        ListOfLists list = doc.data() as ListOfLists;
+        listNrs.add(list.listNr);
+      }
+      listNrs.sort();
+
+      int freeNr = 0;
+      for (int nr in listNrs) {
+        if (nr == freeNr) {
+          freeNr++;
+        } else {
+          break;
+        }
+      }
+
+      return freeNr;
+    } catch (e) {
+      print("Error finding first free list number: $e");
+      rethrow;
+    }
+  }
 }

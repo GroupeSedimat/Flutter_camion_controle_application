@@ -145,18 +145,22 @@ class _UserEditPageState extends State<UserEditPage> {
                 controller: _usernameController,
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userName),
               ),
+              SizedBox(height: 16),
                TextField(
                 controller: _firstnameController,
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userFirstName),
               ),
+              SizedBox(height: 16),
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userLastName),
               ),
+              SizedBox(height: 16),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.eMail),
               ),
+              SizedBox(height: 16),
               Wrap(
                 children: [
                   Text(

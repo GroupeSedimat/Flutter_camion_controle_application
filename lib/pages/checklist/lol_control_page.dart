@@ -14,7 +14,6 @@ class ListOfListsControlPage extends StatefulWidget {
 }
 
 class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
-
   final DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
   final UserService userService = UserService();
 
@@ -81,7 +80,10 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                     ),
                   );
                 } else if (value == 'delete') {
-                  await databaseListOfListsService.deleteListItemByListNr(listOfLists[index].listNr);
+                  bool confirmed = await _showConfirmationDialog(context);
+                  if (confirmed) {
+                    await databaseListOfListsService.deleteListItemByListNr(listOfLists[index].listNr);
+                  }
                 }
                 setState(() {});
               },
@@ -105,5 +107,30 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
         );
       },
     );
+  }
+  Future<bool> _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.confirmDelete),
+          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
+          actions: [
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.no),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.yes),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false;
   }
 }

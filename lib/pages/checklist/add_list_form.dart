@@ -16,28 +16,36 @@ class AddListForm extends StatefulWidget {
 
 class _AddListFormState extends State<AddListForm> {
   final _formKey = GlobalKey<FormState>();
-  final _listNrController = TextEditingController();
   final _listNameController = TextEditingController();
   final _typeControllers = <TextEditingController>[];
   final _types = <String>[];
+  int? _listNr;
 
   @override
   void initState() {
     super.initState();
 
     if (widget.listItem != null) {
-      _listNrController.text = widget.listItem!.listNr.toString();
+      _listNr = widget.listItem!.listNr;
       _listNameController.text = widget.listItem!.listName;
       _types.addAll(widget.listItem!.types);
       _typeControllers.addAll(
         _types.map((type) => TextEditingController(text: type)),
       );
+    } else {
+      _setFirstFreeListNr();
     }
+  }
+
+  Future<void> _setFirstFreeListNr() async {
+    int freeNr = await widget.databaseListOfListsService.findFirstFreeListNr();
+    setState(() {
+      _listNr = freeNr;
+    });
   }
 
   @override
   void dispose() {
-    _listNrController.dispose();
     _listNameController.dispose();
     for (var controller in _typeControllers) {
       controller.dispose();
@@ -73,17 +81,16 @@ class _AddListFormState extends State<AddListForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                controller: _listNrController,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.lOLNumber),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.lOLNumberText;
-                  }
-                  return null;
-                },
-              ),
+              if (_listNr != null) ...[
+                Text(
+                  "${AppLocalizations.of(context)!.lOLNumber}: $_listNr",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 20),
+              ] else ...[
+                CircularProgressIndicator(),
+                const SizedBox(height: 20),
+              ],
               TextFormField(
                 controller: _listNameController,
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.lOLName),
@@ -94,6 +101,7 @@ class _AddListFormState extends State<AddListForm> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
               FutureBuilder<Map<String, String>>(
                 future: UserService().getUsersIdAndName(),
                 builder: (context, snapshot) {
@@ -104,16 +112,21 @@ class _AddListFormState extends State<AddListForm> {
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Text(AppLocalizations.of(context)!.userDataNotFound);
                   } else {
-                    Map<String, String> _userMap = snapshot.data!;
+                    Map<String, String> userMap = snapshot.data!;
                     return Expanded(
                       child: ListView.builder(
                         itemCount: _typeControllers.length,
                         itemBuilder: (context, index) {
                           return ListTile(
                             title: DropdownButtonFormField<String>(
-                              value: _typeControllers[index].text.isNotEmpty ? _typeControllers[index].text : null,
-                              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.lOLAuthorization(index + 1)),
-                              items: _userMap.entries.map((entry) {
+                              value: _typeControllers[index].text.isNotEmpty
+                                  ? _typeControllers[index].text
+                                  : null,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(context)!
+                                    .lOLAuthorization(index + 1),
+                              ),
+                              items: userMap.entries.map((entry) {
                                 return DropdownMenuItem<String>(
                                   value: entry.key,
                                   child: Text(entry.value),
@@ -145,10 +158,9 @@ class _AddListFormState extends State<AddListForm> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    final listNr = int.tryParse(_listNrController.text);
-                    if (listNr != null) {
+                    if (_listNr != null) {
                       final listItem = ListOfLists(
-                        listNr: listNr,
+                        listNr: _listNr!,
                         listName: _listNameController.text,
                         types: _types,
                       );
@@ -157,13 +169,16 @@ class _AddListFormState extends State<AddListForm> {
                         await widget.databaseListOfListsService.addList(listItem);
                       } else {
                         await widget.databaseListOfListsService
-                            .updateListItemByListNr(int.parse(_listNrController.text), listItem);
+                            .updateListItemByListNr(_listNr!, listItem);
                       }
                       Navigator.pop(context);
                     }
                   }
                 },
-                child: Text(widget.listItem == null ? AppLocalizations.of(context)!.lOLAdd : AppLocalizations.of(context)!.confirm),
+                child: Text(widget.listItem == null
+                    ? AppLocalizations.of(context)!.lOLAdd
+                    : AppLocalizations.of(context)!.confirm
+                ),
               ),
             ],
           ),

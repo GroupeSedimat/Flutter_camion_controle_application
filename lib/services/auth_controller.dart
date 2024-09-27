@@ -256,22 +256,20 @@ bool isValidPassword(String password) {
     return _role;
   }
 
-Future<bool> isSuperAdmin(String userId) async {
-  try {
-    var userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get();
+  Future<bool> isSuperAdmin(String userId) async {
+    try {
+      var userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
 
-    if (userDoc.exists) {
-      var role = userDoc.get('role');
-      return role == 'superadmin';
+      if (userDoc.exists) {
+        var role = userDoc.get('role');
+        return role == 'superadmin';
+      }
+    } catch (e) {
+      print('Erreur lors de la vérification du rôle de superadministrateur: $e');
     }
-  } catch (e) {
-    print('Erreur lors de la vérification du rôle de superadministrateur: $e');
+    return false;
   }
-  return false;
-}
-
-
 }
