@@ -62,15 +62,22 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
   }
 
   Widget body(List<ListOfLists> listOfLists, Map<String, String> userMap) {
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
-      itemCount: listOfLists.length,
-      itemBuilder: (_, index) {
-        return Padding(
-          padding: EdgeInsets.all(8),
+  return ListView.builder(
+    padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
+    itemCount: listOfLists.length,
+    itemBuilder: (_, index) {
+      return Padding(
+        padding: EdgeInsets.all(8),
+        child: Card(
+          color: Theme.of(context).cardColor, 
           child: ExpansionTile(
             leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
-            title: Text("${listOfLists[index].listNr}. ${listOfLists[index].listName}"),
+            title: Text(
+              "${listOfLists[index].listNr}. ${listOfLists[index].listName}",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).textTheme.bodyLarge?.color, 
+                  ),
+            ),
             trailing: PopupMenuButton(
               onSelected: (value) async {
                 if (value == 'edit') {
@@ -88,22 +95,34 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
               itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 'edit',
-                  child: Text(AppLocalizations.of(context)!.edit),
+                  child: Text(
+                    AppLocalizations.of(context)!.edit,
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
+                  ),
                 ),
                 PopupMenuItem(
                   value: 'delete',
-                  child: Text(AppLocalizations.of(context)!.delete),
+                  child: Text(
+                    AppLocalizations.of(context)!.delete,
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
+                  ),
                 ),
               ],
             ),
             children: listOfLists[index].types.map<Widget>((type) {
               return ListTile(
-                title: Text(userMap[type] ?? type),
+                title: Text(
+                  userMap[type] ?? type,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).textTheme.bodyLarge?.color, // Text color adapts to theme
+                      ),
+                ),
               );
             }).toList(),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }
