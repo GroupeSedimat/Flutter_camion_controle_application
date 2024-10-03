@@ -23,25 +23,28 @@ import 'locale_provider.dart';
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // await FirebaseAppCheck.instance.activate(
-  //   // You can also use a `ReCaptchaEnterpriseProvider` provider instance as an
-  //   // argument for `webProvider`
-  //   webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
-  //   // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
-  //   // your preferred provider. Choose from:
-  //   // 1. Debug provider
-  //   // 2. Safety Net provider
-  //   // 3. Play Integrity provider
-  //   androidProvider: AndroidProvider.playIntegrity,
-  //   // Default provider for iOS/macOS is the Device Check provider. You can use the "AppleProvider" enum to choose
-  //   // your preferred provider. Choose from:
-  //   // 1. Debug provider
-  //   // 2. Device Check provider
-  //   // 3. App Attest provider
-  //   // 4. App Attest provider with fallback to Device Check provider (App Attest provider is only available on iOS 14.0+, macOS 14.0+)
-  //   // appleProvider: AppleProvider.appAttest,
-  // );
+  await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform
+  );
+  await FirebaseAppCheck.instance.activate(
+    // You can also use a `ReCaptchaEnterpriseProvider` provider
+    // instance as an argument for `webProvider`
+    webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
+    // Default provider for Android is the Play Integrity provider. You can use
+    // the "AndroidProvider" enum to choose your preferred provider. Choose from:
+    // 1. Debug provider
+    // 2. Safety Net provider
+    // 3. Play Integrity provider
+    androidProvider: AndroidProvider.playIntegrity,
+    // Default provider for iOS/macOS is the Device Check provider. You can use
+    // the "AppleProvider" enum to choose your preferred provider. Choose from:
+    // 1. Debug provider
+    // 2. Device Check provider
+    // 3. App Attest provider
+    // 4. App Attest provider with fallback to Device Check provider
+    // (App Attest provider is only available on iOS 14.0+, macOS 14.0+)
+    // appleProvider: AppleProvider.appAttest,
+  );
 
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -77,7 +80,7 @@ class MyApp extends StatelessWidget {
                 secondary: themeProvider.customColor.shade300,
                 background: Colors.white,
                 surface: Colors.white,
-                onSurface: Colors.black, // Texte sombre
+                onSurface: Colors.black,
               ),
               inputDecorationTheme: InputDecorationTheme(
                 labelStyle: TextStyle(color: Colors.black),
@@ -101,7 +104,7 @@ class MyApp extends StatelessWidget {
                 secondary: themeProvider.customColor.shade300,
                 background: Colors.black,
                 surface: Colors.black,
-                onSurface: Colors.white, // Texte clair
+                onSurface: Colors.white,
               ),
               inputDecorationTheme: InputDecorationTheme(
                 labelStyle: TextStyle(color: Colors.white),

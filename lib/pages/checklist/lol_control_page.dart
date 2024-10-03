@@ -68,7 +68,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
         return Padding(
           padding: EdgeInsets.all(8),
           child: Card(
-            color: Theme.of(context).cardColor,
+            color: Theme.of(context).primaryColor.withOpacity(0.4),
             child: ExpansionTile(
               leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
               title: Text(

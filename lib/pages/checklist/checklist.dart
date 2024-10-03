@@ -187,7 +187,7 @@ class _CheckListState extends State<CheckList> {
         ),
       ],
       centerTitle: true,
-      backgroundColor: Colors.blue,
+      backgroundColor: Theme.of(context).primaryColor,
       bottom: TabBar(
         dividerColor: Colors.transparent,
         unselectedLabelColor: Colors.white,
