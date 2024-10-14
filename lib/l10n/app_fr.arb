@@ -8,6 +8,7 @@
     "logOut": "Déconnexion",
     "logOutText": "Vous avez été déconnecté",
     "loading": "Chargement...",
+    "status": "Status",
     "ok": "OK",
     "yes": "Oui",
     "no": "Non",
@@ -69,6 +70,9 @@
     "companyResponsible": "Personne responsable du contact",
     "companyAdmin": "L'administrateur principal de l'entreprise",
     "companyLogo": "Logo de l'entreprise",
+
+    "camionType": "Type de camion",
+    "camionsList": "Liste des camions",
 
     "checkList": "Checklist",
     "checkListDescribe": "Décrire le problème",

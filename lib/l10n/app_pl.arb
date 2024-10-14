@@ -8,6 +8,7 @@
     "logOut": "Wyloguj się",
     "logOutText": "Zostałeś wylogowany",
     "loading": "Ładowanie...",
+    "status": "Status",
     "ok": "OK",
     "yes": "Tak",
     "no": "Nie",
@@ -49,7 +50,7 @@
 
     "eMail": "Adres e-mail",
     "eMailEnter": "Wpisz e-mail",
-    "eMailOrUsernameEnter": "Wprowadź swój e-mail lub nazwę użytkownika",
+    "eMailOrUsernameEnter": "Wpisz e-mail lub nazwę użytkownika",
     "eMailSend": "Wyślij e-mail resetujący hasło",
 
     "company": "Firma",
@@ -69,6 +70,9 @@
     "companyResponsible": "Osoba odpowiedzialna za kontakt",
     "companyAdmin": "Glowny admin firmy",
     "companyLogo": "Logo firmy",
+
+    "camionType": "Typ pojazdu",
+    "camionsList": "lista pojazdow",
 
     "checkList": "Checklist",
     "checkListDescribe": "Opisz problem",

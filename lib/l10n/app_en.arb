@@ -8,6 +8,7 @@
     "logOut": "Log out",
     "logOutText": "You have been logged out",
     "loading": "Loading...",
+    "status": "Status",
     "ok": "OK",
     "yes": "Yes",
     "no": "No",
@@ -69,6 +70,11 @@
     "companyResponsible": "Person responsible for the contact",
     "companyAdmin": "The company's main admin",
     "companyLogo": "Company logo",
+
+    "camionType": "Camion type",
+    "camionsList": "List of trucks",
+    "camionName": "Truck's name",
+    "camionsList": "List of trucks",
 
     "checkList": "Checklist",
     "checkListDescribe": "Describe the problem",

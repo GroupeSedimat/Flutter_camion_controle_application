@@ -9,12 +9,12 @@ class DatabaseBlueprintsService{
 
   DatabaseBlueprintsService(){
     _blueprintRef = _firestore
-        .collection(BLUEPRINT_COLLECTION_REF)
-        .withConverter<Blueprint>(
-          fromFirestore: (snapshots, _)=> Blueprint.fromJson(
-              snapshots.data()!,
-            ),
-          toFirestore: (blueprint, _) => blueprint.toJson()
+      .collection(BLUEPRINT_COLLECTION_REF)
+      .withConverter<Blueprint>(
+        fromFirestore: (snapshots, _)=> Blueprint.fromJson(
+            snapshots.data()!,
+          ),
+        toFirestore: (blueprint, _) => blueprint.toJson()
     );
   }
 
@@ -25,12 +25,6 @@ class DatabaseBlueprintsService{
   Stream<DocumentSnapshot> getOneBlueprintWithID(String blueprintID){
     return _blueprintRef.doc(blueprintID).snapshots();
   }
-
-  // Stream<QuerySnapshot> getBlueprintsOnList(int nrOfList) {
-  //   return _blueprintRef
-  //       .where('nrOfList', isEqualTo: nrOfList)
-  //       .snapshots();
-  // }
 
   void addBlueprint(Blueprint blueprint) async {
     _blueprintRef.add(blueprint);

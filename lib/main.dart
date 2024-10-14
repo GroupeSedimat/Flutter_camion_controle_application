@@ -35,7 +35,7 @@ void main() async {
     // 1. Debug provider
     // 2. Safety Net provider
     // 3. Play Integrity provider
-    androidProvider: AndroidProvider.playIntegrity,
+    androidProvider: AndroidProvider.debug,
     // Default provider for iOS/macOS is the Device Check provider. You can use
     // the "AppleProvider" enum to choose your preferred provider. Choose from:
     // 1. Debug provider
@@ -46,10 +46,8 @@ void main() async {
     // appleProvider: AppleProvider.appAttest,
   );
 
-
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? savedLanguageCode = prefs.getString('languageCode');
-
   runApp(MyApp(savedLanguageCode: savedLanguageCode));
 }
 
