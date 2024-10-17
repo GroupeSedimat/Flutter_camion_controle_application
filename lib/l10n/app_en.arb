@@ -75,6 +75,13 @@
     "camionsList": "List of trucks",
     "camionName": "Truck's name",
     "camionsList": "List of trucks",
+    "camionTypesList": "List of truck types",
+    "camionTypeName": "Name of type",
+    "camionTypeEquipment": "Equipment in the vehicle",
+
+    "equipmentName": "Name of equipment",
+    "equipmentList": "List of equipments",
+    "equipmentDescription": "Equipment's description",
 
     "checkList": "Checklist",
     "checkListDescribe": "Describe the problem",

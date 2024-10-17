@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/UserApprovalPage.dart';
 import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/pages/camion/camion_list.dart';
+import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/lol_control_page.dart';
 import 'package:flutter_application_1/pages/company/company_list.dart';
+import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
@@ -73,6 +76,30 @@ class AdminPage extends StatelessWidget {
           Icons.home_work,
           () {
             Get.to(() => CompanyList());
+          },
+        ),
+        _buildDashboardItem(
+          context,
+          AppLocalizations.of(context)!.camionsList,
+          Icons.fire_truck,
+          () {
+            Get.to(() => CamionList());
+          },
+        ),
+        _buildDashboardItem(
+          context,
+          AppLocalizations.of(context)!.camionTypesList,
+          Icons.fire_truck,
+          () {
+            Get.to(() => CamionTypeList());
+          },
+        ),
+        _buildDashboardItem(
+          context,
+          AppLocalizations.of(context)!.equipmentList,
+          Icons.fire_truck,
+          () {
+            Get.to(() => EquipmentList());
           },
         ),
         _buildDashboardItem(

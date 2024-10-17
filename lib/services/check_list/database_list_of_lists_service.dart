@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 
@@ -36,6 +38,30 @@ class DatabaseListOfListsService{
     }
   }
 
+  Future<Map<String, ListOfLists>> getAllListsWithId() async {
+    try {
+      final querySnapshot = await _listRef.get();
+      List snapshotList = querySnapshot.docs;
+      Map<String, ListOfLists> listOfLists = HashMap();
+
+      for (var snapshotListOfListsItem in snapshotList){
+        listOfLists.addAll({snapshotListOfListsItem.id: snapshotListOfListsItem.data()});
+      }
+      var sortedKeys = listOfLists.keys.toList(growable: false)
+        ..sort((k1, k2) => listOfLists[k1]!.listName.compareTo(listOfLists[k2]!.listName));
+
+      LinkedHashMap<String, ListOfLists> sortedLists = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => listOfLists[k]!,
+      );
+      return sortedLists;
+
+    } catch (e) {
+      print("Error getting listItems: $e");
+      rethrow; // Gérez l’erreur le cas échéant.
+    }
+  }
 
   Future<List<ListOfLists>> getListsWithType(String type) async {
     final listOfList = <ListOfLists>[];

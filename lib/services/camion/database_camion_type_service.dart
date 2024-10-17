@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 
@@ -18,21 +20,54 @@ class DatabaseCamionTypeService{
     );
   }
 
-  Future<List<CamionType>> getAllCamionTypes() async {
+  Future<Map<String, CamionType>> getAllCamionTypes() async {
     try {
       final querySnapshot = await _camionTypeRef.get();
-
       List snapshotList = querySnapshot.docs;
-      final camionTypes = <CamionType>[];
-      for (var snapshotCamionTypeItem in snapshotList){
-        camionTypes.add(snapshotCamionTypeItem.data());
+      Map<String, CamionType> camionType = HashMap();
+
+      for (var snapshotCamionItem in snapshotList){
+        camionType.addAll({snapshotCamionItem.id: snapshotCamionItem.data()});
       }
-      camionTypes.sort((a, b) => a.name.compareTo(b.name));
-      return camionTypes;
+      var sortedKeys = camionType.keys.toList(growable: false)
+        ..sort((k1, k2) => camionType[k1]!.name.compareTo(camionType[k2]!.name));
+
+      LinkedHashMap<String, CamionType> sortedCamions = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => camionType[k]!,
+      );
+      // camions.sort((a, b) => a.name.compareTo(b.name));
+      return sortedCamions;
 
     } catch (e) {
       print("Error getting listItems: $e");
       rethrow; // Gérez l’erreur le cas échéant.
+    }
+  }
+
+  Future<Map<String, String>> getTypesIdAndName() async {
+    try {
+      final querySnapshot = await _camionTypeRef.get();
+      List snapshotList = querySnapshot.docs;
+      Map<String, String> camionType = HashMap();
+
+      for (var snapshotCamionItem in snapshotList){
+        camionType.addAll({snapshotCamionItem.id: snapshotCamionItem.data().name});
+      }
+      var sortedKeys = camionType.keys.toList(growable: false)
+        ..sort((k1, k2) => camionType[k1]!.compareTo(camionType[k2]!));
+
+      LinkedHashMap<String, String> sortedCamions = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => camionType[k]!,
+      );
+      return sortedCamions;
+
+    } catch (e) {
+      print("Error getting listItems: $e");
+      rethrow;
     }
   }
 

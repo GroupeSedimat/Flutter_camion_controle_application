@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
 
@@ -18,17 +20,29 @@ class DatabaseCamionService{
     );
   }
 
-  Future<List<Camion>> getAllCamions() async {
+  Future<Map<String, Camion>> getAllCamions() async {
     try {
       final querySnapshot = await _camionRef.get();
-
       List snapshotList = querySnapshot.docs;
-      final camions = <Camion>[];
+      Map<String, Camion> camions = HashMap();
+
       for (var snapshotCamionItem in snapshotList){
-        camions.add(snapshotCamionItem.data());
+        camions.addAll({snapshotCamionItem.id: snapshotCamionItem.data()});
       }
-      camions.sort((a, b) => a.name.compareTo(b.name));
-      return camions;
+      var sortedKeys = camions.keys.toList(growable: false)
+        ..sort((k1, k2) {
+          int a = camions[k1]!.company.compareTo(camions[k2]!.company);
+          if (a != 0) return a;
+          return camions[k1]!.name.compareTo(camions[k2]!.name);
+        });
+
+      LinkedHashMap<String, Camion> sortedCamions = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => camions[k]!,
+      );
+      // camions.sort((a, b) => a.name.compareTo(b.name));
+      return sortedCamions;
 
     } catch (e) {
       print("Error getting listItems: $e");
@@ -39,16 +53,24 @@ class DatabaseCamionService{
   Future<Map<String, Camion>> getCompanyCamions(companyID) async {
     try {
       final querySnapshot = await _camionRef.get();
-
       List snapshotList = querySnapshot.docs;
-      final camions = <Camion>[];
+      Map<String, Camion> camions = HashMap();
+
       for (var snapshotCamionItem in snapshotList){
         if(snapshotCamionItem.data().company == companyID){
-          camions.add(snapshotCamionItem.data());
+          camions.addAll({snapshotCamionItem.id: snapshotCamionItem.data()});
         }
       }
-      camions.sort((a, b) => a.name.compareTo(b.name));
-      return camions;
+      var sortedKeys = camions.keys.toList(growable: false)
+        ..sort((k1, k2) => camions[k1]!.name.compareTo(camions[k2]!.name));
+
+      LinkedHashMap<String, Camion> sortedCamions = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => camions[k]!,
+      );
+      // camions.sort((a, b) => a.name.compareTo(b.name));
+      return sortedCamions;
 
     } catch (e) {
       print("Error getting listItems: $e");

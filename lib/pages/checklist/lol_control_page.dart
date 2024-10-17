@@ -99,14 +99,14 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                     value: 'edit',
                     child: Text(
                       AppLocalizations.of(context)!.edit,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                   PopupMenuItem(
                     value: 'delete',
                     child: Text(
                       AppLocalizations.of(context)!.delete,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                 ],
@@ -116,7 +116,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                   title: Text(
                     userMap[type] ?? type,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).textTheme.bodyLarge?.color, // Text color adapts to theme
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                   ),
                 );

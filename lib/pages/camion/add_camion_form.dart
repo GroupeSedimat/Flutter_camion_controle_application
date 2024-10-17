@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
+import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/services/camion/database_camion_service.dart';
+import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddCamion extends StatefulWidget {
@@ -19,6 +21,7 @@ class _AddCamionState extends State<AddCamion> {
 
   final _formKey = GlobalKey<FormState>();
   DatabaseCamionService databaseCamionService = DatabaseCamionService();
+  DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   String name = "";
   String camionType = "";
   String responsible = "";
@@ -86,22 +89,47 @@ class _AddCamionState extends State<AddCamion> {
           ),
 
           const SizedBox(height: 20),
-          /// todo dropdown choose type
-          TextFormField(
-            initialValue: camionType,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.camionType,
-              labelText: AppLocalizations.of(context)!.camionType,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            validator: (val) {return (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null;},
-            onChanged: (val) => setState(() {name = val;}),
+          FutureBuilder<Map<String, CamionType>>(
+            future: databaseCamionTypeService.getAllCamionTypes(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text("Error: ${snapshot.error}");
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Text(AppLocalizations.of(context)!.userDataNotFound);
+              } else {
+                Map<String, CamionType> camionTypesMap = snapshot.data!;
+
+                return DropdownButtonFormField<String>(
+                  value: camionType.isNotEmpty ? camionType : null,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.camionType,
+                    labelStyle: TextStyle(
+                      fontSize: 20,
+                      color: Colors.lightBlue,
+                      backgroundColor: Colors.white,
+                    ),
+                    focusedBorder: OutlineInputBorder(gapPadding: 15),
+                    border: OutlineInputBorder(gapPadding: 5),
+                  ),
+                  items: camionTypesMap.entries.map((entry) {
+                    return DropdownMenuItem<String>(
+                      value: entry.key,
+                      child: Text(entry.value.name),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      camionType = value ?? '';
+                    });
+                  },
+                  validator: (value) {
+                    return (value == null || value.isEmpty) ? AppLocalizations.of(context)!.required : null;
+                  },
+                );
+              }
+            },
           ),
 
           const SizedBox(height: 50),
