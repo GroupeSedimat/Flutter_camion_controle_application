@@ -3,6 +3,8 @@ import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_type_form.dart';
+import 'package:flutter_application_1/pages/camion/camion_list.dart';
+import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
 import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -88,116 +90,159 @@ class _CamionTypeListState extends State<CamionTypeList> {
   }
 
   Widget _buildBody(Map<String, CamionType> camionTypeList, MyUser user) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
-      itemCount: camionTypeList.length,
-      itemBuilder: (_, index) {
-        Widget leading = const Icon(Icons.fire_truck, color: Colors.deepPurple, size: 60);
-
-        CamionType camionType = camionTypeList.values.elementAt(index);
-
-        return Padding(
-          padding: const EdgeInsets.all(8),
-          child: ExpansionTile(
-            leading: leading,
-            title: Text(
-              camionType.name,
-              style: TextStyle(
-                fontSize: 24,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            trailing: PopupMenuButton(
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  showCamionTypeModal(
-                    camionType: camionType,
-                    camionTypeID: camionTypeList.keys.elementAt(index),
-                  );
-                } else if (value == 'delete') {
-                  _showDeleteConfirmation(camionTypeList.keys.elementAt(index));
-                }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Wrap(
+          spacing: 30,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CamionList()),
+                );
               },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Text(AppLocalizations.of(context)!.edit),
-                ),
-                if (user.role == "superadmin")
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text(AppLocalizations.of(context)!.delete),
-                  ),
-              ],
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
+              ),
+              child: Text(AppLocalizations.of(context)!.camionsList),
             ),
-            children: [
-              Wrap(
-                spacing: 16.0,
-                runSpacing: 16.0,
-                children: [
-                  // Wyświetlanie listy "lol"
-                  if (camionType.lol.isNotEmpty)
-                    Container(
-                      width: 150,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("List of lists:", style: textStyleBold()),
-                          ...camionType.lol.map((item) => Container(
-                            margin: EdgeInsets.only(top: 8.0),
-                            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColorLight,
-                              borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Text(item, style: textStyle()),
-                          )).toList(),
-                        ],
-                      ),
-                    ),
+            ElevatedButton(
+              onPressed: null,
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
+              ),
+              child: Text(AppLocalizations.of(context)!.camionTypesList),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const EquipmentList()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
+              ),
+              child: Text(AppLocalizations.of(context)!.equipmentList),
+            ),
+          ],
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
+            itemCount: camionTypeList.length,
+            itemBuilder: (_, index) {
+              Widget leading = const Icon(Icons.fire_truck, color: Colors.deepPurple, size: 60);
 
-                  // Wyświetlanie listy "equipment"
-                  if (camionType.equipment.isNotEmpty)
-                    Container(
-                      width: 150,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Equipment:", style: textStyleBold()),
-                          ...camionType.equipment.map((item) => Container(
-                            margin: EdgeInsets.only(top: 8.0),
-                            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColorLight,
-                              borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: Offset(0, 3),
-                                ),
+              CamionType camionType = camionTypeList.values.elementAt(index);
+
+              return Padding(
+                padding: const EdgeInsets.all(8),
+                child: ExpansionTile(
+                  leading: leading,
+                  title: Text(
+                    camionType.name,
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  trailing: PopupMenuButton(
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        showCamionTypeModal(
+                          camionType: camionType,
+                          camionTypeID: camionTypeList.keys.elementAt(index),
+                        );
+                      } else if (value == 'delete') {
+                        _showDeleteConfirmation(camionTypeList.keys.elementAt(index));
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Text(AppLocalizations.of(context)!.edit),
+                      ),
+                      if (user.role == "superadmin")
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Text(AppLocalizations.of(context)!.delete),
+                        ),
+                    ],
+                  ),
+                  children: [
+                    Wrap(
+                      spacing: 16.0,
+                      runSpacing: 16.0,
+                      children: [
+                        // Wyświetlanie listy "lol"
+                        if (camionType.lol.isNotEmpty)
+                          Container(
+                            width: 150,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("List of lists:", style: textStyleBold()),
+                                ...camionType.lol.map((item) => Container(
+                                  margin: EdgeInsets.only(top: 8.0),
+                                  padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColorLight,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(item, style: textStyle()),
+                                )).toList(),
                               ],
                             ),
-                            child: Text(item, style: textStyle()),
-                          )).toList(),
-                        ],
-                      ),
-                    ),
-                ],
-              )
-            ],
+                          ),
+
+                        // Wyświetlanie listy "equipment"
+                        if (camionType.equipment.isNotEmpty)
+                          Container(
+                            width: 150,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Equipment:", style: textStyleBold()),
+                                ...camionType.equipment.map((item) => Container(
+                                  margin: EdgeInsets.only(top: 8.0),
+                                  padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColorLight,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(item, style: textStyle()),
+                                )).toList(),
+                              ],
+                            ),
+                          ),
+                      ],
+                    )
+                  ],
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 

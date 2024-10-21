@@ -38,11 +38,11 @@ class _AddCamionState extends State<AddCamion> {
     if (widget.camion != null) {
       name = widget.camion!.name;
       camionType = widget.camion!.camionType;
-      responsible = widget.camion!.responsible;
-      checks = widget.camion!.checks;
-      lastIntervention = widget.camion!.lastIntervention;
-      status = widget.camion!.status;
-      location = widget.camion!.location;
+      responsible = widget.camion!.responsible!;
+      checks = widget.camion!.checks!;
+      lastIntervention = widget.camion!.lastIntervention!;
+      status = widget.camion!.status!;
+      location = widget.camion!.location!;
       company = widget.camion!.company;
     }
   }

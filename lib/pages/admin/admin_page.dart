@@ -86,22 +86,22 @@ class AdminPage extends StatelessWidget {
             Get.to(() => CamionList());
           },
         ),
-        _buildDashboardItem(
-          context,
-          AppLocalizations.of(context)!.camionTypesList,
-          Icons.fire_truck,
-          () {
-            Get.to(() => CamionTypeList());
-          },
-        ),
-        _buildDashboardItem(
-          context,
-          AppLocalizations.of(context)!.equipmentList,
-          Icons.fire_truck,
-          () {
-            Get.to(() => EquipmentList());
-          },
-        ),
+        // _buildDashboardItem(
+        //   context,
+        //   AppLocalizations.of(context)!.camionTypesList,
+        //   Icons.fire_truck,
+        //   () {
+        //     Get.to(() => CamionTypeList());
+        //   },
+        // ),
+        // _buildDashboardItem(
+        //   context,
+        //   AppLocalizations.of(context)!.equipmentList,
+        //   Icons.fire_truck,
+        //   () {
+        //     Get.to(() => EquipmentList());
+        //   },
+        // ),
         _buildDashboardItem(
           context,
           AppLocalizations.of(context)!.pdfListAdmin,

@@ -5,6 +5,8 @@ import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_form.dart';
+import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
+import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
 import 'package:flutter_application_1/services/camion/database_camion_service.dart';
 import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
@@ -119,78 +121,125 @@ class _CamionListState extends State<CamionList> {
   }
 
   Widget _buildBody(Map<String, Camion> camionList, MyUser user, Map<String, String> camionTypesMap) {
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
-      itemCount: camionList.length,
-      itemBuilder: (_, index) {
-        String camionTypeId = camionList.values.elementAt(index).camionType;
-        String camionTypeName = camionTypesMap[camionTypeId] ?? 'Unknown Type'; // Wyświetla nazwę typu lub 'Unknown Type', jeśli brak w mapie.
-
-        Widget leading;
-        if (camionTypeId.isEmpty) {
-          leading = Icon(Icons.car_crash, color: Colors.deepPurple, size: 60);
-        } else {
-          leading = Icon(Icons.fire_truck, color: Colors.deepPurple, size: 60);
-        }
-
-        return Padding(
-          padding: EdgeInsets.all(8),
-          child: ExpansionTile(
-            leading: leading,
-            title: Text(camionList.values.elementAt(index).name, style: TextStyle(fontSize: 24, color:Theme.of(context).primaryColor, ),),
-            trailing: PopupMenuButton(
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  showCamionModal(
-                    camion: camionList.values.elementAt(index),
-                    camionID: camionList.keys.elementAt(index),
-                  );
-                } else if (value == 'delete') {
-                  _showDeleteConfirmation(camionList.keys.elementAt(index));
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Text(AppLocalizations.of(context)!.edit),
-                ),
-                if (user.role == "superadmin")
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text(AppLocalizations.of(context)!.delete),
-                  ),
-              ],
-            ),
-            children: [
-              Wrap(
-                spacing: 15,
-                children: [
-                  if(camionList.values.elementAt(index).company.isNotEmpty)
-                    SizedBox(
-                      child: Text(
-                        "${AppLocalizations.of(context)!.company}: ${camionList.values.elementAt(index).company}",
-                        style: textStyle(),
-                      ),
-                    ),
-                  if(camionTypeId.isNotEmpty)
-                    SizedBox(
-                      child: Text(
-                        "${AppLocalizations.of(context)!.camionType}: $camionTypeName",
-                        style: textStyle(),
-                      ),
-                    ),
-                  SizedBox(
-                    child: Text(
-                      "${AppLocalizations.of(context)!.status}: ${camionList.values.elementAt(index).status}",
-                      style: textStyle(),
-                    ),
-                  ),
-                ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Wrap(
+          spacing: 30,
+          children: [
+            ElevatedButton(
+              onPressed: null,
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
               ),
-            ],
+              child: Text(AppLocalizations.of(context)!.camionsList),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CamionTypeList()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
+              ),
+              child: Text(AppLocalizations.of(context)!.camionTypesList),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const EquipmentList()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
+              ),
+              child: Text(AppLocalizations.of(context)!.equipmentList),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
+            itemCount: camionList.length,
+            itemBuilder: (_, index) {
+              String camionTypeId = camionList.values.elementAt(index).camionType;
+              String camionTypeName = camionTypesMap[camionTypeId] ?? 'Unknown Type'; // Wyświetla nazwę typu lub 'Unknown Type', jeśli brak w mapie.
+
+              Widget leading;
+              if (camionTypeId.isEmpty) {
+                leading = Icon(Icons.car_crash, color: Colors.deepPurple, size: 60);
+              } else {
+                leading = Icon(Icons.fire_truck, color: Colors.deepPurple, size: 60);
+              }
+
+              return Padding(
+                padding: EdgeInsets.all(8),
+                child: ExpansionTile(
+                  leading: leading,
+                  title: Text(
+                    camionList.values.elementAt(index).name,
+                    style: TextStyle(fontSize: 24, color: Theme.of(context).primaryColor),
+                  ),
+                  trailing: PopupMenuButton(
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        showCamionModal(
+                          camion: camionList.values.elementAt(index),
+                          camionID: camionList.keys.elementAt(index),
+                        );
+                      } else if (value == 'delete') {
+                        _showDeleteConfirmation(camionList.keys.elementAt(index));
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Text(AppLocalizations.of(context)!.edit),
+                      ),
+                      if (user.role == "superadmin")
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Text(AppLocalizations.of(context)!.delete),
+                        ),
+                    ],
+                  ),
+                  children: [
+                    Wrap(
+                      spacing: 15,
+                      children: [
+                        if (camionList.values.elementAt(index).company.isNotEmpty)
+                          SizedBox(
+                            child: Text(
+                              "${AppLocalizations.of(context)!.company}: ${camionList.values.elementAt(index).company}",
+                              style: textStyle(),
+                            ),
+                          ),
+                        if (camionTypeId.isNotEmpty)
+                          SizedBox(
+                            child: Text(
+                              "${AppLocalizations.of(context)!.camionType}: $camionTypeName",
+                              style: textStyle(),
+                            ),
+                          ),
+                        SizedBox(
+                          child: Text(
+                            "${AppLocalizations.of(context)!.status}: ${camionList.values.elementAt(index).status}",
+                            style: textStyle(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 

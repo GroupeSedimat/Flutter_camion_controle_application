@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/equipment/equipment.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/pages/camion/camion_list.dart';
+import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/equipment/add_equipment_form.dart';
 import 'package:flutter_application_1/services/equipment/database_equipment_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
@@ -84,67 +86,109 @@ class _EquipmentListState extends State<EquipmentList> {
   }
 
   Widget _buildBody(Map<String, Equipment> equipmentList, MyUser user) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
-      itemCount: equipmentList.length,
-      itemBuilder: (_, index) {
-        Widget leading = const Icon(Icons.cell_tower_outlined, color: Colors.deepPurple, size: 60);
-
-        Equipment equipment = equipmentList.values.elementAt(index);
-
-        return Padding(
-          padding: const EdgeInsets.all(8),
-          child: ExpansionTile(
-            leading: leading,
-            title: Text(
-              equipment.name,
-              style: TextStyle(
-                fontSize: 24,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            trailing: PopupMenuButton(
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  showEquipmentModal(
-                    equipment: equipment,
-                    equipmentID: equipmentList.keys.elementAt(index),
-                  );
-                } else if (value == 'delete') {
-                  _showDeleteConfirmation(equipmentList.keys.elementAt(index));
-                }
+    return Column(
+      children: [
+        Wrap(
+          spacing: 30,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CamionList()),
+                );
               },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Text(AppLocalizations.of(context)!.edit),
-                ),
-                if (user.role == "superadmin")
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text(AppLocalizations.of(context)!.delete),
-                  ),
-              ],
-            ),
-            children: [
-              // if(equipmentList.values.elementAt(index).name.isNotEmpty)
-              // SizedBox(
-              //   child: Text(
-              //     "${AppLocalizations.of(context)!.equipmentName}: ${equipmentList.values.elementAt(index).name}",
-              //     style: textStyle(),
-              //   ),
-              // ),
-              if(equipmentList.values.elementAt(index).description.isNotEmpty)
-              SizedBox(
-                child: Text(
-                  "${AppLocalizations.of(context)!.equipmentDescription}: ${equipmentList.values.elementAt(index).description}",
-                  style: textStyle(),
-                ),
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
               ),
-            ],
+              child: Text(AppLocalizations.of(context)!.camionsList),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CamionTypeList()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
+              ),
+              child: Text(AppLocalizations.of(context)!.camionTypesList),
+            ),
+            ElevatedButton(
+              onPressed: null,
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: Colors.grey,
+              ),
+              child: Text(AppLocalizations.of(context)!.equipmentList),
+            ),
+          ],
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
+            itemCount: equipmentList.length,
+            itemBuilder: (_, index) {
+              Widget leading = const Icon(Icons.cell_tower_outlined, color: Colors.deepPurple, size: 60);
+
+              Equipment equipment = equipmentList.values.elementAt(index);
+
+              return Padding(
+                padding: const EdgeInsets.all(8),
+                child: ExpansionTile(
+                  leading: leading,
+                  title: Text(
+                    equipment.name,
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  trailing: PopupMenuButton(
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        showEquipmentModal(
+                          equipment: equipment,
+                          equipmentID: equipmentList.keys.elementAt(index),
+                        );
+                      } else if (value == 'delete') {
+                        _showDeleteConfirmation(equipmentList.keys.elementAt(index));
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Text(AppLocalizations.of(context)!.edit),
+                      ),
+                      if (user.role == "superadmin")
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Text(AppLocalizations.of(context)!.delete),
+                        ),
+                    ],
+                  ),
+                  children: [
+                    // if(equipmentList.values.elementAt(index).name.isNotEmpty)
+                    // SizedBox(
+                    //   child: Text(
+                    //     "${AppLocalizations.of(context)!.equipmentName}: ${equipmentList.values.elementAt(index).name}",
+                    //     style: textStyle(),
+                    //   ),
+                    // ),
+                    if(equipmentList.values.elementAt(index).description.isNotEmpty)
+                    SizedBox(
+                      child: Text(
+                        "${AppLocalizations.of(context)!.equipmentDescription}: ${equipmentList.values.elementAt(index).description}",
+                        style: textStyle(),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
