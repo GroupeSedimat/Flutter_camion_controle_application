@@ -18,11 +18,12 @@ class AddCamion extends StatefulWidget {
 }
 
 class _AddCamionState extends State<AddCamion> {
-
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+
   DatabaseCamionService databaseCamionService = DatabaseCamionService();
   DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
-  String name = "";
+
   String camionType = "";
   String responsible = "";
   String checks = "";
@@ -32,11 +33,14 @@ class _AddCamionState extends State<AddCamion> {
   String company = "";
   String pageTile = "";
 
+  Map<String, CamionType>? _camionTypesMap;
+  bool _isLoadingCamionTypes = true;
+
   @override
   void initState() {
     super.initState();
     if (widget.camion != null) {
-      name = widget.camion!.name;
+      _nameController.text = widget.camion!.name;
       camionType = widget.camion!.camionType;
       responsible = widget.camion!.responsible!;
       checks = widget.camion!.checks!;
@@ -45,90 +49,111 @@ class _AddCamionState extends State<AddCamion> {
       location = widget.camion!.location!;
       company = widget.camion!.company;
     }
+
+    _loadCamionTypes();
+  }
+
+  Future<void> _loadCamionTypes() async {
+    try {
+      Map<String, CamionType> camionTypes = await databaseCamionTypeService.getAllCamionTypes();
+      setState(() {
+        _camionTypesMap = camionTypes;
+        _isLoadingCamionTypes = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingCamionTypes = false;
+      });
+      print('Error loading camion types: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if(widget.camion != null){
+    if (widget.camion != null) {
       pageTile = AppLocalizations.of(context)!.edit;
-    }else{
+    } else {
       pageTile = AppLocalizations.of(context)!.add;
     }
+
     return Form(
       key: _formKey,
       child: ListView(
         scrollDirection: Axis.vertical,
-        children: <Widget> [
+        children: <Widget>[
           Text(
             pageTile,
-            style: TextStyle(
-                backgroundColor: Colors.white,
-                fontSize: 30,
-                color: Colors.green,
-                letterSpacing: 4,
-                fontWeight: FontWeight.bold
+            style: const TextStyle(
+              backgroundColor: Colors.white,
+              fontSize: 30,
+              color: Colors.green,
+              letterSpacing: 4,
+              fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 20),
+
+          // Name field without calling setState every time
           TextFormField(
-            initialValue: name,
+            controller: _nameController,
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context)!.camionName,
               labelText: AppLocalizations.of(context)!.camionName,
-              labelStyle: TextStyle(
+              labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
                 backgroundColor: Colors.white,
               ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
             ),
-            validator: (val) {return (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null;},
-            onChanged: (val) => setState(() {name = val;}),
+            validator: (val) {
+              return (val == null || val.isEmpty || val == "")
+                  ? AppLocalizations.of(context)!.required
+                  : null;
+            },
           ),
 
           const SizedBox(height: 20),
-          FutureBuilder<Map<String, CamionType>>(
-            future: databaseCamionTypeService.getAllCamionTypes(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text("Error: ${snapshot.error}");
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Text(AppLocalizations.of(context)!.userDataNotFound);
-              } else {
-                Map<String, CamionType> camionTypesMap = snapshot.data!;
 
-                return DropdownButtonFormField<String>(
-                  value: camionType.isNotEmpty ? camionType : null,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.camionType,
-                    labelStyle: TextStyle(
-                      fontSize: 20,
-                      color: Colors.lightBlue,
-                      backgroundColor: Colors.white,
-                    ),
-                    focusedBorder: OutlineInputBorder(gapPadding: 15),
-                    border: OutlineInputBorder(gapPadding: 5),
-                  ),
-                  items: camionTypesMap.entries.map((entry) {
-                    return DropdownMenuItem<String>(
-                      value: entry.key,
-                      child: Text(entry.value.name),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      camionType = value ?? '';
-                    });
-                  },
-                  validator: (value) {
-                    return (value == null || value.isEmpty) ? AppLocalizations.of(context)!.required : null;
-                  },
-                );
-              }
+          // DropdownButtonFormField for Camion Types
+          _isLoadingCamionTypes
+              ? const CircularProgressIndicator() // Pokazanie loadinga, jeśli typy się ładują
+              : _camionTypesMap == null || _camionTypesMap!.isEmpty
+              ? Text(AppLocalizations.of(context)!.userDataNotFound) // W przypadku braku danych
+              : DropdownButtonFormField<String>(
+            value: camionType.isNotEmpty ? camionType : null,
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.camionType,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+            items: _camionTypesMap!.entries.map((entry) {
+              return DropdownMenuItem<String>(
+                value: entry.key,
+                child: Text(entry.value.name),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                camionType = value ?? '';
+              });
+            },
+            validator: (value) {
+              return (value == null || value.isEmpty)
+                  ? AppLocalizations.of(context)!.required
+                  : null;
             },
           ),
 
@@ -140,21 +165,21 @@ class _AddCamionState extends State<AddCamion> {
             ),
             child: Text(
               AppLocalizations.of(context)!.confirm,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
               ),
             ),
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 Camion newCamion = Camion(
-                    name: name,
-                    camionType: camionType,
-                    responsible: responsible,
-                    checks: checks,
-                    lastIntervention: lastIntervention,
-                    status: status,
-                    location: location,
-                    company: company
+                  name: _nameController.text,
+                  camionType: camionType,
+                  responsible: responsible,
+                  checks: checks,
+                  lastIntervention: lastIntervention,
+                  status: status,
+                  location: location,
+                  company: company,
                 );
                 if (widget.camion == null) {
                   databaseCamionService.addCamion(newCamion);
@@ -165,9 +190,10 @@ class _AddCamionState extends State<AddCamion> {
                   widget.onCamionAdded!();
                 }
               }
-            }),
+            },
+          ),
         ],
-      )
+      ),
     );
   }
 }

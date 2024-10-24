@@ -78,6 +78,7 @@
     "camionTypesList": "List of truck types",
     "camionTypeName": "Name of type",
     "camionTypeEquipment": "Equipment in the vehicle",
+    "noCamionsAvailable": "No trucks available",
 
     "equipmentName": "Name of equipment",
     "equipmentList": "List of equipments",

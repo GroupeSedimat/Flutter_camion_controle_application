@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class Camion {
   String name;
   String camionType;
@@ -32,21 +30,6 @@ class Camion {
     location: json['location']! as String,
     company: json['company']! as String,
   );
-
-  // Constructor with DocumentSnapshot (Firestore)
-  factory Camion.fromSnapshot(DocumentSnapshot snapshot) {
-    final data = snapshot.data() as Map<String, dynamic>;
-    return Camion(
-      name: data['name'] as String,
-      camionType: data['camionType'] as String,
-      responsible: data['responsible'] as String,
-      checks: data['checks'] as String,
-      lastIntervention: data['lastIntervention'] as String,
-      status: data['status'] as String,
-      location: data['location'] as String,
-      company: data['company'] as String,
-    );
-  }
 
   Camion copyWith({
     String? name,

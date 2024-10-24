@@ -11,12 +11,12 @@ class DatabaseCamionService{
 
   DatabaseCamionService(){
     _camionRef = _firestore
-      .collection(CAMION_COLLECTION_REF)
-      .withConverter<Camion>(
+        .collection(CAMION_COLLECTION_REF)
+        .withConverter<Camion>(
         fromFirestore: (snapshots, _)=> Camion.fromJson(
           snapshots.data()!,
         ),
-      toFirestore: (camion, _) => camion.toJson()
+        toFirestore: (camion, _) => camion.toJson()
     );
   }
 
@@ -75,7 +75,7 @@ class DatabaseCamionService{
     }
   }
 
-  Future<QuerySnapshot> getCamionsPaginated({
+  Future<Map<String, dynamic>> getCamionsPaginated({
     String? companyId,
     String? searchQuery,
     String? camionTypeId,
@@ -84,23 +84,19 @@ class DatabaseCamionService{
   }) async {
     Query query = _camionRef;
 
-    // Add filtering by company
     if (companyId != null && companyId.isNotEmpty) {
       query = query.where('company', isEqualTo: companyId);
     }
 
-    // Add filtering by truck type
     if (camionTypeId != null && camionTypeId.isNotEmpty) {
       query = query.where('camionType', isEqualTo: camionTypeId);
     }
 
-    // Add a search by truck name
     if (searchQuery != null && searchQuery.isNotEmpty) {
       query = query.where('name', isGreaterThanOrEqualTo: searchQuery)
           .where('name', isLessThanOrEqualTo: searchQuery + '\uf8ff');
     }
 
-    // Add pagination
     if (lastDocument != null) {
       query = query.startAfterDocument(lastDocument);
     }
@@ -108,7 +104,17 @@ class DatabaseCamionService{
     query = query.limit(limit);
 
     try {
-      return await query.get();
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, Camion> camions = HashMap();
+      for (var doc in querySnapshot.docs) {
+        camions[doc.id] = doc.data() as Camion;
+      }
+      DocumentSnapshot? lastDoc = querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
+
+      return {
+        'camions': camions,
+        'lastDocument': lastDoc,
+      };
     } catch (e) {
       print("Error fetching paginated data: $e");
       rethrow;

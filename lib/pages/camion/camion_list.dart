@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -22,83 +23,127 @@ class CamionList extends StatefulWidget {
 class _CamionListState extends State<CamionList> {
   final DatabaseCamionService databaseCamionService = DatabaseCamionService();
   final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
-  Future<MyUser>? _futureUser;
-  Future<Map<String, String>>? _futureCamionTypes;
+
+  MyUser? _user;
+  Map<String, String>? _camionTypes;
+  Map<String, Camion> _camionList = HashMap();
+  DocumentSnapshot? _lastDocument;
+  bool _isLoadingMore = false;
+  bool _hasMoreData = true;
+
+  ScrollController _scrollController = ScrollController();
+
 
   @override
   void initState() {
     super.initState();
-    _futureUser = getUser();
-    _futureCamionTypes = databaseCamionTypeService.getTypesIdAndName();
+    _loadData();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  Future<void> _loadData() async {
+    await _loadUser();
+    await _loadCamionTypes();
+    _loadMoreCamions();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore && _hasMoreData) {
+      print("-------------------------scroll listener");
+      _loadMoreCamions();
+    }
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      print("-------------------------load user");
+      MyUser user = await getUser();
+      setState(() {
+        print("-------------------------setState load user");
+        _user = user;
+      });
+    } catch (e) {
+      print("Error loading user: $e");
+    }
+  }
+
+  Future<void> _loadCamionTypes() async {
+    try {
+      Map<String, String> types = await databaseCamionTypeService.getTypesIdAndName();
+      setState(() {
+        _camionTypes = types;
+      });
+    } catch (e) {
+      print("Error loading camion types: $e");
+    }
+  }
+
+  Future<void> _loadMoreCamions() async {
+    if (!_hasMoreData || _user == null) return;
+    _isLoadingMore = true;
+
+    try {
+      var paginatedData = await databaseCamionService.getCamionsPaginated(
+        companyId: _user!.role == 'admin' ? _user!.company : null,
+        lastDocument: _lastDocument,
+        limit: 20,
+      );
+
+      Map<String, Camion> newCamionsSnapshot = paginatedData['camions'];
+      DocumentSnapshot? lastDocumentFromQuery = paginatedData['lastDocument'];
+
+      if (newCamionsSnapshot.isNotEmpty) {
+        setState(() {
+          _camionList.addAll(newCamionsSnapshot);
+          _lastDocument = lastDocumentFromQuery;
+          _hasMoreData = newCamionsSnapshot.length >= 20;
+        });
+      } else {
+        setState(() {
+          _hasMoreData = false;
+        });
+      }
+    } catch (e) {
+      print("Error loading camions: $e");
+    } finally {
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<MyUser>(
-      future: _futureUser,
-      builder: (context, userSnapshot) {
-        if (userSnapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (userSnapshot.hasError) {
-          return Center(child: Text('Error: ${userSnapshot.error}'));
-        } else if (userSnapshot.hasData) {
-          MyUser user = userSnapshot.data!;
+    if (_user == null || _camionTypes == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-          return FutureBuilder<Map<String, String>>(
-            future: _futureCamionTypes,
-            builder: (context, camionTypesSnapshot) {
-              if (camionTypesSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (camionTypesSnapshot.hasError) {
-                return Center(child: Text('Error: ${camionTypesSnapshot.error}'));
-              } else if (camionTypesSnapshot.hasData) {
-                Map<String, String> camionTypesMap = camionTypesSnapshot.data!;
-
-                return Scaffold(
-                  body: FutureBuilder(
-                    future: getCamionsData(user),
-                    builder: (context, camionsSnapshot) {
-                      if (camionsSnapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (camionsSnapshot.hasError) {
-                        return Center(child: Text('Error: ${camionsSnapshot.error}'));
-                      } else {
-                        Map<String, Camion> camionList = camionsSnapshot.data!;
-                        return DefaultTabController(
-                          initialIndex: 0,
-                          length: camionList.length,
-                          child: BasePage(
-                            title: title(user),
-                            body: _buildBody(camionList, user, camionTypesMap),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                  floatingActionButton: Visibility(
-                    visible: user.role == 'superadmin',
-                    child: FloatingActionButton(
-                      heroTag: "addCamionHero",
-                      onPressed: () {
-                        showCamionModal();
-                      },
-                      child: const Icon(
-                        Icons.fire_truck,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                );
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
-            },
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    return Scaffold(
+      body: BasePage(
+        title: title(_user!),
+        body: _buildBody(_camionList, _user!, _camionTypes!),
+      ),
+      floatingActionButton: Visibility(
+        visible: _isSuperAdmin(),
+        child: FloatingActionButton(
+          heroTag: "addCamionHero",
+          onPressed: () {
+            showCamionModal();
+          },
+          child: const Icon(Icons.fire_truck, color: Colors.white),
+        ),
+      ),
     );
+  }
+
+  bool _isSuperAdmin() {
+    return _user?.role == 'superadmin';
   }
 
   Future<MyUser> getUser() async {
@@ -163,36 +208,45 @@ class _CamionListState extends State<CamionList> {
         const SizedBox(height: 10),
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
-            itemCount: camionList.length,
-            itemBuilder: (_, index) {
-              String camionTypeId = camionList.values.elementAt(index).camionType;
-              String camionTypeName = camionTypesMap[camionTypeId] ?? 'Unknown Type'; // Wyświetla nazwę typu lub 'Unknown Type', jeśli brak w mapie.
+            controller: _scrollController,
+            physics: AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(8.0),
+            itemCount: _camionList.length,
+            itemBuilder: (context, index) {
+              if (_camionList.isEmpty) {
+                return Center(
+                  child: Text(AppLocalizations.of(context)!.noCamionsAvailable),
+                );
+              }
+
+              String camionId = _camionList.keys.elementAt(index);
+              Camion camion = _camionList[camionId]!;
+
+              String camionTypeName = camionTypesMap[camion.camionType] ?? 'Unknown Type';
 
               Widget leading;
-              if (camionTypeId.isEmpty) {
+              if (camion.camionType.isEmpty) {
                 leading = Icon(Icons.car_crash, color: Colors.deepPurple, size: 60);
               } else {
                 leading = Icon(Icons.fire_truck, color: Colors.deepPurple, size: 60);
               }
-
               return Padding(
                 padding: EdgeInsets.all(8),
                 child: ExpansionTile(
                   leading: leading,
                   title: Text(
-                    camionList.values.elementAt(index).name,
+                    camion.name, // Nazwa ciężarówki
                     style: TextStyle(fontSize: 24, color: Theme.of(context).primaryColor),
                   ),
                   trailing: PopupMenuButton(
                     onSelected: (value) async {
                       if (value == 'edit') {
                         showCamionModal(
-                          camion: camionList.values.elementAt(index),
-                          camionID: camionList.keys.elementAt(index),
+                          camion: camion, // Obiekt Camion
+                          camionID: camionId, // ID ciężarówki
                         );
                       } else if (value == 'delete') {
-                        _showDeleteConfirmation(camionList.keys.elementAt(index));
+                        _showDeleteConfirmation(camionId); // Usuwanie ciężarówki po ID
                       }
                     },
                     itemBuilder: (context) => [
@@ -211,14 +265,14 @@ class _CamionListState extends State<CamionList> {
                     Wrap(
                       spacing: 15,
                       children: [
-                        if (camionList.values.elementAt(index).company.isNotEmpty)
+                        if (camion.company.isNotEmpty)
                           SizedBox(
                             child: Text(
-                              "${AppLocalizations.of(context)!.company}: ${camionList.values.elementAt(index).company}",
+                              "${AppLocalizations.of(context)!.company}: ${camion.company}",
                               style: textStyle(),
                             ),
                           ),
-                        if (camionTypeId.isNotEmpty)
+                        if (camion.camionType.isNotEmpty)
                           SizedBox(
                             child: Text(
                               "${AppLocalizations.of(context)!.camionType}: $camionTypeName",
@@ -227,7 +281,7 @@ class _CamionListState extends State<CamionList> {
                           ),
                         SizedBox(
                           child: Text(
-                            "${AppLocalizations.of(context)!.status}: ${camionList.values.elementAt(index).status}",
+                            "${AppLocalizations.of(context)!.status}: ${camion.status}",
                             style: textStyle(),
                           ),
                         ),
@@ -236,7 +290,7 @@ class _CamionListState extends State<CamionList> {
                   ],
                 ),
               );
-            },
+            }
           ),
         ),
       ],
@@ -248,12 +302,13 @@ class _CamionListState extends State<CamionList> {
   }
 
   String title(MyUser user) {
-    if(user.role == "superadmin"){
+    if (user.role == "superadmin") {
       return AppLocalizations.of(context)!.camionsList;
-    }else{
+    } else {
       return AppLocalizations.of(context)!.details;
     }
   }
+
   void showCamionModal({
     Camion? camion,
     String? camionID,
@@ -298,7 +353,7 @@ class _CamionListState extends State<CamionList> {
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
-              // AppLocalizations.of(context)!
+            // AppLocalizations.of(context)!
           ),
         ],
       ),
