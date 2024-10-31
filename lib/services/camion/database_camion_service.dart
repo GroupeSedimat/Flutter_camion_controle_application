@@ -79,8 +79,11 @@ class DatabaseCamionService{
     String? companyId,
     String? searchQuery,
     String? camionTypeId,
-    DocumentSnapshot? lastDocument, // For paginated queries
+    DocumentSnapshot? lastDocument,
     int limit = 20,
+    String sortByField = 'name',
+    bool isDescending = false,
+    String? secondarySortField,
   }) async {
     Query query = _camionRef;
 
@@ -96,6 +99,13 @@ class DatabaseCamionService{
       query = query.where('name', isGreaterThanOrEqualTo: searchQuery)
           .where('name', isLessThanOrEqualTo: searchQuery + '\uf8ff');
     }
+    query = query.orderBy(sortByField, descending: isDescending);
+    if(sortByField != "name"){
+      query = query.orderBy("name", descending: isDescending);
+    }
+    // if (secondarySortField != null && secondarySortField.isNotEmpty) {
+    //   query = query.orderBy(secondarySortField, descending: isDescending);
+    // }
 
     if (lastDocument != null) {
       query = query.startAfterDocument(lastDocument);
@@ -103,14 +113,16 @@ class DatabaseCamionService{
 
     query = query.limit(limit);
 
+    print(query.parameters);
+
     try {
       QuerySnapshot querySnapshot = await query.get();
       Map<String, Camion> camions = HashMap();
       for (var doc in querySnapshot.docs) {
         camions[doc.id] = doc.data() as Camion;
       }
+      print(camions);
       DocumentSnapshot? lastDoc = querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
-
       return {
         'camions': camions,
         'lastDocument': lastDoc,

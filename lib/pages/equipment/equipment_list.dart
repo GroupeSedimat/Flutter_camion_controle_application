@@ -101,7 +101,7 @@ class _EquipmentListState extends State<EquipmentList> {
               style: ElevatedButton.styleFrom(
                 disabledBackgroundColor: Colors.grey,
               ),
-              child: Text(AppLocalizations.of(context)!.camionsList),
+              child: Text(AppLocalizations.of(context)!.camionMenuTrucks),
             ),
             ElevatedButton(
               onPressed: () {
@@ -113,14 +113,14 @@ class _EquipmentListState extends State<EquipmentList> {
               style: ElevatedButton.styleFrom(
                 disabledBackgroundColor: Colors.grey,
               ),
-              child: Text(AppLocalizations.of(context)!.camionTypesList),
+              child: Text(AppLocalizations.of(context)!.camionMenuTypes),
             ),
             ElevatedButton(
               onPressed: null,
               style: ElevatedButton.styleFrom(
                 disabledBackgroundColor: Colors.grey,
               ),
-              child: Text(AppLocalizations.of(context)!.equipmentList),
+              child: Text(AppLocalizations.of(context)!.camionMenuEquipment),
             ),
           ],
         ),

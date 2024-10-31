@@ -10,6 +10,7 @@ import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
 import 'package:flutter_application_1/services/camion/database_camion_service.dart';
 import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
+import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -23,15 +24,24 @@ class CamionList extends StatefulWidget {
 class _CamionListState extends State<CamionList> {
   final DatabaseCamionService databaseCamionService = DatabaseCamionService();
   final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
+  final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
 
   MyUser? _user;
   Map<String, String>? _camionTypes;
   Map<String, Camion> _camionList = HashMap();
+  Map<String, String>? _companiesNames;
   DocumentSnapshot? _lastDocument;
   bool _isLoadingMore = false;
   bool _hasMoreData = true;
+  String? _selectedFilterType;
+  String? _selectedFilterCompany;
+  String? _selectedSortField;
+  String? _searchQuery;
+  bool _isSortDescending = false;
 
-  ScrollController _scrollController = ScrollController();
+
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
 
   @override
@@ -50,22 +60,20 @@ class _CamionListState extends State<CamionList> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _scrollListener() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore && _hasMoreData) {
-      print("-------------------------scroll listener");
       _loadMoreCamions();
     }
   }
 
   Future<void> _loadUser() async {
     try {
-      print("-------------------------load user");
       MyUser user = await getUser();
       setState(() {
-        print("-------------------------setState load user");
         _user = user;
       });
     } catch (e) {
@@ -76,8 +84,10 @@ class _CamionListState extends State<CamionList> {
   Future<void> _loadCamionTypes() async {
     try {
       Map<String, String> types = await databaseCamionTypeService.getTypesIdAndName();
+      Map<String, String> companies = await databaseCompanyService.getAllCompaniesNames();
       setState(() {
         _camionTypes = types;
+        _companiesNames = companies;
       });
     } catch (e) {
       print("Error loading camion types: $e");
@@ -90,8 +100,12 @@ class _CamionListState extends State<CamionList> {
 
     try {
       var paginatedData = await databaseCamionService.getCamionsPaginated(
-        companyId: _user!.role == 'admin' ? _user!.company : null,
+        sortByField: _selectedSortField ?? 'name',
+        isDescending: _isSortDescending,
+        companyId: _selectedFilterCompany ?? (_user!.role == 'admin' ? _user!.company : null),
+        camionTypeId: _selectedFilterType,
         lastDocument: _lastDocument,
+        searchQuery: _searchQuery,
         limit: 20,
       );
 
@@ -151,33 +165,184 @@ class _CamionListState extends State<CamionList> {
     return await userService.getCurrentUserData();
   }
 
-  Future<Map<String, Camion>> getCamionsData(MyUser user) async {
-    if (user.role == 'superadmin') {
-      return databaseCamionService.getAllCamions();
-    } else if (user.role == 'admin') {
-      Map<String, Camion> camions = HashMap();
-      String companyId = user.company;
-      camions = await databaseCamionService.getCompanyCamions(companyId);
-      return camions;
-    } else {
-      Map<String, Camion> camions = HashMap();
-      return camions;
-    }
+  void _showSubMenuSort(BuildContext context, Offset position) async {
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(position.dx, position.dy, 0, 0),
+      items: [
+        PopupMenuItem(
+          value: 'sortName',
+          child: Text(AppLocalizations.of(context)!.sortName),
+        ),
+        PopupMenuItem(
+          value: 'sortType',
+          child: Text(AppLocalizations.of(context)!.sortType),
+        ),
+        PopupMenuItem(
+          value: 'sortEntreprise',
+          child: Text(AppLocalizations.of(context)!.sortEntreprise),
+        ),
+        PopupMenuItem(
+          value: 'sortDescending',
+          child: Text(AppLocalizations.of(context)!.sortDescending),
+        ),
+      ],
+    ).then((value) {
+      if (value != null) {
+        _handleSubMenuSort(value);
+      }
+    });
+  }
+
+  void _handleSubMenuSort(String value) {
+    setState(() {
+      _selectedSortField = value == 'sortEntreprise' ? 'company' : (value == 'sortType' ? 'camionType' : (value == 'sortName' ? 'name' : _selectedSortField));
+      _isSortDescending = value == 'sortDescending'? _isSortDescending = !_isSortDescending : _isSortDescending;
+      _camionList.clear();
+      _lastDocument = null;
+      _hasMoreData = true;
+    });
+    _loadMoreCamions();
+  }
+
+  void _showSubMenuFilter(BuildContext context, Offset position) async {
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(position.dx, position.dy, 0, 0),
+      items: [
+        PopupMenuItem(
+          value: 'filterType',
+          child: Text(AppLocalizations.of(context)!.filterType),
+        ),
+        PopupMenuItem(
+          value: 'filterEntreprise',
+          child: Text(AppLocalizations.of(context)!.filterEntreprise),
+        ),
+      ],
+    ).then((value) {
+      if (value == 'filterType') {
+        // Wyświetl dialog z listą typów camion
+        _showFilterDialog(
+          context,
+          AppLocalizations.of(context)!.filterType,
+          _camionTypes!,
+              (selectedType) {
+            setState(() {
+              _selectedFilterType = selectedType;
+              _camionList.clear();
+              _lastDocument = null;
+              _hasMoreData = true;
+            });
+            _loadMoreCamions();
+          },
+        );
+      } else if (value == 'filterEntreprise') {
+        // Wyświetl dialog z listą firm
+        _showFilterDialog(
+          context,
+          AppLocalizations.of(context)!.filterEntreprise,
+          _companiesNames!, // Przekazujemy mapę
+              (selectedCompany) {
+            setState(() {
+              _selectedFilterCompany = selectedCompany; // Tutaj selectedCompany to klucz
+              _camionList.clear();
+              _lastDocument = null;
+              _hasMoreData = true;
+            });
+            _loadMoreCamions();
+          },
+        );
+      }
+    });
+  }
+
+
+  void _showFilterDialog(BuildContext context, String title, Map<String, String> options, Function(String) onSelected) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: options.length,
+              itemBuilder: (context, index) {
+                String key = options.keys.elementAt(index);
+                String value = options[key]!;
+                return ListTile(
+                  title: Text(value),
+                  onTap: () {
+                    Navigator.pop(context); // Zamknij dialog
+                    onSelected(key); // Wywołaj funkcję z wybranym kluczem
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildBody(Map<String, Camion> camionList, MyUser user, Map<String, String> camionTypesMap) {
+    // List<String> sortedKeys = _camionList.keys.toList()
+    //   ..sort((a, b) => _camionList[a]!.name.compareTo(_camionList[b]!.name));
+
+    List<String> sortedKeys = _camionList.keys.toList();
+
+    print("-------------------- selectedSortField $_selectedSortField");
+    sortedKeys.sort((a, b) {
+
+      int comparison;
+      if (_selectedSortField == 'name' || _selectedSortField == '' || _selectedSortField == null) {
+        comparison = _isSortDescending
+            ? _camionList[b]!.name.compareTo(_camionList[a]!.name)
+            : _camionList[a]!.name.compareTo(_camionList[b]!.name);
+      } else if (_selectedSortField == 'camionType') {
+        // Sortujemy najpierw po camionType, a jeśli są równe, to alfabetycznie po name
+        comparison = _isSortDescending
+            ? _camionList[b]!.camionType.compareTo(_camionList[a]!.camionType)
+            : _camionList[a]!.camionType.compareTo(_camionList[b]!.camionType);
+
+        if (comparison == 0) {
+          // Jeśli camionType jest taki sam, sortujemy po name
+          comparison = _isSortDescending
+              ? _camionList[b]!.name.compareTo(_camionList[a]!.name)
+              : _camionList[a]!.name.compareTo(_camionList[b]!.name);
+        }
+      } else if (_selectedSortField == 'company') {
+        // Sortujemy najpierw po company, a jeśli są równe, to alfabetycznie po name
+        comparison = _isSortDescending
+            ? _camionList[b]!.company.compareTo(_camionList[a]!.company)
+            : _camionList[a]!.company.compareTo(_camionList[b]!.company);
+
+        if (comparison == 0) {
+          // Jeśli company jest taki sam, sortujemy po name
+          comparison = comparison = _isSortDescending
+              ? _camionList[b]!.name.compareTo(_camionList[a]!.name)
+              : _camionList[a]!.name.compareTo(_camionList[b]!.name);
+        }
+      } else {
+        comparison = 0;
+      }
+
+      return comparison;
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Wrap(
-          spacing: 30,
+          spacing: 5,
           children: [
             ElevatedButton(
               onPressed: null,
               style: ElevatedButton.styleFrom(
                 disabledBackgroundColor: Colors.grey,
               ),
-              child: Text(AppLocalizations.of(context)!.camionsList),
+              child: Text(AppLocalizations.of(context)!.camionMenuTrucks),
             ),
             ElevatedButton(
               onPressed: () {
@@ -189,7 +354,7 @@ class _CamionListState extends State<CamionList> {
               style: ElevatedButton.styleFrom(
                 disabledBackgroundColor: Colors.grey,
               ),
-              child: Text(AppLocalizations.of(context)!.camionTypesList),
+              child: Text(AppLocalizations.of(context)!.camionMenuTypes),
             ),
             ElevatedButton(
               onPressed: () {
@@ -201,10 +366,110 @@ class _CamionListState extends State<CamionList> {
               style: ElevatedButton.styleFrom(
                 disabledBackgroundColor: Colors.grey,
               ),
-              child: Text(AppLocalizations.of(context)!.equipmentList),
+              child: Text(AppLocalizations.of(context)!.camionMenuEquipment),
+            ),
+            PopupMenuButton(
+              icon: Icon(Icons.search_rounded, color: Colors.red),
+              onSelected: (value) {
+                if (value == 'search') {
+                  // Obsłuż wyszukiwanie według nazwy
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'search',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.search_rounded, color: Colors.red),
+                          Text("Search name"),
+                        ],
+                      ),
+                      SizedBox(
+                        width: MediaQuery.sizeOf(context).width * 0.8,
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: "Enter name",
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _searchQuery = _searchController.text.trim(); // Zapisz wartość wyszukiwania
+                                _camionList.clear(); // Wyczyść aktualną listę
+                                _lastDocument = null; // Resetuj ostatni dokument
+                                _hasMoreData = true; // Umożliw kontynuację ładowania danych
+                              });
+                              _loadMoreCamions(); // Wywołaj funkcję ładowania
+                            },
+                            child: Text("Search"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _searchQuery = null; // Zapisz wartość wyszukiwania
+                                _camionList.clear(); // Wyczyść aktualną listę
+                                _lastDocument = null; // Resetuj ostatni dokument
+                                _hasMoreData = true; // Umożliw kontynuację ładowania danych
+                                _selectedSortField = null;
+                                _isSortDescending = false;
+                                _selectedFilterCompany = null;
+                                _selectedFilterType = null;
+                              });
+                              _loadMoreCamions(); // Wywołaj funkcję ładowania
+                            },
+                            child: Text("Reset Serch"),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'sort',
+                  onTap: () async {
+                    // Wyświetl podrzędne menu na konkretnej pozycji
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      RenderBox renderBox = context.findRenderObject() as RenderBox;
+                      Offset position = renderBox.localToGlobal(Offset.zero);
+                      _showSubMenuSort(context, position);
+                    });
+                  },
+                  child: Row(
+                    children: const [
+                      Text("Sort by"),
+                      Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'filter',
+                  onTap: () async {
+                    // Wyświetl podrzędne menu na konkretnej pozycji
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      RenderBox renderBox = context.findRenderObject() as RenderBox;
+                      Offset position = renderBox.localToGlobal(Offset.zero);
+                      _showSubMenuFilter(context, position);
+                    });
+                  },
+                  child: Row(
+                    children: const [
+                      Text("Filter by"),
+                      Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
+
         const SizedBox(height: 10),
         Expanded(
           child: ListView.builder(
@@ -219,7 +484,7 @@ class _CamionListState extends State<CamionList> {
                 );
               }
 
-              String camionId = _camionList.keys.elementAt(index);
+              String camionId = sortedKeys[index];
               Camion camion = _camionList[camionId]!;
 
               String camionTypeName = camionTypesMap[camion.camionType] ?? 'Unknown Type';
@@ -235,18 +500,18 @@ class _CamionListState extends State<CamionList> {
                 child: ExpansionTile(
                   leading: leading,
                   title: Text(
-                    camion.name, // Nazwa ciężarówki
+                    "${index+1} ${camion.name}",
                     style: TextStyle(fontSize: 24, color: Theme.of(context).primaryColor),
                   ),
                   trailing: PopupMenuButton(
                     onSelected: (value) async {
                       if (value == 'edit') {
                         showCamionModal(
-                          camion: camion, // Obiekt Camion
-                          camionID: camionId, // ID ciężarówki
+                          camion: camion,
+                          camionID: camionId,
                         );
                       } else if (value == 'delete') {
-                        _showDeleteConfirmation(camionId); // Usuwanie ciężarówki po ID
+                        _showDeleteConfirmation(camionId);
                       }
                     },
                     itemBuilder: (context) => [
