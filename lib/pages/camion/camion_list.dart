@@ -291,8 +291,6 @@ class _CamionListState extends State<CamionList> {
     //   ..sort((a, b) => _camionList[a]!.name.compareTo(_camionList[b]!.name));
 
     List<String> sortedKeys = _camionList.keys.toList();
-
-    print("-------------------- selectedSortField $_selectedSortField");
     sortedKeys.sort((a, b) {
 
       int comparison;

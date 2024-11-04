@@ -83,7 +83,6 @@ class DatabaseCamionService{
     int limit = 20,
     String sortByField = 'name',
     bool isDescending = false,
-    String? secondarySortField,
   }) async {
     Query query = _camionRef;
 
@@ -103,9 +102,6 @@ class DatabaseCamionService{
     if(sortByField != "name"){
       query = query.orderBy("name", descending: isDescending);
     }
-    // if (secondarySortField != null && secondarySortField.isNotEmpty) {
-    //   query = query.orderBy(secondarySortField, descending: isDescending);
-    // }
 
     if (lastDocument != null) {
       query = query.startAfterDocument(lastDocument);
@@ -113,7 +109,7 @@ class DatabaseCamionService{
 
     query = query.limit(limit);
 
-    print(query.parameters);
+    // print(query.parameters);
 
     try {
       QuerySnapshot querySnapshot = await query.get();
@@ -121,7 +117,6 @@ class DatabaseCamionService{
       for (var doc in querySnapshot.docs) {
         camions[doc.id] = doc.data() as Camion;
       }
-      print(camions);
       DocumentSnapshot? lastDoc = querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
       return {
         'camions': camions,

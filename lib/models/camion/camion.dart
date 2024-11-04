@@ -2,7 +2,7 @@ class Camion {
   String name;
   String camionType;
   String? responsible;
-  String? checks;
+  List<DateTime>? checks;
   String? lastIntervention;
   String? status;
   String? location;
@@ -24,7 +24,7 @@ class Camion {
     name: json['name']! as String,
     camionType: json['camionType']! as String,
     responsible: json['responsible']! as String,
-    checks: json['checks']! as String,
+    checks: (json['checks']! as List<dynamic>?)?.map((date) => DateTime.parse(date as String)).toList(),
     lastIntervention: json['lastIntervention']! as String,
     status: json['status']! as String,
     location: json['location']! as String,
@@ -35,7 +35,7 @@ class Camion {
     String? name,
     String? camionType,
     String? responsible,
-    String? checks,
+    List<DateTime>? checks,
     String? lastIntervention,
     String? status,
     String? location,
@@ -58,7 +58,7 @@ class Camion {
       'name': name,
       'camionType': camionType,
       'responsible': responsible,
-      'checks': checks,
+      'checks': checks?.map((date) => date.toIso8601String()).toList(),
       'lastIntervention': lastIntervention,
       'status': status,
       'location': location,
