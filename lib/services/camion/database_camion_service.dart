@@ -102,7 +102,6 @@ class DatabaseCamionService{
     if(sortByField != "name"){
       query = query.orderBy("name", descending: isDescending);
     }
-
     if (lastDocument != null) {
       query = query.startAfterDocument(lastDocument);
     }

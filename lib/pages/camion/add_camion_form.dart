@@ -98,6 +98,38 @@ class _AddCamionState extends State<AddCamion> {
     super.dispose();
   }
 
+  Future<DateTime?> _selectDateTime([DateTime? initialDate]) async {
+    DateTime selectedDate = initialDate ?? DateTime.now();
+
+    // Pick a date
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (pickedDate != null) {
+      // Pick a time
+      TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(selectedDate),
+      );
+
+      if (pickedTime != null) {
+        // Combine picked date and time
+        return DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.camion != null) {
@@ -214,24 +246,32 @@ class _AddCamionState extends State<AddCamion> {
           Wrap(
             spacing: 5,
             children: checks.map((date) {
-              return Chip(
-                label: Text('${date.toLocal()}'.split(' ')[0]),
-                onDeleted: () {
-                  setState(() {
-                    checks.remove(date);
-                  });
+              return GestureDetector(
+                onTap: () async {
+                  // Open date and time picker for editing
+                  DateTime? updatedDate = await _selectDateTime(date);
+                  if (updatedDate != null) {
+                    setState(() {
+                      // Replace old date with the updated one
+                      int index = checks.indexOf(date);
+                      checks[index] = updatedDate;
+                    });
+                  }
                 },
+                child: Chip(
+                  label: Text('${date.toLocal()}'.split('.')[0]), // Display full date and time
+                  onDeleted: () {
+                    setState(() {
+                      checks.remove(date);
+                    });
+                  },
+                ),
               );
             }).toList(),
           ),
           ElevatedButton(
             onPressed: () async {
-              DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2101),
-              );
+              DateTime? pickedDate = await _selectDateTime();
               if (pickedDate != null) {
                 setState(() {
                   checks.add(pickedDate);
