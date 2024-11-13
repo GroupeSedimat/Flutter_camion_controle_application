@@ -131,8 +131,21 @@ class DatabaseCamionService{
     return _camionRef.snapshots();
   }
 
-  Stream<DocumentSnapshot> getOneCamionWithID(String camionID){
-    return _camionRef.doc(camionID).snapshots();
+  Future<Camion?> getOneCamionWithID(String camionID) async {
+    try {
+      QuerySnapshot querySnapshot = await _camionRef
+          .where(FieldPath.documentId, isEqualTo: camionID)
+          .get();
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.data() as Camion?;
+      } else {
+        print("Camion with ID $camionID does not exist.");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching camion with ID $camionID: $e");
+      rethrow;
+    }
   }
 
   void addCamion(Camion camion) async {

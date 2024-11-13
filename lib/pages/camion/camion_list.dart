@@ -140,8 +140,8 @@ class _CamionListState extends State<CamionList> {
 
     return Scaffold(
       body: BasePage(
-        title: title(_user!),
-        body: _buildBody(_camionList, _user!, _camionTypes!),
+        title: title(),
+        body: _buildBody(),
       ),
       floatingActionButton: Visibility(
         visible: _isSuperAdmin(),
@@ -237,14 +237,13 @@ class _CamionListState extends State<CamionList> {
           },
         );
       } else if (value == 'filterEntreprise') {
-        // Wyświetl dialog z listą firm
         _showFilterDialog(
           context,
           AppLocalizations.of(context)!.filterEntreprise,
-          _companiesNames!, // Przekazujemy mapę
+          _companiesNames!,
               (selectedCompany) {
             setState(() {
-              _selectedFilterCompany = selectedCompany; // Tutaj selectedCompany to klucz
+              _selectedFilterCompany = selectedCompany;
               _camionList.clear();
               _lastDocument = null;
               _hasMoreData = true;
@@ -274,8 +273,8 @@ class _CamionListState extends State<CamionList> {
                 return ListTile(
                   title: Text(value),
                   onTap: () {
-                    Navigator.pop(context); // Zamknij dialog
-                    onSelected(key); // Wywołaj funkcję z wybranym kluczem
+                    Navigator.pop(context);
+                    onSelected(key);
                   },
                 );
               },
@@ -286,9 +285,7 @@ class _CamionListState extends State<CamionList> {
     );
   }
 
-  Widget _buildBody(Map<String, Camion> camionList, MyUser user, Map<String, String> camionTypesMap) {
-    // List<String> sortedKeys = _camionList.keys.toList()
-    //   ..sort((a, b) => _camionList[a]!.name.compareTo(_camionList[b]!.name));
+  Widget _buildBody() {
 
     List<String> sortedKeys = _camionList.keys.toList();
     sortedKeys.sort((a, b) {
@@ -368,11 +365,6 @@ class _CamionListState extends State<CamionList> {
             ),
             PopupMenuButton(
               icon: Icon(Icons.search_rounded, color: Colors.red),
-              onSelected: (value) {
-                if (value == 'search') {
-                  // Obsłuż wyszukiwanie według nazwy
-                }
-              },
               itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 'search',
@@ -432,7 +424,6 @@ class _CamionListState extends State<CamionList> {
                 PopupMenuItem(
                   value: 'sort',
                   onTap: () async {
-                    // Wyświetl podrzędne menu na konkretnej pozycji
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       RenderBox renderBox = context.findRenderObject() as RenderBox;
                       Offset position = renderBox.localToGlobal(Offset.zero);
@@ -485,7 +476,7 @@ class _CamionListState extends State<CamionList> {
               String camionId = sortedKeys[index];
               Camion camion = _camionList[camionId]!;
 
-              String camionTypeName = camionTypesMap[camion.camionType] ?? 'Unknown Type';
+              String camionTypeName = _camionTypes![camion.camionType] ?? 'Unknown Type';
 
               Widget leading;
               if (camion.camionType.isEmpty) {
@@ -517,7 +508,7 @@ class _CamionListState extends State<CamionList> {
                         value: 'edit',
                         child: Text(AppLocalizations.of(context)!.edit),
                       ),
-                      if (user.role == "superadmin")
+                      if (_user!.role == "superadmin")
                         PopupMenuItem(
                           value: 'delete',
                           child: Text(AppLocalizations.of(context)!.delete),
@@ -531,7 +522,7 @@ class _CamionListState extends State<CamionList> {
                         if (camion.company.isNotEmpty)
                           SizedBox(
                             child: Text(
-                              "${AppLocalizations.of(context)!.company}: ${camion.company}",
+                              "${AppLocalizations.of(context)!.company}: ${_companiesNames?[camion.company] ?? 'Unknown Company'}",
                               style: textStyle(),
                             ),
                           ),
@@ -564,8 +555,8 @@ class _CamionListState extends State<CamionList> {
     return TextStyle(fontSize: 20);
   }
 
-  String title(MyUser user) {
-    if (user.role == "superadmin") {
+  String title() {
+    if (_user!.role == "superadmin") {
       return AppLocalizations.of(context)!.camionsList;
     } else {
       return AppLocalizations.of(context)!.details;

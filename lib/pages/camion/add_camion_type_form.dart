@@ -25,7 +25,7 @@ class _AddCamionTypeState extends State<AddCamionType> {
   DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
   DatabaseEquipmentService databaseEquipmentService = DatabaseEquipmentService();
-  List<String> availableLolItems = [];
+  Map<String, String> availableLolMap = {};
   List<String> availableEquipmentItems = [];
   Map<String, bool> equipmentSelection = {};
   final List<TextEditingController> _lolControllers = [];
@@ -55,7 +55,7 @@ class _AddCamionTypeState extends State<AddCamionType> {
     Map<String, Equipment> equipmentLists = await databaseEquipmentService.getAllEquipments();
 
     setState(() {
-      availableLolItems = listOfLists.values.map((list) => list.listName).toList();
+      availableLolMap = listOfLists.map((key, list) => MapEntry(key, list.listName));
       availableEquipmentItems = equipmentLists.values.map((equipment) => equipment.name).toList();
 
       for (var item in availableEquipmentItems) {
@@ -115,12 +115,12 @@ class _AddCamionTypeState extends State<AddCamionType> {
             int index = entry.key;
             return ListTile(
               title: DropdownButtonFormField<String>(
-                value: availableLolItems.contains(lol[index]) ? lol[index] : null,
+                value: availableLolMap.containsKey(lol[index]) ? lol[index] : null,
                 decoration: InputDecoration(labelText: "List of Lists item ${index + 1}"),
-                items: availableLolItems.map((item) {
+                items: availableLolMap.entries.map((entry) {
                   return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item),
+                    value: entry.key,
+                    child: Text(entry.value),
                   );
                 }).toList(),
                 onChanged: (val) {

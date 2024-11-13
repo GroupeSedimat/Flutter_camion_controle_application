@@ -111,16 +111,6 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                   ),
                 ],
               ),
-              children: listOfLists[index].types.map<Widget>((type) {
-                return ListTile(
-                  title: Text(
-                    userMap[type] ?? type,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
-                  ),
-                );
-              }).toList(),
             ),
           )
         );

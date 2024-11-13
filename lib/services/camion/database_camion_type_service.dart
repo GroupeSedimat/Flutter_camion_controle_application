@@ -75,8 +75,21 @@ class DatabaseCamionTypeService{
     return _camionTypeRef.snapshots();
   }
 
-  Stream<DocumentSnapshot> getOneCamionTypeWithID(String camionTypeID){
-    return _camionTypeRef.doc(camionTypeID).snapshots();
+  Future<CamionType?> getOneCamionTypeWithID(String camionTypeID) async {
+    try {
+      QuerySnapshot querySnapshot = await _camionTypeRef
+          .where(FieldPath.documentId, isEqualTo: camionTypeID)
+          .get();
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.data() as CamionType?;
+      } else {
+        print("Camion with ID $camionTypeID does not exist.");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching camion with ID $camionTypeID: $e");
+      rethrow;
+    }
   }
 
   void addCamionType(CamionType camionType) async {

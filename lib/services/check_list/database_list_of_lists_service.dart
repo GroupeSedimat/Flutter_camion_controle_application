@@ -63,25 +63,22 @@ class DatabaseListOfListsService{
     }
   }
 
-  Future<List<ListOfLists>> getListsWithType(String type) async {
-    final listOfList = <ListOfLists>[];
+  Future<List<ListOfLists>> getListsForCamionType(List<String> listIds) async {
+    final listOfLists = <ListOfLists>[];
     try {
-      final querySnapshot = await _firestore
-          .collection(LIST_COLLECTION_REF)
-          .where("types", arrayContains: type)
+      final querySnapshot = await _listRef
+          .where(FieldPath.documentId, whereIn: listIds)
           .get();
-      List snapshotList = querySnapshot.docs;
-      if (snapshotList.isNotEmpty) {
-        for (var snapshotListItem in snapshotList) {
-          listOfList.add(ListOfLists.fromJson(snapshotListItem.data()));
+      for (var doc in querySnapshot.docs) {
+        if (doc.exists) {
+          listOfLists.add(doc.data() as ListOfLists);
         }
       }
-      listOfList.sort((a, b) => a.listNr.compareTo(b.listNr));
-    } catch (error) {
-      // Gérez l’erreur
-      print("Error retrieving task: $error");
+      listOfLists.sort((a, b) => a.listNr.compareTo(b.listNr));
+    } catch (e) {
+      print("Błąd podczas pobierania list dla danego typu kamiona: $e");
     }
-    return listOfList;
+    return listOfLists;
   }
 
   Future<void> addList(ListOfLists listItem) async {
