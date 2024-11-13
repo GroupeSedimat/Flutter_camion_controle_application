@@ -178,6 +178,7 @@ class _CamionListState extends State<CamionList> {
           value: 'sortType',
           child: Text(AppLocalizations.of(context)!.sortType),
         ),
+        if(_user!.role=="superadmin")
         PopupMenuItem(
           value: 'sortEntreprise',
           child: Text(AppLocalizations.of(context)!.sortEntreprise),
@@ -214,6 +215,7 @@ class _CamionListState extends State<CamionList> {
           value: 'filterType',
           child: Text(AppLocalizations.of(context)!.filterType),
         ),
+        if(_user!.role=="superadmin")
         PopupMenuItem(
           value: 'filterEntreprise',
           child: Text(AppLocalizations.of(context)!.filterEntreprise),
@@ -332,6 +334,7 @@ class _CamionListState extends State<CamionList> {
         Wrap(
           spacing: 5,
           children: [
+            if(_user!.role=="superadmin")
             ElevatedButton(
               onPressed: null,
               style: ElevatedButton.styleFrom(
@@ -339,6 +342,7 @@ class _CamionListState extends State<CamionList> {
               ),
               child: Text(AppLocalizations.of(context)!.camionMenuTrucks),
             ),
+            if(_user!.role=="superadmin")
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -351,6 +355,7 @@ class _CamionListState extends State<CamionList> {
               ),
               child: Text(AppLocalizations.of(context)!.camionMenuTypes),
             ),
+            if(_user!.role=="superadmin")
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
