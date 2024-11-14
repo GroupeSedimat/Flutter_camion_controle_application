@@ -178,7 +178,7 @@ class _MapPageState extends State<MapPage> {
           ),
           
         // Bouton pour rafraîchir la localisation
-        /**Positioned(
+        Positioned(
           bottom: 80,
           right: 10,
           child: FloatingActionButton(
@@ -190,7 +190,7 @@ class _MapPageState extends State<MapPage> {
             tooltip: 'Rafraîchir la localisation',
             child: Icon(Icons.my_location),
           ),
-        ), **/
+        ), 
 
         // Boutons pour zoomer/dézoomer
         Positioned(
