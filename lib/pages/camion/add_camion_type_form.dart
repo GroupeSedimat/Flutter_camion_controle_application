@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
-import 'package:flutter_application_1/models/equipment/equipment.dart';
 import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
 import 'package:flutter_application_1/services/equipment/database_equipment_service.dart';
@@ -26,7 +25,7 @@ class _AddCamionTypeState extends State<AddCamionType> {
   DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
   DatabaseEquipmentService databaseEquipmentService = DatabaseEquipmentService();
   Map<String, String> availableLolMap = {};
-  List<String> availableEquipmentItems = [];
+  Map<String, String> availableEquipmentItems = {};
   Map<String, bool> equipmentSelection = {};
   final List<TextEditingController> _lolControllers = [];
   final List<TextEditingController> _equipmentControllers = [];
@@ -52,14 +51,13 @@ class _AddCamionTypeState extends State<AddCamionType> {
 
   Future<void> _loadDataFromDatabase() async {
     Map<String, ListOfLists> listOfLists = await databaseListOfListsService.getAllListsWithId();
-    Map<String, Equipment> equipmentLists = await databaseEquipmentService.getAllEquipments();
+    Map<String, String> equipmentLists = await databaseEquipmentService.getAllEquipmentsKeyAndName();
 
     setState(() {
       availableLolMap = listOfLists.map((key, list) => MapEntry(key, list.listName));
-      availableEquipmentItems = equipmentLists.values.map((equipment) => equipment.name).toList();
-
-      for (var item in availableEquipmentItems) {
-        equipmentSelection[item] = equipment.contains(item);
+      availableEquipmentItems = equipmentLists;
+      for (var equipmentKey in availableEquipmentItems.keys) {
+        equipmentSelection[equipmentKey] = equipment.contains(equipmentKey);
       }
     });
   }
@@ -141,17 +139,19 @@ class _AddCamionTypeState extends State<AddCamionType> {
           ),
 
           const Text("Add Equipment Items:"),
-          ...availableEquipmentItems.map((item) {
+          ...availableEquipmentItems.entries.map((entry) {
+            String equipmentKey = entry.key;
+            String equipmentName = entry.value;
             return CheckboxListTile(
-              title: Text(item),
-              value: equipmentSelection[item] ?? false,
+              title: Text(equipmentName),
+              value: equipmentSelection[equipmentKey] ?? false,
               onChanged: (bool? selected) {
                 setState(() {
-                  equipmentSelection[item] = selected!;
+                  equipmentSelection[equipmentKey] = selected!;
                   if (selected) {
-                    equipment.add(item);
+                    equipment.add(equipmentKey);
                   } else {
-                    equipment.remove(item);
+                    equipment.remove(equipmentKey);
                   }
                 });
               },

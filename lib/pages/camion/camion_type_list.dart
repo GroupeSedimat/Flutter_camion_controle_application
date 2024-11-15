@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
+import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_type_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
 import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
+import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
+import 'package:flutter_application_1/services/equipment/database_equipment_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -18,12 +21,27 @@ class CamionTypeList extends StatefulWidget {
 
 class _CamionTypeListState extends State<CamionTypeList> {
   final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
+  DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
+  DatabaseEquipmentService databaseEquipmentService = DatabaseEquipmentService();
   Future<MyUser>? _futureUser;
+  Map<String, String> availableLolMap = {};
+  Map<String, String> availableEquipmentItems = {};
 
   @override
   void initState() {
     super.initState();
     _futureUser = getUser();
+    _loadDataFromDatabase();
+  }
+
+  Future<void> _loadDataFromDatabase() async {
+    Map<String, ListOfLists> listOfLists = await databaseListOfListsService.getAllListsWithId();
+    Map<String, String> equipmentLists = await databaseEquipmentService.getAllEquipmentsKeyAndName();
+
+    setState(() {
+      availableLolMap = listOfLists.map((key, list) => MapEntry(key, list.listName));
+      availableEquipmentItems = equipmentLists;
+    });
   }
 
   @override
@@ -200,7 +218,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
                                       ),
                                     ],
                                   ),
-                                  child: Text(item, style: textStyle()),
+                                  child: Text(availableLolMap[item] ?? "Unknown list!", style: textStyle()),
                                 )).toList(),
                               ],
                             ),
@@ -229,7 +247,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
                                       ),
                                     ],
                                   ),
-                                  child: Text(item, style: textStyle()),
+                                  child: Text(availableEquipmentItems[item] ?? "Unknown equipment!", style: textStyle()),
                                 )).toList(),
                               ],
                             ),

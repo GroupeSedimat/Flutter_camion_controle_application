@@ -45,6 +45,32 @@ class DatabaseEquipmentService{
     }
   }
 
+  Future<Map<String, String>> getAllEquipmentsKeyAndName() async {
+    try {
+      final querySnapshot = await _equipmentRef.get();
+      List snapshotList = querySnapshot.docs;
+      Map<String, String> equipments = HashMap();
+
+      for (var snapshotEquipmentItem in snapshotList){
+        var snapshotData = snapshotEquipmentItem.data() as Equipment;
+        equipments.addAll({snapshotEquipmentItem.id: snapshotData.name});
+      }
+      var sortedKeys = equipments.keys.toList(growable: false)
+        ..sort((k1, k2) => equipments[k1]!.compareTo(equipments[k2]!));
+
+      LinkedHashMap<String, String> sortedEquipments = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => equipments[k]!,
+      );
+      return sortedEquipments;
+
+    } catch (e) {
+      print("Error getting listItems: $e");
+      rethrow;
+    }
+  }
+
   Stream<QuerySnapshot> getEquipments(){
     return _equipmentRef.snapshots();
   }
