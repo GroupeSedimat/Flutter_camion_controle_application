@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/admin/UserManagementAdmin.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
+import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/lol_control_page.dart';
 import 'package:flutter_application_1/pages/user/messaging_page.dart';
@@ -62,7 +63,7 @@ class MenuWidget extends StatelessWidget {
   Widget buildHeader(BuildContext context) => Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Theme.of(context).primaryColor.withOpacity(0.8), // Teinte plus foncée
+            colors: [Theme.of(context).primaryColor.withOpacity(0.8),
         Theme.of(context).primaryColor.withOpacity(0.4),],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -153,6 +154,13 @@ class MenuWidget extends StatelessWidget {
               icon: Icons.manage_accounts_outlined,
               text: AppLocalizations.of(context)!.manageUsers,
               onClicked: () => Get.to(() => UserManagementAdmin()),
+            ),
+          if (role == 'admin')
+            buildMenuItem(
+              context,
+              icon: Icons.fire_truck,
+              text: AppLocalizations.of(context)!.camionsList,
+              onClicked: () => Get.to(() => CamionList()),
             ),
           if (role == 'superadmin')
             buildMenuItem(

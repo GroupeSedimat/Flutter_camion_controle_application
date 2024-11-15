@@ -41,47 +41,52 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyC6FhnKUtiIQ8EoyXTR3Q1fblubdQA_2DY',
-    appId: '1:885253354272:web:4a851fc0599b1702349d45',
-    messagingSenderId: '885253354272',
-    projectId: 'fir-mobility-corner-app',
-    authDomain: 'fir-mobility-corner-app.firebaseapp.com',
-    storageBucket: 'fir-mobility-corner-app.appspot.com',
+    apiKey: 'AIzaSyD030g38UJBtq--z9cTStuN3I6MezEwUDg',
+    appId: '1:25240704677:web:9fdce9902ce2327db6df4c',
+    messagingSenderId: '25240704677',
+    projectId: 'camion-controle-appli-v1',
+    authDomain: 'camion-controle-appli-v1.firebaseapp.com',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'camion-controle-appli-v1.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB92fGsRaW3TZTHZwif45o4h9jdJSgJYSc',
-    appId: '1:885253354272:android:c2d2c63ea7c8558f349d45',
-    messagingSenderId: '885253354272',
-    projectId: 'fir-mobility-corner-app',
-    storageBucket: 'fir-mobility-corner-app.appspot.com',
+    apiKey: 'AIzaSyCB8XBTNbTrrfxO2L_NVmQGdNbfsnY5YTQ',
+    appId: '1:25240704677:android:a43f9bdbda059a91b6df4c',
+    messagingSenderId: '25240704677',
+    projectId: 'camion-controle-appli-v1',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'camion-controle-appli-v1.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAnZozvUordb1qpCXy68PV-yk1CT8ESsmo',
-    appId: '1:885253354272:ios:dbf3da147a64fe2a349d45',
-    messagingSenderId: '885253354272',
-    projectId: 'fir-mobility-corner-app',
-    storageBucket: 'fir-mobility-corner-app.appspot.com',
+    apiKey: 'AIzaSyAJjQX32JOuLIz5AvpCfoHDYl_eeYXQx4I',
+    appId: '1:25240704677:ios:ebd56b84801ad42cb6df4c',
+    messagingSenderId: '25240704677',
+    projectId: 'camion-controle-appli-v1',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'camion-controle-appli-v1.appspot.com',
     iosBundleId: 'com.mobility.corner.app.flutterApplication1',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAnZozvUordb1qpCXy68PV-yk1CT8ESsmo',
-    appId: '1:885253354272:ios:9bc15a21e94fe473349d45',
-    messagingSenderId: '885253354272',
-    projectId: 'fir-mobility-corner-app',
-    storageBucket: 'fir-mobility-corner-app.appspot.com',
+    apiKey: 'AIzaSyAJjQX32JOuLIz5AvpCfoHDYl_eeYXQx4I',
+    appId: '1:25240704677:ios:706bff9215fa28ecb6df4c',
+    messagingSenderId: '25240704677',
+    projectId: 'camion-controle-appli-v1',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'camion-controle-appli-v1.appspot.com',
     iosBundleId: 'com.example.flutterApplication1',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyC6FhnKUtiIQ8EoyXTR3Q1fblubdQA_2DY',
-    appId: '1:885253354272:web:915446f8cfb6b4e4349d45',
-    messagingSenderId: '885253354272',
-    projectId: 'fir-mobility-corner-app',
-    authDomain: 'fir-mobility-corner-app.firebaseapp.com',
-    storageBucket: 'fir-mobility-corner-app.appspot.com',
+    apiKey: 'AIzaSyD030g38UJBtq--z9cTStuN3I6MezEwUDg',
+    appId: '1:25240704677:web:059e035d73893d5bb6df4c',
+    messagingSenderId: '25240704677',
+    projectId: 'camion-controle-appli-v1',
+    authDomain: 'camion-controle-appli-v1.firebaseapp.com',
+    databaseURL: 'https://camion-controle-appli-v1-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'camion-controle-appli-v1.appspot.com',
   );
 
 }

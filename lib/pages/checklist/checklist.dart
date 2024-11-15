@@ -1,6 +1,8 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/camion/camion.dart';
+import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
@@ -11,6 +13,8 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/pages/checklist/blueprint_template.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/pages/checklist/validate_task.dart';
+import 'package:flutter_application_1/services/camion/database_camion_service.dart';
+import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/check_list/database_blueprints_service.dart';
 import 'package:flutter_application_1/services/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
@@ -34,44 +38,79 @@ class _CheckListState extends State<CheckList> {
   final DatabaseTasksService databaseTasksService = DatabaseTasksService();
   final DatabaseImageService databaseImageService = DatabaseImageService();
   final DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
+  final DatabaseCamionService databaseCamionService = DatabaseCamionService();
+  final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   final PdfService pdfService = PdfService();
   final UserService userService = UserService();
   AuthController authController = AuthController.instance;
 
-  late Future<List<ListOfLists>> listOfListsFuture;
+  late MyUser _user;
+  List<ListOfLists> _listOfListsFuture = [];
   late List<int> counter;
 
   @override
   void initState() {
     super.initState();
-    String? userID = userService.userID;
-    listOfListsFuture = databaseListOfListsService.getListsWithType(userID!);
+    _loadData();
+  }
+
+
+  Future<void> _loadData() async {
+    await _loadUser();
+    await _loadListOfLists();
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      UserService userService = UserService();
+      MyUser user = await userService.getCurrentUserData();
+      setState(() {
+        _user = user;
+      });
+    } catch (e) {
+      print("Error loading user: $e");
+    }
+  }
+
+  Future<void> _loadListOfLists() async {
+
+    if(_user.role == "superadmin"){
+      try {
+        List<ListOfLists> listOfListsFuture = _listOfListsFuture = await databaseListOfListsService.getAllLists();
+        setState(() {
+          _listOfListsFuture = listOfListsFuture;
+        });
+      } catch (e) {
+        print("Error loading list of lists: $e");
+      }
+    }else{
+      try {
+        Camion camion = await databaseCamionService.getOneCamionWithID(_user.camion) as Camion;
+        CamionType camionType = await databaseCamionTypeService.getOneCamionTypeWithID(camion.camionType) as CamionType;
+        List<ListOfLists> listOfListsFuture = await databaseListOfListsService.getListsForCamionType(camionType.lol);
+        setState(() {
+          _listOfListsFuture = listOfListsFuture;
+        });
+      } catch (e) {
+        print("Error loading list of lists: $e");
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<ListOfLists>>(
-      future: listOfListsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error1: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-          return Center(child: Text(AppLocalizations.of(context)!.dataNoData));
-        } else {
-          List<ListOfLists> listOfLists = snapshot.data!;
-          return DefaultTabController(
-            initialIndex: 0,
-            length: listOfLists.length,
-            child: BasePage(
-              appBar: appBar(listOfLists),
-              body: body(listOfLists),
-            ),
-          );
-        }
-      },
-    );
+    if (_listOfListsFuture.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    } else {
+      return DefaultTabController(
+        initialIndex: 0,
+        length: _listOfListsFuture.length,
+        child: BasePage(
+          appBar: appBar(_listOfListsFuture),
+          body: body(_listOfListsFuture),
+        ),
+      );
+    }
   }
 
   void showBlueprintModal({
@@ -187,7 +226,7 @@ class _CheckListState extends State<CheckList> {
         ),
       ],
       centerTitle: true,
-      backgroundColor: Colors.blue,
+      backgroundColor: Theme.of(context).primaryColor,
       bottom: TabBar(
         dividerColor: Colors.transparent,
         unselectedLabelColor: Colors.white,

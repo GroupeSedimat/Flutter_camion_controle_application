@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 
@@ -36,26 +38,47 @@ class DatabaseListOfListsService{
     }
   }
 
-
-  Future<List<ListOfLists>> getListsWithType(String type) async {
-    final listOfList = <ListOfLists>[];
+  Future<Map<String, ListOfLists>> getAllListsWithId() async {
     try {
-      final querySnapshot = await _firestore
-          .collection(LIST_COLLECTION_REF)
-          .where("types", arrayContains: type)
-          .get();
+      final querySnapshot = await _listRef.get();
       List snapshotList = querySnapshot.docs;
-      if (snapshotList.isNotEmpty) {
-        for (var snapshotListItem in snapshotList) {
-          listOfList.add(ListOfLists.fromJson(snapshotListItem.data()));
+      Map<String, ListOfLists> listOfLists = HashMap();
+
+      for (var snapshotListOfListsItem in snapshotList){
+        listOfLists.addAll({snapshotListOfListsItem.id: snapshotListOfListsItem.data()});
+      }
+      var sortedKeys = listOfLists.keys.toList(growable: false)
+        ..sort((k1, k2) => listOfLists[k1]!.listName.compareTo(listOfLists[k2]!.listName));
+
+      LinkedHashMap<String, ListOfLists> sortedLists = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => listOfLists[k]!,
+      );
+      return sortedLists;
+
+    } catch (e) {
+      print("Error getting listItems: $e");
+      rethrow; // Gérez l’erreur le cas échéant.
+    }
+  }
+
+  Future<List<ListOfLists>> getListsForCamionType(List<String> listIds) async {
+    final listOfLists = <ListOfLists>[];
+    try {
+      final querySnapshot = await _listRef
+          .where(FieldPath.documentId, whereIn: listIds)
+          .get();
+      for (var doc in querySnapshot.docs) {
+        if (doc.exists) {
+          listOfLists.add(doc.data() as ListOfLists);
         }
       }
-      listOfList.sort((a, b) => a.listNr.compareTo(b.listNr));
-    } catch (error) {
-      // Gérez l’erreur
-      print("Error retrieving task: $error");
+      listOfLists.sort((a, b) => a.listNr.compareTo(b.listNr));
+    } catch (e) {
+      print("Błąd podczas pobierania list dla danego typu kamiona: $e");
     }
-    return listOfList;
+    return listOfLists;
   }
 
   Future<void> addList(ListOfLists listItem) async {

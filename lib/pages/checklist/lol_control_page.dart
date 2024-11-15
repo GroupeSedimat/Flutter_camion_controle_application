@@ -68,7 +68,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
         return Padding(
           padding: EdgeInsets.all(8),
           child: Card(
-            color: Theme.of(context).cardColor,
+            color: Theme.of(context).primaryColor.withOpacity(0.4),
             child: ExpansionTile(
               leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
               title: Text(
@@ -99,28 +99,18 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                     value: 'edit',
                     child: Text(
                       AppLocalizations.of(context)!.edit,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                   PopupMenuItem(
                     value: 'delete',
                     child: Text(
                       AppLocalizations.of(context)!.delete,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color), // Menu item text adapts
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                 ],
               ),
-              children: listOfLists[index].types.map<Widget>((type) {
-                return ListTile(
-                  title: Text(
-                    userMap[type] ?? type,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).textTheme.bodyLarge?.color, // Text color adapts to theme
-                        ),
-                  ),
-                );
-              }).toList(),
             ),
           )
         );
