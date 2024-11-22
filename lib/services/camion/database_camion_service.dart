@@ -24,6 +24,7 @@ class DatabaseCamionService{
     try {
       final querySnapshot = await _camionRef.get();
       List snapshotList = querySnapshot.docs;
+      print(snapshotList.length);
       Map<String, Camion> camions = {};
 
       for (var snapshotCamionItem in snapshotList) {
@@ -71,7 +72,7 @@ class DatabaseCamionService{
 
     } catch (e) {
       print("Error getting listItems: $e");
-      rethrow; // Gérez l’erreur le cas échéant.
+      rethrow;
     }
   }
 
@@ -148,16 +149,27 @@ class DatabaseCamionService{
     }
   }
 
-  void addCamion(Camion camion) async {
+  Future<void> addCamion(Camion camion) async {
     _camionRef.add(camion);
   }
 
-  void updateCamion(String camionID, Camion camion){
+  Future<void> updateCamion(String camionID, Camion camion) async {
     _camionRef.doc(camionID).update(camion.toJson());
   }
 
   void deleteCamion(String camionID){
     _camionRef.doc(camionID).delete();
+  }
+
+  Future<void> softDeleteCamion(String camionID) async {
+    try{
+      await _camionRef.doc(camionID).update({
+        'deletedAt': DateTime.now().toIso8601String(),
+      });
+      print("Camion with ID $camionID not found for soft delete.");
+    }catch(e){
+      print("Error while trying soft deleting camion with ID $camionID: $e");
+    }
   }
 
 }

@@ -26,6 +26,7 @@
     "confirmApproveText": "Are you sure you want to approve this user?",
     "confirmDisapprove": "Confirm disapproval",
     "confirmDisapproveText": "Are you sure you want to disapprove this user?",
+    "errorSavingData": "Error Saving Data",
 
     "userProfileEdit": "Edit profile",
     "userLoading": "Loading user(s) data",
@@ -70,6 +71,7 @@
     "companyResponsible": "Person responsible for the contact",
     "companyAdmin": "The company's main admin",
     "companyLogo": "Company logo",
+    "companyErrorLoading": "Error loading Companies",
 
     "camionType": "Camion type",
     "camionsList": "List of trucks",
@@ -81,15 +83,20 @@
     "camionTypesList": "List of truck types",
     "camionTypeName": "Name of type",
     "camionTypeEquipment": "Equipment in the vehicle",
+    "camionTypeErrorLoading": "Error loading CamionTypes",
     "noCamionsAvailable": "No trucks available",
     "camionMenuTrucks": "Trucks",
     "camionMenuEquipment": "Equipment",
     "camionMenuTypes": "Types",
+    "camionAddedSuccessfully": "Truck added successfully",
+    "camionUpdatedSuccessfully": "Truck updated successfully",
+
     "sort": "Sort",
     "sortName": "Sort by Name",
     "sortType": "Sort by Type",
     "sortEntreprise": "Sort by company",
     "sortDescending": "Sort A-Z/Z-A",
+
     "filterType": "Filter by Type",
     "filterEntreprise": "Filter by company",
 

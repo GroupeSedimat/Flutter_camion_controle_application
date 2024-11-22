@@ -72,6 +72,9 @@ class _AddCamionState extends State<AddCamion> {
         _isLoadingCamionTypes = false;
       });
       print('Error loading camion types: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.camionTypeErrorLoading)),
+      );
     }
   }
 
@@ -87,6 +90,9 @@ class _AddCamionState extends State<AddCamion> {
         _isLoadingCompanies = false;
       });
       print('Error loading companies: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.companyErrorLoading)),
+      );
     }
   }
 
@@ -128,6 +134,34 @@ class _AddCamionState extends State<AddCamion> {
       }
     }
     return null;
+  }
+
+  Widget buildDropdownField({
+    required String labelText,
+    required List<DropdownMenuItem<String>> items,
+    required Function(String?) onChanged,
+    String? value,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: const TextStyle(
+          fontSize: 20,
+          color: Colors.lightBlue,
+          backgroundColor: Colors.white,
+        ),
+        focusedBorder: const OutlineInputBorder(gapPadding: 15),
+        border: const OutlineInputBorder(gapPadding: 5),
+      ),
+      items: items,
+      onChanged: onChanged,
+      validator: (value) {
+        return (value == null || value.isEmpty)
+            ? AppLocalizations.of(context)!.required
+            : null;
+      },
+    );
   }
 
   @override
@@ -180,38 +214,24 @@ class _AddCamionState extends State<AddCamion> {
 
           // Camion Type Dropdown
           _isLoadingCamionTypes
-              ? const CircularProgressIndicator() // Pokazanie loadinga, jeśli typy się ładują
-              : _camionTypesMap == null || _camionTypesMap!.isEmpty
-              ? Text(AppLocalizations.of(context)!.userDataNotFound) // W przypadku braku danych
-              : DropdownButtonFormField<String>(
-            value: camionType.isNotEmpty ? camionType : null,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context)!.camionType,
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
+            ? const CircularProgressIndicator() // Pokazanie loadinga, jeśli typy się ładują
+            : _camionTypesMap == null || _camionTypesMap!.isEmpty
+            ? Text(AppLocalizations.of(context)!.userDataNotFound) // W przypadku braku danych
+            : buildDropdownField(
+                labelText: AppLocalizations.of(context)!.camionType,
+                items: _camionTypesMap!.entries.map((entry) {
+                  return DropdownMenuItem<String>(
+                    value: entry.key,
+                    child: Text(entry.value.name),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    camionType = value ?? '';
+                  });
+                },
+                value: camionType.isNotEmpty ? camionType : null
               ),
-              focusedBorder: const OutlineInputBorder(gapPadding: 15),
-              border: const OutlineInputBorder(gapPadding: 5),
-            ),
-            items: _camionTypesMap!.entries.map((entry) {
-              return DropdownMenuItem<String>(
-                value: entry.key,
-                child: Text(entry.value.name),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                camionType = value ?? '';
-              });
-            },
-            validator: (value) {
-              return (value == null || value.isEmpty)
-                  ? AppLocalizations.of(context)!.required
-                  : null;
-            },
-          ),
 
           const SizedBox(height: 20),
 
@@ -302,18 +322,8 @@ class _AddCamionState extends State<AddCamion> {
           const SizedBox(height: 20),
 
           // Status Dropdown
-          DropdownButtonFormField<String>(
-            value: status.isNotEmpty ? status : null,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context)!.status,
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: const OutlineInputBorder(gapPadding: 15),
-              border: const OutlineInputBorder(gapPadding: 5),
-            ),
+          buildDropdownField(
+            labelText: AppLocalizations.of(context)!.status,
             items: statusOptions.map((status) {
               return DropdownMenuItem<String>(
                 value: status,
@@ -325,49 +335,31 @@ class _AddCamionState extends State<AddCamion> {
                 status = value ?? '';
               });
             },
-            validator: (value) {
-              return (value == null || value.isEmpty)
-                  ? AppLocalizations.of(context)!.required
-                  : null;
-            },
+            value: status.isNotEmpty ? status : null
           ),
 
           const SizedBox(height: 20),
 
           // Company Dropdown
           _isLoadingCompanies
-              ? const CircularProgressIndicator()
-              : _companyNamesMap == null || _companyNamesMap!.isEmpty
-              ? Text(AppLocalizations.of(context)!.userDataNotFound)
-              : DropdownButtonFormField<String>(
-            value: company.isNotEmpty ? company : null,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context)!.company,
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
+            ? const CircularProgressIndicator()
+            : _companyNamesMap == null || _companyNamesMap!.isEmpty
+            ? Text(AppLocalizations.of(context)!.userDataNotFound)
+            : buildDropdownField(
+                labelText: AppLocalizations.of(context)!.company,
+                items: _companyNamesMap!.entries.map((entry) {
+                  return DropdownMenuItem<String>(
+                    value: entry.key,
+                    child: Text(entry.value),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    company = value ?? '';
+                  });
+                },
+                value: company.isNotEmpty ? company : null
               ),
-              focusedBorder: const OutlineInputBorder(gapPadding: 15),
-              border: const OutlineInputBorder(gapPadding: 5),
-            ),
-            items: _companyNamesMap!.entries.map((entry) {
-              return DropdownMenuItem<String>(
-                value: entry.key,
-                child: Text(entry.value),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                company = value ?? '';
-              });
-            },
-            validator: (value) {
-              return (value == null || value.isEmpty)
-                  ? AppLocalizations.of(context)!.required
-                  : null;
-            },
-          ),
 
           const SizedBox(height: 50),
 
@@ -384,23 +376,40 @@ class _AddCamionState extends State<AddCamion> {
             ),
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                Camion newCamion = Camion(
-                  name: _nameController.text,
-                  camionType: camionType,
-                  responsible: _responsibleController.text,
-                  checks: checks,
-                  lastIntervention: _lastInterventionController.text,
-                  status: status,
-                  location: location,
-                  company: company,
-                );
-                if (widget.camion == null) {
-                  databaseCamionService.addCamion(newCamion);
-                } else {
-                  databaseCamionService.updateCamion(widget.camionID!, newCamion);
-                }
-                if (widget.onCamionAdded != null) {
-                  widget.onCamionAdded!();
+                try {
+                  DateTime dateCreation = widget.camion?.createdAt ?? DateTime.now();
+
+                  Camion newCamion = Camion(
+                    name: _nameController.text,
+                    camionType: camionType,
+                    responsible: _responsibleController.text,
+                    checks: checks,
+                    lastIntervention: _lastInterventionController.text,
+                    status: status,
+                    location: location,
+                    company: company,
+                    createdAt: dateCreation,
+                    updatedAt: DateTime.now(),
+                  );
+
+                  if (widget.camion == null) {
+                    await databaseCamionService.addCamion(newCamion);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.camionAddedSuccessfully)),
+                    );
+                  } else {
+                    await databaseCamionService.updateCamion(widget.camionID!, newCamion);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.camionUpdatedSuccessfully)),
+                    );
+                  }
+
+                  widget.onCamionAdded?.call();
+                } catch (e) {
+                  print("Error: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
+                  );
                 }
               }
             },

@@ -13,6 +13,8 @@ import 'package:flutter_application_1/services/camion/database_camion_type_servi
 import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/camions_table.dart';
 
 class CamionList extends StatefulWidget {
   const CamionList({super.key});
@@ -25,6 +27,7 @@ class _CamionListState extends State<CamionList> {
   final DatabaseCamionService databaseCamionService = DatabaseCamionService();
   final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
+  final DatabaseHelper databaseHelper = DatabaseHelper();
 
   MyUser? _user;
   Map<String, String>? _camionTypes;
@@ -54,6 +57,7 @@ class _CamionListState extends State<CamionList> {
   Future<void> _loadData() async {
     await _loadUser();
     await _loadCamionTypes();
+    await _syncCamions();
     _loadMoreCamions();
   }
 
@@ -129,6 +133,20 @@ class _CamionListState extends State<CamionList> {
       setState(() {
         _isLoadingMore = false;
       });
+    }
+  }
+
+
+  Future<void> _syncCamions() async {
+    try {
+      Map<String, Camion> camionsFromFirestore = await databaseCamionService.getAllCamions();
+
+      final db = await databaseHelper.database;
+      await insertMultipleCamions(db, camionsFromFirestore);
+
+      print("Synchronization with SQLite completed successfully.");
+    } catch (e) {
+      print("Error during synchronization with SQLite: $e");
     }
   }
 
@@ -489,12 +507,18 @@ class _CamionListState extends State<CamionList> {
               } else {
                 leading = Icon(Icons.fire_truck, color: Colors.deepPurple, size: 60);
               }
+              String isDeleted;
+              if(camion.deletedAt != null){
+                isDeleted = " deleted";
+              }else{
+                isDeleted = " not deleted";
+              }
               return Padding(
                 padding: EdgeInsets.all(8),
                 child: ExpansionTile(
                   leading: leading,
                   title: Text(
-                    "${index+1} ${camion.name}",
+                    "${index+1} ${camion.name} $isDeleted",
                     style: TextStyle(fontSize: 24, color: Theme.of(context).primaryColor),
                   ),
                   trailing: PopupMenuButton(
@@ -607,7 +631,7 @@ class _CamionListState extends State<CamionList> {
           ),
           TextButton(
             onPressed: () {
-              databaseCamionService.deleteCamion(camionID);
+              databaseCamionService.softDeleteCamion(camionID);
               setState(() {});
               Navigator.pop(context);
             },
