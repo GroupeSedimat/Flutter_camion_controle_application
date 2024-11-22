@@ -129,45 +129,77 @@ class _EquipmentListState extends State<EquipmentList> {
             padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
             itemCount: equipmentList.length,
             itemBuilder: (_, index) {
-              Widget leading = const Icon(Icons.cell_tower_outlined, color: Colors.deepPurple, size: 60);
+              // Icône stylisée
+              Widget leading = Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.all(8.0),
+                child: Icon(Icons.cell_tower_outlined, color: Colors.black, size: 50),
+              );
 
               Equipment equipment = equipmentList.values.elementAt(index);
 
               return Padding(
-                padding: const EdgeInsets.all(8),
-                child: ExpansionTile(
-                  leading: leading,
-                  title: Text(
-                    equipment.name,
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  trailing: PopupMenuButton(
-                    onSelected: (value) async {
-                      if (value == 'edit') {
-                        showEquipmentModal(
-                          equipment: equipment,
-                          equipmentID: equipmentList.keys.elementAt(index),
-                        );
-                      } else if (value == 'delete') {
-                        _showDeleteConfirmation(equipmentList.keys.elementAt(index));
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Text(AppLocalizations.of(context)!.edit),
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                child: Material(
+                  elevation: 4.0,
+                  borderRadius: BorderRadius.circular(12.0),
+                  child: ExpansionTile(
+                    leading: leading,
+                    title: Text(
+                      equipment.name,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
                       ),
-                      if (user.role == "superadmin")
+                    ),
+                    trailing: PopupMenuButton(
+                      onSelected: (value) async {
+                        if (value == 'edit') {
+                          showEquipmentModal(
+                            equipment: equipment,
+                            equipmentID: equipmentList.keys.elementAt(index),
+                          );
+                        } else if (value == 'delete') {
+                          _showDeleteConfirmation(equipmentList.keys.elementAt(index));
+                        }
+                      },
+                      itemBuilder: (context) => [
                         PopupMenuItem(
-                          value: 'delete',
-                          child: Text(AppLocalizations.of(context)!.delete),
+                         value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, color: Colors.blueAccent),
+                            SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.edit),
+                          ],
                         ),
-                    ],
-                  ),
-                  children: [
+                        ),
+                        if (user.role == "superadmin")
+                          PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.redAccent),
+                              SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.delete),
+                            ],
+                          ),
+                          ),
+                      ],
+                    ),
+                    children: [
                     // if(equipmentList.values.elementAt(index).name.isNotEmpty)
                     // SizedBox(
                     //   child: Text(
@@ -175,19 +207,35 @@ class _EquipmentListState extends State<EquipmentList> {
                     //     style: textStyle(),
                     //   ),
                     // ),
-                    if(equipmentList.values.elementAt(index).description.isNotEmpty)
-                    SizedBox(
-                      child: Text(
-                        "${AppLocalizations.of(context)!.equipmentDescription}: ${equipmentList.values.elementAt(index).description}",
-                        style: textStyle(),
-                      ),
-                    ),
-                  ],
+                      if (equipment.description.isNotEmpty)
+                        Container(
+                          margin: EdgeInsets.only(top: 8.0),
+                          padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            "${AppLocalizations.of(context)!.equipmentDescription}: ${equipment.description}",
+                            style: textStyle(),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               );
             },
           ),
         ),
+
       ],
     );
   }

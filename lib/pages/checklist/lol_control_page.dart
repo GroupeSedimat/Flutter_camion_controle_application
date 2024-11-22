@@ -70,7 +70,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
           child: Card(
             color: Theme.of(context).primaryColor.withOpacity(0.4),
             child: ExpansionTile(
-              leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
+              leading:  Icon(Icons.edit, color: Colors.black, size: 50),
               title: Text(
                 "${listOfLists[index].listNr}. ${listOfLists[index].listName}",
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -96,18 +96,24 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(
-                    value: 'edit',
-                    child: Text(
-                      AppLocalizations.of(context)!.edit,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-                    ),
+                   value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, color: Colors.blueAccent),
+                            SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.edit),
+                          ],
+                        ),
                   ),
                   PopupMenuItem(
-                    value: 'delete',
-                    child: Text(
-                      AppLocalizations.of(context)!.delete,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-                    ),
+                   value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.redAccent),
+                              SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.delete),
+                            ],
+                          ),
                   ),
                 ],
               ),

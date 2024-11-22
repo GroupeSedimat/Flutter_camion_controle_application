@@ -49,7 +49,7 @@ class _AddEquipmentState extends State<AddEquipment> {
               style: TextStyle(
                   backgroundColor: Colors.white,
                   fontSize: 30,
-                  color: Colors.green,
+                  color: Colors.black,
                   letterSpacing: 4,
                   fontWeight: FontWeight.bold
               ),
