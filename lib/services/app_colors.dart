@@ -8,7 +8,7 @@ enum AppColor {
   green,
   purple,
   orange,
-  yellow,
+  //yellow,
   brown,
   cyan,
   pink,
@@ -30,8 +30,8 @@ extension AppColorExtension on AppColor {
         return Colors.purple;
       case AppColor.orange:
         return Colors.orange;
-      case AppColor.yellow:
-        return Colors.yellow;
+      //case AppColor.yellow:
+       // return Colors.yellow;
       case AppColor.brown:
         return Colors.brown;  
       case AppColor.cyan:
@@ -57,8 +57,8 @@ extension AppColorExtension on AppColor {
         return 'Violet';
       case AppColor.orange:
         return 'Orange';
-      case AppColor.yellow:
-        return 'Jaune';  
+      //case AppColor.yellow:
+        //return 'Jaune';  
       case AppColor.brown:
         return 'Marron'; 
       case AppColor.cyan:
@@ -83,8 +83,8 @@ extension AppColorExtension on AppColor {
         return AppColor.purple;
       case Colors.orange:
         return AppColor.orange;
-      case Colors.yellow:
-        return AppColor.yellow; 
+      //case Colors.yellow:
+        //return AppColor.yellow; 
       case Colors.brown:
         return AppColor.brown;   
       case Colors.cyan:
