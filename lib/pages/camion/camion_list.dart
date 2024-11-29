@@ -11,10 +11,12 @@ import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
 import 'package:flutter_application_1/services/camion/database_camion_service.dart';
 import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/database_local_service/sync_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CamionList extends StatefulWidget {
   const CamionList({super.key});
@@ -28,6 +30,8 @@ class _CamionListState extends State<CamionList> {
   final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
   final DatabaseHelper databaseHelper = DatabaseHelper();
+  late Database db;
+  late SyncService syncService;
 
   MyUser? _user;
   Map<String, String>? _camionTypes;
@@ -58,7 +62,8 @@ class _CamionListState extends State<CamionList> {
     await _loadUser();
     await _loadCamionTypes();
     await _syncCamions();
-    _loadMoreCamions();
+    // _loadMoreCamions();
+    _loadLocalCamions();
   }
 
   @override
@@ -70,7 +75,8 @@ class _CamionListState extends State<CamionList> {
 
   void _scrollListener() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore && _hasMoreData) {
-      _loadMoreCamions();
+      // _loadMoreCamions();
+      _loadLocalCamions();
     }
   }
 
@@ -95,6 +101,19 @@ class _CamionListState extends State<CamionList> {
       });
     } catch (e) {
       print("Error loading camion types: $e");
+    }
+  }
+
+  Future<void> _loadLocalCamions() async {
+    try {
+      Map<String, Camion>? camionList = await getAllCamions(db);
+      if(camionList != null){
+        setState(() {
+          _camionList = camionList;
+        });
+      }
+    }catch (e) {
+      print("Error loading camions from local db: $e");
     }
   }
 
@@ -138,11 +157,14 @@ class _CamionListState extends State<CamionList> {
 
 
   Future<void> _syncCamions() async {
+    Database database = await databaseHelper.database;
     try {
-      Map<String, Camion> camionsFromFirestore = await databaseCamionService.getAllCamions();
-
-      final db = await databaseHelper.database;
-      await insertMultipleCamions(db, camionsFromFirestore);
+      setState(() {
+        db = database;
+        syncService = SyncService(db);
+        syncService.fullSyncTable("camions");
+      });
+      // await insertMultipleCamions(db, camionsFromFirestore);
 
       print("Synchronization with SQLite completed successfully.");
     } catch (e) {

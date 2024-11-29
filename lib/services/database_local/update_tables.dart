@@ -27,6 +27,7 @@ Future<void> insertTableInfo(Database db, String tableName) async {
 }
 
 Future<void> updateTableInfo(Database db, TableSyncInfo table) async {
+  print("Updating table ${table.tableName} ...");
   try{
     await db.update(
         updatesTableName,
@@ -34,6 +35,7 @@ Future<void> updateTableInfo(Database db, TableSyncInfo table) async {
         where: 'tableName = ?',
         whereArgs: [table.tableName],
         conflictAlgorithm: ConflictAlgorithm.replace);
+    print("Updated table ${table.tableName}");
   } catch (e){
     print("Error while updating data for ${table.tableName} in table TableSyncInfo: $e");
   }
@@ -85,7 +87,37 @@ Future<void> insertMultiple(Database db, List<TableSyncInfo> updateTables) async
   }
 }
 
-Future<void> updateMultiple(Database db, List<TableSyncInfo> updateTables) async {
+Future<void> markCamionAsRemoteSynced(Database db, String tableName, DateTime timeSync) async {
+  try{
+    await db.update(
+        updatesTableName,
+        {
+          'lastRemoteSync': timeSync.toIso8601String(),
+        },
+        where: 'tableName = ?',
+        whereArgs: [tableName],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while updating data for $tableName in table UpdatesTable: $e");
+  }
+}
+
+Future<void> markTableLocalAsUpdated(Database db, String tableName, DateTime timeUpdate) async {
+  try{
+    await db.update(
+        updatesTableName,
+        {
+          'lastLocalUpdate': timeUpdate.toIso8601String(),
+        },
+        where: 'tableName = ?',
+        whereArgs: [tableName],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while updating data for $tableName in table UpdatesTable: $e");
+  }
+}
+
+Future<void> updateMultiple(Database db, List<TableSyncInfo> updateTables, DateTime timeSync) async {
   try {
     var batch = db.batch();
 
@@ -93,7 +125,7 @@ Future<void> updateMultiple(Database db, List<TableSyncInfo> updateTables) async
       batch.update(
         updatesTableName,
         {
-          'lastLocalUpdate': DateTime.now().toIso8601String(),
+          'lastLocalUpdate': timeSync.toIso8601String(),
         },
         where: 'tableName = ?',
         whereArgs: [table.tableName],

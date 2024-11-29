@@ -8,10 +8,12 @@ import 'package:flutter_application_1/services/camion/database_camion_service.da
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/update_tables.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:flutter_application_1/services/database_local_service/sync_service.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/locale_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sqflite/sqflite.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -27,6 +29,8 @@ class _SplashScreenState extends State<SplashScreen> {
   Map<String, Camion> allCamions = {};
   DatabaseHelper databaseHelper = DatabaseHelper();
   DatabaseCamionService databaseCamionService = DatabaseCamionService();
+  late Database db;
+  late SyncService syncService;
 
   @override
   void initState() {
@@ -65,7 +69,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeDatabase() async {
     try {
-      final db = await databaseHelper.database;
+      Database database = await databaseHelper.database;
+      setState(() {
+        db = database;
+      });
       print("SQLite database initialized successfully.");
     } catch (e) {
       print("Error initializing SQLite database: $e");
@@ -76,8 +83,11 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _syncGlobalData() async {
     try {
       print("Synchronizing global data...");
-      final db = await databaseHelper.database;
-      insertMultipleCamions(db, allCamions);
+      setState(() {
+        syncService = SyncService(db);
+        syncService.fullSyncTable("camions");
+      });
+      // insertMultipleCamions(db, allCamions);
     } catch (e) {
       print("Error during global data synchronization: $e");
       throw e;

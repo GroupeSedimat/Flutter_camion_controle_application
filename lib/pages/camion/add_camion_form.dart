@@ -4,7 +4,10 @@ import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/services/camion/database_camion_service.dart';
 import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sqflite/sqflite.dart';
 
 class AddCamion extends StatefulWidget {
 
@@ -28,6 +31,8 @@ class _AddCamionState extends State<AddCamion> {
   DatabaseCamionService databaseCamionService = DatabaseCamionService();
   DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
+  DatabaseHelper databaseHelper = DatabaseHelper();
+  late Database db;
 
   String camionType = "";
   String status = "";
@@ -45,19 +50,26 @@ class _AddCamionState extends State<AddCamion> {
   @override
   void initState() {
     super.initState();
-    if (widget.camion != null) {
-      _nameController.text = widget.camion!.name;
-      _responsibleController.text = widget.camion!.responsible!;
-      _lastInterventionController.text = widget.camion!.lastIntervention!;
-      checks = widget.camion!.checks ?? [];
-      camionType = widget.camion!.camionType;
-      status = widget.camion!.status!;
-      location = widget.camion!.location!;
-      company = widget.camion!.company;
-    }
+    _initializeData();
+  }
 
-    _loadCamionTypes();
-    _loadCompanyNames();
+  Future<void> _initializeData() async {
+    await _initDatabase();
+    await Future.wait([_loadCamionTypes(), _loadCompanyNames()]);
+    if (widget.camion != null) {
+      _populateFieldsWithCamionData();
+    }
+  }
+
+  void _populateFieldsWithCamionData() {
+    _nameController.text = widget.camion!.name;
+    _responsibleController.text = widget.camion!.responsible!;
+    _lastInterventionController.text = widget.camion!.lastIntervention!;
+    checks = widget.camion!.checks ?? [];
+    camionType = widget.camion!.camionType;
+    status = widget.camion!.status!;
+    location = widget.camion!.location!;
+    company = widget.camion!.company;
   }
 
   Future<void> _loadCamionTypes() async {
@@ -76,6 +88,10 @@ class _AddCamionState extends State<AddCamion> {
         SnackBar(content: Text(AppLocalizations.of(context)!.camionTypeErrorLoading)),
       );
     }
+  }
+
+  Future<void> _initDatabase() async {
+    db = await databaseHelper.database;
   }
 
   Future<void> _loadCompanyNames() async {
@@ -259,47 +275,53 @@ class _AddCamionState extends State<AddCamion> {
           const SizedBox(height: 20),
 
           // Checks field
-          Text(
-            AppLocalizations.of(context)!.camionChecks,
-            style: const TextStyle(fontSize: 20, color: Colors.lightBlue),
-          ),
-          Wrap(
-            spacing: 5,
-            children: checks.map((date) {
-              return GestureDetector(
-                onTap: () async {
-                  // Open date and time picker for editing
-                  DateTime? updatedDate = await _selectDateTime(date);
-                  if (updatedDate != null) {
-                    setState(() {
-                      // Replace old date with the updated one
-                      int index = checks.indexOf(date);
-                      checks[index] = updatedDate;
-                    });
-                  }
-                },
-                child: Chip(
-                  label: Text('${date.toLocal()}'.split('.')[0]), // Display full date and time
-                  onDeleted: () {
-                    setState(() {
-                      checks.remove(date);
-                    });
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.camionChecks,
+              style: const TextStyle(fontSize: 20, color: Colors.lightBlue),
+            ),
+            const SizedBox(height: 10),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: checks.length,
+              itemBuilder: (context, index) {
+                DateTime date = checks[index];
+                return ListTile(
+                  title: Text('${date.toLocal()}'.split('.')[0]),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      setState(() {
+                        checks.removeAt(index);
+                      });
+                    },
+                  ),
+                  onTap: () async {
+                    DateTime? updatedDate = await _selectDateTime(date);
+                    if (updatedDate != null) {
+                      setState(() {
+                        checks[index] = updatedDate;
+                      });
+                    }
                   },
-                ),
-              );
-            }).toList(),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              DateTime? pickedDate = await _selectDateTime();
-              if (pickedDate != null) {
-                setState(() {
-                  checks.add(pickedDate);
-                });
-              }
-            },
-            child: Text(AppLocalizations.of(context)!.add),
-          ),
+                );
+              },
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                DateTime? pickedDate = await _selectDateTime();
+                if (pickedDate != null) {
+                  setState(() {
+                    checks.add(pickedDate);
+                  });
+                }
+              },
+              child: Text(AppLocalizations.of(context)!.add),
+            ),
+          ],
+        ),
 
           const SizedBox(height: 20),
 
@@ -392,13 +414,15 @@ class _AddCamionState extends State<AddCamion> {
                     updatedAt: DateTime.now(),
                   );
 
-                  if (widget.camion == null) {
-                    await databaseCamionService.addCamion(newCamion);
+                  if (widget.camionID == null) {
+                    // await databaseCamionService.addCamion(newCamion);
+                    await insertCamion(db, newCamion, "");
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(AppLocalizations.of(context)!.camionAddedSuccessfully)),
                     );
                   } else {
-                    await databaseCamionService.updateCamion(widget.camionID!, newCamion);
+                    // await databaseCamionService.updateCamion(widget.camionID!, newCamion);
+                    await updateCamion(db, newCamion, widget.camionID!);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(AppLocalizations.of(context)!.camionUpdatedSuccessfully)),
                     );

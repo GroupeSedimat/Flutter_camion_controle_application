@@ -10,6 +10,7 @@ import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/diagrams.dart';
 import 'package:flutter_application_1/pages/splash_screen.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
+import 'package:flutter_application_1/services/dialog_services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:get/get.dart';
@@ -21,20 +22,13 @@ import 'theme_provider.dart';
 import 'locale_provider.dart';
 
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform
   );
   await FirebaseAppCheck.instance.activate(
-    // You can also use a `ReCaptchaEnterpriseProvider` provider
-    // instance as an argument for `webProvider`
     webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
-    // Default provider for Android is the Play Integrity provider. You can use
-    // the "AndroidProvider" enum to choose your preferred provider. Choose from:
-    // 1. Debug provider
-    // 2. Safety Net provider
-    // 3. Play Integrity provider
     androidProvider: AndroidProvider.debug,
     // Default provider for iOS/macOS is the Device Check provider. You can use
     // the "AppleProvider" enum to choose your preferred provider. Choose from:
@@ -65,6 +59,7 @@ class MyApp extends StatelessWidget {
       child: Consumer2<ThemeProvider, LocaleProvider>(
         builder: (context, themeProvider, localeProvider, child) {
           return GetMaterialApp(
+            navigatorKey: DialogService().navigatorKey,
             title: "Mobility Corner App",
             themeMode: themeProvider.themeMode,
             

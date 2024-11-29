@@ -38,6 +38,24 @@ class DatabaseCamionService{
     }
   }
 
+  Future<Map<String, Camion>> getAllCamionsSinceLastSync(String lastSync) async {
+    Query query = _camionRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    // print(query.parameters);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, Camion> camions = HashMap();
+      for (var doc in querySnapshot.docs) {
+        camions[doc.id] = doc.data() as Camion;
+      }
+      return camions;
+    } catch (e) {
+      print("Error fetching Camions since last update data: $e");
+      rethrow;
+    }
+  }
+
   LinkedHashMap<String, Camion> _sortCamions(Map<String, Camion> camions) {
     var sortedKeys = camions.keys.toList(growable: false)
       ..sort((k1, k2) {
@@ -149,8 +167,10 @@ class DatabaseCamionService{
     }
   }
 
-  Future<void> addCamion(Camion camion) async {
-    _camionRef.add(camion);
+  Future<String> addCamion(Camion camion) async {
+    var returnAdd = await _camionRef.add(camion);
+    print("------------- ---------- ----------${returnAdd.id}");
+    return returnAdd.id;
   }
 
   Future<void> updateCamion(String camionID, Camion camion) async {

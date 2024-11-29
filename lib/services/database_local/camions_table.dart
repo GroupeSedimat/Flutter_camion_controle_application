@@ -49,6 +49,36 @@ Future<void> updateCamion(Database db, Camion camion, String firebaseId) async {
   }
 }
 
+Future<void> updateCamionFirebaseID(Database db, Camion camion, String firebaseId) async {
+  List<String> whereConditions = [];
+  List<dynamic> whereArgs = [];
+
+  if (camion.name != "" && camion.name.isNotEmpty) {
+    whereConditions.add('name = ?');
+    whereArgs.add(camion.name);
+  }
+  if (camion.company != "" && camion.company.isNotEmpty) {
+    whereConditions.add('company = ?');
+    whereArgs.add(camion.company);
+  }
+  if (camion.camionType != "" && camion.camionType.isNotEmpty) {
+    whereConditions.add('camionType = ?');
+    whereArgs.add(camion.camionType);
+  }
+  String? whereClause = whereConditions.isNotEmpty ? whereConditions.join(' AND ') : null;
+
+  try {
+    await db.update(
+        tableName,
+        camionToMap(camion, firebaseId: firebaseId),
+        where: whereClause,
+        whereArgs: whereArgs,
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while updating data for ${camion.name} in table Camions: $e");
+  }
+}
+
 Future<void> softDeleteCamion(Database db, String firebaseId) async {
   Camion? camion = await getOneCamionWithID(db, firebaseId);
   if(camion == null){
@@ -87,6 +117,31 @@ Future<Map<String,Camion>?> getAllCamions(Database db) async {
   return sortedCamions(camions: camions);
 }
 
+Future<Map<String,Camion>?> getAllCamionsSinceLastUpdate(Database db, String lastUpdated) async {
+  Map<String, Camion> camions = {};
+  try {
+    final List<Map<String, dynamic>> maps = await db.query(
+        tableName,
+        where: 'updatedAt > ?',
+        whereArgs: [lastUpdated]);
+    if(maps.isEmpty){
+      return null;
+    }
+    print("-------- last updated $lastUpdated");
+
+    for (var camionItem in maps) {
+      print("-------- camion ${camionItem["id"]} updatedAt ${camionItem["updatedAt"]}");
+      camions[camionItem["id"] as String] = responseItemToCamion(camionItem);
+    }
+
+    return sortedCamions(camions: camions);
+
+  } catch (e){
+    print("Error while getting all data from table Camions since last actualisation: $e");
+  }
+  return sortedCamions(camions: camions);
+}
+
 Future<void> insertMultipleCamions(Database db, Map<String, Camion> camions) async {
   try {
     var batch = db.batch();
@@ -94,20 +149,7 @@ Future<void> insertMultipleCamions(Database db, Map<String, Camion> camions) asy
     camions.forEach((firebaseId, camion) {
       batch.insert(
         tableName,
-        {
-          'id': firebaseId,
-          'name': camion.name,
-          'checks': camion.checks != null ? jsonEncode(camion.checks?.map((e) => e.toIso8601String()).toList()) : null,
-          'camionType': camion.camionType,
-          'responsible': camion.responsible,
-          'lastIntervention': camion.lastIntervention,
-          'status': camion.status,
-          'location': camion.location,
-          'company': camion.company,
-          'createdAt': camion.createdAt.toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
-          'deletedAt': camion.deletedAt?.toIso8601String(),
-        },
+        camionToMap(camion, firebaseId: firebaseId)..['updatedAt'] = DateTime.now().toIso8601String(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     });
@@ -115,21 +157,6 @@ Future<void> insertMultipleCamions(Database db, Map<String, Camion> camions) asy
     await batch.commit(noResult: true);
   } catch (e) {
     print("Error while inserting multiple camions into table Camions: $e");
-  }
-}
-
-Future<void> markCamionAsSynced(Database db, String camionID) async {
-  try{
-    await db.update(
-        tableName,
-        {
-          'updatedAt': DateTime.now().toIso8601String(),
-        },
-        where: 'tableId = ?',
-        whereArgs: [camionID],
-        conflictAlgorithm: ConflictAlgorithm.replace);
-  } catch (e){
-    print("Error while updating data for $camionID in table CamionsTable: $e");
   }
 }
 
