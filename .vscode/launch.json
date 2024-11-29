@@ -1,0 +1,45 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flutter_camion_controle_application",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "Flutter_camion_controle_application (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "Flutter_camion_controle_application (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "auth_repository",
+            "cwd": "packages/auth_repository",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "auth_repository (profile mode)",
+            "cwd": "packages/auth_repository",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "auth_repository (release mode)",
+            "cwd": "packages/auth_repository",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

@@ -38,6 +38,7 @@ class _CamionListState extends State<CamionList> {
   String? _selectedSortField;
   String? _searchQuery;
   bool _isSortDescending = false;
+  String?_handleSubMenuSort;
 
 
   final TextEditingController _searchController = TextEditingController();
@@ -165,127 +166,167 @@ class _CamionListState extends State<CamionList> {
     return await userService.getCurrentUserData();
   }
 
-  void _showSubMenuSort(BuildContext context, Offset position) async {
-    await showMenu(
-      context: context,
-      position: RelativeRect.fromLTRB(position.dx, position.dy, 0, 0),
-      items: [
-        PopupMenuItem(
-          value: 'sortName',
-          child: Text(AppLocalizations.of(context)!.sortName),
+ void _showSubMenuSort(BuildContext context, Offset position) async {
+  await showMenu(
+    context: context,
+    position: RelativeRect.fromLTRB(position.dx, position.dy, 0, 0),
+    items: [
+      PopupMenuItem(
+        value: 'sortName',
+        child: Row(
+          children: [
+            Icon(Icons.sort_by_alpha, color: Theme.of(context).primaryColor),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context)!.sortName),
+          ],
         ),
-        PopupMenuItem(
-          value: 'sortType',
-          child: Text(AppLocalizations.of(context)!.sortType),
+      ),
+      PopupMenuItem(
+        value: 'sortType',
+        child: Row(
+          children: [
+            Icon(Icons.category, color: Theme.of(context).primaryColor),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context)!.sortType),
+          ],
         ),
-        if(_user!.role=="superadmin")
+      ),
+      if (_user!.role == "superadmin")
         PopupMenuItem(
           value: 'sortEntreprise',
-          child: Text(AppLocalizations.of(context)!.sortEntreprise),
+          child: Row(
+            children: [
+              Icon(Icons.business, color: Theme.of(context).primaryColor),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.sortEntreprise),
+            ],
+          ),
         ),
-        PopupMenuItem(
-          value: 'sortDescending',
-          child: Text(AppLocalizations.of(context)!.sortDescending),
+      PopupMenuItem(
+        value: 'sortDescending',
+        child: Row(
+          children: [
+            Icon(Icons.arrow_downward, color: Theme.of(context).primaryColor),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context)!.sortDescending),
+          ],
         ),
-      ],
-    ).then((value) {
-      if (value != null) {
-        _handleSubMenuSort(value);
-      }
-    });
-  }
+      ),
+    ],
+  ).then((value) {
+    if (value != null) {
+      _handleSubMenuSort!;
+    }
+  });
+}
 
-  void _handleSubMenuSort(String value) {
-    setState(() {
-      _selectedSortField = value == 'sortEntreprise' ? 'company' : (value == 'sortType' ? 'camionType' : (value == 'sortName' ? 'name' : _selectedSortField));
-      _isSortDescending = value == 'sortDescending'? _isSortDescending = !_isSortDescending : _isSortDescending;
-      _camionList.clear();
-      _lastDocument = null;
-      _hasMoreData = true;
-    });
-    _loadMoreCamions();
-  }
-
-  void _showSubMenuFilter(BuildContext context, Offset position) async {
-    await showMenu(
-      context: context,
-      position: RelativeRect.fromLTRB(position.dx, position.dy, 0, 0),
-      items: [
-        PopupMenuItem(
-          value: 'filterType',
-          child: Text(AppLocalizations.of(context)!.filterType),
+void _showSubMenuFilter(BuildContext context, Offset position) async {
+  await showMenu(
+    context: context,
+    position: RelativeRect.fromLTRB(position.dx, position.dy, 0, 0),
+    items: [
+      PopupMenuItem(
+        value: 'filterType',
+        child: Row(
+          children: [
+            Icon(Icons.filter_alt, color: Theme.of(context).primaryColor),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context)!.filterType),
+          ],
         ),
-        if(_user!.role=="superadmin")
+      ),
+      if (_user!.role == "superadmin")
         PopupMenuItem(
           value: 'filterEntreprise',
-          child: Text(AppLocalizations.of(context)!.filterEntreprise),
+          child: Row(
+            children: [
+              Icon(Icons.business, color:Theme.of(context).primaryColor),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.filterEntreprise),
+            ],
+          ),
         ),
-      ],
-    ).then((value) {
-      if (value == 'filterType') {
-        // Wyświetl dialog z listą typów camion
-        _showFilterDialog(
-          context,
-          AppLocalizations.of(context)!.filterType,
-          _camionTypes!,
-              (selectedType) {
-            setState(() {
-              _selectedFilterType = selectedType;
-              _camionList.clear();
-              _lastDocument = null;
-              _hasMoreData = true;
-            });
-            _loadMoreCamions();
-          },
-        );
-      } else if (value == 'filterEntreprise') {
-        _showFilterDialog(
-          context,
-          AppLocalizations.of(context)!.filterEntreprise,
-          _companiesNames!,
-              (selectedCompany) {
-            setState(() {
-              _selectedFilterCompany = selectedCompany;
-              _camionList.clear();
-              _lastDocument = null;
-              _hasMoreData = true;
-            });
-            _loadMoreCamions();
-          },
-        );
-      }
-    });
-  }
+    ],
+  ).then((value) {
+    if (value == 'filterType') {
+      _showFilterDialog(
+        context,
+        AppLocalizations.of(context)!.filterType,
+        _camionTypes!,
+        (selectedType) {
+          setState(() {
+            _selectedFilterType = selectedType;
+            _camionList.clear();
+            _lastDocument = null;
+            _hasMoreData = true;
+          });
+          _loadMoreCamions();
+        },
+      );
+    } else if (value == 'filterEntreprise') {
+      _showFilterDialog(
+        context,
+        AppLocalizations.of(context)!.filterEntreprise,
+        _companiesNames!,
+        (selectedCompany) {
+          setState(() {
+            _selectedFilterCompany = selectedCompany;
+            _camionList.clear();
+            _lastDocument = null;
+            _hasMoreData = true;
+          });
+          _loadMoreCamions();
+        },
+      );
+    }
+  });
+}
 
-
-  void _showFilterDialog(BuildContext context, String title, Map<String, String> options, Function(String) onSelected) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: options.length,
-              itemBuilder: (context, index) {
-                String key = options.keys.elementAt(index);
-                String value = options[key]!;
-                return ListTile(
-                  title: Text(value),
+void _showFilterDialog(BuildContext context, String title, Map<String, String> options, Function(String) onSelected) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Text(
+          title,
+          style:  TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              String key = options.keys.elementAt(index);
+              String value = options[key]!;
+              return Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  tileColor: Color.fromARGB(251, 227, 225, 225) ,
+                  title: Text(
+                    value,
+                    style:  TextStyle(fontSize: 16, color: Theme.of(context).primaryColor),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     onSelected(key);
                   },
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildBody() {
 
@@ -369,57 +410,93 @@ class _CamionListState extends State<CamionList> {
               child: Text(AppLocalizations.of(context)!.camionMenuEquipment),
             ),
             PopupMenuButton(
-              icon: Icon(Icons.search_rounded, color: Colors.red),
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'search',
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(Icons.search_rounded, color: Colors.red),
-                          Text("Search name"),
-                        ],
-                      ),
-                      SizedBox(
-                        width: MediaQuery.sizeOf(context).width * 0.8,
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: "Enter name",
+              icon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor, size: 28),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'search',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.search_rounded, color: Theme.of(context).primaryColor),
+                        SizedBox(width: 8),
+                        Text(
+                          "Search Name",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black87,
                           ),
                         ),
-                      ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _searchQuery = _searchController.text.trim(); // Zapisz wartość wyszukiwania
-                                _camionList.clear(); // Wyczyść aktualną listę
-                                _lastDocument = null; // Resetuj ostatni dokument
-                                _hasMoreData = true; // Umożliw kontynuację ładowania danych
-                              });
-                              _loadMoreCamions(); // Wywołaj funkcję ładowania
-                            },
-                            child: Text("Search"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _searchQuery = null; // Zapisz wartość wyszukiwania
-                                _camionList.clear(); // Wyczyść aktualną listę
-                                _lastDocument = null; // Resetuj ostatni dokument
-                                _hasMoreData = true; // Umożliw kontynuację ładowania danych
-                                _selectedSortField = null;
-                                _isSortDescending = false;
-                                _selectedFilterCompany = null;
-                                _selectedFilterType = null;
-                              });
-                              _loadMoreCamions(); // Wywołaj funkcję ładowania
-                            },
-                            child: Text("Reset Serch"),
+                      ],
+                    ),
+          SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[400]!),
+            ),
+            child: TextField(
+              controller: _searchController,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Enter name...",
+                hintStyle: TextStyle(color: Colors.grey[500]),
+                border: InputBorder.none,
+                //prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _searchQuery = _searchController.text.trim();
+                    _camionList.clear();
+                    _lastDocument = null;
+                    _hasMoreData = true;
+                  });
+                  _loadMoreCamions();
+                },
+                icon: Icon(Icons.search, size: 18),
+                label: Text("Search"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _searchQuery = null;
+                    _camionList.clear();
+                    _lastDocument = null;
+                    _hasMoreData = true;
+                    _selectedSortField = null;
+                    _isSortDescending = false;
+                    _selectedFilterCompany = null;
+                    _selectedFilterType = null;
+                  });
+                  _loadMoreCamions();
+                },
+                icon: Icon(Icons.refresh, size: 18),
+                label: Text("Reset"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                           ),
                         ],
                       ),
@@ -467,35 +544,49 @@ class _CamionListState extends State<CamionList> {
         const SizedBox(height: 10),
         Expanded(
           child: ListView.builder(
-            controller: _scrollController,
-            physics: AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(8.0),
-            itemCount: _camionList.length,
-            itemBuilder: (context, index) {
-              if (_camionList.isEmpty) {
-                return Center(
-                  child: Text(AppLocalizations.of(context)!.noCamionsAvailable),
-                );
-              }
+          controller: _scrollController,
+          physics: AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          itemCount: _camionList.length,
+          itemBuilder: (context, index) {
+            if (_camionList.isEmpty) {
+              return Center(
+                child: Text(
+                  AppLocalizations.of(context)!.noCamionsAvailable,
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                ),
+              );
+            }
 
-              String camionId = sortedKeys[index];
-              Camion camion = _camionList[camionId]!;
+            String camionId = sortedKeys[index];
+            Camion camion = _camionList[camionId]!;
 
-              String camionTypeName = _camionTypes![camion.camionType] ?? 'Unknown Type';
+            String camionTypeName = _camionTypes![camion.camionType] ?? 'Unknown Type';
 
-              Widget leading;
-              if (camion.camionType.isEmpty) {
-                leading = Icon(Icons.car_crash, color: Colors.deepPurple, size: 60);
-              } else {
-                leading = Icon(Icons.fire_truck, color: Colors.deepPurple, size: 60);
-              }
-              return Padding(
-                padding: EdgeInsets.all(8),
+            Widget leading;
+            if (camion.camionType.isEmpty) {
+              leading = Icon(Icons.car_crash, color: Colors.redAccent, size: 50);
+            } else {
+              leading = Icon(Icons.fire_truck, color: Colors.black, size: 50);
+            }
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ExpansionTile(
-                  leading: leading,
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.grey[200],
+                    child: leading,
+                    radius: 30,
+                  ),
                   title: Text(
-                    "${index+1} ${camion.name}",
-                    style: TextStyle(fontSize: 24, color: Theme.of(context).primaryColor),
+                    "${index + 1}. ${camion.name}",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                   trailing: PopupMenuButton(
                     onSelected: (value) async {
@@ -511,54 +602,67 @@ class _CamionListState extends State<CamionList> {
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'edit',
-                        child: Text(AppLocalizations.of(context)!.edit),
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, color: Colors.blueAccent),
+                            SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.edit),
+                          ],
+                        ),
                       ),
                       if (_user!.role == "superadmin")
                         PopupMenuItem(
                           value: 'delete',
-                          child: Text(AppLocalizations.of(context)!.delete),
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.redAccent),
+                              SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.delete),
+                            ],
+                          ),
                         ),
                     ],
                   ),
                   children: [
-                    Wrap(
-                      spacing: 15,
-                      children: [
-                        if (camion.company.isNotEmpty)
-                          SizedBox(
-                            child: Text(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (camion.company.isNotEmpty)
+                            Text(
                               "${AppLocalizations.of(context)!.company}: ${_companiesNames?[camion.company] ?? 'Unknown Company'}",
-                              style: textStyle(),
+                              style: textStyle().copyWith(fontWeight: FontWeight.bold,),
                             ),
-                          ),
-                        if (camion.camionType.isNotEmpty)
-                          SizedBox(
-                            child: Text(
+                          if (camion.camionType.isNotEmpty)
+                            Text(
                               "${AppLocalizations.of(context)!.camionType}: $camionTypeName",
-                              style: textStyle(),
+                              style: textStyle().copyWith(fontWeight: FontWeight.bold,),
                             ),
-                          ),
-                        SizedBox(
-                          child: Text(
+                          Text(
                             "${AppLocalizations.of(context)!.status}: ${camion.status}",
-                            style: textStyle(),
-                          ),
-                        ),
-                      ],
+                            style: textStyle().copyWith(fontWeight: FontWeight.bold,),
+
+
+                              ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              );
-            }
-          ),
+              ),
+            );
+          },
         ),
-      ],
-    );
-  }
+              ),
+              ],
+      );
 
-  TextStyle textStyle(){
-    return TextStyle(fontSize: 20);
-  }
+        }
+
+        TextStyle textStyle() {
+        return TextStyle(fontSize: 18, color: Colors.grey[800]);
+      }
 
   String title() {
     if (_user!.role == "superadmin") {

@@ -10,7 +10,7 @@ class BasePage extends StatelessWidget {
   final Widget body;
   final PreferredSizeWidget? appBar;
   final String? title;
-  BasePage({super.key, required this.body, this.appBar, this.title});
+  BasePage({super.key, required this.body, this.appBar, this.title,});
 
 
   @override
