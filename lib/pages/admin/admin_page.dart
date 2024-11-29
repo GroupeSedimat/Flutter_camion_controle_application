@@ -46,14 +46,14 @@ class AdminPage extends StatelessWidget {
             Get.to(() => UserManagementPage());
           },
         ),
-        _buildDashboardItem(
+       /* _buildDashboardItem(
           context,
           AppLocalizations.of(context)!.userApprove,
           Icons.approval,
           () {
             Get.to(() => UserApprovalPage());
           },
-        ),
+        ), */
         _buildDashboardItem(
           context,
           AppLocalizations.of(context)!.checkList,
