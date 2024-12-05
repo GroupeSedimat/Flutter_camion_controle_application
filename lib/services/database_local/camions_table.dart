@@ -25,9 +25,9 @@ Future<void> createTableCamions(Database db) async {
   ''');
 }
 
-Future<void> insertCamion(Database db, Camion camion, String firebaseId) async {
+Future<void> insertCamion(dynamic dbOrTxn, Camion camion, String firebaseId) async {
   try{
-    await db.insert(
+    await dbOrTxn.insert(
         tableName,
         camionToMap(camion, firebaseId: firebaseId),
         conflictAlgorithm: ConflictAlgorithm.replace);
@@ -36,9 +36,9 @@ Future<void> insertCamion(Database db, Camion camion, String firebaseId) async {
   }
 }
 
-Future<void> updateCamion(Database db, Camion camion, String firebaseId) async {
+Future<void> updateCamion(dynamic dbOrTxn, Camion camion, String firebaseId) async {
   try{
-    await db.update(
+    await dbOrTxn.update(
         tableName,
         camionToMap(camion, firebaseId: firebaseId),
         where: 'id = ?',
@@ -117,13 +117,13 @@ Future<Map<String,Camion>?> getAllCamions(Database db) async {
   return sortedCamions(camions: camions);
 }
 
-Future<Map<String,Camion>?> getAllCamionsSinceLastUpdate(Database db, String lastUpdated) async {
+Future<Map<String,Camion>?> getAllCamionsSinceLastUpdate(dynamic dbOrTxn, String lastUpdated, String timeSync) async {
   Map<String, Camion> camions = {};
   try {
-    final List<Map<String, dynamic>> maps = await db.query(
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
         tableName,
-        where: 'updatedAt > ?',
-        whereArgs: [lastUpdated]);
+        where: 'updatedAt > ? AND updatedAt < ?',
+        whereArgs: [lastUpdated, timeSync]);
     if(maps.isEmpty){
       return null;
     }
@@ -142,14 +142,14 @@ Future<Map<String,Camion>?> getAllCamionsSinceLastUpdate(Database db, String las
   return sortedCamions(camions: camions);
 }
 
-Future<void> insertMultipleCamions(Database db, Map<String, Camion> camions) async {
+Future<void> insertMultipleCamions(dynamic dbOrTxn, Map<String, Camion> camions) async {
   try {
-    var batch = db.batch();
+    var batch = dbOrTxn.batch();
 
     camions.forEach((firebaseId, camion) {
       batch.insert(
         tableName,
-        camionToMap(camion, firebaseId: firebaseId)..['updatedAt'] = DateTime.now().toIso8601String(),
+        camionToMap(camion, firebaseId: firebaseId),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     });
@@ -160,9 +160,9 @@ Future<void> insertMultipleCamions(Database db, Map<String, Camion> camions) asy
   }
 }
 
-Future<Camion?> getOneCamionWithID(Database db, String camionID) async {
+Future<Camion?> getOneCamionWithID(dynamic dbOrTxn, String camionID) async {
   try{
-    final List<Map<String, dynamic>> maps = await db.query(
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
       tableName,
       where: 'id = ?',
       whereArgs: [camionID],
@@ -179,10 +179,10 @@ Future<Camion?> getOneCamionWithID(Database db, String camionID) async {
   }
 }
 
-Future<Map<String, Camion>?> getCompanyCamions(Database db, String companyID) async {
+Future<Map<String, Camion>?> getCompanyCamions(dynamic dbOrTxn, String companyID) async {
   Map<String, Camion> camions = {};
   try {
-    final List<Map<String, dynamic>> maps = await db.query(
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
         tableName,
         where: 'company = ?',
         whereArgs: [companyID]);
@@ -203,7 +203,7 @@ Future<Map<String, Camion>?> getCompanyCamions(Database db, String companyID) as
 }
 
 Future<Map<String, Camion>?> getSortedFilteredCamions({
-    required Database db,
+    required dynamic dbOrTxn,
     String? companyID,
     String? camionTypeId,
     String? searchQuery,
@@ -230,7 +230,7 @@ Future<Map<String, Camion>?> getSortedFilteredCamions({
   String? whereClause = whereConditions.isNotEmpty ? whereConditions.join(' AND ') : null;
 
   try {
-    final List<Map<String, dynamic>> maps = await db.query(
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
         tableName,
         where: whereClause,
         whereArgs: whereArgs);
@@ -264,7 +264,7 @@ Map<String, dynamic> camionToMap(Camion camion, {String? firebaseId}) {
     'location': camion.location,
     'company': camion.company,
     'createdAt': camion.createdAt.toIso8601String(),
-    'updatedAt': DateTime.now().toIso8601String(),
+    'updatedAt': camion.updatedAt.toIso8601String(),
     'deletedAt': camion.deletedAt?.toIso8601String(),
   };
 }

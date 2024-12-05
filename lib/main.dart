@@ -10,7 +10,10 @@ import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/diagrams.dart';
 import 'package:flutter_application_1/pages/splash_screen.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/dialog_services.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:get/get.dart';
@@ -40,9 +43,25 @@ void main() async {
     // appleProvider: AppleProvider.appAttest,
   );
 
+  final database = await DatabaseHelper().database;
+
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? savedLanguageCode = prefs.getString('languageCode');
-  runApp(MyApp(savedLanguageCode: savedLanguageCode));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => NetworkService()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider(savedLanguageCode)),
+        Provider(create: (_) => DatabaseHelper()),
+        Provider(create: (context) => SyncService(
+          database,
+          Provider.of<NetworkService>(context, listen: false),
+        )),
+      ],
+      child: MyApp(savedLanguageCode: savedLanguageCode),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -51,87 +70,77 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider(savedLanguageCode)),
-      ],
-      child: Consumer2<ThemeProvider, LocaleProvider>(
-        builder: (context, themeProvider, localeProvider, child) {
-          return GetMaterialApp(
-            navigatorKey: DialogService().navigatorKey,
-            title: "Mobility Corner App",
-            themeMode: themeProvider.themeMode,
-            
-            // Thème clair
-            theme: ThemeData(
-              primaryColor: themeProvider.customColor,
-              brightness: Brightness.light,
-              scaffoldBackgroundColor: Colors.white,
-              colorScheme: ColorScheme.light(
-                primary: themeProvider.customColor,
-                secondary: themeProvider.customColor.shade300,
-                background: Colors.white,
-                surface: Colors.white,
-                onSurface: Colors.black,
-              ),
-              inputDecorationTheme: InputDecorationTheme(
-                labelStyle: TextStyle(color: Colors.black),
-                hintStyle: TextStyle(color: Colors.grey),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: themeProvider.customColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: themeProvider.customColor),
-                ),
-              ),
-            ),
+    return GetMaterialApp(
+      navigatorKey: DialogService().navigatorKey,
+      title: "Mobility Corner App",
+      themeMode: context.watch<ThemeProvider>().themeMode,
 
-            // Thème sombre
-            darkTheme: ThemeData(
-              primaryColor: themeProvider.customColor,
-              brightness: Brightness.dark, 
-              scaffoldBackgroundColor: Colors.black,
-              colorScheme: ColorScheme.dark(
-                primary: themeProvider.customColor,
-                secondary: themeProvider.customColor.shade300,
-                background: Colors.black,
-                surface: Colors.black,
-                onSurface: Colors.white,
-              ),
-              inputDecorationTheme: InputDecorationTheme(
-                labelStyle: TextStyle(color: Colors.white),
-                hintStyle: TextStyle(color: Colors.white70),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: themeProvider.customColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: themeProvider.customColor),
-                ),
-              ),
-            ),
-
-            locale: localeProvider.locale,
-            supportedLocales: L10n.all,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            fallbackLocale: Locale('en'),
-            home: SplashScreen(),
-            routes: {
-              '/wrapper': (context) => const Wrapper(),
-              '/checklist': (context) => const CheckList(),
-              '/diagrams': (context) => const Diagrams(),
-              '/loadingdata': (context) => const LoadingData(),
-              '/settings': (context) => SettingsPage(),
-              '/map': (context) => MapPage(),
-            },
-          );
-        },
+      // Thème clair
+      theme: ThemeData(
+        primaryColor: context.watch<ThemeProvider>().customColor,
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.white,
+        colorScheme: ColorScheme.light(
+          primary: context.watch<ThemeProvider>().customColor,
+          secondary: context.watch<ThemeProvider>().customColor.shade300,
+          background: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle: TextStyle(color: Colors.black),
+          hintStyle: TextStyle(color: Colors.grey),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: context.watch<ThemeProvider>().customColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: context.watch<ThemeProvider>().customColor),
+          ),
+        ),
       ),
+
+      // Thème sombre
+      darkTheme: ThemeData(
+        primaryColor: context.watch<ThemeProvider>().customColor,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
+        colorScheme: ColorScheme.dark(
+          primary: context.watch<ThemeProvider>().customColor,
+          secondary: context.watch<ThemeProvider>().customColor.shade300,
+          background: Colors.black,
+          surface: Colors.black,
+          onSurface: Colors.white,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle: TextStyle(color: Colors.white),
+          hintStyle: TextStyle(color: Colors.white70),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: context.watch<ThemeProvider>().customColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: context.watch<ThemeProvider>().customColor),
+          ),
+        ),
+      ),
+
+      locale: context.watch<LocaleProvider>().locale,
+      supportedLocales: L10n.all,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      fallbackLocale: Locale('en'),
+      home: SplashScreen(),
+      routes: {
+        '/wrapper': (context) => const Wrapper(),
+        '/checklist': (context) => const CheckList(),
+        '/diagrams': (context) => const Diagrams(),
+        '/loadingdata': (context) => const LoadingData(),
+        '/settings': (context) => SettingsPage(),
+        '/map': (context) => MapPage(),
+      },
     );
   }
 }

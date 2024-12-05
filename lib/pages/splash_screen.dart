@@ -8,7 +8,7 @@ import 'package:flutter_application_1/services/camion/database_camion_service.da
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/update_tables.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
-import 'package:flutter_application_1/services/database_local_service/sync_service.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/locale_provider.dart';
@@ -27,10 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
   bool firebaseInitialized = false;
   bool firebaseError = false;
   Map<String, Camion> allCamions = {};
-  DatabaseHelper databaseHelper = DatabaseHelper();
   DatabaseCamionService databaseCamionService = DatabaseCamionService();
-  late Database db;
-  late SyncService syncService;
 
   @override
   void initState() {
@@ -41,21 +38,16 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _initializeApp() async {
     try {
       await _initializeFirebase();
-      await _initializeDatabase();
       await _syncGlobalData();
-      // _navigateToNextScreen();
     } catch (e) {
       print("Error during app initialization: $e");
-      // Możesz tutaj obsłużyć błędy, np. wyświetlić komunikat.
     }
   }
 
   Future<void> _initializeFirebase() async {
     try {
       await Firebase.initializeApp();
-      Map<String, Camion> camions = await databaseCamionService.getAllCamions();
       setState(() {
-        allCamions = camions;
         firebaseInitialized = true;
       });
       print("Firebase initialized successfully.");
@@ -67,39 +59,14 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  Future<void> _initializeDatabase() async {
-    try {
-      Database database = await databaseHelper.database;
-      setState(() {
-        db = database;
-      });
-      print("SQLite database initialized successfully.");
-    } catch (e) {
-      print("Error initializing SQLite database: $e");
-      throw e;
-    }
-  }
-
   Future<void> _syncGlobalData() async {
     try {
       print("Synchronizing global data...");
-      setState(() {
-        syncService = SyncService(db);
-        syncService.fullSyncTable("camions");
-      });
-      // insertMultipleCamions(db, allCamions);
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      await syncService.fullSyncTable("camions");
     } catch (e) {
       print("Error during global data synchronization: $e");
       throw e;
-    }
-  }
-
-  void _navigateToNextScreen() {
-    if (firebaseInitialized && !firebaseError) {
-      Get.off(() => LoginPage()); // Przejście do strony logowania
-    } else {
-      // Możesz dodać ekran błędu, jeśli Firebase nie zainicjalizował się poprawnie
-      print("Error detected. Staying on SplashScreen.");
     }
   }
 

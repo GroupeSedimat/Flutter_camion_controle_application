@@ -10,6 +10,10 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
+  Future<void> init() async {
+    await database; // This ensures the database is initialized.
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
@@ -32,6 +36,7 @@ class DatabaseHelper {
           "camionTypes",
           "companies",
           "listOfLists",
+          "blueprints",
           "validateTasks",
           "equipments"
         ]);

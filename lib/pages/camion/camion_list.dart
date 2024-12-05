@@ -11,11 +11,12 @@ import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
 import 'package:flutter_application_1/services/camion/database_camion_service.dart';
 import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
-import 'package:flutter_application_1/services/database_local_service/sync_service.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class CamionList extends StatefulWidget {
@@ -29,9 +30,6 @@ class _CamionListState extends State<CamionList> {
   final DatabaseCamionService databaseCamionService = DatabaseCamionService();
   final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-  final DatabaseHelper databaseHelper = DatabaseHelper();
-  late Database db;
-  late SyncService syncService;
 
   MyUser? _user;
   Map<String, String>? _camionTypes;
@@ -106,6 +104,7 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadLocalCamions() async {
     try {
+      Database db = await Provider.of<DatabaseHelper>(context, listen: false).database;
       Map<String, Camion>? camionList = await getAllCamions(db);
       if(camionList != null){
         setState(() {
@@ -157,16 +156,13 @@ class _CamionListState extends State<CamionList> {
 
 
   Future<void> _syncCamions() async {
-    Database database = await databaseHelper.database;
     try {
-      setState(() {
-        db = database;
-        syncService = SyncService(db);
-        syncService.fullSyncTable("camions");
-      });
+      print("Synchronizing Camions...");
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      await syncService.fullSyncTable("camions");
       // await insertMultipleCamions(db, camionsFromFirestore);
 
-      print("Synchronization with SQLite completed successfully.");
+      print("Synchronization with SQLite completed.");
     } catch (e) {
       print("Error during synchronization with SQLite: $e");
     }

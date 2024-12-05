@@ -7,6 +7,7 @@ import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class AddCamion extends StatefulWidget {
@@ -31,7 +32,7 @@ class _AddCamionState extends State<AddCamion> {
   DatabaseCamionService databaseCamionService = DatabaseCamionService();
   DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-  DatabaseHelper databaseHelper = DatabaseHelper();
+  // DatabaseHelper databaseHelper = DatabaseHelper();
   late Database db;
 
   String camionType = "";
@@ -91,7 +92,7 @@ class _AddCamionState extends State<AddCamion> {
   }
 
   Future<void> _initDatabase() async {
-    db = await databaseHelper.database;
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
   Future<void> _loadCompanyNames() async {

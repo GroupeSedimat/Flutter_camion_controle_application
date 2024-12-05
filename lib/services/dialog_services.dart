@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class DialogService {
   static final DialogService _instance = DialogService._internal();
 
-  // GlobalKey to manage the Navigator state without context
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   factory DialogService() => _instance;
@@ -11,12 +10,12 @@ class DialogService {
   DialogService._internal();
 
   // Function to show a generic dialog
-  Future<void> showDialog({
+  Future<T?> showDialog<T>({
     required String title,
     required String message,
     List<DialogAction> actions = const [],
   }) async {
-    await showGeneralDialog(
+    return showGeneralDialog<T>(
       context: navigatorKey.currentState!.overlay!.context,
       barrierDismissible: true,
       barrierLabel: 'Dismiss',
@@ -28,8 +27,7 @@ class DialogService {
           actions: actions.map((action) {
             return TextButton(
               onPressed: () {
-                action.onPressed();
-                Navigator.of(navigatorKey.currentState!.context).pop();
+                Navigator.of(navigatorKey.currentState!.context).pop(action.result);
               },
               child: Text(action.label),
             );
@@ -40,9 +38,9 @@ class DialogService {
   }
 }
 
-class DialogAction {
+class DialogAction<T> {
   final String label;
-  final VoidCallback onPressed;
+  final T result;
 
-  DialogAction({required this.label, required this.onPressed});
+  DialogAction({required this.label, required this.result});
 }

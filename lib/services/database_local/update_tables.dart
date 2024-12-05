@@ -87,12 +87,12 @@ Future<void> insertMultiple(Database db, List<TableSyncInfo> updateTables) async
   }
 }
 
-Future<void> markCamionAsRemoteSynced(Database db, String tableName, DateTime timeSync) async {
+Future<void> markCamionAsRemoteSynced(Database db, String tableName, String timeSync) async {
   try{
     await db.update(
         updatesTableName,
         {
-          'lastRemoteSync': timeSync.toIso8601String(),
+          'lastRemoteSync': timeSync,
         },
         where: 'tableName = ?',
         whereArgs: [tableName],
@@ -102,12 +102,12 @@ Future<void> markCamionAsRemoteSynced(Database db, String tableName, DateTime ti
   }
 }
 
-Future<void> markTableLocalAsUpdated(Database db, String tableName, DateTime timeUpdate) async {
+Future<void> markTableLocalAsUpdated(Database db, String tableName, String timeUpdate) async {
   try{
     await db.update(
         updatesTableName,
         {
-          'lastLocalUpdate': timeUpdate.toIso8601String(),
+          'lastLocalUpdate': timeUpdate,
         },
         where: 'tableName = ?',
         whereArgs: [tableName],
@@ -139,9 +139,9 @@ Future<void> updateMultiple(Database db, List<TableSyncInfo> updateTables, DateT
   }
 }
 
-Future<TableSyncInfo?> getOneWithName(Database db, String tableName) async {
+Future<TableSyncInfo?> getOneWithName(dynamic dbOrTxn, String tableName) async {
   try{
-    final List<Map<String, dynamic>> maps = await db.query(
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
       updatesTableName,
       where: 'tableName = ?',
       whereArgs: [tableName],
