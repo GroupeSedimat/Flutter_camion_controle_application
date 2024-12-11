@@ -100,9 +100,12 @@
     "filterType": "Filter by Type",
     "filterEntreprise": "Filter by company",
 
+    "equipmentIdShop": "Enter equipment id in stock",
     "equipmentName": "Name of equipment",
     "equipmentList": "List of equipments",
     "equipmentDescription": "Equipment's description",
+    "equipmentQuantity": "Enter quantity of this equipment",
+    "equipmentErrorLoading": "Error loading equipment",
 
     "checkList": "Checklist",
     "checkListDescribe": "Describe the problem",
@@ -113,6 +116,7 @@
     "photoNotYet": "No photo yet",
     "photoMake": "Make photo",
     "photoGallery": "Choose from gallery",
+    "photoAdd": "Add photo",
 
     "pdfCreate": "Create PDF",
     "pdfList": "PDF file list",

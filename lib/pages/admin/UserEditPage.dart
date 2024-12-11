@@ -41,9 +41,9 @@ class _UserEditPageState extends State<UserEditPage> {
     _firstnameController.text = widget.user.username;
     _emailController.text = widget.user.email;
     _selectedRole = widget.user.role.isNotEmpty ? widget.user.role : UserRole.user.toString().split('.').last; // Default role
-    _isValidate = widget.user.apresFormation;
-    _isValidateDoc = widget.user.apresFormationDoc;
-    _uploadedImageUrl.text = widget.user.apresFormationDoc;
+    _isValidate = widget.user.apresFormation ?? false;
+    _isValidateDoc = widget.user.apresFormationDoc ?? "";
+    _uploadedImageUrl.text = widget.user.apresFormationDoc ?? "";
   }
 
   @override
@@ -100,9 +100,9 @@ class _UserEditPageState extends State<UserEditPage> {
     }
 
     Future<void> deleteImage() async {
-      if (_uploadedImageUrl != null && _uploadedImageUrl!.text.isNotEmpty) {
+      if (_uploadedImageUrl.text.isNotEmpty) {
         try {
-          await _databaseValidationService.deleteValidationFromFirebase(_uploadedImageUrl!.text);
+          await _databaseValidationService.deleteValidationFromFirebase(_uploadedImageUrl.text);
 
           setState(() {
             _uploadedImageUrl.text = '';
@@ -178,10 +178,10 @@ class _UserEditPageState extends State<UserEditPage> {
                 'Apres Formation Doc:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              if (_uploadedImageUrl != null && _uploadedImageUrl!.text.isNotEmpty)
+              if (_uploadedImageUrl.text.isNotEmpty)
                 Column(
                   children: [
-                    Image.network(_uploadedImageUrl!.text, width: 250),
+                    Image.network(_uploadedImageUrl.text, width: 250),
                     SizedBox(height: 8),
                     ElevatedButton(
                       onPressed: deleteImage,

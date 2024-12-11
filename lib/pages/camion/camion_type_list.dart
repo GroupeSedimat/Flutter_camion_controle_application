@@ -6,11 +6,15 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_type_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
-import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
-import 'package:flutter_application_1/services/equipment/database_equipment_service.dart';
+import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/equipments_table.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CamionTypeList extends StatefulWidget {
   const CamionTypeList({super.key});
@@ -20,12 +24,11 @@ class CamionTypeList extends StatefulWidget {
 }
 
 class _CamionTypeListState extends State<CamionTypeList> {
-  final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
+  late Database db;
   DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
-  DatabaseEquipmentService databaseEquipmentService = DatabaseEquipmentService();
   Future<MyUser>? _futureUser;
   Map<String, String> availableLolMap = {};
-  Map<String, String> availableEquipmentItems = {};
+  Map<String, String>? _equipmentLists;
 
   @override
   void initState() {
@@ -35,13 +38,29 @@ class _CamionTypeListState extends State<CamionTypeList> {
   }
 
   Future<void> _loadDataFromDatabase() async {
+    await _initDatabase();
+    await _syncDatas();
     Map<String, ListOfLists> listOfLists = await databaseListOfListsService.getAllListsWithId();
-    Map<String, String> equipmentLists = await databaseEquipmentService.getAllEquipmentsKeyAndName();
+    _equipmentLists = await getAllEquipmentsNames(db);
 
     setState(() {
       availableLolMap = listOfLists.map((key, list) => MapEntry(key, list.listName));
-      availableEquipmentItems = equipmentLists;
     });
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _syncDatas() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes");
+      print("Synchronization with SQLite completed.");
+    } catch (e) {
+      print("Error during synchronization with SQLite: $e");
+    }
   }
 
   @override
@@ -104,7 +123,12 @@ class _CamionTypeListState extends State<CamionTypeList> {
   }
 
   Future<Map<String, CamionType>> getCamionTypesData(MyUser user) async {
-    return databaseCamionTypeService.getAllCamionTypes();
+    Map<String, CamionType>? list = await getAllCamionTypes(db);
+    if(list != null){
+      return list;
+    }else{
+      return {};
+    }
   }
 
   Widget _buildBody(Map<String, CamionType> camionTypeList, MyUser user) {
@@ -196,14 +220,14 @@ class _CamionTypeListState extends State<CamionTypeList> {
                       runSpacing: 16.0,
                       children: [
                         // Wyświetlanie listy "lol"
-                        if (camionType.lol.isNotEmpty)
+                        if (camionType.lol != null)
                           Container(
                             width: 150,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("List of lists:", style: textStyleBold()),
-                                ...camionType.lol.map((item) => Container(
+                                ...camionType.lol!.map((item) => Container(
                                   margin: EdgeInsets.only(top: 8.0),
                                   padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                                   decoration: BoxDecoration(
@@ -225,14 +249,14 @@ class _CamionTypeListState extends State<CamionTypeList> {
                           ),
 
                         // Wyświetlanie listy "equipment"
-                        if (camionType.equipment.isNotEmpty)
+                        if (camionType.equipment != null)
                           Container(
                             width: 150,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("Equipment:", style: textStyleBold()),
-                                ...camionType.equipment.map((item) => Container(
+                                ...camionType.equipment!.map((item) => Container(
                                   margin: EdgeInsets.only(top: 8.0),
                                   padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                                   decoration: BoxDecoration(
@@ -247,7 +271,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
                                       ),
                                     ],
                                   ),
-                                  child: Text(availableEquipmentItems[item] ?? "Unknown equipment!", style: textStyle()),
+                                  child: Text(_equipmentLists?[item] ?? "Unknown equipment!", style: textStyle()),
                                 )).toList(),
                               ],
                             ),
@@ -317,7 +341,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
           ),
           TextButton(
             onPressed: () {
-              databaseCamionTypeService.deleteCamionType(camionTypeID);
+              softDeleteCamionType(db, camionTypeID);
               setState(() {});
               Navigator.pop(context);
             },

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/equipment/equipment.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -5,9 +7,13 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/equipment/add_equipment_form.dart';
-import 'package:flutter_application_1/services/equipment/database_equipment_service.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/equipments_table.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class EquipmentList extends StatefulWidget {
   const EquipmentList({super.key});
@@ -17,66 +23,76 @@ class EquipmentList extends StatefulWidget {
 }
 
 class _EquipmentListState extends State<EquipmentList> {
-  final DatabaseEquipmentService databaseEquipmentService = DatabaseEquipmentService();
-  Future<MyUser>? _futureUser;
+  late Database db;
+  Map<String, Equipment> _equipmentLists = HashMap();
+  MyUser? _user;
 
   @override
   void initState() {
     super.initState();
-    _futureUser = getUser();
+    _loadUser();
+    _loadDataFromDatabase();
+  }
+
+  Future<void> _loadDataFromDatabase() async {
+    await _initDatabase();
+    await _syncDatas();
+    Map<String, Equipment>? equipmentLists = await getAllEquipments(db);
+    setState(() {
+      _equipmentLists = equipmentLists!;
+    });
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      MyUser user = await getUser();
+      setState(() {
+        _user = user;
+      });
+    } catch (e) {
+      print("Error loading user: $e");
+    }
+  }
+
+  Future<void> _syncDatas() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing Equipments...");
+      await syncService.fullSyncTable("equipments");
+      print("++++ Synchronization with SQLite completed.");
+    } catch (e) {
+      print("++++ Error during synchronization with SQLite: $e");
+    }
+  }
+
+  bool _isSuperAdmin() {
+    return _user?.role == 'superadmin';
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<MyUser>(
-      future: _futureUser,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (snapshot.hasData) {
-          MyUser user = snapshot.data!;
-          return Scaffold(
-              body: FutureBuilder(
-                future: databaseEquipmentService.getAllEquipments(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    Map<String, Equipment> equipmentList = snapshot.data!;
-                    return DefaultTabController(
-                      initialIndex: 0,
-                      length: equipmentList.length,
-                      child: BasePage(
-                        title: title(user),
-                        body: _buildBody(equipmentList, user),
-                      ),
-                    );
-                  }
-                },
-              ),
-              floatingActionButton: Visibility(
-                visible: user.role == 'superadmin',
-                child: FloatingActionButton(
-                  heroTag: "addEquipmentHero",
-                  onPressed: () {
-                    showEquipmentModal();
-                  },
-                  // backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: const Icon(
-                    Icons.fire_truck,
-                    color: Colors.white,
-                  ),
-                ),
-              )
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    if (_user == null || _equipmentLists.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return Scaffold(
+      body: BasePage(
+        title: title(),
+        body: _buildBody(),
+      ),
+      floatingActionButton: Visibility(
+        visible: _isSuperAdmin(),
+        child: FloatingActionButton(
+          heroTag: "addEquipmentHero",
+          onPressed: () {
+            showEquipmentModal();
+          },
+          child: const Icon(Icons.fire_truck, color: Colors.white),
+        ),
+      ),
     );
   }
 
@@ -85,7 +101,7 @@ class _EquipmentListState extends State<EquipmentList> {
     return await userService.getCurrentUserData();
   }
 
-  Widget _buildBody(Map<String, Equipment> equipmentList, MyUser user) {
+  Widget _buildBody() {
     return Column(
       children: [
         Wrap(
@@ -127,11 +143,12 @@ class _EquipmentListState extends State<EquipmentList> {
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
-            itemCount: equipmentList.length,
+            itemCount: _equipmentLists.length,
             itemBuilder: (_, index) {
               Widget leading = const Icon(Icons.cell_tower_outlined, color: Colors.deepPurple, size: 60);
 
-              Equipment equipment = equipmentList.values.elementAt(index);
+              Equipment equipment = _equipmentLists.values.elementAt(index);
+              String equipmentId = _equipmentLists.keys.elementAt(index);
 
               return Padding(
                 padding: const EdgeInsets.all(8),
@@ -149,10 +166,10 @@ class _EquipmentListState extends State<EquipmentList> {
                       if (value == 'edit') {
                         showEquipmentModal(
                           equipment: equipment,
-                          equipmentID: equipmentList.keys.elementAt(index),
+                          equipmentID: equipmentId,
                         );
                       } else if (value == 'delete') {
-                        _showDeleteConfirmation(equipmentList.keys.elementAt(index));
+                        _showDeleteConfirmation(equipmentId);
                       }
                     },
                     itemBuilder: (context) => [
@@ -160,7 +177,7 @@ class _EquipmentListState extends State<EquipmentList> {
                         value: 'edit',
                         child: Text(AppLocalizations.of(context)!.edit),
                       ),
-                      if (user.role == "superadmin")
+                      if (_user!.role == "superadmin")
                         PopupMenuItem(
                           value: 'delete',
                           child: Text(AppLocalizations.of(context)!.delete),
@@ -168,17 +185,31 @@ class _EquipmentListState extends State<EquipmentList> {
                     ],
                   ),
                   children: [
-                    // if(equipmentList.values.elementAt(index).name.isNotEmpty)
-                    // SizedBox(
-                    //   child: Text(
-                    //     "${AppLocalizations.of(context)!.equipmentName}: ${equipmentList.values.elementAt(index).name}",
-                    //     style: textStyle(),
-                    //   ),
-                    // ),
-                    if(equipmentList.values.elementAt(index).description.isNotEmpty)
+                    if(equipment.idShop != "")
                     SizedBox(
                       child: Text(
-                        "${AppLocalizations.of(context)!.equipmentDescription}: ${equipmentList.values.elementAt(index).description}",
+                        "${AppLocalizations.of(context)!.equipmentIdShop}: ${equipment.idShop }",
+                        style: textStyle(),
+                      ),
+                    ),
+                    if(equipment.description != "")
+                    SizedBox(
+                      child: Text(
+                        "${AppLocalizations.of(context)!.equipmentDescription}: ${equipment.description }",
+                        style: textStyle(),
+                      ),
+                    ),
+                    if(equipment.quantity != null)
+                    SizedBox(
+                      child: Text(
+                        "${AppLocalizations.of(context)!.equipmentQuantity}: ${equipment.quantity }",
+                        style: textStyle(),
+                      ),
+                    ),
+                    if(equipment.photo != null)
+                    SizedBox(
+                      child: Text(
+                        "${AppLocalizations.of(context)!.photoGallery}: ${equipment.photo.toString()}",
                         style: textStyle(),
                       ),
                     ),
@@ -199,8 +230,8 @@ class _EquipmentListState extends State<EquipmentList> {
     return TextStyle(fontSize: 25, fontWeight: FontWeight.bold);
   }
 
-  String title(MyUser user) {
-    if(user.role == "superadmin"){
+  String title() {
+    if(_user!.role == "superadmin"){
       return AppLocalizations.of(context)!.equipmentList;
     }else{
       return AppLocalizations.of(context)!.equipmentDescription;
@@ -245,7 +276,7 @@ class _EquipmentListState extends State<EquipmentList> {
           ),
           TextButton(
             onPressed: () {
-              databaseEquipmentService.deleteEquipment(equipmentID);
+              softDeleteEquipment(db, equipmentID);
               setState(() {});
               Navigator.pop(context);
             },

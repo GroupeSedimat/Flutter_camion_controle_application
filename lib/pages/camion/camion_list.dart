@@ -8,14 +8,15 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
-import 'package:flutter_application_1/services/camion/database_camion_service.dart';
-import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
+// import 'package:flutter_application_1/services/camion/database_camion_service.dart';
+// import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -27,8 +28,6 @@ class CamionList extends StatefulWidget {
 }
 
 class _CamionListState extends State<CamionList> {
-  final DatabaseCamionService databaseCamionService = DatabaseCamionService();
-  final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
 
   MyUser? _user;
@@ -43,6 +42,7 @@ class _CamionListState extends State<CamionList> {
   String? _selectedSortField;
   String? _searchQuery;
   bool _isSortDescending = false;
+  late Database db;
 
 
   final TextEditingController _searchController = TextEditingController();
@@ -57,11 +57,16 @@ class _CamionListState extends State<CamionList> {
   }
 
   Future<void> _loadData() async {
+    await _initDatabase();
     await _loadUser();
     await _loadCamionTypes();
-    await _syncCamions();
+    await _syncDatas();
     // _loadMoreCamions();
     _loadLocalCamions();
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
   @override
@@ -91,7 +96,7 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadCamionTypes() async {
     try {
-      Map<String, String> types = await databaseCamionTypeService.getTypesIdAndName();
+      Map<String, String>? types = await getAllCamionTypeNames(db);
       Map<String, String> companies = await databaseCompanyService.getAllCompaniesNames();
       setState(() {
         _camionTypes = types;
@@ -104,7 +109,6 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadLocalCamions() async {
     try {
-      Database db = await Provider.of<DatabaseHelper>(context, listen: false).database;
       Map<String, Camion>? camionList = await getAllCamions(db);
       if(camionList != null){
         setState(() {
@@ -121,24 +125,17 @@ class _CamionListState extends State<CamionList> {
     _isLoadingMore = true;
 
     try {
-      var paginatedData = await databaseCamionService.getCamionsPaginated(
+      var paginatedData = await getSortedFilteredCamions(
+        dbOrTxn: db,
         sortByField: _selectedSortField ?? 'name',
         isDescending: _isSortDescending,
-        companyId: _selectedFilterCompany ?? (_user!.role == 'admin' ? _user!.company : null),
         camionTypeId: _selectedFilterType,
-        lastDocument: _lastDocument,
         searchQuery: _searchQuery,
-        limit: 20,
       );
 
-      Map<String, Camion> newCamionsSnapshot = paginatedData['camions'];
-      DocumentSnapshot? lastDocumentFromQuery = paginatedData['lastDocument'];
-
-      if (newCamionsSnapshot.isNotEmpty) {
+      if (paginatedData != null) {
         setState(() {
-          _camionList.addAll(newCamionsSnapshot);
-          _lastDocument = lastDocumentFromQuery;
-          _hasMoreData = newCamionsSnapshot.length >= 20;
+          _camionList.addAll(paginatedData);
         });
       } else {
         setState(() {
@@ -155,16 +152,16 @@ class _CamionListState extends State<CamionList> {
   }
 
 
-  Future<void> _syncCamions() async {
+  Future<void> _syncDatas() async {
     try {
-      print("Synchronizing Camions...");
       final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing Camions...");
       await syncService.fullSyncTable("camions");
-      // await insertMultipleCamions(db, camionsFromFirestore);
-
-      print("Synchronization with SQLite completed.");
+      print("++++ Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes");
+      print("++++ Synchronization with SQLite completed.");
     } catch (e) {
-      print("Error during synchronization with SQLite: $e");
+      print("++++ Error during synchronization with SQLite: $e");
     }
   }
 
@@ -649,7 +646,7 @@ class _CamionListState extends State<CamionList> {
           ),
           TextButton(
             onPressed: () {
-              databaseCamionService.softDeleteCamion(camionID);
+              softDeleteCamion(db, camionID);
               setState(() {});
               Navigator.pop(context);
             },

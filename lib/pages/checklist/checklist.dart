@@ -13,8 +13,8 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/pages/checklist/blueprint_template.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/pages/checklist/validate_task.dart';
-import 'package:flutter_application_1/services/camion/database_camion_service.dart';
-import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
+import 'package:flutter_application_1/services/database_firestore/database_camion_service.dart';
+import 'package:flutter_application_1/services/database_firestore/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/check_list/database_blueprints_service.dart';
 import 'package:flutter_application_1/services/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
@@ -85,12 +85,17 @@ class _CheckListState extends State<CheckList> {
       }
     }else{
       try {
-        Camion camion = await databaseCamionService.getOneCamionWithID(_user.camion) as Camion;
-        CamionType camionType = await databaseCamionTypeService.getOneCamionTypeWithID(camion.camionType) as CamionType;
-        List<ListOfLists> listOfListsFuture = await databaseListOfListsService.getListsForCamionType(camionType.lol);
-        setState(() {
-          _listOfListsFuture = listOfListsFuture;
-        });
+        if(_user.camion != null){
+          Camion camion = await databaseCamionService.getOneCamionWithID(_user.camion!) as Camion;
+          CamionType camionType = await databaseCamionTypeService.getOneCamionTypeWithID(camion.camionType) as CamionType;
+          List<ListOfLists> listOfListsFuture = [];
+          if(camionType.lol != null){
+            listOfListsFuture = await databaseListOfListsService.getListsForCamionType(camionType.lol!);
+          }
+          setState(() {
+            _listOfListsFuture = listOfListsFuture;
+          });
+        }
       } catch (e) {
         print("Error loading list of lists: $e");
       }
@@ -106,8 +111,8 @@ class _CheckListState extends State<CheckList> {
         initialIndex: 0,
         length: _listOfListsFuture.length,
         child: BasePage(
-          appBar: appBar(_listOfListsFuture),
-          body: body(_listOfListsFuture),
+          appBar: appBar(),
+          body: body(),
         ),
       );
     }
@@ -210,7 +215,7 @@ class _CheckListState extends State<CheckList> {
     setState(() {});
   }
 
-  AppBar appBar(List<ListOfLists> listOfLists) {
+  AppBar appBar() {
     return AppBar(
       title: Text(AppLocalizations.of(context)!.checkList,
         style: TextStyle(
@@ -235,7 +240,7 @@ class _CheckListState extends State<CheckList> {
         indicatorColor: Colors.red,
         labelColor: Colors.black,
         isScrollable: true,
-        tabs: listOfLists.map((blueprint) =>
+        tabs: _listOfListsFuture.map((blueprint) =>
             Tab(
               text: blueprint.listName,
             )).toList(),
@@ -243,7 +248,7 @@ class _CheckListState extends State<CheckList> {
     );
   }
 
-  Widget body(List<ListOfLists> listOfLists) {
+  Widget body() {
     return StreamBuilder(
       stream: databaseBlueprintsService.getBlueprints(),
       builder: (context, snapshot) {
@@ -268,13 +273,13 @@ class _CheckListState extends State<CheckList> {
         for (var blueprintSnapshot in blueprintsSnapshotList) {
           blueprints.addAll({blueprintSnapshot.id: blueprintSnapshot.data()});
         }
-        counter = List<int>.filled(listOfLists.length, 0);
-        for (var i = 0; i < listOfLists.length; i++) {
+        counter = List<int>.filled(_listOfListsFuture.length, 0);
+        for (var i = 0; i < _listOfListsFuture.length; i++) {
           sortedBlueprints = Map.fromEntries(
               blueprints.entries.toList()..sort((e1, e2) => (e1.value.nrEntryPosition).compareTo(e2.value.nrEntryPosition))
           );
           for (Blueprint blueprint in sortedBlueprints.values) {
-            if (blueprint.nrOfList == listOfLists[i].listNr) {
+            if (blueprint.nrOfList == _listOfListsFuture[i].listNr) {
               counter[i]++;
             }
           }
@@ -296,7 +301,7 @@ class _CheckListState extends State<CheckList> {
             final user = userSnapshot.data!;
             return TabBarView(
               children: <Widget>[
-                for (var list in listOfLists)
+                for (var list in _listOfListsFuture)
                   FutureBuilder<bool>(
                     future: testIfFull(sortedBlueprints, list.listNr, userUID),
                     builder: (context, testIfFullSnapshot) {

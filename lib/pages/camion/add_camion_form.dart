@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
-import 'package:flutter_application_1/services/camion/database_camion_service.dart';
-import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -29,10 +28,7 @@ class _AddCamionState extends State<AddCamion> {
   final TextEditingController _responsibleController = TextEditingController();
   final TextEditingController _lastInterventionController = TextEditingController();
 
-  DatabaseCamionService databaseCamionService = DatabaseCamionService();
-  DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-  // DatabaseHelper databaseHelper = DatabaseHelper();
   late Database db;
 
   String camionType = "";
@@ -75,7 +71,7 @@ class _AddCamionState extends State<AddCamion> {
 
   Future<void> _loadCamionTypes() async {
     try {
-      Map<String, CamionType> camionTypes = await databaseCamionTypeService.getAllCamionTypes();
+      Map<String, CamionType>? camionTypes = await getAllCamionTypes(db);
       setState(() {
         _camionTypesMap = camionTypes;
         _isLoadingCamionTypes = false;
@@ -386,51 +382,90 @@ class _AddCamionState extends State<AddCamion> {
 
           const SizedBox(height: 50),
 
-          TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.blue,
-              minimumSize: const Size(250, 60),
-            ),
-            child: Text(
-              AppLocalizations.of(context)!.confirm,
-              style: const TextStyle(
-                color: Colors.white,
-              ),
-            ),
+          // TextButton(
+          //   style: TextButton.styleFrom(
+          //     backgroundColor: Colors.blue,
+          //     minimumSize: const Size(250, 60),
+          //   ),
+          //   child: Text(
+          //     AppLocalizations.of(context)!.confirm,
+          //     style: const TextStyle(
+          //       color: Colors.white,
+          //     ),
+          //   ),
+          //   onPressed: () async {
+          //     if (_formKey.currentState!.validate()) {
+          //       try {
+          //         DateTime dateCreation = widget.camion?.createdAt ?? DateTime.now();
+          //
+          //         Camion newCamion = Camion(
+          //           name: _nameController.text,
+          //           camionType: camionType,
+          //           responsible: _responsibleController.text,
+          //           checks: checks,
+          //           lastIntervention: _lastInterventionController.text,
+          //           status: status,
+          //           location: location,
+          //           company: company,
+          //           createdAt: dateCreation,
+          //           updatedAt: DateTime.now(),
+          //         );
+          //
+          //         if (widget.camionID == null) {
+          //           // await databaseCamionService.addCamion(newCamion);
+          //           await insertCamion(db, newCamion, "");
+          //           ScaffoldMessenger.of(context).showSnackBar(
+          //             SnackBar(content: Text(AppLocalizations.of(context)!.camionAddedSuccessfully)),
+          //           );
+          //         } else {
+          //           // await databaseCamionService.updateCamion(widget.camionID!, newCamion);
+          //           await updateCamion(db, newCamion, widget.camionID!);
+          //           ScaffoldMessenger.of(context).showSnackBar(
+          //             SnackBar(content: Text(AppLocalizations.of(context)!.camionUpdatedSuccessfully)),
+          //           );
+          //         }
+          //         if (widget.onCamionAdded != null) {
+          //           widget.onCamionAdded!();
+          //         }
+          //         // widget.onCamionAdded?.call();
+          //       } catch (e) {
+          //         print("Error: $e");
+          //         ScaffoldMessenger.of(context).showSnackBar(
+          //           SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
+          //         );
+          //       }
+          //     }
+          //   },
+          // ),
+          ElevatedButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                try {
+                try{
                   DateTime dateCreation = widget.camion?.createdAt ?? DateTime.now();
 
-                  Camion newCamion = Camion(
-                    name: _nameController.text,
-                    camionType: camionType,
-                    responsible: _responsibleController.text,
-                    checks: checks,
-                    lastIntervention: _lastInterventionController.text,
-                    status: status,
-                    location: location,
-                    company: company,
-                    createdAt: dateCreation,
-                    updatedAt: DateTime.now(),
-                  );
+                          Camion newCamion = Camion(
+                            name: _nameController.text,
+                            camionType: camionType,
+                            responsible: _responsibleController.text,
+                            checks: checks,
+                            lastIntervention: _lastInterventionController.text,
+                            status: status,
+                            location: location,
+                            company: company,
+                            createdAt: dateCreation,
+                            updatedAt: DateTime.now(),
+                          );
 
-                  if (widget.camionID == null) {
-                    // await databaseCamionService.addCamion(newCamion);
-                    await insertCamion(db, newCamion, "");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.camionAddedSuccessfully)),
-                    );
+                  if (widget.camion == null) {
+                    insertCamion(db, newCamion, "");
                   } else {
-                    // await databaseCamionService.updateCamion(widget.camionID!, newCamion);
-                    await updateCamion(db, newCamion, widget.camionID!);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.camionUpdatedSuccessfully)),
-                    );
+                    updateCamion(db, newCamion, widget.camionID!);
                   }
-
-                  widget.onCamionAdded?.call();
-                } catch (e) {
+                  if (widget.onCamionAdded != null) {
+                    widget.onCamionAdded!();
+                  }
+                }
+                catch(e){
                   print("Error: $e");
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
@@ -438,6 +473,9 @@ class _AddCamionState extends State<AddCamion> {
                 }
               }
             },
+            child: Text(widget.camion == null
+                ? AppLocalizations.of(context)!.add
+                : AppLocalizations.of(context)!.confirm),
           ),
         ],
       ),

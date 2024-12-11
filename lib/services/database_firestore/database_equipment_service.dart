@@ -71,6 +71,23 @@ class DatabaseEquipmentService{
     }
   }
 
+  Future<Map<String, Equipment>> getAllEquipmentsSinceLastSync(String lastSync) async {
+    Query query = _equipmentRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, Equipment> equipment = HashMap();
+      for (var doc in querySnapshot.docs) {
+        equipment[doc.id] = doc.data() as Equipment;
+      }
+      return equipment;
+    } catch (e) {
+      print("Error fetching Equipments since last update data: $e");
+      rethrow;
+    }
+  }
+
   Stream<QuerySnapshot> getEquipments(){
     return _equipmentRef.snapshots();
   }
@@ -79,11 +96,13 @@ class DatabaseEquipmentService{
     return _equipmentRef.doc(equipmentID).snapshots();
   }
 
-  void addEquipment(Equipment equipment) async {
-    _equipmentRef.add(equipment);
+  Future<String> addEquipment(Equipment equipment) async {
+    var returnAdd = await _equipmentRef.add(equipment);
+    print("------------- ---------- Add equipment: ${returnAdd.id}");
+    return returnAdd.id;
   }
 
-  void updateEquipment(String equipmentID, Equipment equipment){
+  Future<void> updateEquipment(String equipmentID, Equipment equipment) async {
     _equipmentRef.doc(equipmentID).update(equipment.toJson());
   }
 

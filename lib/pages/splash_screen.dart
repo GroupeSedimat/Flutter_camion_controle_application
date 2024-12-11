@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/pages/user/login_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/services/camion/database_camion_service.dart';
+import 'package:flutter_application_1/services/database_firestore/database_camion_service.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/update_tables.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
@@ -61,9 +61,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _syncGlobalData() async {
     try {
-      print("Synchronizing global data...");
       final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing Camions...");
       await syncService.fullSyncTable("camions");
+      print("++++ Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes");
+      print("++++ Synchronizing Equipments...");
+      await syncService.fullSyncTable("equipments");
+      print("++++ Synchronization with SQLite completed.");
     } catch (e) {
       print("Error during global data synchronization: $e");
       throw e;

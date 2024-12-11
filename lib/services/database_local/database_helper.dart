@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
+import 'package:flutter_application_1/services/database_local/equipments_table.dart';
 import 'package:flutter_application_1/services/database_local/update_tables.dart';
 import 'package:sqflite/sqflite.dart';
 import 'camions_table.dart';
@@ -29,6 +31,8 @@ class DatabaseHelper {
       version: 1,
       onCreate: (db, version) async {
         await createTableCamions(db);
+        await createTableCamionTypes(db);
+        await createTableEquipments(db);
         await createTableInfo(db);
         await _initializeUpdateTable(db, [
           "users",

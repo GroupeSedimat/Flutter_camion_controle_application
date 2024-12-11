@@ -92,16 +92,36 @@ class DatabaseCamionTypeService{
     }
   }
 
-  void addCamionType(CamionType camionType) async {
-    _camionTypeRef.add(camionType);
+  Future<String> addCamionType(CamionType camionType) async {
+    var returnAdd = await _camionTypeRef.add(camionType);
+    print("------------- ---------- Add camion type: ${returnAdd.id}");
+    return returnAdd.id;
   }
 
-  void updateCamionType(String camionTypeID, CamionType camionType){
+  Future<void> updateCamionType(String camionTypeID, CamionType camionType) async {
     _camionTypeRef.doc(camionTypeID).update(camionType.toJson());
   }
 
   void deleteCamionType(String camionTypeID){
     _camionTypeRef.doc(camionTypeID).delete();
+  }
+
+  Future<Map<String, CamionType>> getAllCamionsSinceLastSync(String lastSync) async {
+    Query query = _camionTypeRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    // print(query.parameters);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, CamionType> camions = HashMap();
+      for (var doc in querySnapshot.docs) {
+        camions[doc.id] = doc.data() as CamionType;
+      }
+      return camions;
+    } catch (e) {
+      print("Error fetching Camion Typess since last update data: $e");
+      rethrow;
+    }
   }
 
 }

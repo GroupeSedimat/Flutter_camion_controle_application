@@ -48,13 +48,13 @@ class UserDetailsPage extends StatelessWidget {
                 AppLocalizations.of(context)!.userFirstName,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(user.firstname),
+              Text(user.firstname ?? ""),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.userLastName,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(user.name),
+              Text(user.name ?? ""),
               SizedBox(height: 16),
               Text(
                 'Role:',
@@ -76,8 +76,8 @@ class UserDetailsPage extends StatelessWidget {
                 'Apres Formation Doc:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              if(user.apresFormationDoc != "")
-              Image.network(user.apresFormationDoc, width: 600),
+              if(user.apresFormationDoc != "" && user.apresFormationDoc != null)
+              Image.network(user.apresFormationDoc!, width: 600),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.company,

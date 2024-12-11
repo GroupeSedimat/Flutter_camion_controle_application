@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/equipment/equipment.dart';
-import 'package:flutter_application_1/services/equipment/database_equipment_service.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/equipments_table.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class AddEquipment extends StatefulWidget {
 
@@ -18,19 +21,71 @@ class AddEquipment extends StatefulWidget {
 class _AddEquipmentState extends State<AddEquipment> {
 
   final _formKey = GlobalKey<FormState>();
-  DatabaseEquipmentService databaseEquipmentService = DatabaseEquipmentService();
-  String name = "";
-  String description = "";
+
+  late Database db;
+
+  final TextEditingController _idShopController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final List<TextEditingController> _photoControllers = [];
+  List<String>? photo;
+  bool? available;
   String pageTile = "";
 
   @override
   void initState() {
     super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await _initDatabase();
     if (widget.equipment != null) {
-      name = widget.equipment!.name;
-      description = widget.equipment!.description;
+      _populateFieldsWithEquipmentData();
     }
   }
+
+  void _populateFieldsWithEquipmentData() {
+    _idShopController.text = widget.equipment!.idShop ?? '';
+    _nameController.text = widget.equipment!.name;
+    _descriptionController.text = widget.equipment!.description ?? '';
+    photo = widget.equipment!.photo;
+    _photoControllers.addAll(photo!.map((item) => TextEditingController(text: item)));
+    _quantityController.text = widget.equipment!.quantity?.toString() ?? '';
+    available = widget.equipment!.available;
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  @override
+  void dispose() {
+    _idShopController.dispose();
+    _nameController.dispose();
+    _descriptionController.dispose();
+    for (var controller in _photoControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _addPhotoField() {
+    setState(() {
+      _photoControllers.add(TextEditingController());
+      photo?.add('');
+    });
+  }
+
+  void _removePhotoField(int index) {
+    setState(() {
+      _photoControllers[index].dispose();
+      _photoControllers.removeAt(index);
+      photo?.removeAt(index);
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -57,69 +112,148 @@ class _AddEquipmentState extends State<AddEquipment> {
 
             const SizedBox(height: 20),
             TextFormField(
-              initialValue: name,
+              controller: _idShopController,
               decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.equipmentName,
-                labelText: AppLocalizations.of(context)!.equipmentName,
-                labelStyle: TextStyle(
+                hintText: AppLocalizations.of(context)!.equipmentIdShop,
+                labelText: AppLocalizations.of(context)!.equipmentIdShop,
+                labelStyle: const TextStyle(
                   fontSize: 20,
                   color: Colors.lightBlue,
                   backgroundColor: Colors.white,
                 ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
+                focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                border: const OutlineInputBorder(gapPadding: 5),
               ),
-              validator: (val) {return (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null;},
-              onChanged: (val) => setState(() {name = val;}),
             ),
 
             const SizedBox(height: 20),
             TextFormField(
-              initialValue: description,
+              controller: _nameController,
               decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.details,
-                labelText: AppLocalizations.of(context)!.details,
-                labelStyle: TextStyle(
+                hintText: AppLocalizations.of(context)!.equipmentName,
+                labelText: AppLocalizations.of(context)!.equipmentName,
+                labelStyle: const TextStyle(
                   fontSize: 20,
                   color: Colors.lightBlue,
                   backgroundColor: Colors.white,
                 ),
-                focusedBorder: OutlineInputBorder(gapPadding: 15),
-                border: OutlineInputBorder(gapPadding: 5),
+                focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                border: const OutlineInputBorder(gapPadding: 5),
               ),
-              onChanged: (val) => setState(() {
-                description = val;
-              }),
+              validator: (val) {
+                return (val == null || val.isEmpty || val == "")
+                    ? AppLocalizations.of(context)!.required
+                    : null;
+              },
             ),
+
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _descriptionController,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.equipmentDescription,
+                labelText: AppLocalizations.of(context)!.equipmentDescription,
+                labelStyle: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.lightBlue,
+                  backgroundColor: Colors.white,
+                ),
+                focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                border: const OutlineInputBorder(gapPadding: 5),
+              ),
+            ),
+
+            const Text("Add Photos:"),
+            ..._photoControllers.asMap().entries.map((entry) {
+              int index = entry.key;
+              return ListTile(
+                title: TextFormField(
+                  controller: _photoControllers[index],
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.photoAdd,
+                    labelText: AppLocalizations.of(context)!.photoAdd,
+                    labelStyle: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.lightBlue,
+                      backgroundColor: Colors.white,
+                    ),
+                    focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                    border: const OutlineInputBorder(gapPadding: 5),
+                  ),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.remove_circle),
+                  onPressed: () => _removePhotoField(index),
+                ),
+              );
+            }).toList(),
+            TextButton(
+              onPressed: _addPhotoField,
+              child: const Text("Add photo link"),
+            ),
+
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _quantityController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.equipmentQuantity,
+                labelText: AppLocalizations.of(context)!.equipmentQuantity,
+                labelStyle: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.lightBlue,
+                  backgroundColor: Colors.white,
+                ),
+                focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                border: const OutlineInputBorder(gapPadding: 5),
+              ),
+            ),
+
 
             const SizedBox(height: 50),
             TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  minimumSize: const Size(250, 60),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.blue,
+                minimumSize: const Size(250, 60),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.confirm,
+                style: TextStyle(
+                  color: Colors.white,
                 ),
-                child: Text(
-                  AppLocalizations.of(context)!.confirm,
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
+              ),
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  try{
+                    int? parsedQuantity = int.tryParse(_quantityController.text);
+                    DateTime dateCreation = widget.equipment?.createdAt ?? DateTime.now();
                     Equipment newEquipment = Equipment(
-                        name: name,
-                        description: description
+                      idShop: _idShopController.text,
+                      name: _nameController.text,
+                      description: _descriptionController.text,
+                      photo: photo,
+                      quantity: parsedQuantity,
+                      available: available,
+                      createdAt: dateCreation,
+                      updatedAt: DateTime.now(),
                     );
                     if (widget.equipment == null) {
-                      databaseEquipmentService.addEquipment(newEquipment);
+                      insertEquipment(db, newEquipment, "");
                     } else {
-                      databaseEquipmentService.updateEquipment(widget.equipmentID!, newEquipment);
+                      updateEquipment(db, newEquipment, widget.equipmentID!);
                     }
                     if (widget.onEquipmentAdded != null) {
                       widget.onEquipmentAdded!();
                     }
                   }
-                }),
+                  catch(e){
+                    print("Error: $e");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
+                    );
+                  }
+                }
+              }),
           ],
         )
     );

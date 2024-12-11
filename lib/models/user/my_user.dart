@@ -2,23 +2,23 @@ class MyUser {
   String role;
   String username;
   String email;
-  String name;
-  String firstname;
+  String? name;
+  String? firstname;
   String company;
-  bool apresFormation;
-  String apresFormationDoc;
-  String camion;
+  bool? apresFormation;
+  String? apresFormationDoc;
+  String? camion;
 
   MyUser({
     required this.role,
     required this.username,
     required this.email,
-    required this.name,
-    required this.firstname,
+    this.name,
+    this.firstname,
     required this.company,
-    required this.apresFormation,
-    required this.apresFormationDoc,
-    required this.camion,
+    this.apresFormation,
+    this.apresFormationDoc,
+    this.camion,
   });
 
   MyUser.fromJson(Map<String, Object?> json): this (
