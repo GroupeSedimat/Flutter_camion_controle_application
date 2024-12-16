@@ -56,7 +56,7 @@ class _PDFShowListState extends State<PDFShowList> {
                         final entry = sortedPdf.entries.toList()[index];
                         final fileName = entry.key;
                         final url = entry.value;
-                        return PDFShowTemplate(fileName: fileName, url: url, userData: userData,);
+                        return PDFShowTemplate(fileName: fileName, url: url);
                       },
                     );
                   } else {

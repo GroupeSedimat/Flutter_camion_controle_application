@@ -8,9 +8,7 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
-// import 'package:flutter_application_1/services/camion/database_camion_service.dart';
-// import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
-import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -28,7 +26,6 @@ class CamionList extends StatefulWidget {
 }
 
 class _CamionListState extends State<CamionList> {
-  final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
 
   MyUser? _user;
   Map<String, String>? _camionTypes;
@@ -58,11 +55,12 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadData() async {
     await _initDatabase();
+    await _syncDatas();
     await _loadUser();
     await _loadCamionTypes();
-    await _syncDatas();
+    await _loadCompaniesNames();
     // _loadMoreCamions();
-    _loadLocalCamions();
+    await _loadLocalCamions();
   }
 
   Future<void> _initDatabase() async {
@@ -85,7 +83,8 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadUser() async {
     try {
-      MyUser user = await getUser();
+      UserService userService = UserService();
+      MyUser user = await userService.getCurrentUserData();
       setState(() {
         _user = user;
       });
@@ -97,13 +96,22 @@ class _CamionListState extends State<CamionList> {
   Future<void> _loadCamionTypes() async {
     try {
       Map<String, String>? types = await getAllCamionTypeNames(db);
-      Map<String, String> companies = await databaseCompanyService.getAllCompaniesNames();
       setState(() {
         _camionTypes = types;
-        _companiesNames = companies;
       });
     } catch (e) {
       print("Error loading camion types: $e");
+    }
+  }
+
+  Future<void> _loadCompaniesNames() async {
+    try {
+      Map<String, String>? companies = await getAllCompaniesNames(db);
+      setState(() {
+        _companiesNames = companies;
+      });
+    } catch (e) {
+      print("Error loading Companies Names: $e");
     }
   }
 
@@ -191,11 +199,6 @@ class _CamionListState extends State<CamionList> {
 
   bool _isSuperAdmin() {
     return _user?.role == 'superadmin';
-  }
-
-  Future<MyUser> getUser() async {
-    UserService userService = UserService();
-    return await userService.getCurrentUserData();
   }
 
   void _showSubMenuSort(BuildContext context, Offset position) async {

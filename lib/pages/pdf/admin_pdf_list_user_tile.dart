@@ -89,7 +89,6 @@ class UserTile extends StatelessWidget {
                           return PDFShowTemplate(
                             fileName: docRef.name,
                             url: urlSnapshot.data!,
-                            userData: user,
                           );
                         } else {
                           return ListTile(

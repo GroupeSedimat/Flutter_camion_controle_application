@@ -64,7 +64,7 @@ class UserManagementAdmin extends StatelessWidget {
                         onSelected: (String value) {
                           switch (value) {
                             case 'view':
-                              Get.to(() => UserDetailsPage(user: user));
+                              Get.to(() => UserDetailsPage());
                               break;
                             case 'edit':
                               Get.to(() => UserEditPage(user: user));

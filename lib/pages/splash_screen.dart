@@ -1,19 +1,12 @@
-// ignore_for_file: use_super_parameters, prefer_const_constructors, unused_import, library_private_types_in_public_api, avoid_print
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/pages/user/login_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/services/database_firestore/database_camion_service.dart';
-import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_local/update_tables.dart';
-import 'package:flutter_application_1/services/database_local/camions_table.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/locale_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:sqflite/sqflite.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -26,8 +19,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   bool firebaseInitialized = false;
   bool firebaseError = false;
-  Map<String, Camion> allCamions = {};
-  DatabaseCamionService databaseCamionService = DatabaseCamionService();
 
   @override
   void initState() {
@@ -66,6 +57,8 @@ class _SplashScreenState extends State<SplashScreen> {
       await syncService.fullSyncTable("camions");
       print("++++ Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes");
+      print("++++ Synchronizing Companies...");
+      await syncService.fullSyncTable("companies");
       print("++++ Synchronizing Equipments...");
       await syncService.fullSyncTable("equipments");
       print("++++ Synchronization with SQLite completed.");

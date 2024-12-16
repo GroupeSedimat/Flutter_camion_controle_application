@@ -36,7 +36,7 @@ class _EquipmentListState extends State<EquipmentList> {
 
   Future<void> _loadDataFromDatabase() async {
     await _initDatabase();
-    await _syncDatas();
+    await _syncData();
     Map<String, Equipment>? equipmentLists = await getAllEquipments(db);
     setState(() {
       _equipmentLists = equipmentLists!;
@@ -58,7 +58,7 @@ class _EquipmentListState extends State<EquipmentList> {
     }
   }
 
-  Future<void> _syncDatas() async {
+  Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("++++ Synchronizing Equipments...");

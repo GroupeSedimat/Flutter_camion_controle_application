@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
-import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +28,6 @@ class _AddCamionState extends State<AddCamion> {
   final TextEditingController _responsibleController = TextEditingController();
   final TextEditingController _lastInterventionController = TextEditingController();
 
-  DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
   late Database db;
 
   String camionType = "";
@@ -93,7 +92,7 @@ class _AddCamionState extends State<AddCamion> {
 
   Future<void> _loadCompanyNames() async {
     try {
-      Map<String, String> companies = await databaseCompanyService.getAllCompaniesNames();
+      Map<String, String>? companies = await getAllCompaniesNames(db);
       setState(() {
         _companyNamesMap = companies;
         _isLoadingCompanies = false;
@@ -381,62 +380,6 @@ class _AddCamionState extends State<AddCamion> {
               ),
 
           const SizedBox(height: 50),
-
-          // TextButton(
-          //   style: TextButton.styleFrom(
-          //     backgroundColor: Colors.blue,
-          //     minimumSize: const Size(250, 60),
-          //   ),
-          //   child: Text(
-          //     AppLocalizations.of(context)!.confirm,
-          //     style: const TextStyle(
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          //   onPressed: () async {
-          //     if (_formKey.currentState!.validate()) {
-          //       try {
-          //         DateTime dateCreation = widget.camion?.createdAt ?? DateTime.now();
-          //
-          //         Camion newCamion = Camion(
-          //           name: _nameController.text,
-          //           camionType: camionType,
-          //           responsible: _responsibleController.text,
-          //           checks: checks,
-          //           lastIntervention: _lastInterventionController.text,
-          //           status: status,
-          //           location: location,
-          //           company: company,
-          //           createdAt: dateCreation,
-          //           updatedAt: DateTime.now(),
-          //         );
-          //
-          //         if (widget.camionID == null) {
-          //           // await databaseCamionService.addCamion(newCamion);
-          //           await insertCamion(db, newCamion, "");
-          //           ScaffoldMessenger.of(context).showSnackBar(
-          //             SnackBar(content: Text(AppLocalizations.of(context)!.camionAddedSuccessfully)),
-          //           );
-          //         } else {
-          //           // await databaseCamionService.updateCamion(widget.camionID!, newCamion);
-          //           await updateCamion(db, newCamion, widget.camionID!);
-          //           ScaffoldMessenger.of(context).showSnackBar(
-          //             SnackBar(content: Text(AppLocalizations.of(context)!.camionUpdatedSuccessfully)),
-          //           );
-          //         }
-          //         if (widget.onCamionAdded != null) {
-          //           widget.onCamionAdded!();
-          //         }
-          //         // widget.onCamionAdded?.call();
-          //       } catch (e) {
-          //         print("Error: $e");
-          //         ScaffoldMessenger.of(context).showSnackBar(
-          //           SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
-          //         );
-          //       }
-          //     }
-          //   },
-          // ),
           ElevatedButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {

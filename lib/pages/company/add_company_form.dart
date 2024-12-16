@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
-import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class AddCompany extends StatefulWidget {
 
@@ -18,34 +21,62 @@ class AddCompany extends StatefulWidget {
 class _AddCompanyState extends State<AddCompany> {
 
   final _formKey = GlobalKey<FormState>();
-  DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-  String name = "";
-  String description = "";
-  String sirene = "";
-  String siret = "";
-  String address = "";
-  String responsible = "";
-  String admin = "";
-  String tel = "";
-  String email = "";
-  String logo = "";
+  late Database db;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _sireneController = TextEditingController();
+  final TextEditingController _siretController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _responsibleController = TextEditingController();
+  final TextEditingController _adminController = TextEditingController();
+  final TextEditingController _telController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _logoController = TextEditingController();
   String pageTile = "";
 
   @override
   void initState() {
     super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await _initDatabase();
     if (widget.company != null) {
-      name = widget.company!.name;
-      description = widget.company!.description;
-      sirene = widget.company!.sirene;
-      siret = widget.company!.siret;
-      address = widget.company!.address;
-      responsible = widget.company!.responsible;
-      admin = widget.company!.admin;
-      tel = widget.company!.tel;
-      email = widget.company!.email;
-      logo = widget.company!.logo;
+      _populateFieldsWithEquipmentData();
     }
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  void _populateFieldsWithEquipmentData() {
+    _nameController.text = widget.company!.name;
+    _descriptionController.text = widget.company!.description ?? '';
+    _sireneController.text = widget.company!.sirene ?? '';
+    _siretController.text = widget.company!.siret ?? '';
+    _addressController.text = widget.company!.address ?? '';
+    _responsibleController.text = widget.company!.responsible ?? '';
+    _adminController.text = widget.company!.admin ?? '';
+    _telController.text = widget.company!.tel ?? '';
+    _emailController.text = widget.company!.email ?? '';
+    _logoController.text = widget.company!.logo ?? '';
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _sireneController.dispose();
+    _siretController.dispose();
+    _addressController.dispose();
+    _responsibleController.dispose();
+    _adminController.dispose();
+    _telController.dispose();
+    _emailController.dispose();
+    _logoController.dispose();
+    super.dispose();
   }
 
   @override
@@ -73,188 +104,146 @@ class _AddCompanyState extends State<AddCompany> {
 
           const SizedBox(height: 20),
           TextFormField(
-            initialValue: name,
+            controller: _nameController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companyName,
-              labelText: AppLocalizations.of(context)!.companyName,
-              labelStyle: TextStyle(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
                 backgroundColor: Colors.white,
               ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
             ),
-            validator: (val) {return (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null;},
-            onChanged: (val) => setState(() {name = val;}),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _descriptionController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _sireneController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _siretController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _addressController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _responsibleController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _adminController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _telController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _emailController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
+          ),const SizedBox(height: 20),
+          TextFormField(
+            controller: _logoController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              labelStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.lightBlue,
+                backgroundColor: Colors.white,
+              ),
+              focusedBorder: const OutlineInputBorder(gapPadding: 15),
+              border: const OutlineInputBorder(gapPadding: 5),
+            ),
           ),
 
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: description,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companyDescription,
-              labelText: AppLocalizations.of(context)!.companyDescription,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            onChanged: (val) => setState(() {
-              description = val;
-            }),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: sirene,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companySirene,
-              labelText: AppLocalizations.of(context)!.companySirene,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            validator: (val) =>
-            (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null,
-            onChanged: (val) => setState(() {
-              sirene = val;
-            }),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: siret,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companySiret,
-              labelText: AppLocalizations.of(context)!.companySiret,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            validator: (val) =>
-            (val == null || val.isEmpty || val == "") ? AppLocalizations.of(context)!.required : null,
-            onChanged: (val) => setState(() {
-              siret = val;
-            }),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: address,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companyAddress,
-              labelText: AppLocalizations.of(context)!.companyAddress,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            onChanged: (val) => setState(() {
-              address = val;
-            }),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: responsible,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companyResponsible,
-              labelText: AppLocalizations.of(context)!.companyResponsible,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            onChanged: (val) => setState(() {
-              responsible = val;
-            }),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: admin,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companyAdmin,
-              labelText: AppLocalizations.of(context)!.companyAdmin,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            onChanged: (val) => setState(() {
-              admin = val;
-            }),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: tel,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companyPhone,
-              labelText: AppLocalizations.of(context)!.companyPhone,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            onChanged: (val) => setState(() {
-              tel = val;
-            }),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: email,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companyEMail,
-              labelText: AppLocalizations.of(context)!.companyEMail,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            onChanged: (val) => setState(() {
-              email = val;
-            }),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            initialValue: logo,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.companyLogo,
-              labelText: AppLocalizations.of(context)!.companyLogo,
-              labelStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: OutlineInputBorder(gapPadding: 15),
-              border: OutlineInputBorder(gapPadding: 5),
-            ),
-            onChanged: (val) => setState(() {
-              logo = val;
-            }),
-          ),
           const SizedBox(height: 50),
           TextButton(
             style: TextButton.styleFrom(
@@ -268,26 +257,38 @@ class _AddCompanyState extends State<AddCompany> {
               ),
             ),
             onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                Company newCompany = Company(
-                    name: name,
-                    description: description,
-                    sirene: sirene,
-                    siret: siret,
-                    address: address,
-                    responsible: responsible,
-                    admin: admin,
-                    tel: tel,
-                    email: email,
-                    logo: logo);
-                if (widget.company == null) {
-                  databaseCompanyService.addCompany(newCompany);
-                } else {
-                  databaseCompanyService.updateCompany(widget.companyID!, newCompany);
+              try{
+                if (_formKey.currentState!.validate()) {
+                  DateTime dateCreation = widget.company?.createdAt ?? DateTime.now();
+                  Company newCompany = Company(
+                    name: _nameController.text,
+                    description: _descriptionController.text,
+                    sirene: _sireneController.text,
+                    siret: _siretController.text,
+                    address: _addressController.text,
+                    responsible: _responsibleController.text,
+                    admin: _adminController.text,
+                    tel: _telController.text,
+                    email: _emailController.text,
+                    logo: _logoController.text,
+                    createdAt: dateCreation,
+                    updatedAt: DateTime.now(),
+                  );
+                  if (widget.company == null) {
+                    insertCompany(db, newCompany, "");
+                  } else {
+                    updateCompany(db, newCompany, widget.companyID!);
+                  }
+                  if (widget.onCompanyAdded != null) {
+                    widget.onCompanyAdded!();
+                  }
                 }
-                if (widget.onCompanyAdded != null) {
-                  widget.onCompanyAdded!();
-                }
+              }
+              catch(e){
+                print("Error: $e");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
+                );
               }
             }),
         ],

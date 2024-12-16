@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
@@ -11,8 +12,9 @@ import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/check_list/database_image_service.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/pdf/database_pdf_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:intl/intl.dart';
@@ -21,13 +23,17 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class PdfService {
   DatabasePDFService databasePDFService = DatabasePDFService();
   AuthController authController = AuthController.instance;
   UserService userService = UserService();
-  DatabaseCompanyService companyService = DatabaseCompanyService();
   DatabaseImageService databaseImageService = DatabaseImageService();
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  late Database db;
   late Map<int,Uint8List> photosToPDF;
   late int count;
   late int count2;
@@ -45,12 +51,17 @@ class PdfService {
     return ttf;
   }
 
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(navigatorKey.currentState!.overlay!.context, listen: false).database;
+  }
+
   Future<Uint8List> createInvoice(Map<String, TaskChecklist> tasks, Map<String, Blueprint> sortedBlueprints, ListOfLists list) async {
     this.list = list;
     final pdf = pw.Document();
     userID = authController.getCurrentUserUID()!;
     user = await userService.getUserData(userID);
-    company = await companyService.getCompanyByID(user.company);
+    _initDatabase();
+    company = (await getOneCompanyWithID(db, user.company))!;
     mobilityLogo = (await rootBundle.load('assets/images/keybas_logo.png')).buffer.asUint8List();
     count = 1;
     count2 = 1;
@@ -209,8 +220,8 @@ class PdfService {
 
   Future<pw.Row> companyDatas(Company company, pw.Font font) async {
     Uint8List? logoData;
-    if (company.logo.isNotEmpty) {
-      logoData = await downloadImage(company.logo);
+    if (company.logo != null) {
+      logoData = await downloadImage(company.logo!);
     }
     return pw.Row(
       children: [

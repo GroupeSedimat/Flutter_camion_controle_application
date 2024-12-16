@@ -1,17 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
-class UserDetailsPage extends StatelessWidget {
-  final MyUser user;
-  final DatabaseCompanyService companyService = DatabaseCompanyService();
+class UserDetailsPage extends StatefulWidget {
 
-  UserDetailsPage({required this.user});
+  UserDetailsPage({super.key});
 
-  Future<String> getCompanyName(String companyId) async {
-    var company = await companyService.getCompanyByID(companyId);
-    return company.name;
+  @override
+  State<UserDetailsPage> createState() => _UserDetailsPageState();
+}
+
+class _UserDetailsPageState extends State<UserDetailsPage> {
+
+  late Database db;
+  Map<String, Company> _company = {};
+  late MyUser _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+    _loadDataFromDatabase();
+  }
+
+  Future<void> _loadDataFromDatabase() async {
+    await _initDatabase();
+    await _syncData();
+    Map<String, Company> companyWithId = {};
+    Company? company = await getOneCompanyWithID(db, _user.company);
+    companyWithId[_user.company] = company!;
+
+    setState(() {
+      _company = companyWithId;
+    });
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      MyUser user = await getUser();
+      setState(() {
+        _user = user;
+      });
+    } catch (e) {
+      print("Error loading user: $e");
+    }
+  }
+
+  Future<MyUser> getUser() async {
+    UserService userService = UserService();
+    return await userService.getCurrentUserData();
+  }
+
+  Future<void> _syncData() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing Companies...");
+      await syncService.fullSyncTable("companies");
+      print("++++ Synchronization with SQLite completed.");
+    } catch (e) {
+      print("++++ Error during synchronization with SQLite: $e");
+    }
   }
 
   @override
@@ -36,35 +95,35 @@ class UserDetailsPage extends StatelessWidget {
                 AppLocalizations.of(context)!.userName,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(user.username),
+              Text(_user.username),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.eMail,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(user.email),
+              Text(_user.email),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.userFirstName,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(user.firstname ?? ""),
+              Text(_user.firstname ?? ""),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.userLastName,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(user.name ?? ""),
+              Text(_user.name ?? ""),
               SizedBox(height: 16),
               Text(
                 'Role:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(user.role),
+              Text(_user.role),
               SizedBox(height: 16),
               Row(
                 children: [
-                  Checkbox(value: user.apresFormation, onChanged: null),
+                  Checkbox(value: _user.apresFormation, onChanged: null),
                   Text(
                     'User after Formation:',
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -76,27 +135,14 @@ class UserDetailsPage extends StatelessWidget {
                 'Apres Formation Doc:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              if(user.apresFormationDoc != "" && user.apresFormationDoc != null)
-              Image.network(user.apresFormationDoc!, width: 600),
+              if(_user.apresFormationDoc != "" && _user.apresFormationDoc != null)
+              Image.network(_user.apresFormationDoc!, width: 600),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.company,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              FutureBuilder<String>(
-                future: getCompanyName(user.company),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('Company name not found');
-                  } else {
-                    return Text(snapshot.data!);
-                  }
-                },
-              ),
+              Text(_company.values.first.name),
             ],
           ),
         ),

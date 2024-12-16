@@ -6,16 +6,55 @@ import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
-import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
-class UserManagementPage extends StatelessWidget {
+class UserManagementPage extends StatefulWidget {
+  @override
+  State<UserManagementPage> createState() => _UserManagementPageState();
+}
+
+class _UserManagementPageState extends State<UserManagementPage> {
   final AuthController authController = Get.find();
-  final DatabaseCompanyService companyService = DatabaseCompanyService();
+  late Database db;
+  Map<String, String> _companyNames = {};
 
-  Future<Map<String, String>> getCompanyNames() async {
-    return await companyService.getAllCompaniesNames();
+  @override
+  void initState() {
+    super.initState();
+    _loadDataFromDatabase();
+  }
+
+  Future<void> _loadDataFromDatabase() async {
+    await _initDatabase();
+    await _syncData();
+    Map<String, String>? companyNames = await getAllCompaniesNames(db);
+    if(companyNames == null){
+      companyNames == {};
+    }
+    setState(() {
+      _companyNames = companyNames!;
+    });
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _syncData() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing Companies...");
+      await syncService.fullSyncTable("companies");
+      print("++++ Synchronization with SQLite completed.");
+    } catch (e) {
+      print("++++ Error during synchronization with SQLite: $e");
+    }
   }
 
   @override
@@ -34,138 +73,127 @@ class UserManagementPage extends StatelessWidget {
             return MyUser.fromJson(data);
           }).toList();
 
-          return FutureBuilder<Map<String, String>>(
-            future: getCompanyNames(),
-            builder: (context, companySnapshot) {
-              if (!companySnapshot.hasData) {
-                return Center(child: CircularProgressIndicator());
-              }
+          var usersByCompany = <String, List<MyUser>>{};
+          for (var user in users) {
+            var companyName = _companyNames[user.company] ?? 'Unknown';
+            if (usersByCompany[companyName] == null) {
+              usersByCompany[companyName] = [];
+            }
+            usersByCompany[companyName]!.add(user);
+          }
 
-              var companyNames = companySnapshot.data!;
+          return ListView.builder(
+            itemCount: usersByCompany.length,
+            itemBuilder: (context, index) {
+              var company = usersByCompany.keys.elementAt(index);
+              var companyUsers = usersByCompany[company]!;
 
-              var usersByCompany = <String, List<MyUser>>{};
-              for (var user in users) {
-                var companyName = companyNames[user.company] ?? 'Unknown';
-                if (usersByCompany[companyName] == null) {
-                  usersByCompany[companyName] = [];
-                }
-                usersByCompany[companyName]!.add(user);
-              }
-
-              return ListView.builder(
-                itemCount: usersByCompany.length,
-                itemBuilder: (context, index) {
-                  var company = usersByCompany.keys.elementAt(index);
-                  var companyUsers = usersByCompany[company]!;
-
-                  return Card(
-                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              return Card(
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ExpansionTile(
+                  title: Text(
+                    company,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
                     ),
-                    child: ExpansionTile(
-                      title: Text(
-                        company,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
+                  ),
+                  children: companyUsers.map((user) {
+                    return Card(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.all(16),
+                        leading: CircleAvatar(
+                          // backgroundColor:  Theme.of(context).primaryColor,
+                          child: Text(
+                            user.username[0],
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        title: Text(
+                          user.username,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(user.email),
+                        trailing: PopupMenuButton<String>(
+                          icon: Icon(Icons.more_vert),
+                          onSelected: (String value) {
+                            switch (value) {
+                              case 'view':
+                                Get.to(() => UserDetailsPage());
+                                break;
+                              case 'edit':
+                                Get.to(() => UserEditPage(user: user));
+                                break;
+                              case 'reset_password':
+                                _resetPassword(user.email);
+                                break;
+                              case 'delete':
+                                _deleteUser(context, user.username);
+                                break;
+                            }
+                          },
+                          itemBuilder: (BuildContext context) {
+                            return [
+                              PopupMenuItem(
+                                value: 'view',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.visibility, color: Colors.blueAccent),
+                                    SizedBox(width: 8),
+                                    Text(AppLocalizations.of(context)!.details),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit, color: Colors.orange),
+                                    SizedBox(width: 8),
+                                    Text(AppLocalizations.of(context)!.edit),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'reset_password',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.lock, color: Colors.purple),
+                                    SizedBox(width: 8),
+                                    Text(AppLocalizations.of(context)!.passReset),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete, color: Colors.red),
+                                    SizedBox(width: 8),
+                                    Text(AppLocalizations.of(context)!.delete),
+                                  ],
+                                ),
+                              ),
+                            ];
+                          },
                         ),
                       ),
-                      children: companyUsers.map((user) {
-                        return Card(
-                          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.all(16),
-                            leading: CircleAvatar(
-                              // backgroundColor:  Theme.of(context).primaryColor,
-                              child: Text(
-                                user.username[0],
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            title: Text(
-                              user.username,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(user.email),
-                            trailing: PopupMenuButton<String>(
-                              icon: Icon(Icons.more_vert),
-                              onSelected: (String value) {
-                                switch (value) {
-                                  case 'view':
-                                    Get.to(() => UserDetailsPage(user: user));
-                                    break;
-                                  case 'edit':
-                                    Get.to(() => UserEditPage(user: user));
-                                    break;
-                                  case 'reset_password':
-                                    _resetPassword(user.email);
-                                    break;
-                                  case 'delete':
-                                    _deleteUser(context, user.username);
-                                    break;
-                                }
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return [
-                                  PopupMenuItem(
-                                    value: 'view',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.visibility, color: Colors.blueAccent),
-                                        SizedBox(width: 8),
-                                        Text(AppLocalizations.of(context)!.details),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'edit',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.edit, color: Colors.orange),
-                                        SizedBox(width: 8),
-                                        Text(AppLocalizations.of(context)!.edit),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'reset_password',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.lock, color: Colors.purple),
-                                        SizedBox(width: 8),
-                                        Text(AppLocalizations.of(context)!.passReset),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'delete',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.delete, color: Colors.red),
-                                        SizedBox(width: 8),
-                                        Text(AppLocalizations.of(context)!.delete),
-                                      ],
-                                    ),
-                                  ),
-                                ];
-                              },
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                },
+                    );
+                  }).toList(),
+                ),
               );
             },
           );

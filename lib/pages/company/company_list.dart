@@ -5,9 +5,13 @@ import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/company/add_company_form.dart';
-import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CompanyList extends StatefulWidget {
   const CompanyList({super.key});
@@ -17,66 +21,82 @@ class CompanyList extends StatefulWidget {
 }
 
 class _CompanyListState extends State<CompanyList> {
-  final DatabaseCompanyService databaseCompanyService = DatabaseCompanyService();
-  Future<MyUser>? _futureUser;
+  late Database db;
+  Map<String, Company> _companyList = HashMap();
+  MyUser? _user;
 
   @override
   void initState() {
     super.initState();
-    _futureUser = getUser();
+    _loadUser();
+    _loadDataFromDatabase();
+  }
+
+  Future<void> _loadDataFromDatabase() async {
+    await _initDatabase();
+    await _syncData();
+    Map<String, Company>? companyList = {};
+    if(_isSuperAdmin()){
+      companyList = await getAllCompanies(db);
+    }else{
+      Company? company = await getOneCompanyWithID(db, _user!.company);
+      companyList[_user!.company] = company!;
+    }
+    setState(() {
+      _companyList = companyList!;
+    });
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      MyUser user = await getUser();
+      setState(() {
+        _user = user;
+      });
+    } catch (e) {
+      print("Error loading user: $e");
+    }
+  }
+
+  Future<void> _syncData() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing Companies...");
+      await syncService.fullSyncTable("companies");
+      print("++++ Synchronization with SQLite completed.");
+    } catch (e) {
+      print("++++ Error during synchronization with SQLite: $e");
+    }
+  }
+
+  bool _isSuperAdmin() {
+    return _user?.role == 'superadmin';
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<MyUser>(
-      future: _futureUser,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (snapshot.hasData) {
-          MyUser user = snapshot.data!;
-          return Scaffold(
-              body: FutureBuilder(
-                future: getCompanyPdfData(user),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    Map<String, Company> companyMap = snapshot.data!;
-                    return DefaultTabController(
-                      initialIndex: 0,
-                      length: companyMap.length,
-                      child: BasePage(
-                        title: title(user),
-                        body: _buildBody(companyMap, user),
-                      ),
-                    );
-                  }
-                },
-              ),
-              floatingActionButton: Visibility(
-                visible: user.role == 'superadmin',
-                child: FloatingActionButton(
-                  heroTag: "addCompanyHero",
-                  onPressed: () {
-                    showCompanyModal();
-                  },
-                  // backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: const Icon(
-                    Icons.add_home_work,
-                    color: Colors.white,
-                  ),
-                ),
-              )
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    if (_user == null || _companyList.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return Scaffold(
+      body: BasePage(
+        title: title(),
+        body: _buildBody(),
+      ),
+      floatingActionButton: Visibility(
+        visible: _isSuperAdmin(),
+        child: FloatingActionButton(
+          heroTag: "addCompanyHero",
+          onPressed: () {
+            showCompanyModal();
+          },
+          child: const Icon(Icons.fire_truck, color: Colors.white),
+        ),
+      ),
     );
   }
 
@@ -85,32 +105,17 @@ class _CompanyListState extends State<CompanyList> {
     return await userService.getCurrentUserData();
   }
 
-  Future<Map<String, Company>> getCompanyPdfData(MyUser user) async {
-    if (user.role == 'superadmin') {
-      return databaseCompanyService.getAllCompanies();
-    } else if (user.role == 'admin') {
-      Map<String, Company> companies = HashMap();
-      String companyId = user.company;
-      Company company = await databaseCompanyService.getCompanyByID(companyId);
-      companies.addAll({companyId: company});
-      return companies;
-    } else {
-      Map<String, Company> companies = HashMap();
-      return companies;
-    }
-  }
-
-  Widget _buildBody(Map<String, Company> companyMap, MyUser user) {
+  Widget _buildBody() {
     return ListView.builder(
       padding: EdgeInsets.fromLTRB(8, 8, 8, 50),
-      itemCount: companyMap.length,
+      itemCount: _companyList.length,
       itemBuilder: (_, index) {
         Widget leading;
-        if (companyMap.values.elementAt(index).logo == "") {
+        if (_companyList.values.elementAt(index).logo == "" || _companyList.values.elementAt(index).logo == null) {
           leading = Icon(Icons.home_work, color: Colors.deepPurple, size: 60);
         } else {
           leading = Image.network(
-            companyMap.values.elementAt(index).logo,
+            _companyList.values.elementAt(index).logo!,
             height: 60,
           );
         }
@@ -118,16 +123,16 @@ class _CompanyListState extends State<CompanyList> {
           padding: EdgeInsets.all(8),
           child: ExpansionTile(
             leading: leading,
-            title: Text(companyMap.values.elementAt(index).name, style: TextStyle(fontSize: 24, color:Theme.of(context).primaryColor, ),),
+            title: Text(_companyList.values.elementAt(index).name, style: TextStyle(fontSize: 24, color:Theme.of(context).primaryColor, ),),
             trailing: PopupMenuButton(
               onSelected: (value) async {
                 if (value == 'edit') {
                   showCompanyModal(
-                    company: companyMap.values.elementAt(index),
-                    companyID: companyMap.keys.elementAt(index),
+                    company: _companyList.values.elementAt(index),
+                    companyID: _companyList.keys.elementAt(index),
                   );
                 } else if (value == 'delete') {
-                  _showDeleteConfirmation(companyMap.keys.elementAt(index));
+                  _showDeleteConfirmation(_companyList.keys.elementAt(index));
                 }
               },
               itemBuilder: (context) => [
@@ -135,7 +140,7 @@ class _CompanyListState extends State<CompanyList> {
                   value: 'edit',
                   child: Text(AppLocalizations.of(context)!.edit),
                 ),
-                if(user.role == "superadmin")
+                if(_isSuperAdmin())
                 PopupMenuItem(
                   value: 'delete',
                   child: Text(AppLocalizations.of(context)!.delete),
@@ -148,48 +153,48 @@ class _CompanyListState extends State<CompanyList> {
                 children: [
                   SizedBox(
                     child: Text(
-                      "${AppLocalizations.of(context)!.companySiret}: ${companyMap.values.elementAt(index).siret}",
+                      "${AppLocalizations.of(context)!.companySiret}: ${_companyList.values.elementAt(index).siret}",
                       style: textStyle(),
                     ),
                   ),
                   SizedBox(
                     child: Text(
-                      "${AppLocalizations.of(context)!.companySirene}: ${companyMap.values.elementAt(index).sirene}",
+                      "${AppLocalizations.of(context)!.companySirene}: ${_companyList.values.elementAt(index).sirene}",
                       style: textStyle(),
                     ),
                   ),
-                  if (companyMap.values.elementAt(index).description != "")
+                  if (_companyList.values.elementAt(index).description != "")
                   SizedBox(
                     child: Text(
-                      "${AppLocalizations.of(context)!.companyDescription}: ${companyMap.values.elementAt(index).description}",
+                      "${AppLocalizations.of(context)!.companyDescription}: ${_companyList.values.elementAt(index).description}",
                       style: textStyle(),
                     ),
                   ),
-                  if (companyMap.values.elementAt(index).tel != "")
+                  if (_companyList.values.elementAt(index).tel != "")
                   SizedBox(
                     child: Text(
-                      "${AppLocalizations.of(context)!.companyPhone}: ${companyMap.values.elementAt(index).tel}",
+                      "${AppLocalizations.of(context)!.companyPhone}: ${_companyList.values.elementAt(index).tel}",
                       style: textStyle(),
                     ),
                   ),
-                  if (companyMap.values.elementAt(index).email != "")
+                  if (_companyList.values.elementAt(index).email != "")
                   SizedBox(
                     child: Text(
-                      "${AppLocalizations.of(context)!.companyEMail}: ${companyMap.values.elementAt(index).email}",
+                      "${AppLocalizations.of(context)!.companyEMail}: ${_companyList.values.elementAt(index).email}",
                       style: textStyle(),
                     ),
                   ),
-                  if (companyMap.values.elementAt(index).address != "")
+                  if (_companyList.values.elementAt(index).address != "")
                   SizedBox(
                     child: Text(
-                      "${AppLocalizations.of(context)!.companyAddress}: ${companyMap.values.elementAt(index).address}",
+                      "${AppLocalizations.of(context)!.companyAddress}: ${_companyList.values.elementAt(index).address}",
                       style: textStyle(),
                     ),
                   ),
-                  if (companyMap.values.elementAt(index).responsible != "")
+                  if (_companyList.values.elementAt(index).responsible != "")
                   SizedBox(
                     child: Text(
-                      "${AppLocalizations.of(context)!.companyResponsible}: ${companyMap.values.elementAt(index).responsible}",
+                      "${AppLocalizations.of(context)!.companyResponsible}: ${_companyList.values.elementAt(index).responsible}",
                       style: textStyle(),
                     ),
                   ),
@@ -206,8 +211,8 @@ class _CompanyListState extends State<CompanyList> {
     return TextStyle(fontSize: 20);
   }
 
-  String title(MyUser user) {
-    if(user.role == "superadmin"){
+  String title() {
+    if(_isSuperAdmin()){
       return AppLocalizations.of(context)!.companyList;
     }else{
       return AppLocalizations.of(context)!.details;
@@ -252,7 +257,7 @@ class _CompanyListState extends State<CompanyList> {
           ),
           TextButton(
             onPressed: () {
-              databaseCompanyService.deleteCompany(companyID);
+              softDeleteCompany(db, companyID);
               setState(() {});
               Navigator.pop(context);
             },

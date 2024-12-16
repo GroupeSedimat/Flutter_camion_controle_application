@@ -13,17 +13,18 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/pages/checklist/blueprint_template.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/pages/checklist/validate_task.dart';
-import 'package:flutter_application_1/services/database_firestore/database_camion_service.dart';
-import 'package:flutter_application_1/services/database_firestore/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/check_list/database_blueprints_service.dart';
 import 'package:flutter_application_1/services/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
 import 'package:flutter_application_1/services/check_list/database_tasks_service.dart';
+import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
+import 'package:flutter_application_1/services/database_local/camions_table.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';
 import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CheckList extends StatefulWidget {
   const CheckList({super.key});
@@ -34,17 +35,17 @@ class CheckList extends StatefulWidget {
 
 class _CheckListState extends State<CheckList> {
 
+  late Database db;
+  late MyUser _user;
+
   final DatabaseBlueprintsService databaseBlueprintsService = DatabaseBlueprintsService();
   final DatabaseTasksService databaseTasksService = DatabaseTasksService();
   final DatabaseImageService databaseImageService = DatabaseImageService();
   final DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
-  final DatabaseCamionService databaseCamionService = DatabaseCamionService();
-  final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
   final PdfService pdfService = PdfService();
   final UserService userService = UserService();
   AuthController authController = AuthController.instance;
 
-  late MyUser _user;
   List<ListOfLists> _listOfListsFuture = [];
   late List<int> counter;
 
@@ -86,8 +87,8 @@ class _CheckListState extends State<CheckList> {
     }else{
       try {
         if(_user.camion != null){
-          Camion camion = await databaseCamionService.getOneCamionWithID(_user.camion!) as Camion;
-          CamionType camionType = await databaseCamionTypeService.getOneCamionTypeWithID(camion.camionType) as CamionType;
+          Camion camion = await getOneCamionWithID(db, _user.camion!) as Camion;
+          CamionType camionType = await getOneCamionTypeWithID(db, camion.camionType) as CamionType;
           List<ListOfLists> listOfListsFuture = [];
           if(camionType.lol != null){
             listOfListsFuture = await databaseListOfListsService.getListsForCamionType(camionType.lol!);

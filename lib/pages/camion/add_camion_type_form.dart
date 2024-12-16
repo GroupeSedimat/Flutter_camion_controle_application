@@ -4,8 +4,8 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_firestore/database_equipment_service.dart';
 import 'package:flutter_application_1/services/database_local/equipments_table.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -50,6 +50,7 @@ class _AddCamionTypeState extends State<AddCamionType> {
 
   Future<void> _initializeData() async {
     await _initDatabase();
+    await _syncDatas();
     await Future.wait([_loadEquipments(), _loadListOfLists()]);
     if (widget.camionType != null) {
       _populateFieldsWithCamionTypeData();
@@ -90,6 +91,17 @@ class _AddCamionTypeState extends State<AddCamionType> {
         equipmentSelection[equipmentKey] = equipment.contains(equipmentKey);
       }
     });
+  }
+
+  Future<void> _syncDatas() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing Equipments...");
+      await syncService.fullSyncTable("equipments");
+      print("++++ Synchronization with SQLite completed.");
+    } catch (e) {
+      print("++++ Error during synchronization with SQLite: $e");
+    }
   }
 
   @override
@@ -217,7 +229,6 @@ class _AddCamionTypeState extends State<AddCamionType> {
                   if (widget.camionType == null) {
                     insertCamionType(db, newCamionType, "");
                   } else {
-                    // databaseCamionTypeService.updateCamionType(widget.camionTypeID!, newCamionType);
                     updateCamionType(db, newCamionType, widget.camionTypeID!);
                   }
                   if (widget.onCamionTypeAdded != null) {

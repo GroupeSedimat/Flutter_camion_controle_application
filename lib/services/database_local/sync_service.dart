@@ -1,13 +1,15 @@
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
+import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/equipment/equipment.dart';
 import 'package:flutter_application_1/models/database_local/table_sync_info.dart';
-// import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/database_firestore/database_camion_service.dart';
 import 'package:flutter_application_1/services/database_firestore/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/database_firestore/database_equipment_service.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/equipments_table.dart';
 import 'package:flutter_application_1/services/database_local/update_tables.dart';
 import 'package:flutter_application_1/services/dialog_services.dart';
@@ -22,6 +24,7 @@ class SyncService {
   final UserService firebaseUserService = UserService();
   final DatabaseCamionTypeService firebaseCamionTypeService = DatabaseCamionTypeService();
   final DatabaseEquipmentService firebaseEquipmentService = DatabaseEquipmentService();
+  final DatabaseCompanyService firebaseCompanyService = DatabaseCompanyService();
 
   SyncService(this.db, this.networkService);
 
@@ -142,8 +145,52 @@ class SyncService {
           print("----------- sync service From Firebase camionTypes end");
           break;
         case "companies":
-
           /// sync Companies DB
+          List<Map<String, dynamic>> conflicts = [];
+          await db.transaction((txn) async {
+            print("----------- sync service From Firebase Companies");
+            final Map<String, Company> firebaseCompanies = await firebaseCompanyService.getAllCompaniesSinceLastSync(lastSync);
+            final Map<String, Company>? localCompanies = await getAllCompaniesSinceLastUpdate(txn, lastSync, timeSync);
+            print("----------- Firebase Companies since last update $firebaseCompanies");
+
+            for (var firebaseCompany in firebaseCompanies.entries) {
+              final Company? localCompany = localCompanies?[firebaseCompany.key];
+              if (localCompany == null) {
+                await insertCompany(txn, firebaseCompany.value, firebaseCompany.key);
+              } else {
+                conflicts.add({
+                  'firebaseKey': firebaseCompany.key,
+                  'firebase': firebaseCompany.value,
+                  'local': localCompanies,
+                });
+              }
+            }
+          });
+
+          for (var conflict in conflicts) {
+            final shouldContinue = await showConflictDialog(
+              conflict['firebase'],
+              conflict['local'],
+            );
+
+            if (shouldContinue == '') {
+              itsOk = false;
+              throw Exception("Synchronization canceled by user.");
+            }
+
+            await db.transaction((txn) async {
+              await resolveConflict(
+                txn,
+                conflict['firebaseKey'],
+                conflict['firebase'],
+                conflict['local'],
+                shouldContinue,
+                tableName,
+              );
+            });
+          }
+
+          print("----------- sync service From Firebase Companies end");
           break;
         case "listOfLists":
 
@@ -220,7 +267,7 @@ class SyncService {
         break;
 
       case "camions":
-      /// sync Camion DB
+      /// sync Camions DB
         print("-----------sync service To Firebase camions start");
 
         TableSyncInfo? lastUpdatedDatas = await getOneWithName(db, tableName);
@@ -272,6 +319,28 @@ class SyncService {
         break;
       case "companies":
       /// sync Companies DB
+        print("-----------sync service To Firebase companies types start");
+
+        TableSyncInfo? lastUpdatedDatas = await getOneWithName(db, tableName);
+        String lastUpdated = lastUpdatedDatas?.lastLocalUpdate ?? "";
+        if (lastUpdated == ""){
+          print("-----------sync service To Firebase companies sync no needed");
+          break;
+        }
+        final Map<String, Company>? localCompanies = await getAllCompaniesSinceLastUpdate(db, lastUpdated, timeSync);
+        print("----------- companies since last update $localCompanies");
+        if(localCompanies != null){
+          for (var company in localCompanies.entries) {
+            if(company.key == ""){
+              company.value.updatedAt = DateTime.parse(timeSync);
+              String newID = await firebaseCompanyService.addCompany(company.value);
+              await updateCompanyFirebaseID(db, company.value, newID);
+            }else{
+              await firebaseCompanyService.updateCompany(company.key, company.value);
+            }
+          }
+        }
+        print("-----------sync service To Firebase end");
         break;
       case "listOfLists":
       /// sync LoL DB
