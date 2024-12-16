@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
-import 'package:flutter_application_1/services/check_list/database_blueprints_service.dart';
+import 'package:flutter_application_1/services/database_firestore/check_list/database_blueprints_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

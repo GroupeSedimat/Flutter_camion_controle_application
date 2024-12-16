@@ -6,7 +6,7 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_type_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
-import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
+import 'package:flutter_application_1/services/database_firestore/check_list/database_list_of_lists_service.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/equipments_table.dart';

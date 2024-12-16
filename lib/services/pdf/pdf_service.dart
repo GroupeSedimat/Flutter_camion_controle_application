@@ -11,7 +11,7 @@ import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/services/check_list/database_image_service.dart';
+import 'package:flutter_application_1/services/database_firestore/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:http/http.dart' as http;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
-import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
+import 'package:flutter_application_1/services/database_firestore/check_list/database_list_of_lists_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddListForm extends StatefulWidget {
