@@ -60,7 +60,7 @@ class PdfService {
     final pdf = pw.Document();
     userID = authController.getCurrentUserUID()!;
     user = await userService.getUserData(userID);
-    _initDatabase();
+    await _initDatabase();
     company = (await getOneCompanyWithID(db, user.company))!;
     mobilityLogo = (await rootBundle.load('assets/images/keybas_logo.png')).buffer.asUint8List();
     count = 1;
@@ -76,7 +76,7 @@ class PdfService {
           blueprintTaskList.addAll({blueprint: task});
           if(task.photoFilePath != ""){
             Uint8List? photo = await databaseImageService.downloadImageFromFirebase(task.photoFilePath!);
-            photosToPDF.addAll({task.nrEntryPosition!: photo!});
+            photosToPDF.addAll({task.nrEntryPosition: photo!});
           }
         }
       }
@@ -104,7 +104,7 @@ class PdfService {
     );
 
     sortedBlueprintTaskList = Map.fromEntries(blueprintTaskList.entries.toList()..sort(
-                  (e1, e2) => (e1.value.nrEntryPosition!).compareTo(e2.value.nrEntryPosition!))
+                  (e1, e2) => (e1.value.nrEntryPosition).compareTo(e2.value.nrEntryPosition))
     );
     pdf.addPage(
       pw.MultiPage(
@@ -179,7 +179,7 @@ class PdfService {
                       style: pw.TextStyle(font: font),
                     ),
                     pw.Text(
-                      "Validation date: ${DateFormat("dd-MM-yyyy h:mm a").format(entry.value.validationDate!.toDate())}",
+                      "Validation date: ${DateFormat("dd-MM-yyyy h:mm a").format(entry.value.updatedAt)}",
                       style: pw.TextStyle(font: font),
                     ),
                   ],

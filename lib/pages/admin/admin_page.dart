@@ -1,19 +1,13 @@
-// ignore_for_file: use_super_parameters, prefer_const_constructors, unused_import
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/UserApprovalPage.dart';
 import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
-import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/lol_control_page.dart';
 import 'package:flutter_application_1/pages/company/company_list.dart';
-import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
-import 'package:flutter_application_1/pages/welcome_page.dart';
-import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/pages/settings_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:get/get.dart';

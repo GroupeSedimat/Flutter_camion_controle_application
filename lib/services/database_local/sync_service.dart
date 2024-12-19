@@ -1,14 +1,23 @@
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
+import 'package:flutter_application_1/models/checklist/blueprint.dart';
+import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
+import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/equipment/equipment.dart';
 import 'package:flutter_application_1/models/database_local/table_sync_info.dart';
 import 'package:flutter_application_1/services/database_company_service.dart';
+import 'package:flutter_application_1/services/database_firestore/check_list/database_blueprints_service.dart';
+import 'package:flutter_application_1/services/database_firestore/check_list/database_list_of_lists_service.dart';
+import 'package:flutter_application_1/services/database_firestore/check_list/database_tasks_service.dart';
 import 'package:flutter_application_1/services/database_firestore/database_camion_service.dart';
 import 'package:flutter_application_1/services/database_firestore/database_camion_type_service.dart';
 import 'package:flutter_application_1/services/database_firestore/database_equipment_service.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:flutter_application_1/services/database_local/check_list/blueprints_table.dart';
+import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
+import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/equipments_table.dart';
 import 'package:flutter_application_1/services/database_local/update_tables.dart';
@@ -25,6 +34,9 @@ class SyncService {
   final DatabaseCamionTypeService firebaseCamionTypeService = DatabaseCamionTypeService();
   final DatabaseEquipmentService firebaseEquipmentService = DatabaseEquipmentService();
   final DatabaseCompanyService firebaseCompanyService = DatabaseCompanyService();
+  final DatabaseListOfListsService firebaseLOLService = DatabaseListOfListsService();
+  final DatabaseTasksService firebaseTaskService = DatabaseTasksService();
+  final DatabaseBlueprintsService firebaseBlueprintService = DatabaseBlueprintsService();
 
   SyncService(this.db, this.networkService);
 
@@ -144,6 +156,7 @@ class SyncService {
 
           print("----------- sync service From Firebase camionTypes end");
           break;
+
         case "companies":
           /// sync Companies DB
           List<Map<String, dynamic>> conflicts = [];
@@ -192,14 +205,105 @@ class SyncService {
 
           print("----------- sync service From Firebase Companies end");
           break;
+
         case "listOfLists":
-
           /// sync LoL DB
-          break;
-        case "validateTasks":
+          List<Map<String, dynamic>> conflicts = [];
+          await db.transaction((txn) async {
+            print("----------- sync service From Firebase LoL");
+            final Map<String, ListOfLists> firebaseLoL = await firebaseLOLService.getAllLOLSinceLastSync(lastSync);
+            final Map<String, ListOfLists>? localLoL = await getAllListsSinceLastUpdate(txn, lastSync, timeSync);
+            print("----------- Firebase LOL since last update $firebaseLoL");
 
-          /// sync Validated Tasks DB
+            for (var firebaseList in firebaseLoL.entries) {
+              final ListOfLists? localList = localLoL?[firebaseList.key];
+              if (localList == null) {
+                await insertList(txn, firebaseList.value, firebaseList.key);
+              } else {
+                conflicts.add({
+                  'firebaseKey': firebaseList.key,
+                  'firebase': firebaseList.value,
+                  'local': localList,
+                });
+              }
+            }
+          });
+
+          for (var conflict in conflicts) {
+            final shouldContinue = await showConflictDialog(
+              conflict['firebase'],
+              conflict['local'],
+            );
+
+            if (shouldContinue == '') {
+              itsOk = false;
+              throw Exception("Synchronization canceled by user.");
+            }
+
+            await db.transaction((txn) async {
+              await resolveConflict(
+                txn,
+                conflict['firebaseKey'],
+                conflict['firebase'],
+                conflict['local'],
+                shouldContinue,
+                tableName,
+              );
+            });
+          }
+          print("----------- sync service From Firebase LoL end");
           break;
+
+        case "validateTasks":
+          /// sync Validated Tasks DB
+          List<Map<String, dynamic>> conflicts = [];
+          await db.transaction((txn) async {
+            print("----------- sync service From Firebase Tasks");
+            String userId = await getUserId();
+            final Map<String, TaskChecklist> firebaseTasks = await firebaseTaskService.getAllTasks(userId);
+            final Map<String, TaskChecklist>? localTasks = await getAllTasksOfUser(txn, userId);
+            print("----------- Firebase Tasks since last update $firebaseTasks");
+
+            for (var firebaseTask in firebaseTasks.entries) {
+              final TaskChecklist? localTask = localTasks?[firebaseTask.key];
+              if (localTask == null) {
+                await insertTask(txn, firebaseTask.value, firebaseTask.key);
+              } else {
+                if (firebaseTask.value.updatedAt.isAfter(localTask.updatedAt)) {
+                  await updateTask(txn, firebaseTask.value , firebaseTask.key);
+                } else {
+                  await updateTask(txn, localTask, firebaseTask.key);
+                }
+              }
+            }
+          });
+
+          for (var conflict in conflicts) {
+            final shouldContinue = await showConflictDialog(
+              conflict['firebase'],
+              conflict['local'],
+            );
+
+            if (shouldContinue == '') {
+              itsOk = false;
+              throw Exception("Synchronization canceled by user.");
+            }
+
+            await db.transaction((txn) async {
+              await resolveConflict(
+                txn,
+                conflict['firebaseKey'],
+                conflict['firebase'],
+                conflict['local'],
+                shouldContinue,
+                tableName,
+              );
+            });
+          }
+
+          print("----------- sync service From Firebase Tasks end");
+          break;
+
         case "equipments":
           /// sync Equipments DB
           List<Map<String, dynamic>> conflicts = [];
@@ -249,9 +353,55 @@ class SyncService {
 
           print("----------- sync service From Firebase Equipments end");
           break;
-        case "blueprints":
 
+        case "blueprints":
           /// sync Blueprints DB
+          List<Map<String, dynamic>> conflicts = [];
+          await db.transaction((txn) async {
+            print("----------- sync service From Firebase Blueprints");
+
+            final Map<String, Blueprint> firebaseBlueprints = await firebaseBlueprintService.getAllBlueprintsSinceLastSync(lastSync);
+            final Map<String, Blueprint>? localBlueprintsTypes = await getAllBlueprintsSinceLastUpdate(txn, lastSync, timeSync);
+            print("----------- Firebase Blueprints since last update $firebaseBlueprints");
+
+            for (var firebaseBlueprint in firebaseBlueprints.entries) {
+              final Blueprint? localBlueprint = localBlueprintsTypes?[firebaseBlueprint.key];
+              if (localBlueprint == null) {
+                await insertBlueprint(txn, firebaseBlueprint.value, firebaseBlueprint.key);
+              } else {
+                conflicts.add({
+                  'firebaseKey': firebaseBlueprint.key,
+                  'firebase': firebaseBlueprint.value,
+                  'local': localBlueprint,
+                });
+              }
+            }
+          });
+
+          for (var conflict in conflicts) {
+            final shouldContinue = await showConflictDialog(
+              conflict['firebase'],
+              conflict['local'],
+            );
+
+            if (shouldContinue == '') {
+              itsOk = false;
+              throw Exception("Synchronization canceled by user.");
+            }
+
+            await db.transaction((txn) async {
+              await resolveConflict(
+                txn,
+                conflict['firebaseKey'],
+                conflict['firebase'],
+                conflict['local'],
+                shouldContinue,
+                tableName,
+              );
+            });
+          }
+
+          print("----------- sync service From Firebase Blueprints end");
           break;
         default:
           throw "Invalid Table";
@@ -317,6 +467,7 @@ class SyncService {
         }
         print("-----------sync service To Firebase end");
         break;
+
       case "companies":
       /// sync Companies DB
         print("-----------sync service To Firebase companies types start");
@@ -342,12 +493,53 @@ class SyncService {
         }
         print("-----------sync service To Firebase end");
         break;
+
       case "listOfLists":
       /// sync LoL DB
+        print("-----------sync service To Firebase LOL types start");
+
+        TableSyncInfo? lastUpdatedDatas = await getOneWithName(db, tableName);
+        String lastUpdated = lastUpdatedDatas?.lastLocalUpdate ?? "";
+        if (lastUpdated == ""){
+          print("-----------sync service To Firebase LOL sync no needed");
+          break;
+        }
+        final Map<String, ListOfLists>? localListOfLists = await getAllListsSinceLastUpdate(db, lastUpdated, timeSync);
+        print("----------- LOL last update $localListOfLists");
+        if(localListOfLists != null){
+          for (var list in localListOfLists.entries) {
+            if(list.key == ""){
+              list.value.updatedAt = DateTime.parse(timeSync);
+              String newID = await firebaseLOLService.addList(list.value);
+              await updateListFirebaseID(db, list.value, newID);
+            }else{
+              await firebaseLOLService.updateList(list.key, list.value);
+            }
+          }
+        }
+        print("-----------sync service To Firebase end");
         break;
+
       case "validateTasks":
       /// sync Validated Tasks DB
+        print("-----------sync service To Firebase Tasks start");
+        String userId = await getUserId();
+        final Map<String, TaskChecklist>? tasks = await getAllTasksOfUser(db, userId);
+        print("----------- Tasks last update $tasks");
+        if(tasks != null){
+          for (var task in tasks.entries) {
+            if(task.key == ""){
+              task.value.updatedAt = DateTime.parse(timeSync);
+              String newID = await firebaseTaskService.addTask(task.value);
+              await updateTaskFirebaseID(db, task.value, newID);
+            }else{
+              await firebaseTaskService.updateTask(task.key, task.value);
+            }
+          }
+        }
+        print("-----------sync service To Firebase end");
         break;
+
       case "equipments":
       /// sync Equipments DB
         print("-----------sync service To Firebase Equipments start");
@@ -373,9 +565,33 @@ class SyncService {
         }
         print("-----------sync service To Firebase end");
         break;
+
       case "blueprints":
       /// sync Blueprints DB
+        print("-----------sync service To Firebase Blueprints start");
+
+        TableSyncInfo? lastUpdatedDatas = await getOneWithName(db, tableName);
+        String lastUpdated = lastUpdatedDatas?.lastLocalUpdate ?? "";
+        if (lastUpdated == ""){
+          print("-----------sync service To Firebase Blueprints sync no needed");
+          break;
+        }
+        final Map<String, Blueprint>? blueprints = await getAllBlueprintsSinceLastUpdate(db, lastUpdated, timeSync);
+        print("----------- Blueprints last update $blueprints");
+        if(blueprints != null){
+          for (var blueprint in blueprints.entries) {
+            if(blueprint.key == ""){
+              blueprint.value.updatedAt = DateTime.parse(timeSync);
+              String newID = await firebaseBlueprintService.addBlueprint(blueprint.value);
+              await updateBlueprint(db, blueprint.value, newID);
+            }else{
+              await firebaseBlueprintService.updateBlueprint(blueprint.key, blueprint.value);
+            }
+          }
+        }
+        print("-----------sync service To Firebase end");
         break;
+
       default:
         throw "Invalid Table";
     }
@@ -398,6 +614,15 @@ class SyncService {
     } catch (e) {
       print("Error during full sync for $tableName: $e");
     }
+  }
+
+  Future<String> getUserId() async {
+    UserService userService = UserService();
+    String? uId = userService.userID;
+    if(uId == null){
+      return "";
+    }
+    return uId;
   }
 
   Future<String> showConflictDialog(
@@ -460,15 +685,37 @@ class SyncService {
           await updateCamionType(dbOrTxn, localData as CamionType, firebaseKey);
         }
         break;
+
       case "companies":
       /// resolve Companies DB
+        print("resolve Companies with mode: $shouldContinue");
+        if (shouldContinue == 'firebase') {
+          await updateCompany(dbOrTxn, firebaseData as Company, firebaseKey);
+        } else if (shouldContinue == 'local') {
+          await updateCompany(dbOrTxn, localData as Company, firebaseKey);
+        }
         break;
+
       case "listOfLists":
       /// resolve LoL DB
+        print("resolve LOL with mode: $shouldContinue");
+        if (shouldContinue == 'firebase') {
+          await updateList(dbOrTxn, firebaseData as ListOfLists, firebaseKey);
+        } else if (shouldContinue == 'local') {
+          await updateList(dbOrTxn, localData as ListOfLists, firebaseKey);
+        }
         break;
+
       case "validateTasks":
       /// resolve Validated Tasks DB
+        print("resolve Validated Tasks with mode: $shouldContinue");
+        if (shouldContinue == 'firebase') {
+          await updateTask(dbOrTxn, firebaseData as TaskChecklist, firebaseKey);
+        } else if (shouldContinue == 'local') {
+          await updateTask(dbOrTxn, localData as TaskChecklist, firebaseKey);
+        }
         break;
+
       case "equipments":
       /// resolve Equipments DB
       print("resolve Equipment with mode: $shouldContinue");
@@ -478,9 +725,17 @@ class SyncService {
           await updateEquipment(dbOrTxn, localData as Equipment, firebaseKey);
         }
         break;
+
       case "blueprints":
       /// resolve Blueprints DB
+        print("resolve Blueprints with mode: $shouldContinue");
+        if (shouldContinue == 'firebase') {
+          await updateBlueprint(dbOrTxn, firebaseData as Blueprint, firebaseKey);
+        } else if (shouldContinue == 'local') {
+          await updateBlueprint(dbOrTxn, localData as Blueprint, firebaseKey);
+        }
         break;
+
       default:
         throw "Invalid Table";
     }

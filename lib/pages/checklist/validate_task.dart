@@ -1,29 +1,33 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/services/database_firestore/check_list/database_image_service.dart';
-import 'package:flutter_application_1/services/database_firestore/check_list/database_tasks_service.dart';
+import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/pick_image_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ValidateTask extends StatefulWidget {
 
-  DatabaseTasksService databaseTasksService;
   Blueprint blueprint;
   TaskChecklist validate;
   String keyId;
   String userUID;
+  final VoidCallback? onValidateAdded;
 
   ValidateTask({
     super.key,
-    required this.databaseTasksService,
     required this.blueprint,
     required this.validate,
     required this.keyId,
-    required this.userUID});
+    required this.userUID,
+    this.onValidateAdded
+  });
 
   @override
   State<ValidateTask> createState() => ValidateTaskState();
@@ -31,27 +35,33 @@ class ValidateTask extends StatefulWidget {
 
 class ValidateTaskState extends State<ValidateTask> {
   final _formKey = GlobalKey<FormState>();
-  late String descriptionOfProblem;
-  String? photoFilePath;
-  bool? isDone;
-  Timestamp? validationDate;
-  TaskChecklist? task;
-  int? nrOfList;
-  int? nrEntryPosition;
   File? imageGalery;
-  double screenWidth = 50;
-  double screenHeight = 50;
+  late Database db;
 
   final PickImageService _pickImageService = PickImageService();
 
   @override
   void initState() {
     super.initState();
+    _initDatabase();
+  }
 
-    task = widget.validate;
-    descriptionOfProblem = task?.descriptionOfProblem ?? "";
-    photoFilePath = task?.photoFilePath ?? "";
-    isDone = task?.isDone;
+  Future<void> _syncValidateTasks() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+
+      print("++++ Synchronizing Validate Tasks...");
+      await syncService.fullSyncTable("validateTasks");
+      print("++++ Synchronization with SQLite completed.");
+    } catch (e) {
+      print("Error during global data synchronization: $e");
+      throw e;
+    }
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+    _syncValidateTasks();
   }
 
   Future pickImageFromGallery() async {
@@ -71,8 +81,8 @@ class ValidateTaskState extends State<ValidateTask> {
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
-    screenWidth = screenSize.width;
-    screenHeight = screenSize.height;
+    double screenWidth = screenSize.width;
+    double screenHeight = screenSize.height;
     DatabaseImageService databaseImageService = DatabaseImageService();
 
     return Form(
@@ -100,7 +110,7 @@ class ValidateTaskState extends State<ValidateTask> {
             ),
             const SizedBox(height: 20),
             TextFormField(
-              initialValue: task?.descriptionOfProblem,
+              initialValue: widget.validate.descriptionOfProblem,
               decoration: InputDecoration(
                 hintText: AppLocalizations.of(context)!.checkListDescribe,
                 labelText: AppLocalizations.of(context)!.checkListDescribe,
@@ -113,23 +123,22 @@ class ValidateTaskState extends State<ValidateTask> {
                 border: UnderlineInputBorder(),
               ),
               validator: (val) {return (val == null || val.isEmpty) ? AppLocalizations.of(context)!.required : null;},
-              onChanged: (val) => descriptionOfProblem = val,
+              onChanged: (val) => widget.validate.descriptionOfProblem = val,
             ),
             const SizedBox(height: 40),
 
             Transform.scale(
               scale: 5,                                                           // Change checkbox scale
               child: Checkbox(
-                value: task?.isDone,
+                value: widget.validate.isDone,
                 checkColor: Colors.red,
-                activeColor: (task?.isDone == true) ? Colors.green: Colors.grey ,
+                activeColor: (widget.validate.isDone == true) ? Colors.green: Colors.grey ,
                 side: const BorderSide(width: 3, color: Colors.red),
-                shape: (task?.isDone == true) ? const ContinuousRectangleBorder() : const CircleBorder(),
+                shape: (widget.validate.isDone == true) ? const ContinuousRectangleBorder() : const CircleBorder(),
                 tristate: true,
                 onChanged: (value) {
                   setState(() {
-                    isDone = value;
-                    task?.isDone = value;
+                    widget.validate.isDone = value;
                   });
                 },
               ),
@@ -144,8 +153,8 @@ class ValidateTaskState extends State<ValidateTask> {
               child: imageGalery != null
                 ? Image.file(imageGalery!)
                 :(
-                  (photoFilePath != "" && photoFilePath != null)
-                    ? Image.network(photoFilePath!)
+                  (widget.validate.photoFilePath != "" && widget.validate.photoFilePath != null)
+                    ? Image.network(widget.validate.photoFilePath!)
                     : Text(AppLocalizations.of(context)!.photoNotYet, style: TextStyle(fontSize: screenWidth * 0.03,),)
                 ),
             ),
@@ -211,13 +220,13 @@ class ValidateTaskState extends State<ValidateTask> {
                     ),
                   ),
                   onPressed: () async {
-                    validationDate = Timestamp.now();
+                    widget.validate.updatedAt = DateTime.now();
                     if (imageGalery != null) {
                       try {
                         String photoFilePath = await databaseImageService.addImageToFirebase(imageGalery!.path);
                         if (mounted) {
                           setState(() {
-                            this.photoFilePath = photoFilePath;
+                            widget.validate.photoFilePath = photoFilePath;
                           });
                         }
                       } catch (e) {
@@ -225,23 +234,17 @@ class ValidateTaskState extends State<ValidateTask> {
                       }
                     }
 
-                    if(isDone!=true) isDone = false;
-                    TaskChecklist task = TaskChecklist(
-                        nrOfList: widget.blueprint.nrOfList,
-                        nrEntryPosition: widget.blueprint.nrEntryPosition,
-                        validationDate: validationDate,
-                        isDone: isDone,
-                        descriptionOfProblem: descriptionOfProblem,
-                        photoFilePath: photoFilePath,
-                        userId: widget.userUID
-                    );
+                    if(widget.validate.isDone!=true) widget.validate.isDone = false;
+                    widget.validate.userId = widget.userUID;
+                    widget.validate.nrOfList = widget.blueprint.nrOfList;
+                    widget.validate.nrEntryPosition = widget.blueprint.nrEntryPosition;
                     if(widget.keyId == ""){
-                      widget.databaseTasksService.addTask(task);
+                      insertTask(db, widget.validate, "");
                     }else{
-                      widget.databaseTasksService.updateTask(widget.keyId, task);
+                      updateTask(db, widget.validate, widget.keyId);
                     }
                     if (mounted) {
-                      Navigator.pop(context);
+                      widget.onValidateAdded?.call();
                     }
                   },
                 ),
@@ -257,6 +260,7 @@ class ValidateTaskState extends State<ValidateTask> {
                     ),
                   ),
                   onPressed: () async {
+                    setState(() {});
                     Navigator.pop(context);
                   },
                 ),

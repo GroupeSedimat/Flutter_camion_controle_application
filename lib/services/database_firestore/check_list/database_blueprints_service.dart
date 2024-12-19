@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 
@@ -18,6 +20,23 @@ class DatabaseBlueprintsService{
     );
   }
 
+  Future<Map<String, Blueprint>> getAllBlueprintsSinceLastSync(String lastSync) async {
+    Query query = _blueprintRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, Blueprint> blueprints = HashMap();
+      for (var doc in querySnapshot.docs) {
+        blueprints[doc.id] = doc.data() as Blueprint;
+      }
+      return blueprints;
+    } catch (e) {
+      print("Error fetching ListOfLists since last update data: $e");
+      rethrow;
+    }
+  }
+
   Stream<QuerySnapshot> getBlueprints(){
     return _blueprintRef.snapshots();
   }
@@ -26,11 +45,13 @@ class DatabaseBlueprintsService{
     return _blueprintRef.doc(blueprintID).snapshots();
   }
 
-  void addBlueprint(Blueprint blueprint) async {
-    _blueprintRef.add(blueprint);
+  Future<String> addBlueprint(Blueprint blueprint) async {
+    var returnAdd = await _blueprintRef.add(blueprint);
+    print("------------- ---------- ----------${returnAdd.id}");
+    return returnAdd.id;
   }
 
-  void updateBlueprint(String blueprintID, Blueprint blueprint){
+  Future<void> updateBlueprint(String blueprintID, Blueprint blueprint) async {
     _blueprintRef.doc(blueprintID).update(blueprint.toJson());
   }
 

@@ -7,7 +7,7 @@ class MyUser {
   String company;
   bool? apresFormation;
   String? apresFormationDoc;
-  String? camion;
+  String? camion; // change to List<String> for more camions?
 
   MyUser({
     required this.role,

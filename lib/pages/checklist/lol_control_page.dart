@@ -83,7 +83,9 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddListForm(listItem: listOfLists[index]),
+                        builder: (context) => AddListForm(
+                          listItem: listOfLists[index],
+                        ),
                       ),
                     );
                   } else if (value == 'delete') {

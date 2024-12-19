@@ -1,5 +1,3 @@
-// ignore_for_file: constant_identifier_names, avoid_print
-
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -35,58 +33,34 @@ class DatabaseTasksService{
 
     } catch (e) {
       print("Error getting tasks: $e");
-      rethrow; // Gérez l’erreur le cas échéant.
+      rethrow;
     }
   }
 
-  Future<List<String>> getOneListOfTasks(int nrList, String userUID) async {
-    final tasksList = <String>[];
+  Future<Map<String, TaskChecklist>> getAllTasksSinceLastSync(String lastSync) async {
+    Query query = _tasksRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+
     try {
-      final querySnapshot = await _firestore
-          .collection(TASK_COLLECTION_REF)
-          .where("nrOfList", isEqualTo: nrList)
-          .where("userId", isEqualTo: userUID)
-          .get();
-      if (querySnapshot.docs.isNotEmpty) {
-        List tasksSnapshotList = querySnapshot.docs;
-        for (var taskSnapshot in tasksSnapshotList){
-          tasksList.add(taskSnapshot.id);
-        }
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, TaskChecklist> tasks = HashMap();
+      for (var doc in querySnapshot.docs) {
+        tasks[doc.id] = doc.data() as TaskChecklist;
       }
-      return tasksList;
-
-    } catch (error) {
-      // Gérez l’erreur
-      print("Error retrieving task: $error");
-      return tasksList;
+      return tasks;
+    } catch (e) {
+      print("Error fetching Tasks since last update data: $e");
+      rethrow;
     }
   }
 
-  Future<TaskChecklist> getOneTaskWithListPos(int nrList, int nrPosition, String userUID) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection(TASK_COLLECTION_REF)
-          .where("nrOfList", isEqualTo: nrList)
-          .where("nrEntryPosition", isEqualTo: nrPosition)
-          .where("userId", isEqualTo: userUID)
-          .get();
-      if (querySnapshot.docs.isNotEmpty) {
-        return TaskChecklist.fromJson(querySnapshot.docs.first.data());
-      } else {
-        return TaskChecklist();
-      }
-    } catch (error) {
-      // Gérez l’erreur
-      print("Error retrieving task: $error");
-      return TaskChecklist();
-    }
+  Future<String> addTask(TaskChecklist task) async {
+    var returnAdd = await _tasksRef.add(task);
+    print("------------- ---------- ----------${returnAdd.id}");
+    return returnAdd.id;
   }
 
-  void addTask(TaskChecklist task) async {
-    _tasksRef.add(task);
-  }
-
-  void updateTask(String taskID, TaskChecklist task){
+  Future<void> updateTask(String taskID, TaskChecklist task) async {
     _tasksRef.doc(taskID).update(task.toJson());
   }
 

@@ -38,6 +38,24 @@ class DatabaseListOfListsService{
     }
   }
 
+  Future<Map<String, ListOfLists>> getAllLOLSinceLastSync(String lastSync) async {
+    Query query = _listRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, ListOfLists> lol = HashMap();
+      for (var doc in querySnapshot.docs) {
+        lol[doc.id] = doc.data() as ListOfLists;
+      }
+      return lol;
+    } catch (e) {
+      print("Error fetching ListOfLists since last update data: $e");
+      rethrow;
+    }
+  }
+
+
   Future<Map<String, ListOfLists>> getAllListsWithId() async {
     try {
       final querySnapshot = await _listRef.get();
@@ -76,16 +94,18 @@ class DatabaseListOfListsService{
       }
       listOfLists.sort((a, b) => a.listNr.compareTo(b.listNr));
     } catch (e) {
-      print("Błąd podczas pobierania list dla danego typu kamiona: $e");
+      print("Error getting listItems for this camion type: $e");
     }
     return listOfLists;
   }
 
-  Future<void> addList(ListOfLists listItem) async {
-    _listRef.add(listItem);
+  Future<String> addList(ListOfLists listItem) async {
+    var returnAdd = await _listRef.add(listItem);
+    print("------------- ---------- ----------${returnAdd.id}");
+    return returnAdd.id;
   }
 
-  void updateList(String listItemID, ListOfLists listItem){
+  Future<void> updateList(String listItemID, ListOfLists listItem) async {
     _listRef.doc(listItemID).update(listItem.toJson());
   }
 

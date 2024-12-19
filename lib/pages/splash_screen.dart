@@ -61,6 +61,10 @@ class _SplashScreenState extends State<SplashScreen> {
       await syncService.fullSyncTable("companies");
       print("++++ Synchronizing Equipments...");
       await syncService.fullSyncTable("equipments");
+      print("++++ Synchronizing LOL...");
+      await syncService.fullSyncTable("listOfLists");
+      print("++++ Synchronizing Blueprints...");
+      await syncService.fullSyncTable("blueprints");
       print("++++ Synchronization with SQLite completed.");
     } catch (e) {
       print("Error during global data synchronization: $e");
