@@ -1,16 +1,12 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
+// ignore: file_names
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/user/user_role.dart';
-import 'package:flutter_application_1/services/database_validation_files_service.dart';
-import 'package:flutter_application_1/services/pick_image_service.dart';
+import 'package:flutter_application_1/services/user_service.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserAddPage extends StatefulWidget {
+  const UserAddPage({super.key});
+
   @override
   _UserAddPageState createState() => _UserAddPageState();
 }
@@ -20,75 +16,77 @@ class _UserAddPageState extends State<UserAddPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  late String _selectedRole;
-  late bool _isValidate;
-  late String _isValidateDoc;
-  late String _selectedCompany;
-  late String _selectedCamion;
-  late bool _isApproved;
-  final TextEditingController _uploadedImageUrl = TextEditingController();
-  File? _selectedImage;
+  String? _selectedRole;
+  String? _selectedCompany;
+  bool _isApproved = false;
+  final UserService _userService = UserService();
 
-  final List<String> companies = ["Company1", "Company2", "Company3"]; 
-  final List<String> camions = ["Camion1", "Camion2", "Camion3"]; 
-  final List<String> roles = ["admin", "user", "manager"]; 
+  List<String> companies = [];
+  List<String> roles = [];
 
   @override
   void initState() {
     super.initState();
-    _selectedRole = roles.first; 
-    _isValidate = false; 
-    _isValidateDoc = ''; 
-    _selectedCompany = companies.first; 
-    _selectedCamion = camions.first; 
-    _isApproved = false; 
+    _fetchCompanies();
+    _fetchRoles();
   }
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _nameController.dispose();
-    _firstnameController.dispose();
-    _emailController.dispose();
-    _uploadedImageUrl.dispose();
-    super.dispose();
+  Future<void> _fetchCompanies() async {
+    try {
+      final QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('companies').get();
+      setState(() {
+        companies = snapshot.docs.map((doc) => doc['name'] as String).toList();
+        _selectedCompany = companies.isNotEmpty ? companies.first : null;
+      });
+    } catch (e) {
+      print("Erreur lors du chargement des entreprises : $e");
+    }
+  }
+
+  Future<void> _fetchRoles() async {
+    try {
+      final QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('roles').get();
+      setState(() {
+        roles = snapshot.docs.map((doc) => doc['name'] as String).toList();
+        _selectedRole = roles.isNotEmpty ? roles.first : null;
+      });
+    } catch (e) {
+      print("Erreur lors du chargement des rôles : $e");
+    }
   }
 
   Future<void> _addUser() async {
-    if (_usernameController.text.isEmpty || 
-        _nameController.text.isEmpty || 
-        _firstnameController.text.isEmpty || 
-        _emailController.text.isEmpty || 
-        _selectedCompany.isEmpty || 
-        _selectedCamion.isEmpty) {
+    if (_usernameController.text.isEmpty ||
+        _nameController.text.isEmpty ||
+        _firstnameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _selectedCompany == null ||
+        _selectedRole == null) {
       Get.snackbar(
         "Erreur",
-        "Tous les champs sont obligatoires.",
+        "Veuillez remplir tous les champs obligatoires.",
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
 
-    String finalValidateDoc = _isValidateDoc.isEmpty ? 'Aucun document téléchargé' : _isValidateDoc;
-
     try {
-      await FirebaseFirestore.instance.collection('users').add({
+      await _userService.addUser({
         'username': _usernameController.text,
         'name': _nameController.text,
         'firstname': _firstnameController.text,
         'email': _emailController.text,
         'role': _selectedRole,
-        'apresFormation': _isValidate,
-        'apresFormationDoc': finalValidateDoc,
         'company': _selectedCompany,
-        'camion': _selectedCamion,
         'isApproved': _isApproved,
       });
 
       Get.snackbar(
-        "Utilisateur ajouté",
-        "L'utilisateur a été ajouté avec succès.",
+        "Succès",
+        "Utilisateur ajouté avec succès.",
         backgroundColor: Colors.green,
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -97,7 +95,7 @@ class _UserAddPageState extends State<UserAddPage> {
     } catch (e) {
       Get.snackbar(
         "Erreur",
-        "Erreur lors de l'ajout : ${e.toString()}",
+        "Erreur lors de l'ajout de l'utilisateur : ${e.toString()}",
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -105,135 +103,58 @@ class _UserAddPageState extends State<UserAddPage> {
   }
 
   @override
+  void dispose() {
+    _usernameController.dispose();
+    _nameController.dispose();
+    _firstnameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Ajouter un utilisateur"),
+        title: const Text("Ajouter un utilisateur"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(labelText: "Nom d'utilisateur"),
+              _buildTextField(_usernameController, "Nom d'utilisateur"),
+              _buildTextField(_firstnameController, "Prénom"),
+              _buildTextField(_nameController, "Nom"),
+              _buildTextField(_emailController, "Email"),
+              const SizedBox(height: 16),
+              _buildDropdown(
+                "Entreprise",
+                _selectedCompany,
+                companies,
+                (value) => setState(() => _selectedCompany = value),
               ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _firstnameController,
-                decoration: InputDecoration(labelText: "Prénom"),
+              const SizedBox(height: 16),
+              _buildDropdown(
+                "Rôle",
+                _selectedRole,
+                roles,
+                (value) => setState(() => _selectedRole = value),
               ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: "Nom"),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: "Email"),
-              ),
-              SizedBox(height: 16),
-              Wrap(
-                children: [
-                  Text("Utilisateur validé après formation"),
-                  Checkbox(
-                    value: _isValidate,
-                    onChanged: (value) {
-                      setState(() {
-                        _isValidate = value!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              Text(
-                "Document après formation",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              if (_uploadedImageUrl.text.isNotEmpty)
-                Column(
-                  children: [
-                    Image.network(_uploadedImageUrl.text, width: 250),
-                    SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _uploadedImageUrl.clear();
-                          _isValidateDoc = '';
-                        });
-                      },
-                      child: Text("Supprimer l'image"),
-                    ),
-                  ],
-                )
-              else
-                Text("Aucune image téléchargée"),
-              SizedBox(height: 16),
-              DropdownButton<String>(
-                value: _selectedCompany,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedCompany = newValue!;
-                  });
-                },
-                items: companies.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-              SizedBox(height: 16),
-              DropdownButton<String>(
-                value: _selectedCamion,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedCamion = newValue!;
-                  });
-                },
-                items: camions.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Approuvé"),
+                  const Text("Approuvé"),
                   Switch(
                     value: _isApproved,
-                    onChanged: (bool value) {
-                      setState(() {
-                        _isApproved = value;
-                      });
-                    },
+                    onChanged: (value) => setState(() => _isApproved = value),
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-              DropdownButton<String>(
-                value: _selectedRole,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedRole = newValue!;
-                  });
-                },
-                items: roles.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-              SizedBox(height: 20),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _addUser,
-                child: Text("Confirmer"),
+                child: const Text("Confirmer"),
               ),
             ],
           ),
@@ -241,5 +162,27 @@ class _UserAddPageState extends State<UserAddPage> {
       ),
     );
   }
+
+  Widget _buildTextField(TextEditingController controller, String label) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(labelText: label),
+    );
+  }
+
+  Widget _buildDropdown(
+    String label,
+    String? value,
+    List<String> items,
+    ValueChanged<String?> onChanged,
+  ) {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(labelText: label),
+      value: value,
+      onChanged: onChanged,
+      items: items.map((item) {
+        return DropdownMenuItem(value: item, child: Text(item));
+      }).toList(),
+    );
+  }
 }
- 

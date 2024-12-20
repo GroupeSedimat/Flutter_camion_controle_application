@@ -178,7 +178,7 @@ Widget build(BuildContext context) {
       right: 16,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end, // Aligner à droite
+        crossAxisAlignment: CrossAxisAlignment.end, 
         children: [
           FloatingActionButton.extended(
             onPressed: () {
@@ -188,13 +188,13 @@ Widget build(BuildContext context) {
             icon: Icon(Icons.approval),
           ),
           SizedBox(height: 16), 
-          /**FloatingActionButton.extended(
+         /* FloatingActionButton.extended(
             onPressed: () {
               Get.to(() => UserAddPage());
             },
             label: Text("add User"),
             icon: Icon(Icons.add),
-          ),**/
+          ), */
         ],
       ),
     ),
