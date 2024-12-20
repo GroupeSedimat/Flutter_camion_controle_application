@@ -379,6 +379,8 @@ class _CheckListState extends State<CheckList> {
                   heroTag: "makePDFHero${list.listNr}",
                   onPressed: () async {
                     final pdfData = await pdfService.createInvoice(
+                      db,
+                      _user,
                       _tasks,
                       _blueprints,
                       list,
@@ -386,7 +388,9 @@ class _CheckListState extends State<CheckList> {
                     await pdfService.savePdfFile(
                       _user.company,
                       pdfData,
-                          () => deleteOneTasksListForUser(list.listNr, userUID),
+                      _user,
+                      _userId,
+                      () => deleteOneTasksListForUser(list.listNr, userUID),
                     );
                   },
                   backgroundColor: Colors.red,
