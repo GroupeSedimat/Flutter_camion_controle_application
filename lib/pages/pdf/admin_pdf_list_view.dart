@@ -11,7 +11,7 @@ import 'package:flutter_application_1/services/database_local/companies_table.da
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/pdf/database_pdf_service.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';

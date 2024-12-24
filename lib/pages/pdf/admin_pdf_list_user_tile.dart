@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_template.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 

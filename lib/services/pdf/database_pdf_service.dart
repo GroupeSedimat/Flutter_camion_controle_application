@@ -4,7 +4,7 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 
 const String PDF_STORAGE_REF = "pdf";
 

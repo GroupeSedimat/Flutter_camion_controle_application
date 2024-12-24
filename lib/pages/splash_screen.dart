@@ -53,18 +53,8 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _syncGlobalData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Camions...");
-      await syncService.fullSyncTable("camions");
-      print("++++ Synchronizing CamionTypess...");
-      await syncService.fullSyncTable("camionTypes");
       print("++++ Synchronizing Companies...");
       await syncService.fullSyncTable("companies");
-      print("++++ Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments");
-      print("++++ Synchronizing LOL...");
-      await syncService.fullSyncTable("listOfLists");
-      print("++++ Synchronizing Blueprints...");
-      await syncService.fullSyncTable("blueprints");
       print("++++ Synchronization with SQLite completed.");
     } catch (e) {
       print("Error during global data synchronization: $e");

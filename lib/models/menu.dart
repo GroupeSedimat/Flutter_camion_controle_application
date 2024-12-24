@@ -14,7 +14,7 @@ import 'package:flutter_application_1/pages/pdf/pdf_show_list.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get/get.dart';
 

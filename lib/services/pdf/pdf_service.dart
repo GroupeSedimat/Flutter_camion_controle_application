@@ -20,6 +20,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:sqflite/sqflite.dart';
 
 class PdfService {
+  /// adapt to mode offline
   DatabasePDFService databasePDFService = DatabasePDFService();
   DatabaseImageService databaseImageService = DatabaseImageService();
 

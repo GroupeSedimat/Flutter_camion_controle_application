@@ -8,14 +8,64 @@ import 'package:flutter_application_1/pages/checklist/lol_control_page.dart';
 import 'package:flutter_application_1/pages/company/company_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
-class AdminPage extends StatelessWidget {
+class AdminPage extends StatefulWidget {
   final UserRole userRole;
 
   const AdminPage({Key? key, required this.userRole}) : super(key: key);
+
+  @override
+  State<AdminPage> createState() => _AdminPageState();
+}
+
+class _AdminPageState extends State<AdminPage> {
+
+  late Database db;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _initDatabase();
+    await _syncDatas();
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _syncDatas() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing Users...");
+      await syncService.fullSyncTable("users");
+      print("++++ Synchronizing Camions...");
+      await syncService.fullSyncTable("camions");
+      print("++++ Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes");
+      print("++++ Synchronizing Companies...");
+      await syncService.fullSyncTable("companies");
+      print("++++ Synchronizing Equipments...");
+      await syncService.fullSyncTable("equipments");
+      print("++++ Synchronizing LOL...");
+      await syncService.fullSyncTable("listOfLists");
+      print("++++ Synchronizing Blueprints...");
+      await syncService.fullSyncTable("blueprints");
+      print("++++ Synchronization with SQLite completed.");
+    } catch (e) {
+      print("++++ Error during synchronization with SQLite: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

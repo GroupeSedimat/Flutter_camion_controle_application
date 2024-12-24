@@ -15,7 +15,7 @@ import 'package:flutter_application_1/services/database_local/check_list/tasks_t
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

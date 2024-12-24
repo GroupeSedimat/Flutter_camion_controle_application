@@ -8,6 +8,9 @@ class MyUser {
   bool? apresFormation;
   String? apresFormationDoc;
   String? camion; // change to List<String> for more camions?
+  DateTime createdAt;
+  DateTime updatedAt;
+  DateTime? deletedAt;
 
   MyUser({
     required this.role,
@@ -19,6 +22,9 @@ class MyUser {
     this.apresFormation,
     this.apresFormationDoc,
     this.camion,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
   });
 
   MyUser.fromJson(Map<String, Object?> json): this (
@@ -31,6 +37,11 @@ class MyUser {
     apresFormation: json['apresFormation']! as bool,
     apresFormationDoc: json['apresFormationDoc']! as String,
     camion: json['camion']! as String,
+    createdAt: DateTime.parse(json['createdAt'] as String),
+    updatedAt: DateTime.parse(json['updatedAt'] as String),
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.parse(json['deletedAt'] as String)
+        : null,
   );
 
   MyUser copyWith({
@@ -43,6 +54,9 @@ class MyUser {
     bool? apresFormation,
     String? apresFormationDoc,
     String? camion,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
   }) {
     return MyUser(
       role: role ?? this.role,
@@ -54,20 +68,27 @@ class MyUser {
       apresFormation: apresFormation ?? this.apresFormation,
       apresFormationDoc: apresFormationDoc ?? this.apresFormationDoc,
       camion: camion ?? this.camion,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 
   Map<String, Object?> toJson(){
-    return{
+    final Map<String, Object?> json = {
       'role': role,
       'username': username,
       'email': email,
-      'name': name,
-      'firstname': firstname,
       'company': company,
-      'apresFormation': apresFormation,
-      'apresFormationDoc': apresFormationDoc,
-      'camion': camion,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
+    if (name != null) json['name'] = name;
+    if (firstname != null) json['firstname'] = firstname;
+    if (apresFormation != null) json['apresFormation'] = apresFormation;
+    if (apresFormationDoc != null) json['apresFormationDoc'] = apresFormationDoc;
+    if (camion != null) json['camion'] = camion;
+    if (deletedAt != null) json['deletedAt'] = deletedAt!.toIso8601String();
+    return json;
   }
 }

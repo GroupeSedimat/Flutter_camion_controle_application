@@ -40,6 +40,65 @@ class UserService{
     return users;
   }
 
+  Future<Map<String,MyUser>> getAllUsersData() async {
+    Map<String, MyUser> users = HashMap();
+    try {
+      final userSnapshot = await _userRef.get();
+      for (var doc in userSnapshot.docs) {
+        MyUser user = doc.data() as MyUser;
+        users[doc.id] = user;
+      }
+    } catch (error) {
+      print("Error retrieving Users list: $error");
+    }
+    return users;
+  }
+
+  Future<Map<String,MyUser>> getAllUsersDataSinceLastSync(String lastSync) async {
+    Map<String, MyUser> users = HashMap();
+    Query query = _userRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      for (var doc in querySnapshot.docs) {
+        MyUser user = doc.data() as MyUser;
+        users[doc.id] = user;
+      }
+    } catch (error) {
+      print("Error retrieving Users list: $error");
+    }
+    return users;
+  }
+
+  Future<Map<String,MyUser>> getCompanyUsersDataSinceLastSync(String lastSync, String companyName) async {
+    Map<String, MyUser> users = HashMap();
+    Query query = _userRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    query = query.where('company', isEqualTo: companyName);
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      for (var doc in querySnapshot.docs) {
+        MyUser user = doc.data() as MyUser;
+        users[doc.id] = user;
+      }
+    } catch (error) {
+      print("Error retrieving Users list: $error");
+    }
+    return users;
+  }
+
+  Future<Map<String,MyUser>> getCurrentUserMapSinceLastSync(String lastSync) async {
+    Map<String, MyUser> users = HashMap();
+    try {
+      DocumentSnapshot documentSnapshot = await _userRef.doc(userID).get();
+      MyUser user = documentSnapshot.data() as MyUser;
+      users[documentSnapshot.id] = user;
+    } catch (error) {
+      print("Error retrieving Users list: $error");
+    }
+    return users;
+  }
+
   Future<MyUser> getCurrentUserData() async {
     if (userID != null) {
       DocumentSnapshot doc = await _userRef.doc(userID).get();
@@ -57,6 +116,11 @@ class UserService{
     DocumentSnapshot doc = await _userRef.doc(userID).get();
     return doc.data() as MyUser;
   }
+
+  Future<void> updateUser(String userId, MyUser user) async {
+    _userRef.doc(userId).update(user.toJson());
+  }
+
 
   Future<void> deleteUser(String username) async {
     try {

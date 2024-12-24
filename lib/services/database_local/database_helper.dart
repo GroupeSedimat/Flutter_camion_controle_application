@@ -5,6 +5,7 @@ import 'package:flutter_application_1/services/database_local/equipments_table.d
 import 'package:flutter_application_1/services/database_local/update_tables.dart';
 import 'package:flutter_application_1/services/database_local/check_list/blueprints_table.dart';
 import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
+import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:sqflite/sqflite.dart';
 import 'camions_table.dart';
 
@@ -34,23 +35,24 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: (db, version) async {
+        await createTableInfo(db);
+        await createTableUsers(db);
         await createTableCamions(db);
         await createTableCamionTypes(db);
         await createTableEquipments(db);
-        await createTableInfo(db);
         await createTableCompany(db);
-        await createTableBlueprints(db);
         await createTableListOfLists(db);
+        await createTableBlueprints(db);
         await createTableTasks(db);
         await _initializeUpdateTable(db, [
           "users",
           "camions",
           "camionTypes",
+          "equipments",
           "companies",
           "listOfLists",
           "blueprints",
-          "validateTasks",
-          "equipments"
+          "validateTasks"
         ]);
       },
     );
