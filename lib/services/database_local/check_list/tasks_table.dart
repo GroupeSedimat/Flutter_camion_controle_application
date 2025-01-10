@@ -68,15 +68,24 @@ Future<void> updateTaskFirebaseID(Database db, TaskChecklist task, String fireba
   }
 }
 
-Future<void> deleteTask(Database db, String firebaseId) async {
+Future<void> deleteTask(dynamic dbOrTxn, String firebaseId) async {
   try{
-    await db.delete(
+    await dbOrTxn.delete(
         tableName,
         where: 'id = ?',
         whereArgs: [firebaseId]
     );
   } catch (e){
     print("Error while deleting data with id $firebaseId in table Tasks: $e");
+  }
+}
+Future<void> clearTaskTable(dynamic dbOrTxn) async {
+  try{
+    await dbOrTxn.delete(
+        tableName
+    );
+  } catch (e){
+    print("Error while deleting data in table Tasks: $e");
   }
 }
 

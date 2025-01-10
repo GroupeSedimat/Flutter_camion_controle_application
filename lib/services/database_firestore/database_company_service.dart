@@ -141,7 +141,7 @@ Future<Map<String, Company>> getAllCompanies() async {
 
   Future<String> addCompany(Company company) async {
     var returnAdd = await _companyRef.add(company);
-    print("------------- ---------- ----------${returnAdd.id}");
+    print("------------- ---------- ---------- database add company${returnAdd.id}");
     return returnAdd.id;
   }
 

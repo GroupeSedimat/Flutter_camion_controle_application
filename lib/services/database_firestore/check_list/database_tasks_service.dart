@@ -56,7 +56,7 @@ class DatabaseTasksService{
 
   Future<String> addTask(TaskChecklist task) async {
     var returnAdd = await _tasksRef.add(task);
-    print("------------- ---------- ----------${returnAdd.id}");
+    print("------------- ---------- ---------- database add task${returnAdd.id}");
     return returnAdd.id;
   }
 
@@ -71,6 +71,14 @@ class DatabaseTasksService{
   Future<void> deleteTaskFuture(String taskID) async {
     print("Delete task with id: $taskID");
     await _tasksRef.doc(taskID).delete();
+  }
+
+  Future<void> deleteTaskForUser(String userId) async {
+    print("Delete tasks for user: $userId");
+    Map<String, TaskChecklist> tasks = await getAllTasks(userId);
+    for (var firebaseTask in tasks.entries){
+      await _tasksRef.doc(firebaseTask.key).delete();
+    }
   }
 
 }

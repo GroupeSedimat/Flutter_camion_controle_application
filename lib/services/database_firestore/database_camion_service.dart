@@ -169,7 +169,7 @@ class DatabaseCamionService{
 
   Future<String> addCamion(Camion camion) async {
     var returnAdd = await _camionRef.add(camion);
-    print("------------- ---------- ----------${returnAdd.id}");
+    print("------------- ---------- ---------- database add camion ${returnAdd.id}");
     return returnAdd.id;
   }
 

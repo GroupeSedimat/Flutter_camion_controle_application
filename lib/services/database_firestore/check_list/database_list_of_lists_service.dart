@@ -101,7 +101,7 @@ class DatabaseListOfListsService{
 
   Future<String> addList(ListOfLists listItem) async {
     var returnAdd = await _listRef.add(listItem);
-    print("------------- ---------- ----------${returnAdd.id}");
+    print("------------- ---------- ---------- database add list of list ${returnAdd.id}");
     return returnAdd.id;
   }
 

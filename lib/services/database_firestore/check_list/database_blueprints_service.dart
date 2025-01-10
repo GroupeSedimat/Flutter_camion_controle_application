@@ -47,7 +47,7 @@ class DatabaseBlueprintsService{
 
   Future<String> addBlueprint(Blueprint blueprint) async {
     var returnAdd = await _blueprintRef.add(blueprint);
-    print("------------- ---------- ----------${returnAdd.id}");
+    print("------------- ---------- ---------- database add blueprint ${returnAdd.id}");
     return returnAdd.id;
   }
 

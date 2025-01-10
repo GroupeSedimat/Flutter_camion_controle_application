@@ -57,21 +57,23 @@ class _CheckListState extends State<CheckList> {
 
   Future<void> _loadData() async {
     await _loadUser();
-    await _syncDatas();
+    await _syncData();
     await _loadListOfLists();
     await _loadBlueprints();
     await _loadTasks();
   }
 
-  Future<void> _syncDatas() async {
+  Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
+      print("++++ Synchronizing users...");
+      await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("++++ Synchronizing List of Lists...");
       await syncService.fullSyncTable("listOfLists");
       print("++++ Synchronizing Blueprints...");
       await syncService.fullSyncTable("blueprints");
       print("++++ Synchronizing Validate Tasks...");
-      await syncService.fullSyncTable("validateTasks");
+      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
       print("++++ Synchronization with SQLite completed.");
     } catch (e) {
       print("Error during global data synchronization: $e");
@@ -198,10 +200,10 @@ class _CheckListState extends State<CheckList> {
                 validate: validate,
                 keyId: keyId,
                 onValidateAdded: () async {
-                  await _syncDatas();
+                  await _syncData();
                   if (mounted) {
-                    setState(() {});
                     Navigator.pop(context);
+                    setState(() {});
                   }
                 },
                 userUID: _userId,

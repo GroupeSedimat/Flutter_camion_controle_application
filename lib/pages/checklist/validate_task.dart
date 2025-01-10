@@ -51,7 +51,7 @@ class ValidateTaskState extends State<ValidateTask> {
       final syncService = Provider.of<SyncService>(context, listen: false);
 
       print("++++ Synchronizing Validate Tasks...");
-      await syncService.fullSyncTable("validateTasks");
+      await syncService.syncToFirebase("validateTasks", DateTime.now().toString(), userId: widget.userUID);
       print("++++ Synchronization with SQLite completed.");
     } catch (e) {
       print("Error during global data synchronization: $e");
@@ -61,7 +61,6 @@ class ValidateTaskState extends State<ValidateTask> {
 
   Future<void> _initDatabase() async {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
-    _syncValidateTasks();
   }
 
   Future pickImageFromGallery() async {

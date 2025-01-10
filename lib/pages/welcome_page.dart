@@ -20,6 +20,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
   late Database db;
   MyUser? _user;
+  String? _userID;
   bool _isDataLoaded = false;
 
   @override
@@ -31,19 +32,21 @@ class _WelcomePageState extends State<WelcomePage> {
   Future<void> _loadData() async {
     await _initDatabase();
     await _loadUser();
-    await _syncDatas();
-    setState(() {
-      _isDataLoaded = true;
-    });
+    await _syncData();
+    if (mounted) {
+      setState(() {
+        _isDataLoaded = true;
+      });
+    }
   }
 
   Future<void> _loadUser() async {
     try {
       UserService userService = UserService();
       MyUser user = await userService.getCurrentUserData();
-      setState(() {
-        _user = user;
-      });
+      String? userId = await userService.userID;
+      _user = user;
+      _userID = userId;
     } catch (e) {
       print("Error loading user: $e");
     }
@@ -53,15 +56,18 @@ class _WelcomePageState extends State<WelcomePage> {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
-  Future<void> _syncDatas() async {
-    if (_user == null) {
-      print("Cannot sync data: user is not loaded");
+  Future<void> _syncData() async {
+
+    if (_user == null || _userID == null) {
+      print("Cannot sync data: user or userID is not loaded");
       return;
+    }else{
+      print("Can sync data: user: ${_user!.name} is loaded");
     }
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("++++ Synchronizing Users...");
-      await syncService.fullSyncTable("users");
+      await syncService.fullSyncTable("users", user: _user, userId: _userID);
       print("++++ Synchronizing Camions...");
       await syncService.fullSyncTable("camions");
       print("++++ Synchronizing CamionTypess...");
@@ -82,23 +88,13 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isDataLoaded) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
     return BasePage(
       title: AppLocalizations.of(context)!.homePage,
-      body: _buildBody(context),
+      body: _isDataLoaded ? _buildBody(context) : CircularProgressIndicator(),
     );
   }
 
   Widget _buildBody(BuildContext context) {
-    if (_user == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
 

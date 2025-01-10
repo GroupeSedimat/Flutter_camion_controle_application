@@ -87,7 +87,7 @@ Future<void> insertMultiple(Database db, List<TableSyncInfo> updateTables) async
   }
 }
 
-Future<void> markCamionAsRemoteSynced(Database db, String tableName, String timeSync) async {
+Future<void> markTableAsRemoteSynced(Database db, String tableName, String timeSync) async {
   try{
     await db.update(
         updatesTableName,

@@ -48,7 +48,7 @@ class _AdminPageState extends State<AdminPage> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("++++ Synchronizing Users...");
-      await syncService.fullSyncTable("users");
+      await syncService.fullSyncTable("users");//, user:user, userId: userId
       print("++++ Synchronizing Camions...");
       await syncService.fullSyncTable("camions");
       print("++++ Synchronizing CamionTypess...");
