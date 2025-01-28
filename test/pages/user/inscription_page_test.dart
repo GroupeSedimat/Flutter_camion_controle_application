@@ -11,7 +11,11 @@ void main() {
       ),
     );
 
-    // Vérifie si le texte est bien visible
+    
     expect(find.text('Welcome to the app!'), findsOneWidget);
   });
+
+
+
+  
 }
