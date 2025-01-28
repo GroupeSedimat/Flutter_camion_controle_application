@@ -31,7 +31,7 @@ class UserManagementAdmin extends StatelessWidget {
         }
         var currentUserData = snapshot.data!.data() as Map<String, Object?>;
         var currentUserCompany = currentUserData['company'];
-
+  
         return BasePage(
           title: AppLocalizations.of(context)!.manageUsers,
           body: StreamBuilder<QuerySnapshot>(

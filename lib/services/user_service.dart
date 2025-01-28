@@ -118,4 +118,6 @@ class UserService{
       },
     );
   }
+
+  addUser(Map<String, Object?> map) {}
 }
