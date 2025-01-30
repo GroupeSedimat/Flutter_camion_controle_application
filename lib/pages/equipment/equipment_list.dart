@@ -7,10 +7,13 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/equipment/add_equipment_form.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/equipments_table.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
+import 'package:flutter_application_1/services/database_local/users_table.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -24,19 +27,37 @@ class EquipmentList extends StatefulWidget {
 
 class _EquipmentListState extends State<EquipmentList> {
   late Database db;
+  late AuthController authController;
+  late UserService userService;
+  late NetworkService networkService;
   Map<String, Equipment> _equipmentLists = HashMap();
   MyUser? _user;
+  String? _userId;
 
   @override
   void initState() {
     super.initState();
-    _loadUser();
-    _loadDataFromDatabase();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _initDatabase();
+    await _initService();
+    if (!networkService.isOnline) {
+      print("Offline mode, no user update possible");
+    }else{
+      await _loadUserToConnection();
+    }
+    await _loadUser();
+    if (!networkService.isOnline) {
+      print("Offline mode, no sync possible");
+    }{
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
   }
 
   Future<void> _loadDataFromDatabase() async {
-    await _initDatabase();
-    await _syncData();
     Map<String, Equipment>? equipmentLists = await getAllEquipments(db);
     setState(() {
       _equipmentLists = equipmentLists!;
@@ -47,12 +68,47 @@ class _EquipmentListState extends State<EquipmentList> {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
-  Future<void> _loadUser() async {
+  Future<void> _initService() async {
     try {
-      MyUser user = await getUser();
-      setState(() {
-        _user = user;
-      });
+      authController = AuthController();
+      userService = UserService();
+      networkService = Provider.of<NetworkService>(context, listen: false);
+    } catch (e) {
+      print("Error loading services: $e");
+    }
+  }
+
+  Future<void> _loadUserToConnection() async {
+    print("equipment user to connection firebase ☢☢☢☢☢☢☢");
+    Map<String, MyUser>? users = await getThisUser(db);
+    print("users: $users");
+    if(users != null ){
+      return;
+    }
+    try {
+      MyUser user = await userService.getCurrentUserData();
+      print("user ☢☢☢☢☢☢☢ $user");
+      String? userId = await userService.userID;
+      print("userId ☢☢☢☢☢☢☢ $userId");
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Users...");
+      await syncService.fullSyncTable("users", user: user, userId: userId);
+    } catch (e) {
+      print("💽 Error loading user: $e");
+    }
+  }
+
+  Future<void> _loadUser() async {
+    print("equipment list page local ☢☢☢☢☢☢☢");
+    try {
+      Map<String, MyUser>? users = await getThisUser(db);
+      print("connected as  $users");
+      MyUser user = users!.values.first;
+      print("local user ☢☢☢☢☢☢☢ $user");
+      String? userId = users.keys.first;
+      print("local userId ☢☢☢☢☢☢☢ $userId");
+      _userId = userId;
+      _user = user;
     } catch (e) {
       print("Error loading user: $e");
     }
@@ -61,11 +117,13 @@ class _EquipmentListState extends State<EquipmentList> {
   Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Equipments...");
+      print("💽 Synchronizing Users...");
+      await syncService.fullSyncTable("users", user: _user, userId: _userId);
+      print("💽 Synchronizing Equipments...");
       await syncService.fullSyncTable("equipments");
-      print("++++ Synchronization with SQLite completed.");
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("++++ Error during synchronization with SQLite: $e");
+      print("💽 Error during synchronization with SQLite: $e");
     }
   }
 
@@ -94,11 +152,6 @@ class _EquipmentListState extends State<EquipmentList> {
         ),
       ),
     );
-  }
-
-  Future<MyUser> getUser() async {
-    UserService userService = UserService();
-    return await userService.getCurrentUserData();
   }
 
   Widget _buildBody() {

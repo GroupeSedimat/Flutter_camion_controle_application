@@ -18,6 +18,7 @@ Future<void> createTableUsers(Database db) async {
       apresFormation TEXT,
       apresFormationDoc TEXT,
       camion TEXT,
+      thisUser TEXT,
       createdAt TEXT,
       updatedAt TEXT,
       deletedAt TEXT
@@ -25,11 +26,11 @@ Future<void> createTableUsers(Database db) async {
   ''');
 }
 
-Future<void> insertUser(dynamic dbOrTxn, MyUser user, String firebaseId) async {
+Future<void> insertUser(dynamic dbOrTxn, MyUser user, String firebaseId, String thisUser) async {
   try{
     await dbOrTxn.insert(
         tableName,
-        userToMap(user, firebaseId: firebaseId),
+        userToMap(user, firebaseId: firebaseId, thisUser: thisUser),
         conflictAlgorithm: ConflictAlgorithm.replace);
   } catch (e){
     print("Error while inserting data into table Users: $e");
@@ -48,29 +49,6 @@ Future<void> updateUser(dynamic dbOrTxn, MyUser user, String firebaseId) async {
     print("Error while updating data for ${user.name} in table Users: $e");
   }
 }
-
-// Future<void> updateUserFirebaseID(Database db, MyUser user, String firebaseId) async {
-//   List<String> whereConditions = [];
-//   List<dynamic> whereArgs = [];
-//
-//   whereConditions.add('username = ?');
-//   whereArgs.add(user.username);
-//   whereConditions.add('email = ?');
-//   whereArgs.add(user.email);
-//
-//   String? whereClause = whereConditions.isNotEmpty ? whereConditions.join(' AND ') : null;
-//
-//   try {
-//     await db.update(
-//         tableName,
-//         userToMap(user, firebaseId: firebaseId),
-//         where: whereClause,
-//         whereArgs: whereArgs,
-//         conflictAlgorithm: ConflictAlgorithm.replace);
-//   } catch (e){
-//     print("Error while updating data for ${user.name} in table Users: $e");
-//   }
-// }
 
 Future<void> softDeleteUser(Database db, String firebaseId) async {
   try{
@@ -179,20 +157,23 @@ Future<Map<String,MyUser>?> getUserDataSinceLastUpdate(dynamic dbOrTxn, String l
   try {
     final List<Map<String, dynamic>> maps = await dbOrTxn.query(
         tableName,
-        where: 'updatedAt > ? AND updatedAt < ? AND id = ?',
-        whereArgs: [lastUpdated, timeSync, userId]);
+        where: 'updatedAt > ? AND updatedAt < ?',
+        whereArgs: [lastUpdated, timeSync]);
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Users $lastUpdated");
-    var user = maps.first;
-    print("-------- user ${user["id"]} updatedAt ${user["updatedAt"]}");
-    users[user["id"] as String] = responseItemToUser(user);
+
+    for (var user in maps) {
+      if(user["id"] == userId){
+        print("-------- user ${user["id"]} updatedAt ${user["updatedAt"]}");
+        users[user["id"] as String] = responseItemToUser(user);
+      }
+    }
 
     return users;
 
   } catch (e){
-    print("Error while getting all data from table Users since last actualisation: $e");
+    print("Error while getting user data since last actualisation from table Users: $e");
   }
   return sortedUsers(users: users);
 }
@@ -225,21 +206,45 @@ Future<MyUser?> getOneUserWithID(dynamic dbOrTxn, String userID) async {
     if(maps.isEmpty){
       return null;
     }
-
     return responseItemToUser(maps.first);
-
   } catch (e){
     print("Error while getting data of User with id $userID from table Users: $e");
     return null;
   }
 }
 
-Map<String, dynamic> userToMap(MyUser user, {String? firebaseId}) {
+Future<Map<String,MyUser>?> getThisUser(dynamic dbOrTxn) async {
+  Map<String, MyUser> users = {};
+  try{
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
+      tableName,
+      where: 'thisUser = ?',
+      whereArgs: ["true"],
+    );
+    if(maps.isEmpty){
+      return null;
+    }
+    for (var user in maps) {
+      if(user["thisUser"] == "true"){
+        print("-------- user ${user["id"]} updatedAt ${user["updatedAt"]} is this user ${user["thisUser"]}");
+        print("-------- user ${user["role"]} username ${user["username"]} is apresFormation ${user["apresFormation"]}");
+        users[user["id"] as String] = responseItemToUser(user);
+        print("users $users");
+      }
+    }
+    return users;
+  } catch (e){
+    print("Error while getting data of this User from table Users: $e");
+    return null;
+  }
+}
+
+Map<String, dynamic> userToMap(MyUser user, {String? firebaseId, String? thisUser}) {
   String? apresFormation;
   if(user.apresFormation == true){
-    apresFormation =  "true";
+    apresFormation = "true";
   }else if(user.apresFormation == false){
-    apresFormation =  "false";
+    apresFormation = "false";
   }
   return {
     'id': firebaseId,
@@ -255,10 +260,17 @@ Map<String, dynamic> userToMap(MyUser user, {String? firebaseId}) {
     'createdAt': user.createdAt.toIso8601String(),
     'updatedAt': user.updatedAt.toIso8601String(),
     'deletedAt': user.deletedAt?.toIso8601String(),
+    'thisUser' : thisUser,
   };
 }
 
 MyUser responseItemToUser(var user){
+  bool? afterFormation;
+  if(user['apresFormation'] == "true"){
+    afterFormation = true;
+  }else if (user['apresFormation'] == "false"){
+    afterFormation = false;
+  }
   return MyUser(
     role: user["role"] as String,
     username: user["username"] as String,
@@ -270,9 +282,7 @@ MyUser responseItemToUser(var user){
         ? user['firstname'] as String
         : null,
     company: user["company"] as String,
-    apresFormation: user["apresFormation"]!= null
-        ? user['apresFormation'] as bool
-        : null,
+    apresFormation: afterFormation,
     apresFormationDoc: user["apresFormationDoc"]!= null
         ? user['apresFormationDoc'] as String
         : null,

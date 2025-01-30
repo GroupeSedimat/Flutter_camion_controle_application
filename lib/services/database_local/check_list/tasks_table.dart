@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:sqflite/sqflite.dart';
 
-String tableName = "tasks";
+String tableName = "validateTasks";
 
 Future<void> createTableTasks(Database db) async {
   await db.execute('''

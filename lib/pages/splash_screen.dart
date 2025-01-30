@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_application_1/pages/user/login_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/locale_provider.dart';
@@ -29,7 +27,6 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _initializeApp() async {
     try {
       await _initializeFirebase();
-      await _syncGlobalData();
     } catch (e) {
       print("Error during app initialization: $e");
     }
@@ -47,18 +44,6 @@ class _SplashScreenState extends State<SplashScreen> {
         firebaseError = true;
       });
       print("Error initializing Firebase: $e");
-    }
-  }
-
-  Future<void> _syncGlobalData() async {
-    try {
-      final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Companies...");
-      await syncService.fullSyncTable("companies");
-      print("++++ Synchronization with SQLite completed.");
-    } catch (e) {
-      print("Error during global data synchronization: $e");
-      throw e;
     }
   }
 
@@ -152,7 +137,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ElevatedButton.icon(
                   onPressed: () {
                     Get.put(AuthController());
-                    Get.to(() => LoginPage());
+                    // Get.to(() => LoginPage());
                   },
                   icon: Icon(Icons.login),
                   label: Text(AppLocalizations.of(context)!.logIn),

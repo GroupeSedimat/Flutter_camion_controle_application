@@ -4,7 +4,7 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_application_1/services/database_firestore/user_service.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 
 const String PDF_STORAGE_REF = "pdf";
 
@@ -57,9 +57,10 @@ class DatabasePDFService{
 
   Future<Map<String, String>> getUserListOfPDF(String companyID) async {
     Map<String, String> pdfList = HashMap();
-    String userID = UserService().userID!;
+    AuthController authController = AuthController();
+    String userId = authController.getCurrentUserUID();
     try {
-      final userRef = _referencePdf.child(companyID).child(userID);
+      final userRef = _referencePdf.child(companyID).child(userId);
       final userSnapshot = await userRef.listAll();
 
       // Iterate through the files (items) in each subfolder
@@ -70,7 +71,7 @@ class DatabasePDFService{
       return pdfList;
 
     } catch (error) {
-      print("Error retrieving User $userID pdf list: $error");
+      print("Error retrieving User $userId pdf list: $error");
       return pdfList;
     }
   }

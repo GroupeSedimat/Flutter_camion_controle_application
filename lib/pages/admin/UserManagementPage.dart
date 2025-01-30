@@ -49,11 +49,11 @@ class _UserManagementPageState extends State<UserManagementPage> {
   Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Companies...");
+      print("💽 Synchronizing Companies...");
       await syncService.fullSyncTable("companies");
-      print("++++ Synchronization with SQLite completed.");
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("++++ Error during synchronization with SQLite: $e");
+      print("💽 Error during synchronization with SQLite: $e");
     }
   }
 

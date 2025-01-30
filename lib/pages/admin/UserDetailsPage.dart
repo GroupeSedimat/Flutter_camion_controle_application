@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
@@ -48,7 +49,10 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
 
   Future<void> _loadUser() async {
     try {
-      MyUser user = await getUser();
+      AuthController authController = AuthController();
+      UserService userService = UserService();
+      String userId = authController.getCurrentUserUID();
+      MyUser user = await userService.getCurrentUserData();
       setState(() {
         _user = user;
       });
@@ -57,19 +61,14 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     }
   }
 
-  Future<MyUser> getUser() async {
-    UserService userService = UserService();
-    return await userService.getCurrentUserData();
-  }
-
   Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Companies...");
+      print("💽 Synchronizing Companies...");
       await syncService.fullSyncTable("companies");
-      print("++++ Synchronization with SQLite completed.");
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("++++ Error during synchronization with SQLite: $e");
+      print("💽 Error during synchronization with SQLite: $e");
     }
   }
 

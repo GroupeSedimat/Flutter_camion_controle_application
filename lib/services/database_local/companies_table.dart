@@ -38,6 +38,17 @@ Future<void> insertCompany(dynamic dbOrTxn, Company company, String firebaseId) 
   }
 }
 
+Future<void> insertCompanyName(dynamic dbOrTxn, String companyName, String firebaseId) async {
+  try{
+    await dbOrTxn.insert(
+        tableName,
+        companyNameToMap(companyName, firebaseId),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while inserting data into table Companies: $e");
+  }
+}
+
 Future<void> updateCompany(dynamic dbOrTxn, Company company, String firebaseId) async {
   try{
     await dbOrTxn.update(
@@ -212,6 +223,25 @@ Map<String, dynamic> companyToMap(Company company, {String? firebaseId}) {
     'createdAt': company.createdAt.toIso8601String(),
     'updatedAt': company.updatedAt.toIso8601String(),
     'deletedAt': company.deletedAt?.toIso8601String(),
+  };
+}
+
+Map<String, dynamic> companyNameToMap(String companyName, String firebaseId) {
+  return {
+    'id': firebaseId,
+    'name': companyName,
+    'description': "",
+    'sirene': "",
+    'siret': "",
+    'address': "",
+    'responsible': "",
+    'admin': "",
+    'tel': "",
+    'email': "",
+    'logo': "",
+    'createdAt': DateTime.now().toIso8601String(),
+    'updatedAt': DateTime.now().toIso8601String(),
+    'deletedAt': DateTime.now().toIso8601String(),
   };
 }
 

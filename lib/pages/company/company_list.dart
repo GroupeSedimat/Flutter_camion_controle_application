@@ -5,10 +5,13 @@ import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/company/add_company_form.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
+import 'package:flutter_application_1/services/database_local/users_table.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -24,24 +27,36 @@ class _CompanyListState extends State<CompanyList> {
   late Database db;
   Map<String, Company> _companyList = HashMap();
   MyUser? _user;
+  String? _userId;
+  late AuthController authController;
+  late UserService userService;
+  late NetworkService networkService;
 
   @override
   void initState() {
     super.initState();
-    _loadUser();
-    _loadDataFromDatabase();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _initDatabase();
+    await _initService();
+    if (!networkService.isOnline) {
+      print("Offline mode, no user update possible");
+    }else{
+      await _loadUserToConnection();
+    }
+    await _loadUser();
+    if (!networkService.isOnline) {
+      print("Offline mode, no sync possible");
+    }{
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
   }
 
   Future<void> _loadDataFromDatabase() async {
-    await _initDatabase();
-    await _syncData();
-    Map<String, Company>? companyList = {};
-    if(_isSuperAdmin()){
-      companyList = await getAllCompanies(db);
-    }else{
-      Company? company = await getOneCompanyWithID(db, _user!.company);
-      companyList[_user!.company] = company!;
-    }
+    Map<String, Company>? companyList = await getAllCompanies(db);
     setState(() {
       _companyList = companyList!;
     });
@@ -51,12 +66,47 @@ class _CompanyListState extends State<CompanyList> {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
-  Future<void> _loadUser() async {
+  Future<void> _initService() async {
     try {
-      MyUser user = await getUser();
-      setState(() {
-        _user = user;
-      });
+      authController = AuthController();
+      userService = UserService();
+      networkService = Provider.of<NetworkService>(context, listen: false);
+    } catch (e) {
+      print("Error loading services: $e");
+    }
+  }
+
+  Future<void> _loadUserToConnection() async {
+    print("welcome user to connection firebase ☢☢☢☢☢☢☢");
+    Map<String, MyUser>? users = await getThisUser(db);
+    print("users: $users");
+    if(users != null ){
+      return;
+    }
+    try {
+      MyUser user = await userService.getCurrentUserData();
+      print("user ☢☢☢☢☢☢☢ $user");
+      String? userId = await userService.userID;
+      print("userId ☢☢☢☢☢☢☢ $userId");
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Users...");
+      await syncService.fullSyncTable("users", user: user, userId: userId);
+    } catch (e) {
+      print("💽 Error loading user: $e");
+    }
+  }
+
+  Future<void> _loadUser() async {
+    print("equipment list page local ☢☢☢☢☢☢☢");
+    try {
+      Map<String, MyUser>? users = await getThisUser(db);
+      print("connected as  $users");
+      MyUser user = users!.values.first;
+      print("local user ☢☢☢☢☢☢☢ $user");
+      String? userId = users.keys.first;
+      print("local userId ☢☢☢☢☢☢☢ $userId");
+      _userId = userId;
+      _user = user;
     } catch (e) {
       print("Error loading user: $e");
     }
@@ -65,11 +115,13 @@ class _CompanyListState extends State<CompanyList> {
   Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Companies...");
-      await syncService.fullSyncTable("companies");
-      print("++++ Synchronization with SQLite completed.");
+      print("💽 Synchronizing Users...");
+      await syncService.fullSyncTable("users", user: _user, userId: _userId);
+      print("💽 Synchronizing Companies...");
+      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("++++ Error during synchronization with SQLite: $e");
+      print("💽 Error during synchronization with SQLite: $e");
     }
   }
 
@@ -98,11 +150,6 @@ class _CompanyListState extends State<CompanyList> {
         ),
       ),
     );
-  }
-
-  Future<MyUser> getUser() async {
-    UserService userService = UserService();
-    return await userService.getCurrentUserData();
   }
 
   Widget _buildBody() {

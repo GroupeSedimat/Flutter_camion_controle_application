@@ -42,17 +42,22 @@ class SyncService {
 
   SyncService(this.db, this.networkService);
 
-  Future<void> fullSyncTable(String tableName, {MyUser? user, String? userId}) async {
+  Future<void> fullSyncTable(String tableName, {MyUser? user, String? userId, List<String>? dataPlus}) async {
     String timeSync = DateTime.now().toIso8601String();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible for table: $tableName");
       return;
     }
     try {
-      print("Online mode, sync possible for table: $tableName");
+      print("🔛 Online mode, sync possible for table: $tableName 🔛");
       bool itsOk;
+      print("Sync data plus: 💾💾💾💾 $dataPlus");
       if(user!=null){
-        itsOk = await syncFromFirebase(tableName, timeSync, user: user, userId: userId);
+        if(dataPlus != null){
+          itsOk = await syncFromFirebase(tableName, timeSync, user: user, userId: userId, dataPlus: dataPlus);
+        }else{
+          itsOk = await syncFromFirebase(tableName, timeSync, user: user, userId: userId);
+        }
         await syncToFirebase(tableName, timeSync, userId: userId);
       }else{
         itsOk = await syncFromFirebase(tableName, timeSync);
@@ -67,7 +72,7 @@ class SyncService {
     }
   }
 
-  Future<bool> syncFromFirebase(String tableName, String timeSync, {MyUser? user, String? userId}) async {
+  Future<bool> syncFromFirebase(String tableName, String timeSync, {MyUser? user, String? userId, List<String>? dataPlus}) async {
     bool itsOk = true;
     String lastSync = "";
     TableSyncInfo? lastUpdatedDatas = await getOneWithName(db, tableName);
@@ -88,12 +93,11 @@ class SyncService {
           /// for superadmin - all users
           /// for company admin - company users
           /// for user - current user
-          /// clear local db when firebase update are later than lastLocalUpdate and lastLocalUpdate == lastRemoteSync
           if(user == null || userId == null){
             print("user or userId not provided");
             break;
           }
-          print("++++++++-----++++++++------- ${user.name}");
+          print("++++++++-----++++++++------- User: ${user.name} Role: ${user.role}");
 
           List<Map<String, dynamic>> conflicts = [];
           await db.transaction((txn) async {
@@ -106,7 +110,11 @@ class SyncService {
               for (var firebaseUser in firebaseUsers.entries) {
                 final MyUser? localUser = localUsers?[firebaseUser.key];
                 if (localUser == null) {
-                  await insertUser(txn, firebaseUser.value, firebaseUser.key);
+                  String thisUser = "false";
+                  if(userId == firebaseUser.key){
+                    thisUser = "true";
+                  }
+                  await insertUser(txn, firebaseUser.value, firebaseUser.key, thisUser);
                 } else {
                   if(!firebaseUser.value.updatedAt.isAtSameMomentAs(localUser.updatedAt)){
                     conflicts.add({
@@ -126,7 +134,11 @@ class SyncService {
               for (var firebaseUser in firebaseUsers.entries) {
                 final MyUser? localUser = localUsers?[firebaseUser.key];
                 if (localUser == null) {
-                  await insertUser(txn, firebaseUser.value, firebaseUser.key);
+                  String thisUser = "false";
+                  if(userId == firebaseUser.key){
+                    thisUser = "true";
+                  }
+                  await insertUser(txn, firebaseUser.value, firebaseUser.key, thisUser);
                 } else {
                   conflicts.add({
                     'firebaseKey': firebaseUser.key,
@@ -135,16 +147,20 @@ class SyncService {
                   });
                 }
               }
-            }else{
+            }else if (user.role == "user"){
               try{
-                final Map<String, MyUser> firebaseUsers = await firebaseUserService.getCurrentUserMapSinceLastSync(lastSync);
+                final Map<String, MyUser> firebaseUsers = await firebaseUserService.getCurrentUserMapSinceLastSync(lastSync, userId);
                 final Map<String, MyUser>? localUsers = await getUserDataSinceLastUpdate(txn, lastSync, timeSync, userId);
                 print("----------- Firebase Users for standard user since last update $firebaseUsers");
 
                 for (var firebaseUser in firebaseUsers.entries) {
                   final MyUser? localUser = localUsers?[firebaseUser.key];
                   if (localUser == null) {
-                    await insertUser(txn, firebaseUser.value, firebaseUser.key);
+                    String thisUser = "false";
+                    if(userId == firebaseUser.key){
+                      thisUser = "true";
+                    }
+                    await insertUser(txn, firebaseUser.value, firebaseUser.key, thisUser);
                   } else {
                     if(!firebaseUser.value.updatedAt.isAtSameMomentAs(localUser.updatedAt)){
                       conflicts.add({
@@ -198,28 +214,73 @@ class SyncService {
         /// sync Camion DB
         /// get data from firebase about camions and write it do db local
         /// user need to be connected
-        /// todo add camion for user, company or all depend on role
+        /// add camion for user, company or all depend on role
           List<Map<String, dynamic>> conflicts = [];
+          if(user == null){
+            print("user or userId not provided");
+            break;
+          }
           await db.transaction((txn) async {
             print("----------- sync service From Firebase camions");
-            final Map<String, Camion> firebaseCamions = await firebaseCamionService.getAllCamionsSinceLastSync(lastSync);
-            final Map<String, Camion>? localCamions = await getAllCamionsSinceLastUpdate(txn, lastSync, timeSync);
-            print("----------- Firebase camions since last update $firebaseCamions");
+            if(user.role == "superadmin"){
+              final Map<String, Camion> firebaseCamions = await firebaseCamionService.getAllCamionsSinceLastSync(lastSync);
+              final Map<String, Camion>? localCamions = await getAllCamionsSinceLastUpdate(txn, lastSync, timeSync);
+              print("----------- Firebase camions since last update $firebaseCamions");
 
-            for (var firebaseCamion in firebaseCamions.entries) {
-              final Camion? localCamion = localCamions?[firebaseCamion.key];
-              if (localCamion == null) {
-                await insertCamion(txn, firebaseCamion.value, firebaseCamion.key);
-              } else {
-                if(!firebaseCamion.value.updatedAt.isAtSameMomentAs(localCamion.updatedAt)){
-                  conflicts.add({
-                    'firebaseKey': firebaseCamion.key,
-                    'firebase': firebaseCamion.value,
-                    'local': localCamion,
-                  });
+              for (var firebaseCamion in firebaseCamions.entries) {
+                final Camion? localCamion = localCamions?[firebaseCamion.key];
+                if (localCamion == null) {
+                  await insertCamion(txn, firebaseCamion.value, firebaseCamion.key);
+                } else {
+                  if(!firebaseCamion.value.updatedAt.isAtSameMomentAs(localCamion.updatedAt)){
+                    conflicts.add({
+                      'firebaseKey': firebaseCamion.key,
+                      'firebase': firebaseCamion.value,
+                      'local': localCamion,
+                    });
+                  }
+                }
+              }
+            }else if(user.role == "admin"){
+              final Map<String, Camion> firebaseCamions = await firebaseCamionService.getCompanyCamionsSinceLastSync(user.company, lastSync);
+              final Map<String, Camion>? localCamions = await getAllCamionsSinceLastUpdate(txn, lastSync, timeSync);
+              print("----------- Firebase camions since last update $firebaseCamions");
+
+              for (var firebaseCamion in firebaseCamions.entries) {
+                final Camion? localCamion = localCamions?[firebaseCamion.key];
+                if (localCamion == null) {
+                  await insertCamion(txn, firebaseCamion.value, firebaseCamion.key);
+                } else {
+                  if(!firebaseCamion.value.updatedAt.isAtSameMomentAs(localCamion.updatedAt)){
+                    conflicts.add({
+                      'firebaseKey': firebaseCamion.key,
+                      'firebase': firebaseCamion.value,
+                      'local': localCamion,
+                    });
+                  }
+                }
+              }
+            }else if(user.role == "user"){
+              final Map<String, Camion> firebaseCamions = await firebaseCamionService.getOneCamionSinceLastSync(user.camion, lastSync);
+              final Map<String, Camion>? localCamions = await getAllCamionsSinceLastUpdate(txn, lastSync, timeSync);
+              print("----------- Firebase camions since last update $firebaseCamions");
+
+              for (var firebaseCamion in firebaseCamions.entries) {
+                final Camion? localCamion = localCamions?[firebaseCamion.key];
+                if (localCamion == null) {
+                  await insertCamion(txn, firebaseCamion.value, firebaseCamion.key);
+                } else {
+                  if(!firebaseCamion.value.updatedAt.isAtSameMomentAs(localCamion.updatedAt)){
+                    conflicts.add({
+                      'firebaseKey': firebaseCamion.key,
+                      'firebase': firebaseCamion.value,
+                      'local': localCamion,
+                    });
+                  }
                 }
               }
             }
+
           });
 
           for (var conflict in conflicts) {
@@ -256,8 +317,13 @@ class SyncService {
           List<Map<String, dynamic>> conflicts = [];
           await db.transaction((txn) async {
             print("----------- sync service From Firebase camionTypes");
-
-            final Map<String, CamionType> firebaseCamionTypes = await firebaseCamionTypeService.getAllCamionsSinceLastSync(lastSync);
+            Map<String, CamionType> firebaseCamionTypes = {};
+            print("Data Plus 💾💾 in camionTypes: $dataPlus");
+            if(dataPlus == null){
+              firebaseCamionTypes = await firebaseCamionTypeService.getAllCamionTypesSinceLastSync(lastSync);
+            }else{
+              firebaseCamionTypes = await firebaseCamionTypeService.getListedCamionTypesSinceLastSync(lastSync, dataPlus);
+            }
             final Map<String, CamionType>? localCamionTypes = await getAllCamionTypesSinceLastUpdate(txn, lastSync, timeSync);
             print("----------- Firebase camion types since last update $firebaseCamionTypes");
 
@@ -311,22 +377,53 @@ class SyncService {
           /// todo add just companies names when not connected
           List<Map<String, dynamic>> conflicts = [];
           await db.transaction((txn) async {
-            print("----------- sync service From Firebase Companies");
-            final Map<String, Company> firebaseCompanies = await firebaseCompanyService.getAllCompaniesSinceLastSync(lastSync);
-            final Map<String, Company>? localCompanies = await getAllCompaniesSinceLastUpdate(txn, lastSync, timeSync);
-            print("----------- Firebase Companies since last update $firebaseCompanies");
+            if(user == null){
+              print("user or userId not provided");
+              Map<String, String> companiesNames = await firebaseCompanyService.getAllCompaniesNames();
+              print("Names ok");
+              for (var firebaseCompany in companiesNames.entries){
+                insertCompanyName(txn, firebaseCompany.value, firebaseCompany.key);
+              }
+            }else{
+              if(user.role == "superadmin"){
+                print("----------- sync service From Firebase Companies");
+                final Map<String, Company> firebaseCompanies = await firebaseCompanyService.getAllCompaniesSinceLastSync(lastSync);
+                final Map<String, Company>? localCompanies = await getAllCompaniesSinceLastUpdate(txn, lastSync, timeSync);
+                print("----------- Firebase Companies since last update $firebaseCompanies");
 
-            for (var firebaseCompany in firebaseCompanies.entries) {
-              final Company? localCompany = localCompanies?[firebaseCompany.key];
-              if (localCompany == null) {
-                await insertCompany(txn, firebaseCompany.value, firebaseCompany.key);
-              } else {
-                if(!firebaseCompany.value.updatedAt.isAtSameMomentAs(localCompany.updatedAt)){
-                  conflicts.add({
-                    'firebaseKey': firebaseCompany.key,
-                    'firebase': firebaseCompany.value,
-                    'local': localCompany,
-                  });
+                for (var firebaseCompany in firebaseCompanies.entries) {
+                  final Company? localCompany = localCompanies?[firebaseCompany.key];
+                  if (localCompany == null) {
+                    await insertCompany(txn, firebaseCompany.value, firebaseCompany.key);
+                  } else {
+                    if(!firebaseCompany.value.updatedAt.isAtSameMomentAs(localCompany.updatedAt)){
+                      conflicts.add({
+                        'firebaseKey': firebaseCompany.key,
+                        'firebase': firebaseCompany.value,
+                        'local': localCompany,
+                      });
+                    }
+                  }
+                }
+              }else if(user.role == "admin" || user.role == "user"){
+                print("----------- sync service From Firebase Companies");
+                final Map<String, Company> firebaseCompanies = await firebaseCompanyService.getCompanyByIdSinceLastSync(lastSync, user.company);
+                final Map<String, Company>? localCompanies = await getAllCompaniesSinceLastUpdate(txn, lastSync, timeSync);
+                print("----------- Firebase Companies since last update $firebaseCompanies");
+
+                for (var firebaseCompany in firebaseCompanies.entries) {
+                  final Company? localCompany = localCompanies?[firebaseCompany.key];
+                  if (localCompany == null) {
+                    await insertCompany(txn, firebaseCompany.value, firebaseCompany.key);
+                  } else {
+                    if(!firebaseCompany.value.updatedAt.isAtSameMomentAs(localCompany.updatedAt)){
+                      conflicts.add({
+                        'firebaseKey': firebaseCompany.key,
+                        'firebase': firebaseCompany.value,
+                        'local': localCompany,
+                      });
+                    }
+                  }
                 }
               }
             }
@@ -362,11 +459,16 @@ class SyncService {
           /// sync LoL DB
           /// get data from firebase about list of lists and write it do db local
           /// user need to be connected
-          /// todo add lol for user or all depend on role
           List<Map<String, dynamic>> conflicts = [];
+          print("Data Plus 💾💾 in List of Lists: $dataPlus");
           await db.transaction((txn) async {
             print("----------- sync service From Firebase LoL");
-            final Map<String, ListOfLists> firebaseLoL = await firebaseLOLService.getAllLOLSinceLastSync(lastSync);
+            Map<String, ListOfLists> firebaseLoL = {};
+            if(dataPlus != null){
+              firebaseLoL = await firebaseLOLService.getLoLsWithIds(lastSync, dataPlus);
+            }else{
+              firebaseLoL = await firebaseLOLService.getAllLOLSinceLastSync(lastSync);
+            }
             final Map<String, ListOfLists>? localLoL = await getAllListsSinceLastUpdate(txn, lastSync, timeSync);
             print("----------- Firebase LOL since last update $firebaseLoL");
 
@@ -541,7 +643,6 @@ class SyncService {
           List<Map<String, dynamic>> conflicts = [];
           await db.transaction((txn) async {
             print("----------- sync service From Firebase Blueprints");
-
             final Map<String, Blueprint> firebaseBlueprints = await firebaseBlueprintService.getAllBlueprintsSinceLastSync(lastSync);
             final Map<String, Blueprint>? localBlueprintsTypes = await getAllBlueprintsSinceLastUpdate(txn, lastSync, timeSync);
             print("----------- Firebase Blueprints since last update $firebaseBlueprints");

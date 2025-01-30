@@ -8,6 +8,7 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_type_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
@@ -83,7 +84,9 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadUser() async {
     try {
+      AuthController authController = AuthController();
       UserService userService = UserService();
+      String userId = authController.getCurrentUserUID();
       MyUser user = await userService.getCurrentUserData();
       setState(() {
         _user = user;
@@ -162,13 +165,13 @@ class _CamionListState extends State<CamionList> {
   Future<void> _syncDatas() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Camions...");
-      await syncService.fullSyncTable("camions");
-      print("++++ Synchronizing CamionTypess...");
+      print("💽 Synchronizing Camions...");
+      await syncService.fullSyncTable("camions", user:_user);
+      print("💽 Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes");
-      print("++++ Synchronization with SQLite completed.");
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("++++ Error during synchronization with SQLite: $e");
+      print("💽 Error during synchronization with SQLite: $e");
     }
   }
 

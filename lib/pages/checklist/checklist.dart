@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
@@ -9,11 +10,15 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/pages/checklist/blueprint_template.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/pages/checklist/validate_task.dart';
+import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
+import 'package:flutter_application_1/services/database_local/camions_table.dart';
 import 'package:flutter_application_1/services/database_local/check_list/blueprints_table.dart';
 import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
 import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/database_local/users_table.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -35,20 +40,31 @@ class _CheckListState extends State<CheckList> {
   late MyUser _user;
   late String _userId;
   late List<int> counter;
+  bool _isLoading = true;
   late Map<String, ListOfLists> _listOfLists = {};
   late Map<String, Blueprint> _blueprints = {};
   late Map<String, TaskChecklist> _tasks = {};
 
+  late AuthController authController;
+  late UserService userService;
+  late NetworkService networkService;
   final PdfService pdfService = PdfService();
-  final UserService userService = UserService();
-  AuthController authController = AuthController.instance;
 
 
   @override
   void initState() {
     super.initState();
-    _initDatabase();
     _loadData();
+  }
+
+  Future<void> _initServices() async {
+    try {
+      authController = AuthController();
+      userService = UserService();
+      networkService = Provider.of<NetworkService>(context, listen: false);
+    } catch (e) {
+      print("Error loading services: $e");
+    }
   }
 
   Future<void> _initDatabase() async {
@@ -56,40 +72,112 @@ class _CheckListState extends State<CheckList> {
   }
 
   Future<void> _loadData() async {
+    await _initDatabase();
+    await _initServices();
+    if (!networkService.isOnline) {
+      print("Offline mode, no user update possible");
+    }else{
+      await _loadUserToConnection();
+    }
     await _loadUser();
-    await _syncData();
+    if (!networkService.isOnline) {
+      print("Offline mode, no sync possible");
+    }{
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadDataFromDatabase() async {
     await _loadListOfLists();
     await _loadBlueprints();
     await _loadTasks();
+    setState((){});
   }
 
   Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing users...");
+      print("💽 Synchronizing users...");
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
-      print("++++ Synchronizing List of Lists...");
-      await syncService.fullSyncTable("listOfLists");
-      print("++++ Synchronizing Blueprints...");
+      print("💽 Synchronizing users Camions...");
+      await syncService.fullSyncTable("camions", user: _user, userId: _userId);
+      List<String> camionsTypeIdList = [];
+      await getAllCamions(db).then((camionsMap) {
+        if(camionsMap != null){
+          for(var camion in camionsMap.entries){
+            if(!camionsTypeIdList.contains(camion.value.camionType)){
+              camionsTypeIdList.add(camion.value.camionType);
+            }
+          }
+        }
+      });
+      print("Camion types Ids in list: $camionsTypeIdList");
+      print("💽 Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      List<String> camionListOfListId = [];
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
+      if(camionTypesMap != null){
+        for(var camionType in camionTypesMap.entries){
+          if(camionType.value.lol != null){
+            for(var list in camionType.value.lol!){
+              if(!camionListOfListId.contains(list)){
+                camionListOfListId.add(list);
+              }
+            }
+          }
+        }
+      }
+      print("Camion List of Lists Ids: $camionListOfListId");
+      print("💽 Synchronizing LOL...");
+      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
+      print("💽 Synchronizing Blueprints...");
       await syncService.fullSyncTable("blueprints");
-      print("++++ Synchronizing Validate Tasks...");
+      print("💽 Synchronizing Validate Tasks...");
       await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
-      print("++++ Synchronization with SQLite completed.");
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("Error during global data synchronization: $e");
+      print("💽 Error during global data synchronization: $e");
       rethrow;
     }
   }
 
-  Future<void> _loadUser() async {
+  Future<void> _loadUserToConnection() async {
+    print("welcome user to connection firebase ☢☢☢☢☢☢☢");
+    Map<String, MyUser>? users = await getThisUser(db);
+    print("users: $users");
+    if(users != null ){
+      return;
+    }
     try {
-      UserService userService = UserService();
       MyUser user = await userService.getCurrentUserData();
-      String userId = userService.userID!;
-      setState(() {
-        _user = user;
-        _userId = userId;
-      });
+      print("user ☢☢☢☢☢☢☢ $user");
+      String? userId = await userService.userID;
+      print("userId ☢☢☢☢☢☢☢ $userId");
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Users...");
+      await syncService.fullSyncTable("users", user: user, userId: userId);
+    } catch (e) {
+      print("💽 Error loading user: $e");
+    }
+  }
+
+  Future<void> _loadUser() async {
+    print("welcome page local ☢☢☢☢☢☢☢");
+    try {
+      Map<String, MyUser>? users = await getThisUser(db);
+      print("connected as  $users");
+      MyUser user = users!.values.first;
+      print("local user ☢☢☢☢☢☢☢ $user");
+      String? userId = users.keys.first;
+      print("local userId ☢☢☢☢☢☢☢ $userId");
+      _userId = userId;
+      _user = user;
     } catch (e) {
       print("Error loading user: $e");
     }
@@ -98,18 +186,14 @@ class _CheckListState extends State<CheckList> {
   Future<void> _loadBlueprints() async {
     Map<String, Blueprint>? blueprints = await getAllBlueprints(db);
     if(blueprints != null){
-      setState(() {
-        _blueprints = blueprints;
-      });
+      _blueprints = blueprints;
     }
   }
 
   Future<void> _loadTasks() async {
     Map<String, TaskChecklist>? tasks = await getAllTasksOfUser(db, _userId);
     if(tasks != null){
-      setState(() {
         _tasks = tasks;
-      });
     }
   }
 
@@ -117,9 +201,7 @@ class _CheckListState extends State<CheckList> {
     try {
       Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db);
       if(listOfListsFuture != null){
-        setState(() {
-          _listOfLists = listOfListsFuture;
-        });
+        _listOfLists = listOfListsFuture;
       }
     } catch (e) {
       print("Error loading list of lists: $e");
@@ -128,18 +210,35 @@ class _CheckListState extends State<CheckList> {
 
   @override
   Widget build(BuildContext context) {
-    if (_listOfLists.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    } else {
-      return DefaultTabController(
-        initialIndex: 0,
-        length: _listOfLists.length,
-        child: BasePage(
-          appBar: appBar(),
-          body: body(),
+    if (_isLoading) {
+      return Scaffold(
+        body: Drawer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(child: CircularProgressIndicator()),
+          ),
         ),
       );
     }
+
+    return DefaultTabController(
+      initialIndex: 0,
+      length: _listOfLists.length,
+      child: BasePage(
+        appBar: appBar(),
+        body: body(),
+      ),
+    );
+
   }
 
   void showBlueprintModal({
@@ -201,10 +300,9 @@ class _CheckListState extends State<CheckList> {
                 keyId: keyId,
                 onValidateAdded: () async {
                   await _syncData();
-                  if (mounted) {
-                    Navigator.pop(context);
-                    setState(() {});
-                  }
+                  await _loadTasks();
+                  Navigator.pop(context);
+                  setState(() {});
                 },
                 userUID: _userId,
               ),
@@ -285,11 +383,6 @@ class _CheckListState extends State<CheckList> {
   Widget body() {
     if (_listOfLists.isEmpty) {
       return const Center(child: CircularProgressIndicator());
-    }
-
-    String? userUID = authController.getCurrentUserUID();
-    if (userUID == null) {
-      return const Center(child: Text("User not logged in"));
     }
 
     return TabBarView(
@@ -392,7 +485,7 @@ class _CheckListState extends State<CheckList> {
                       pdfData,
                       _user,
                       _userId,
-                      () => deleteOneTasksListForUser(list.listNr, userUID),
+                      () => deleteOneTasksListForUser(list.listNr, _userId),
                     );
                   },
                   backgroundColor: Colors.red,

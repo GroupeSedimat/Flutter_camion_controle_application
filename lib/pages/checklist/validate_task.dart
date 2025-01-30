@@ -1,12 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/services/database_firestore/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/pick_image_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -44,19 +42,6 @@ class ValidateTaskState extends State<ValidateTask> {
   void initState() {
     super.initState();
     _initDatabase();
-  }
-
-  Future<void> _syncValidateTasks() async {
-    try {
-      final syncService = Provider.of<SyncService>(context, listen: false);
-
-      print("++++ Synchronizing Validate Tasks...");
-      await syncService.syncToFirebase("validateTasks", DateTime.now().toString(), userId: widget.userUID);
-      print("++++ Synchronization with SQLite completed.");
-    } catch (e) {
-      print("Error during global data synchronization: $e");
-      throw e;
-    }
   }
 
   Future<void> _initDatabase() async {

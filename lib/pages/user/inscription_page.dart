@@ -60,9 +60,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
   Future<void> _loadCompanies() async {
     try {
       Map<String, String>? companyNames = await getAllCompaniesNames(db);
-      setState(() {
-        _companyListNames = companyNames!;
-      });
+      if(companyNames != null){
+        setState(() {
+          _companyListNames = companyNames;
+        });
+      }
 
     } catch (e) {
       print("Error loading Companies Names: $e");
@@ -72,11 +74,12 @@ class _InscriptionPageState extends State<InscriptionPage> {
   Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Companies...");
-      await syncService.fullSyncTable("companies");
-      print("++++ Synchronization with SQLite completed.");
+      print("💽 Synchronizing Companies...");
+      String timeSync = DateTime.now().toIso8601String();
+      await syncService.syncFromFirebase("companies", timeSync);
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("++++ Error during synchronization with SQLite: $e");
+      print("💽 Error during synchronization with SQLite: $e");
     }
   }
 
@@ -119,6 +122,17 @@ class _InscriptionPageState extends State<InscriptionPage> {
             children: [
               GestureDetector(
                 onTap: () {
+                  DatabaseHelper().clearTables([
+                    "users",
+                    "updates",
+                    "camions",
+                    "camionTypes",
+                    "equipments",
+                    "companies",
+                    "listOfLists",
+                    "blueprints",
+                    "validateTasks"
+                  ]);
                   Navigator.of(context).pop();
                 },
                 child: Container(

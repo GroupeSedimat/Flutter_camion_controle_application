@@ -55,7 +55,6 @@ class DatabaseListOfListsService{
     }
   }
 
-
   Future<Map<String, ListOfLists>> getAllListsWithId() async {
     try {
       final querySnapshot = await _listRef.get();
@@ -64,6 +63,35 @@ class DatabaseListOfListsService{
 
       for (var snapshotListOfListsItem in snapshotList){
         listOfLists.addAll({snapshotListOfListsItem.id: snapshotListOfListsItem.data()});
+      }
+      var sortedKeys = listOfLists.keys.toList(growable: false)
+        ..sort((k1, k2) => listOfLists[k1]!.listName.compareTo(listOfLists[k2]!.listName));
+
+      LinkedHashMap<String, ListOfLists> sortedLists = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => listOfLists[k]!,
+      );
+      return sortedLists;
+
+    } catch (e) {
+      print("Error getting listItems: $e");
+      rethrow; // Gérez l’erreur le cas échéant.
+    }
+  }
+
+  Future<Map<String, ListOfLists>> getLoLsWithIds(String lastSync, List<String> lolIds) async {
+    try {
+      final querySnapshot = await _listRef
+          .where('updatedAt', isGreaterThan: lastSync)
+          .get();
+      List snapshotList = querySnapshot.docs;
+      Map<String, ListOfLists> listOfLists = HashMap();
+
+      for (var snapshotListOfListsItem in snapshotList){
+        if(lolIds.contains(snapshotListOfListsItem.id)){
+          listOfLists.addAll({snapshotListOfListsItem.id: snapshotListOfListsItem.data()});
+        }
       }
       var sortedKeys = listOfLists.keys.toList(growable: false)
         ..sort((k1, k2) => listOfLists[k1]!.listName.compareTo(listOfLists[k2]!.listName));

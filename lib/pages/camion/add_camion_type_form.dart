@@ -96,11 +96,11 @@ class _AddCamionTypeState extends State<AddCamionType> {
   Future<void> _syncDatas() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("++++ Synchronizing Equipments...");
+      print("💽 Synchronizing Equipments...");
       await syncService.fullSyncTable("equipments");
-      print("++++ Synchronization with SQLite completed.");
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("++++ Error during synchronization with SQLite: $e");
+      print("💽 Error during synchronization with SQLite: $e");
     }
   }
 

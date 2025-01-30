@@ -226,9 +226,9 @@ class _AddCamionState extends State<AddCamion> {
 
           // Camion Type Dropdown
           _isLoadingCamionTypes
-            ? const CircularProgressIndicator() // Pokazanie loadinga, jeśli typy się ładują
+            ? const CircularProgressIndicator()
             : _camionTypesMap == null || _camionTypesMap!.isEmpty
-            ? Text(AppLocalizations.of(context)!.userDataNotFound) // W przypadku braku danych
+            ? Text(AppLocalizations.of(context)!.userDataNotFound)
             : buildDropdownField(
                 labelText: AppLocalizations.of(context)!.camionType,
                 items: _camionTypesMap!.entries.map((entry) {

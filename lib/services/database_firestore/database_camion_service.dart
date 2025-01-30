@@ -41,7 +41,6 @@ class DatabaseCamionService{
   Future<Map<String, Camion>> getAllCamionsSinceLastSync(String lastSync) async {
     Query query = _camionRef;
     query = query.where('updatedAt', isGreaterThan: lastSync);
-    // print(query.parameters);
 
     try {
       QuerySnapshot querySnapshot = await query.get();
@@ -56,18 +55,8 @@ class DatabaseCamionService{
     }
   }
 
-  LinkedHashMap<String, Camion> _sortCamions(Map<String, Camion> camions) {
-    var sortedKeys = camions.keys.toList(growable: false)
-      ..sort((k1, k2) {
-        int companyCompare = camions[k1]!.company.compareTo(camions[k2]!.company);
-        if (companyCompare != 0) return companyCompare;
-        return camions[k1]!.name.compareTo(camions[k2]!.name);
-      });
 
-    return LinkedHashMap.fromIterable(sortedKeys, key: (k) => k, value: (k) => camions[k]!);
-  }
-
-  Future<Map<String, Camion>> getCompanyCamions(companyID) async {
+  Future<Map<String, Camion>> getCompanyCamions(String companyID) async {
     try {
       final querySnapshot = await _camionRef.get();
       List snapshotList = querySnapshot.docs;
@@ -77,6 +66,70 @@ class DatabaseCamionService{
         if(snapshotCamionItem.data().company == companyID){
           camions.addAll({snapshotCamionItem.id: snapshotCamionItem.data()});
         }
+      }
+      var sortedKeys = camions.keys.toList(growable: false)
+        ..sort((k1, k2) => camions[k1]!.name.compareTo(camions[k2]!.name));
+
+      LinkedHashMap<String, Camion> sortedCamions = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => camions[k]!,
+      );
+      return sortedCamions;
+
+    } catch (e) {
+      print("Error getting listItems: $e");
+      rethrow;
+    }
+  }
+
+  Future<Map<String, Camion>> getCompanyCamionsSinceLastSync(String companyID, String lastSync) async {
+    Query query = _camionRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      List snapshotList = querySnapshot.docs;
+      Map<String, Camion> camions = HashMap();
+
+      for (var snapshotCamionItem in snapshotList){
+        if(snapshotCamionItem.data().company == companyID){
+          camions.addAll({snapshotCamionItem.id: snapshotCamionItem.data()});
+        }
+      }
+      var sortedKeys = camions.keys.toList(growable: false)
+        ..sort((k1, k2) => camions[k1]!.name.compareTo(camions[k2]!.name));
+
+      LinkedHashMap<String, Camion> sortedCamions = LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => camions[k]!,
+      );
+      return sortedCamions;
+
+    } catch (e) {
+      print("Error getting listItems: $e");
+      rethrow;
+    }
+  }
+
+  Future<Map<String, Camion>> getOneCamionSinceLastSync(String? camion, String lastSync) async {
+    Query query = _camionRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+
+    if(camion == null){
+      Map<String, Camion> sortedCamions = {};
+      return sortedCamions;
+    }
+    try {
+      QuerySnapshot querySnapshot = await _camionRef
+        .where(FieldPath.documentId, isEqualTo: camion)
+        .get();
+      List snapshotList = querySnapshot.docs;
+      Map<String, Camion> camions = HashMap();
+
+      for (var snapshotCamionItem in snapshotList){
+        camions.addAll({snapshotCamionItem.id: snapshotCamionItem.data()});
       }
       var sortedKeys = camions.keys.toList(growable: false)
         ..sort((k1, k2) => camions[k1]!.name.compareTo(camions[k2]!.name));
@@ -124,10 +177,7 @@ class DatabaseCamionService{
     if (lastDocument != null) {
       query = query.startAfterDocument(lastDocument);
     }
-
     query = query.limit(limit);
-
-    // print(query.parameters);
 
     try {
       QuerySnapshot querySnapshot = await query.get();
@@ -190,6 +240,17 @@ class DatabaseCamionService{
     }catch(e){
       print("Error while trying soft deleting camion with ID $camionID: $e");
     }
+  }
+
+  LinkedHashMap<String, Camion> _sortCamions(Map<String, Camion> camions) {
+    var sortedKeys = camions.keys.toList(growable: false)
+      ..sort((k1, k2) {
+        int companyCompare = camions[k1]!.company.compareTo(camions[k2]!.company);
+        if (companyCompare != 0) return companyCompare;
+        return camions[k1]!.name.compareTo(camions[k2]!.name);
+      });
+
+    return LinkedHashMap.fromIterable(sortedKeys, key: (k) => k, value: (k) => camions[k]!);
   }
 
 }

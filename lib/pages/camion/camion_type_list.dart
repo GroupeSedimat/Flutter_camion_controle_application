@@ -6,8 +6,9 @@ import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_type_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
-import 'package:flutter_application_1/services/database_firestore/check_list/database_list_of_lists_service.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
+import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/equipments_table.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
@@ -25,27 +26,45 @@ class CamionTypeList extends StatefulWidget {
 
 class _CamionTypeListState extends State<CamionTypeList> {
   late Database db;
-  DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
-  Future<MyUser>? _futureUser;
-  Map<String, String> availableLolMap = {};
+  MyUser? _user;
+  String? _userID;
+  Map<String, String>? _availableLolMap;
   Map<String, String>? _equipmentLists;
+  Map<String, CamionType>? _camionTypesList;
 
   @override
   void initState() {
     super.initState();
-    _futureUser = getUser();
-    _loadDataFromDatabase();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _initDatabase();
+    await _syncDatas();
+    await _loadUser();
+    await _loadDataFromDatabase();
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      AuthController authController = AuthController();
+      UserService userService = UserService();
+      String userId = authController.getCurrentUserUID();
+      MyUser user = await userService.getCurrentUserData();
+      _user = user;
+      _userID = userId;
+    } catch (e) {
+      print("Error loading user: $e");
+    }
   }
 
   Future<void> _loadDataFromDatabase() async {
-    await _initDatabase();
-    await _syncDatas();
-    Map<String, ListOfLists> listOfLists = await databaseListOfListsService.getAllListsWithId();
+    Map<String, ListOfLists>? listOfLists = await getAllLists(db);
     _equipmentLists = await getAllEquipmentsNames(db);
-
-    setState(() {
-      availableLolMap = listOfLists.map((key, list) => MapEntry(key, list.listName));
-    });
+    _camionTypesList = await getAllCamionTypes(db);
+    if(listOfLists != null){
+      _availableLolMap = listOfLists.map((key, list) => MapEntry(key, list.listName));
+    }
   }
 
   Future<void> _initDatabase() async {
@@ -55,71 +74,46 @@ class _CamionTypeListState extends State<CamionTypeList> {
   Future<void> _syncDatas() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("Synchronizing CamionTypess...");
+      print("💽 Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes");
-      print("Synchronization with SQLite completed.");
+      print("💽 Synchronizing Equipments...");
+      await syncService.fullSyncTable("equipments");
+      print("💽 Synchronizing LOL...");
+      await syncService.fullSyncTable("listOfLists");
+      print("💽 Synchronization with SQLite completed.");
     } catch (e) {
-      print("Error during synchronization with SQLite: $e");
+      print("💽 Error during synchronization with SQLite: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<MyUser>(
-      future: _futureUser,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (snapshot.hasData) {
-          MyUser user = snapshot.data!;
-          return Scaffold(
-              body: FutureBuilder(
-                future: getCamionTypesData(user),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    Map<String, CamionType> camionTypesList = snapshot.data!;
-                    return DefaultTabController(
-                      initialIndex: 0,
-                      length: camionTypesList.length,
-                      child: BasePage(
-                        title: title(user),
-                        body: _buildBody(camionTypesList, user),
-                      ),
-                    );
-                  }
-                },
-              ),
-              floatingActionButton: Visibility(
-                visible: user.role == 'superadmin',
-                child: FloatingActionButton(
-                  heroTag: "addCamionTypeHero",
-                  onPressed: () {
-                    showCamionTypeModal();
-                  },
-                  // backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: const Icon(
-                    Icons.fire_truck,
-                    color: Colors.white,
-                  ),
-                ),
-              )
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    if(_user == null || _camionTypesList == null || _availableLolMap == null){
+      return Text(AppLocalizations.of(context)!.dataNoData);
+    }
+    return Scaffold(
+        body: DefaultTabController(
+          initialIndex: 0,
+          length: _camionTypesList!.length,
+          child: BasePage(
+            title: title(_user!),
+            body: _buildBody(_camionTypesList!, _user!),
+          ),
+        ),
+        floatingActionButton: Visibility(
+          visible: _user!.role == 'superadmin',
+          child: FloatingActionButton(
+            heroTag: "addCamionTypeHero",
+            onPressed: () {
+              showCamionTypeModal();
+            },
+            child: const Icon(
+              Icons.fire_truck,
+              color: Colors.white,
+            ),
+          ),
+        )
     );
-  }
-
-  Future<MyUser> getUser() async {
-    UserService userService = UserService();
-    return await userService.getCurrentUserData();
   }
 
   Future<Map<String, CamionType>> getCamionTypesData(MyUser user) async {
@@ -219,9 +213,9 @@ class _CamionTypeListState extends State<CamionTypeList> {
                       spacing: 16.0,
                       runSpacing: 16.0,
                       children: [
-                        // Wyświetlanie listy "lol"
+                        // Affichage de la liste "List of lists"
                         if (camionType.lol != null)
-                          Container(
+                          SizedBox(
                             width: 150,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,15 +236,15 @@ class _CamionTypeListState extends State<CamionTypeList> {
                                       ),
                                     ],
                                   ),
-                                  child: Text(availableLolMap[item] ?? "Unknown list!", style: textStyle()),
-                                )).toList(),
+                                  child: Text(_availableLolMap![item] ?? "Unknown list!", style: textStyle()),
+                                )),
                               ],
                             ),
                           ),
 
-                        // Wyświetlanie listy "equipment"
+                        // Affichage de la liste "equipment"
                         if (camionType.equipment != null)
-                          Container(
+                          SizedBox(
                             width: 150,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,7 +266,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
                                     ],
                                   ),
                                   child: Text(_equipmentLists?[item] ?? "Unknown equipment!", style: textStyle()),
-                                )).toList(),
+                                )),
                               ],
                             ),
                           ),
@@ -346,7 +340,6 @@ class _CamionTypeListState extends State<CamionTypeList> {
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
-              // AppLocalizations.of(context)!
           ),
         ],
       ),

@@ -42,7 +42,7 @@ Future<Map<String, Company>> getAllCompanies() async {
 
     } catch (e) {
       print("Error getting companies: $e");
-      rethrow; // Gérez l’erreur le cas échéant.
+      rethrow;
     }
   }
 
@@ -53,23 +53,20 @@ Future<Map<String, Company>> getAllCompanies() async {
 
       Map<String, String> companies = HashMap();
       for (var companySnapshot in companySnapshotList){
-        Company company = companySnapshot.data();
-        companies.addAll({companySnapshot.id: company.name});
+        companies[companySnapshot.id] = companySnapshot.data().name;
       }
       var sortedKeys = companies.keys.toList(growable: false)
-        ..sort((k1, k2) => companies[k1]!.compareTo(companies[k2]!));
+        ..sort((k1, k2) => companies[k1]!.toLowerCase().compareTo(companies[k2]!.toLowerCase()));
 
       LinkedHashMap<String, String> sortedCompanies = LinkedHashMap.fromIterable(
         sortedKeys,
         key: (k) => k,
         value: (k) => companies[k]!,
       );
-
       return sortedCompanies;
-
     } catch (e) {
         print("Error getting companies: $e");
-        rethrow; // Gérez l’erreur le cas échéant.
+        rethrow;
       }
   }
 
@@ -136,6 +133,25 @@ Future<Map<String, Company>> getAllCompanies() async {
       // Gérez l’erreur
       print("Error retrieving company ID: $error");
       return null;
+    }
+  }
+
+  Future<Map<String, Company>> getCompanyByIdSinceLastSync(String lastSync, String id) async {
+    Query query = _companyRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, Company> companies = HashMap();
+      for (var doc in querySnapshot.docs) {
+        if(doc.id == id){
+          companies[doc.id] = doc.data() as Company;
+        }
+      }
+      return companies;
+
+    } catch (error) {
+      print("Error fetching Company with id $id since last update data: $error");
+      rethrow;
     }
   }
 

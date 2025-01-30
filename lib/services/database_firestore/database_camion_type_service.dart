@@ -106,7 +106,7 @@ class DatabaseCamionTypeService{
     _camionTypeRef.doc(camionTypeID).delete();
   }
 
-  Future<Map<String, CamionType>> getAllCamionsSinceLastSync(String lastSync) async {
+  Future<Map<String, CamionType>> getAllCamionTypesSinceLastSync(String lastSync) async {
     Query query = _camionTypeRef;
     query = query.where('updatedAt', isGreaterThan: lastSync);
     // print(query.parameters);
@@ -120,6 +120,26 @@ class DatabaseCamionTypeService{
       return camions;
     } catch (e) {
       print("Error fetching Camion Typess since last update data: $e");
+      rethrow;
+    }
+  }
+
+  Future<Map<String, CamionType>> getListedCamionTypesSinceLastSync(String lastSync, List<String> camionsTypesId) async {
+    Query query = _camionTypeRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    // print(query.parameters);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, CamionType> camions = HashMap();
+      for (var doc in querySnapshot.docs) {
+        if(camionsTypesId.contains(doc.id)){
+          camions[doc.id] = doc.data() as CamionType;
+        }
+      }
+      return camions;
+    } catch (e) {
+      print("Error fetching Camion Typess from list since last update data: $e");
       rethrow;
     }
   }

@@ -18,7 +18,7 @@ class DatabaseHelper {
   DatabaseHelper._internal();
 
   Future<void> init() async {
-    await database; // This ensures the database is initialized.
+    await database;
   }
 
   Future<Database> get database async {
@@ -60,6 +60,10 @@ class DatabaseHelper {
 
   Future<void> _initializeUpdateTable(Database db, List<String> tableNames) async {
     for (var tableName in tableNames) {
+      if(tableName == "updates"){
+        continue;
+      }
+      print("🔛 initialize table $tableName 🔛");
       final existingEntry = await db.query(
         updatesTableName,
         where: 'tableName = ?',
@@ -70,5 +74,20 @@ class DatabaseHelper {
         await insertTableInfo(db, tableName);
       }
     }
+  }
+
+  Future<void> clearTables(List<String> tableNames) async {
+    final db = await database;
+    print("🧹 I'm starting to clean up the database...");
+
+    for (var tableName in tableNames) {
+      print("🧹 I'm clearing the table: $tableName");
+      await db.delete(tableName);
+    }
+
+    print("🧹 Cleaning completed. Initializing update tables...");
+    await _initializeUpdateTable(db, tableNames);
+
+    print("✅ Cleaning and initialization completed.");
   }
 }
