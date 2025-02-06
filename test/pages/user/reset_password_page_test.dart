@@ -17,7 +17,8 @@ void main() {
           GlobalWidgetsLocalizations.delegate,
         ],
         supportedLocales: const [
-          Locale('en', ''), // 🔥 Remplace par 'fr' si besoin
+         Locale('en', ''),
+        Locale('fr', ''), 
         ],
         home: ResetPasswordPage(),
       ),
@@ -25,17 +26,16 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Vérifie que le champ de texte pour l'email est présent
+   
     final emailField = find.byType(TextField);
     expect(emailField, findsOneWidget);
 
-    // Entre un email
+   
     await tester.enterText(emailField, 'test@example.com');
 
-    // Rafraîchit le widget après l’entrée de texte
     await tester.pump();
 
-    // Vérifie que l'email saisi est bien affiché
+ 
     expect(find.text('test@example.com'), findsOneWidget);
   });
 }
