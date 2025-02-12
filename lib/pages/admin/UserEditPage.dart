@@ -30,6 +30,7 @@ class _UserEditPageState extends State<UserEditPage> {
   final TextEditingController _uploadedImageUrl = TextEditingController();
   File? _selectedImage;
 
+  /// todo make offline photos and files validations (DatabaseValidationService)
   final PickImageService _pickImageService = PickImageService();
   final DatabaseValidationService _databaseValidationService = DatabaseValidationService();
 

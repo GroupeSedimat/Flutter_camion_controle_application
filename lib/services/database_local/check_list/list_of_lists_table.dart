@@ -79,6 +79,22 @@ Future<void> softDeleteList(Database db, String firebaseId) async {
   }
 }
 
+Future<void> restoreList(Database db, String firebaseId) async {
+  try{
+    await db.update(
+        tableName,
+        {
+          'updatedAt': DateTime.now().toIso8601String(),
+          'deletedAt': null
+        },
+        where: 'id = ?',
+        whereArgs: [firebaseId],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while restoring data with id $firebaseId in table List of Lists: $e");
+  }
+}
+
 Future<Map<String,ListOfLists>?> getAllLists(Database db) async {
   Map<String, ListOfLists> listOfLists = {};
   try{

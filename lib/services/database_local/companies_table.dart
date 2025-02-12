@@ -109,6 +109,22 @@ Future<void> softDeleteCompany(Database db, String firebaseId) async {
   }
 }
 
+Future<void> restoreCompany(Database db, String firebaseId) async {
+  try{
+    await db.update(
+        tableName,
+        {
+          'updatedAt': DateTime.now().toIso8601String(),
+          'deletedAt': null
+        },
+        where: 'id = ?',
+        whereArgs: [firebaseId],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while restoring data with id $firebaseId in table Company: $e");
+  }
+}
+
 Future<Map<String,Company>?> getAllCompanies(Database db) async {
   Map<String, Company> companies = {};
   try{
@@ -241,7 +257,6 @@ Map<String, dynamic> companyNameToMap(String companyName, String firebaseId) {
     'logo': "",
     'createdAt': DateTime.now().toIso8601String(),
     'updatedAt': DateTime.now().toIso8601String(),
-    'deletedAt': DateTime.now().toIso8601String(),
   };
 }
 
@@ -271,6 +286,9 @@ Company responseItemToCompany(var companyItem){
         : null,
     email: companyItem["email"]!= null
         ? companyItem['email'] as String
+        : null,
+    logo: companyItem["logo"]!= null
+        ? companyItem['logo'] as String
         : null,
     createdAt: DateTime.parse(companyItem["createdAt"] as String),
     updatedAt: DateTime.parse(companyItem["updatedAt"] as String),

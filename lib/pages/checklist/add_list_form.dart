@@ -29,7 +29,6 @@ class _AddListFormState extends State<AddListForm> {
   int? _listNr;
   String pageTile = "";
   bool _isLoading = true;
-
   late Database db;
 
   @override

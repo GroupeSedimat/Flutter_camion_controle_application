@@ -27,13 +27,16 @@ class EquipmentList extends StatefulWidget {
 
 class _EquipmentListState extends State<EquipmentList> {
   late Database db;
+  late MyUser _user;
+  late String _userId;
+  bool _isLoading = true;
+
   late AuthController authController;
   late UserService userService;
   late NetworkService networkService;
   Map<String, Equipment> _equipmentLists = HashMap();
-  MyUser? _user;
-  String? _userId;
 
+  /// todo repair names order and showing photo(s)
   @override
   void initState() {
     super.initState();
@@ -55,13 +58,11 @@ class _EquipmentListState extends State<EquipmentList> {
       await _syncData();
     }
     await _loadDataFromDatabase();
-  }
-
-  Future<void> _loadDataFromDatabase() async {
-    Map<String, Equipment>? equipmentLists = await getAllEquipments(db);
-    setState(() {
-      _equipmentLists = equipmentLists!;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _initDatabase() async {
@@ -127,14 +128,37 @@ class _EquipmentListState extends State<EquipmentList> {
     }
   }
 
+  Future<void> _loadDataFromDatabase() async {
+    Map<String, Equipment>? equipmentLists = await getAllEquipments(db);
+    setState(() {
+      _equipmentLists = equipmentLists!;
+    });
+  }
+
   bool _isSuperAdmin() {
-    return _user?.role == 'superadmin';
+    return _user.role == 'superadmin';
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null || _equipmentLists.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+    if (_isLoading) {
+      return Scaffold(
+        body: Drawer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
     }
     return Scaffold(
       body: BasePage(
@@ -202,13 +226,16 @@ class _EquipmentListState extends State<EquipmentList> {
 
               Equipment equipment = _equipmentLists.values.elementAt(index);
               String equipmentId = _equipmentLists.keys.elementAt(index);
-
+              String isDeleted = "";
+              if(equipment.deletedAt != null){
+                isDeleted = " (deleted)";
+              }
               return Padding(
                 padding: const EdgeInsets.all(8),
                 child: ExpansionTile(
                   leading: leading,
                   title: Text(
-                    equipment.name,
+                    "${equipment.name}$isDeleted",
                     style: TextStyle(
                       fontSize: 24,
                       color: Theme.of(context).primaryColor,
@@ -223,6 +250,13 @@ class _EquipmentListState extends State<EquipmentList> {
                         );
                       } else if (value == 'delete') {
                         _showDeleteConfirmation(equipmentId);
+                      } else if (value == 'restore') {
+                        await restoreEquipment(db, equipmentId);
+                        if (networkService.isOnline) {
+                          await _syncEquipments();
+                        }
+                        await _loadDataFromDatabase();
+                        setState(() {});
                       }
                     },
                     itemBuilder: (context) => [
@@ -230,10 +264,15 @@ class _EquipmentListState extends State<EquipmentList> {
                         value: 'edit',
                         child: Text(AppLocalizations.of(context)!.edit),
                       ),
-                      if (_user!.role == "superadmin")
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text(AppLocalizations.of(context)!.delete),
+                      if (_isSuperAdmin())
+                        equipment.deletedAt == null
+                          ? PopupMenuItem(
+                            value: 'delete',
+                            child: Text(AppLocalizations.of(context)!.delete),
+                        )
+                          : PopupMenuItem(
+                            value: 'restore',
+                            child: Text(AppLocalizations.of(context)!.restore),
                         ),
                     ],
                   ),
@@ -284,12 +323,13 @@ class _EquipmentListState extends State<EquipmentList> {
   }
 
   String title() {
-    if(_user!.role == "superadmin"){
+    if(_isSuperAdmin()){
       return AppLocalizations.of(context)!.equipmentList;
     }else{
       return AppLocalizations.of(context)!.equipmentDescription;
     }
   }
+
   void showEquipmentModal({
     Equipment? equipment,
     String? equipmentID,
@@ -306,7 +346,12 @@ class _EquipmentListState extends State<EquipmentList> {
           child: AddEquipment(
             equipment: equipment,
             equipmentID: equipmentID,
-            onEquipmentAdded: () {
+            onEquipmentAdded: () async {
+              // on accept, sync and reload data then refresh page
+              if (networkService.isOnline) {
+                await _syncEquipments();
+              }
+              await _loadDataFromDatabase();
               setState(() {});
               Navigator.pop(context);
             },
@@ -328,8 +373,12 @@ class _EquipmentListState extends State<EquipmentList> {
             child: Text(AppLocalizations.of(context)!.no),
           ),
           TextButton(
-            onPressed: () {
-              softDeleteEquipment(db, equipmentID);
+            onPressed: () async {
+              await softDeleteEquipment(db, equipmentID);
+              if (networkService.isOnline) {
+                await _syncEquipments();
+              }
+              await _loadDataFromDatabase();
               setState(() {});
               Navigator.pop(context);
             },
@@ -339,5 +388,16 @@ class _EquipmentListState extends State<EquipmentList> {
         ],
       ),
     );
+  }
+
+  Future<void> _syncEquipments() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Equipments...");
+      await syncService.fullSyncTable("equipments");
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during synchronization with SQLite: $e");
+    }
   }
 }

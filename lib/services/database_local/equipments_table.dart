@@ -90,6 +90,22 @@ Future<void> softDeleteEquipment(Database db, String firebaseId) async {
   }
 }
 
+Future<void> restoreEquipment(Database db, String firebaseId) async {
+  try{
+    await db.update(
+        tableName,
+        {
+          'updatedAt': DateTime.now().toIso8601String(),
+          'deletedAt': null
+        },
+        where: 'id = ?',
+        whereArgs: [firebaseId],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while restoring data with id $firebaseId in table Equipments: $e");
+  }
+}
+
 Future<Map<String,Equipment>?> getAllEquipments(Database db) async {
   Map<String, Equipment> equipments = {};
   try{

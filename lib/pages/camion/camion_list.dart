@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
+import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_form.dart';
@@ -12,6 +13,8 @@ import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
+import 'package:flutter_application_1/services/database_local/users_table.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
@@ -28,7 +31,11 @@ class CamionList extends StatefulWidget {
 
 class _CamionListState extends State<CamionList> {
 
-  MyUser? _user;
+  late Database db;
+  late MyUser _user;
+  late String _userId;
+  bool _isLoading = true;
+
   Map<String, String>? _camionTypes;
   Map<String, Camion> _camionList = HashMap();
   Map<String, String>? _companiesNames;
@@ -40,8 +47,10 @@ class _CamionListState extends State<CamionList> {
   String? _selectedSortField;
   String? _searchQuery;
   bool _isSortDescending = false;
-  late Database db;
 
+  late AuthController authController;
+  late UserService userService;
+  late NetworkService networkService;
 
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -51,57 +60,138 @@ class _CamionListState extends State<CamionList> {
   void initState() {
     super.initState();
     _loadData();
-    _scrollController.addListener(_scrollListener);
   }
 
   Future<void> _loadData() async {
     await _initDatabase();
-    await _syncDatas();
+    await _initService();
+    if (!networkService.isOnline) {
+      print("Offline mode, no user update possible");
+    }else{
+      await _loadUserToConnection();
+    }
     await _loadUser();
-    await _loadCamionTypes();
-    await _loadCompaniesNames();
-    // _loadMoreCamions();
-    await _loadLocalCamions();
+    if (!networkService.isOnline) {
+      print("Offline mode, no sync possible");
+    }{
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _initDatabase() async {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _searchController.dispose();
-    super.dispose();
+  Future<void> _initService() async {
+    try {
+      authController = AuthController();
+      userService = UserService();
+      networkService = Provider.of<NetworkService>(context, listen: false);
+      _scrollController.addListener(_scrollListener);
+    } catch (e) {
+      print("Error loading services: $e");
+    }
   }
 
-  void _scrollListener() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore && _hasMoreData) {
-      // _loadMoreCamions();
-      _loadLocalCamions();
+  Future<void> _loadUserToConnection() async {
+    print("welcome user to connection firebase ☢☢☢☢☢☢☢");
+    Map<String, MyUser>? users = await getThisUser(db);
+    print("users: $users");
+    if(users != null ){
+      return;
+    }
+    try {
+      MyUser user = await userService.getCurrentUserData();
+      print("user ☢☢☢☢☢☢☢ $user");
+      String? userId = await userService.userID;
+      print("userId ☢☢☢☢☢☢☢ $userId");
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Users...");
+      await syncService.fullSyncTable("users", user: user, userId: userId);
+    } catch (e) {
+      print("💽 Error loading user: $e");
     }
   }
 
   Future<void> _loadUser() async {
+    print("welcome page local ☢☢☢☢☢☢☢");
     try {
-      AuthController authController = AuthController();
-      UserService userService = UserService();
-      String userId = authController.getCurrentUserUID();
-      MyUser user = await userService.getCurrentUserData();
-      setState(() {
-        _user = user;
-      });
+      Map<String, MyUser>? users = await getThisUser(db);
+      print("connected as  $users");
+      MyUser user = users!.values.first;
+      print("local user ☢☢☢☢☢☢☢ $user");
+      String? userId = users.keys.first;
+      print("local userId ☢☢☢☢☢☢☢ $userId");
+      _userId = userId;
+      _user = user;
     } catch (e) {
       print("Error loading user: $e");
+    }
+  }
+
+  Future<void> _syncData() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing users...");
+      await syncService.fullSyncTable("users", user: _user, userId: _userId);
+      print("💽 Synchronizing users Camions...");
+      await syncService.fullSyncTable("camions", user: _user, userId: _userId);
+      List<String> camionsTypeIdList = [];
+      await getAllCamions(db).then((camionsMap) {
+        if(camionsMap != null){
+          for(var camion in camionsMap.entries){
+            if(!camionsTypeIdList.contains(camion.value.camionType)){
+              camionsTypeIdList.add(camion.value.camionType);
+            }
+          }
+        }
+      });
+      print("💽 Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      List<String> camionListOfListId = [];
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
+      if(camionTypesMap != null){
+        for(var camionType in camionTypesMap.entries){
+          if(camionType.value.lol != null){
+            for(var list in camionType.value.lol!){
+              if(!camionListOfListId.contains(list)){
+                camionListOfListId.add(list);
+              }
+            }
+          }
+        }
+      }
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during global data synchronization: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> _loadDataFromDatabase() async {
+    await _loadCamionTypes();
+    await _loadCompaniesNames();
+    await _loadLocalCamions();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoadingMore && _hasMoreData) {
+      _loadLocalCamions();
     }
   }
 
   Future<void> _loadCamionTypes() async {
     try {
       Map<String, String>? types = await getAllCamionTypeNames(db);
-      setState(() {
+      if(types != null){
         _camionTypes = types;
-      });
+      }
     } catch (e) {
       print("Error loading camion types: $e");
     }
@@ -110,9 +200,9 @@ class _CamionListState extends State<CamionList> {
   Future<void> _loadCompaniesNames() async {
     try {
       Map<String, String>? companies = await getAllCompaniesNames(db);
-      setState(() {
+      if(companies != null){
         _companiesNames = companies;
-      });
+      }
     } catch (e) {
       print("Error loading Companies Names: $e");
     }
@@ -122,9 +212,7 @@ class _CamionListState extends State<CamionList> {
     try {
       Map<String, Camion>? camionList = await getAllCamions(db);
       if(camionList != null){
-        setState(() {
-          _camionList = camionList;
-        });
+        _camionList = camionList;
       }
     }catch (e) {
       print("Error loading camions from local db: $e");
@@ -132,7 +220,7 @@ class _CamionListState extends State<CamionList> {
   }
 
   Future<void> _loadMoreCamions() async {
-    if (!_hasMoreData || _user == null) return;
+    if (!_hasMoreData) return;
     _isLoadingMore = true;
 
     try {
@@ -162,23 +250,33 @@ class _CamionListState extends State<CamionList> {
     }
   }
 
-  Future<void> _syncDatas() async {
-    try {
-      final syncService = Provider.of<SyncService>(context, listen: false);
-      print("💽 Synchronizing Camions...");
-      await syncService.fullSyncTable("camions", user:_user);
-      print("💽 Synchronizing CamionTypess...");
-      await syncService.fullSyncTable("camionTypes");
-      print("💽 Synchronization with SQLite completed.");
-    } catch (e) {
-      print("💽 Error during synchronization with SQLite: $e");
-    }
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null || _camionTypes == null) {
-      return const Center(child: CircularProgressIndicator());
+    if (_isLoading) {
+      return Scaffold(
+        body: Drawer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
@@ -200,7 +298,7 @@ class _CamionListState extends State<CamionList> {
   }
 
   bool _isSuperAdmin() {
-    return _user?.role == 'superadmin';
+    return _user.role == 'superadmin';
   }
 
   void _showSubMenuSort(BuildContext context, Offset position) async {
@@ -216,7 +314,7 @@ class _CamionListState extends State<CamionList> {
           value: 'sortType',
           child: Text(AppLocalizations.of(context)!.sortType),
         ),
-        if(_user!.role=="superadmin")
+        if(_isSuperAdmin())
         PopupMenuItem(
           value: 'sortEntreprise',
           child: Text(AppLocalizations.of(context)!.sortEntreprise),
@@ -253,7 +351,7 @@ class _CamionListState extends State<CamionList> {
           value: 'filterType',
           child: Text(AppLocalizations.of(context)!.filterType),
         ),
-        if(_user!.role=="superadmin")
+        if(_isSuperAdmin())
         PopupMenuItem(
           value: 'filterEntreprise',
           child: Text(AppLocalizations.of(context)!.filterEntreprise),
@@ -372,7 +470,7 @@ class _CamionListState extends State<CamionList> {
         Wrap(
           spacing: 5,
           children: [
-            if(_user!.role=="superadmin")
+            if(_isSuperAdmin())
             ElevatedButton(
               onPressed: null,
               style: ElevatedButton.styleFrom(
@@ -380,7 +478,7 @@ class _CamionListState extends State<CamionList> {
               ),
               child: Text(AppLocalizations.of(context)!.camionMenuTrucks),
             ),
-            if(_user!.role=="superadmin")
+            if(_isSuperAdmin())
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -393,7 +491,7 @@ class _CamionListState extends State<CamionList> {
               ),
               child: Text(AppLocalizations.of(context)!.camionMenuTypes),
             ),
-            if(_user!.role=="superadmin")
+            if(_isSuperAdmin())
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -434,28 +532,28 @@ class _CamionListState extends State<CamionList> {
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                _searchQuery = _searchController.text.trim(); // Zapisz wartość wyszukiwania
-                                _camionList.clear(); // Wyczyść aktualną listę
-                                _lastDocument = null; // Resetuj ostatni dokument
-                                _hasMoreData = true; // Umożliw kontynuację ładowania danych
+                                _searchQuery = _searchController.text.trim();
+                                _camionList.clear();
+                                _lastDocument = null;
+                                _hasMoreData = true;
                               });
-                              _loadMoreCamions(); // Wywołaj funkcję ładowania
+                              _loadMoreCamions();
                             },
                             child: Text("Search"),
                           ),
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                _searchQuery = null; // Zapisz wartość wyszukiwania
-                                _camionList.clear(); // Wyczyść aktualną listę
-                                _lastDocument = null; // Resetuj ostatni dokument
-                                _hasMoreData = true; // Umożliw kontynuację ładowania danych
+                                _searchQuery = null;
+                                _camionList.clear();
+                                _lastDocument = null;
+                                _hasMoreData = true;
                                 _selectedSortField = null;
                                 _isSortDescending = false;
                                 _selectedFilterCompany = null;
                                 _selectedFilterType = null;
                               });
-                              _loadMoreCamions(); // Wywołaj funkcję ładowania
+                              _loadMoreCamions();
                             },
                             child: Text("Reset Serch"),
                           ),
@@ -483,7 +581,6 @@ class _CamionListState extends State<CamionList> {
                 PopupMenuItem(
                   value: 'filter',
                   onTap: () async {
-                    // Wyświetl podrzędne menu na konkretnej pozycji
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       RenderBox renderBox = context.findRenderObject() as RenderBox;
                       Offset position = renderBox.localToGlobal(Offset.zero);
@@ -529,9 +626,9 @@ class _CamionListState extends State<CamionList> {
               }
               String isDeleted;
               if(camion.deletedAt != null){
-                isDeleted = " deleted";
+                isDeleted = " (deleted)";
               }else{
-                isDeleted = " not deleted";
+                isDeleted = "";
               }
               return Padding(
                 padding: EdgeInsets.all(8),
@@ -550,6 +647,13 @@ class _CamionListState extends State<CamionList> {
                         );
                       } else if (value == 'delete') {
                         _showDeleteConfirmation(camionId);
+                      } else if (value == 'restore') {
+                        await restoreCamion(db, camionId);
+                        if (networkService.isOnline) {
+                          await _syncCamions();
+                        }
+                        await _loadDataFromDatabase();
+                        setState(() {});
                       }
                     },
                     itemBuilder: (context) => [
@@ -557,10 +661,15 @@ class _CamionListState extends State<CamionList> {
                         value: 'edit',
                         child: Text(AppLocalizations.of(context)!.edit),
                       ),
-                      if (_user!.role == "superadmin")
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text(AppLocalizations.of(context)!.delete),
+                      if (_isSuperAdmin())
+                        camion.deletedAt == null
+                          ? PopupMenuItem(
+                            value: 'delete',
+                            child: Text(AppLocalizations.of(context)!.delete),
+                        )
+                          : PopupMenuItem(
+                            value: 'restore',
+                            child: Text(AppLocalizations.of(context)!.restore),
                         ),
                     ],
                   ),
@@ -600,12 +709,24 @@ class _CamionListState extends State<CamionList> {
     );
   }
 
+  Future<void> _syncCamions() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing users Camions...");
+      await syncService.fullSyncTable("camions", user: _user, userId: _userId);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during global data synchronization: $e");
+      rethrow;
+    }
+  }
+
   TextStyle textStyle(){
     return TextStyle(fontSize: 20);
   }
 
   String title() {
-    if (_user!.role == "superadmin") {
+    if (_isSuperAdmin()) {
       return AppLocalizations.of(context)!.camionsList;
     } else {
       return AppLocalizations.of(context)!.details;
@@ -628,7 +749,11 @@ class _CamionListState extends State<CamionList> {
           child: AddCamion(
             camion: camion,
             camionID: camionID,
-            onCamionAdded: () {
+            onCamionAdded: () async {
+              if (networkService.isOnline) {
+                await _syncCamions();
+              }
+              await _loadDataFromDatabase();
               setState(() {});
               Navigator.pop(context);
             },
@@ -650,8 +775,12 @@ class _CamionListState extends State<CamionList> {
             child: Text(AppLocalizations.of(context)!.no),
           ),
           TextButton(
-            onPressed: () {
-              softDeleteCamion(db, camionID);
+            onPressed: () async {
+              await softDeleteCamion(db, camionID);
+              if (networkService.isOnline) {
+                await _syncCamions();
+              }
+              await _loadDataFromDatabase();
               setState(() {});
               Navigator.pop(context);
             },

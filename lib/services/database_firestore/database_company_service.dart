@@ -162,7 +162,11 @@ Future<Map<String, Company>> getAllCompanies() async {
   }
 
   Future<void> updateCompany(String companyID, Company company) async {
-    _companyRef.doc(companyID).update(company.toJson());
+    final data = company.toJson();
+    if(company.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _companyRef.doc(companyID).update(data);
   }
 
   Future<void> deleteCompany(String companyID) async {

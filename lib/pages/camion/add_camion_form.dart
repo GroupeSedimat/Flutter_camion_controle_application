@@ -124,7 +124,7 @@ class _AddCamionState extends State<AddCamion> {
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime(2222),
     );
 
     if (pickedDate != null) {

@@ -29,7 +29,7 @@ class _AddEquipmentState extends State<AddEquipment> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final List<TextEditingController> _photoControllers = [];
-  List<String>? photo;
+  List<String> photo = [];
   bool? available;
   String pageTile = "";
 
@@ -51,13 +51,21 @@ class _AddEquipmentState extends State<AddEquipment> {
   }
 
   void _populateFieldsWithEquipmentData() {
+    List<String> photoList = widget.equipment!.photo ?? [];
+
     _idShopController.text = widget.equipment!.idShop ?? '';
     _nameController.text = widget.equipment!.name;
     _descriptionController.text = widget.equipment!.description ?? '';
-    photo = widget.equipment!.photo;
-    _photoControllers.addAll(photo!.map((item) => TextEditingController(text: item)));
+
+
     _quantityController.text = widget.equipment!.quantity?.toString() ?? '';
     available = widget.equipment!.available;
+
+    setState((){
+      photo = photoList;
+      _photoControllers.addAll(photoList.map((item) => TextEditingController(text: item)));
+    });
+
   }
 
   @override
@@ -74,7 +82,7 @@ class _AddEquipmentState extends State<AddEquipment> {
   void _addPhotoField() {
     setState(() {
       _photoControllers.add(TextEditingController());
-      photo?.add('');
+      photo.add('');
     });
   }
 
@@ -82,7 +90,7 @@ class _AddEquipmentState extends State<AddEquipment> {
     setState(() {
       _photoControllers[index].dispose();
       _photoControllers.removeAt(index);
-      photo?.removeAt(index);
+      photo.removeAt(index);
     });
   }
 
@@ -180,13 +188,18 @@ class _AddEquipmentState extends State<AddEquipment> {
                   focusedBorder: const OutlineInputBorder(gapPadding: 15),
                   border: const OutlineInputBorder(gapPadding: 5),
                 ),
+                onChanged: (val) {
+                  setState(() {
+                    photo[index] = val;
+                  });
+                },
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.remove_circle),
                 onPressed: () => _removePhotoField(index),
               ),
             );
-          }).toList(),
+          }),
           TextButton(
             onPressed: _addPhotoField,
             child: const Text("Add photo link"),
@@ -225,7 +238,15 @@ class _AddEquipmentState extends State<AddEquipment> {
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 try{
-                  int? parsedQuantity = int.tryParse(_quantityController.text);
+                  int? parsedQuantity = int.tryParse(_quantityController.text.trim());
+                  if (parsedQuantity == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.equipmentEnterQuantity)),
+                    );
+                    return;
+                  }
+                  // List<String> cleanedPhotos = photo?.where((p) => p.trim().isNotEmpty).toList() ?? [];
+
                   DateTime dateCreation = widget.equipment?.createdAt ?? DateTime.now();
                   Equipment newEquipment = Equipment(
                     idShop: _idShopController.text,
@@ -233,18 +254,17 @@ class _AddEquipmentState extends State<AddEquipment> {
                     description: _descriptionController.text,
                     photo: photo,
                     quantity: parsedQuantity,
-                    available: available,
+                    available: available ?? false,
                     createdAt: dateCreation,
                     updatedAt: DateTime.now(),
                   );
+
                   if (widget.equipment == null) {
                     insertEquipment(db, newEquipment, "");
                   } else {
                     updateEquipment(db, newEquipment, widget.equipmentID!);
                   }
-                  if (widget.onEquipmentAdded != null) {
-                    widget.onEquipmentAdded!();
-                  }
+                  widget.onEquipmentAdded?.call();
                 }
                 catch(e){
                   print("Error: $e");

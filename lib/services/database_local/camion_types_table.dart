@@ -88,6 +88,22 @@ Future<void> softDeleteCamionType(Database db, String firebaseId) async {
   }
 }
 
+Future<void> restoreCamionType(Database db, String firebaseId) async {
+  try{
+    await db.update(
+        tableName,
+        {
+          'updatedAt': DateTime.now().toIso8601String(),
+          'deletedAt': null
+        },
+        where: 'id = ?',
+        whereArgs: [firebaseId],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while restoring data with id $firebaseId in table Camion Types: $e");
+  }
+}
+
 Future<Map<String,CamionType>?> getAllCamionTypes(Database db) async {
   Map<String, CamionType> camionTypes = {};
   try{

@@ -22,6 +22,8 @@ class _AddCompanyState extends State<AddCompany> {
 
   final _formKey = GlobalKey<FormState>();
   late Database db;
+  bool _isLoading = true;
+  String pageTile = "";
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _sireneController = TextEditingController();
@@ -32,7 +34,6 @@ class _AddCompanyState extends State<AddCompany> {
   final TextEditingController _telController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _logoController = TextEditingController();
-  String pageTile = "";
 
   @override
   void initState() {
@@ -44,6 +45,11 @@ class _AddCompanyState extends State<AddCompany> {
     await _initDatabase();
     if (widget.company != null) {
       _populateFieldsWithEquipmentData();
+    }
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -61,6 +67,7 @@ class _AddCompanyState extends State<AddCompany> {
     _adminController.text = widget.company!.admin ?? '';
     _telController.text = widget.company!.tel ?? '';
     _emailController.text = widget.company!.email ?? '';
+    /// todo repair logo!
     _logoController.text = widget.company!.logo ?? '';
   }
 
@@ -81,6 +88,26 @@ class _AddCompanyState extends State<AddCompany> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: Drawer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
+    }
+
     if(widget.company != null){
       pageTile = AppLocalizations.of(context)!.companyEdit;
     }else{
@@ -106,8 +133,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _nameController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companyName,
+              labelText: AppLocalizations.of(context)!.companyName,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -120,8 +147,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _descriptionController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companyDescription,
+              labelText: AppLocalizations.of(context)!.companyDescription,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -134,8 +161,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _sireneController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companySirene,
+              labelText: AppLocalizations.of(context)!.companySirene,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -148,8 +175,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _siretController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companySiret,
+              labelText: AppLocalizations.of(context)!.companySiret,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -162,8 +189,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _addressController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companyAddress,
+              labelText: AppLocalizations.of(context)!.companyAddress,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -176,8 +203,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _responsibleController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companyResponsible,
+              labelText: AppLocalizations.of(context)!.companyResponsible,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -190,8 +217,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _adminController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companyAdmin,
+              labelText: AppLocalizations.of(context)!.companyAdmin,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -204,8 +231,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _telController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companyPhone,
+              labelText: AppLocalizations.of(context)!.companyPhone,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -218,8 +245,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _emailController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companyEMail,
+              labelText: AppLocalizations.of(context)!.companyEMail,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,
@@ -232,8 +259,8 @@ class _AddCompanyState extends State<AddCompany> {
           TextFormField(
             controller: _logoController,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
+              hintText: AppLocalizations.of(context)!.companyLogo,
+              labelText: AppLocalizations.of(context)!.companyLogo,
               labelStyle: const TextStyle(
                 fontSize: 20,
                 color: Colors.lightBlue,

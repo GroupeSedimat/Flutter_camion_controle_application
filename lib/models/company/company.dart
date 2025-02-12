@@ -32,15 +32,15 @@ class Company {
 
   Company.fromJson(Map<String, Object?> json): this (
     name: json['name']! as String,
-    description: json['description'] != null ? json['responsible'] as String : null,
-    sirene: json['sirene'] != null ? json['responsible'] as String : null,
-    siret: json['siret'] != null ? json['responsible'] as String : null,
-    address: json['address'] != null ? json['responsible'] as String : null,
+    description: json['description'] != null ? json['description'] as String : null,
+    sirene: json['sirene'] != null ? json['sirene'] as String : null,
+    siret: json['siret'] != null ? json['siret'] as String : null,
+    address: json['address'] != null ? json['address'] as String : null,
     responsible: json['responsible'] != null ? json['responsible'] as String : null,
-    admin: json['admin'] != null ? json['responsible'] as String : null,
-    tel: json['tel'] != null ? json['responsible'] as String : null,
-    email: json['email'] != null ? json['responsible'] as String : null,
-    logo: json['logo'] != null ? json['responsible'] as String : null,
+    admin: json['admin'] != null ? json['admin'] as String : null,
+    tel: json['tel'] != null ? json['tel'] as String : null,
+    email: json['email'] != null ? json['email'] as String : null,
+    logo: json['logo'] != null ? json['logo'] as String : null,
     createdAt: DateTime.parse(json['createdAt'] as String),
     updatedAt: DateTime.parse(json['updatedAt'] as String),
     deletedAt: json['deletedAt'] != null
@@ -81,20 +81,21 @@ class Company {
   }
 
   Map<String, Object?> toJson(){
-    return{
+    final Map<String, Object?> json = {
       'name': name,
-      'description': description,
-      'sirene': sirene,
-      'siret': siret,
-      'address': address,
-      'responsible': responsible,
-      'admin': admin,
-      'tel': tel,
-      'email': email,
-      'logo': logo,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'deletedAt': deletedAt,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
+    if (description != null) json['description'] = description;
+    if (sirene != null) json['sirene'] = sirene;
+    if (siret != null) json['siret'] = siret;
+    if (address != null) json['address'] = address;
+    if (responsible != null) json['responsible'] = responsible;
+    if (admin != null) json['admin'] = admin;
+    if (tel != null) json['tel'] = tel;
+    if (email != null) json['email'] = email;
+    if (logo != null) json['logo'] = logo;
+    if (deletedAt != null) json['deletedAt'] = deletedAt!.toIso8601String();
+    return json;
   }
 }

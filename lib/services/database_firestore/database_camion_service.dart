@@ -224,7 +224,11 @@ class DatabaseCamionService{
   }
 
   Future<void> updateCamion(String camionID, Camion camion) async {
-    _camionRef.doc(camionID).update(camion.toJson());
+    final data = camion.toJson();
+    if(camion.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _camionRef.doc(camionID).update(data);
   }
 
   void deleteCamion(String camionID){

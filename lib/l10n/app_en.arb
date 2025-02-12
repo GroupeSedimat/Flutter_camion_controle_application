@@ -20,6 +20,7 @@
     "details": "See details",
     "edit": "Edit",
     "delete": "Delete",
+    "restore": "Restore",
     "confirmDelete": "Confirm deletion",
     "confirmDeleteText": "Are you sure you want to delete?",
     "confirmApprove": "Approve this user?",
@@ -100,11 +101,12 @@
     "filterType": "Filter by Type",
     "filterEntreprise": "Filter by company",
 
-    "equipmentIdShop": "Enter equipment id in stock",
+    "equipmentIdShop": "Equipment id in stock",
     "equipmentName": "Name of equipment",
     "equipmentList": "List of equipments",
     "equipmentDescription": "Equipment's description",
-    "equipmentQuantity": "Enter quantity of this equipment",
+    "equipmentQuantity": "Quantity of this equipment",
+    "equipmentEnterQuantity": "Please enter a valid quantity",
     "equipmentErrorLoading": "Error loading equipment",
 
     "checkList": "Checklist",
@@ -152,6 +154,7 @@
     "dataFetching": "Fetching data",
     "dataReceived": "Got data",
     "dataNoData": "No data, sorry :(",
+    "dataNoDataOffLine": "No data in offline mode, sorry :(",
 
     "colorLight": "Light",
     "colorDark": "Dark",

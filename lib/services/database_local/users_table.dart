@@ -66,6 +66,22 @@ Future<void> softDeleteUser(Database db, String firebaseId) async {
   }
 }
 
+Future<void> restoreUser(Database db, String firebaseId) async {
+  try{
+    await db.update(
+        tableName,
+        {
+          'updatedAt': DateTime.now().toIso8601String(),
+          'deletedAt': null
+        },
+        where: 'id = ?',
+        whereArgs: [firebaseId],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while restoring data with id $firebaseId in table Users: $e");
+  }
+}
+
 Future<Map<String,MyUser>?> getAllUsers(Database db) async {
   Map<String, MyUser> users = {};
   try{
@@ -119,7 +135,8 @@ Future<Map<String,MyUser>?> getAllUsersSinceLastUpdate(dynamic dbOrTxn, String l
       users[user["id"] as String] = responseItemToUser(user);
     }
 
-    return sortedUsers(users: users);
+    // return sortedUsers(users: users);
+    return users;
 
   } catch (e){
     print("Error while getting all data from table Users since last actualisation: $e");

@@ -8,6 +8,8 @@ import 'package:flutter_application_1/services/database_local/companies_table.da
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
+import 'package:flutter_application_1/services/database_local/users_table.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -26,19 +28,42 @@ class PDFShowTemplate extends StatefulWidget {
 class _PDFShowTemplateState extends State<PDFShowTemplate> {
   late Company _company;
   late Database db;
-  MyUser? _user;
+  late MyUser _user;
+  late String _userId;
+  bool _isLoading = true;
+  late AuthController authController;
+  late UserService userService;
+  late NetworkService networkService;
 
   @override
   void initState() async {
     super.initState();
-    _loadUser();
-    _loadDataFromDatabase();
+    _loadData();
   }
 
+  Future<void> _loadData() async {
+    await _initDatabase();
+    await _initServices();
+    if (!networkService.isOnline) {
+      print("Offline mode, no user update possible");
+    }else{
+      await _loadUserToConnection();
+    }
+    await _loadUser();
+    if (!networkService.isOnline) {
+      print("Offline mode, no sync possible");
+    }{
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   Future<void> _loadDataFromDatabase() async {
-    await _initDatabase();
-    await _syncData();
     await _loadCompanies();
   }
 
@@ -46,27 +71,58 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
-  Future<void> _loadUser() async {
+  Future<void> _initServices() async {
     try {
-      AuthController authController = AuthController();
-      UserService userService = UserService();
-      String userId = authController.getCurrentUserUID();
-      MyUser user = await userService.getCurrentUserData();
-      setState(() {
-        _user = user;
-      });
+      authController = AuthController();
+      userService = UserService();
+      networkService = Provider.of<NetworkService>(context, listen: false);
+    } catch (e) {
+      print("Error loading services: $e");
+    }
+  }
+
+  Future<void> _loadUser() async {
+    print("welcome page local ☢☢☢☢☢☢☢");
+    try {
+      Map<String, MyUser>? users = await getThisUser(db);
+      print("connected as  $users");
+      MyUser user = users!.values.first;
+      print("local user ☢☢☢☢☢☢☢ $user");
+      String? userId = users.keys.first;
+      print("local userId ☢☢☢☢☢☢☢ $userId");
+      _userId = userId;
+      _user = user;
     } catch (e) {
       print("Error loading user: $e");
     }
   }
 
+  Future<void> _loadUserToConnection() async {
+    print("welcome user to connection firebase ☢☢☢☢☢☢☢");
+    Map<String, MyUser>? users = await getThisUser(db);
+    print("users: $users");
+    if(users != null ){
+      return;
+    }
+    try {
+      MyUser user = await userService.getCurrentUserData();
+      print("user ☢☢☢☢☢☢☢ $user");
+      String? userId = await userService.userID;
+      print("userId ☢☢☢☢☢☢☢ $userId");
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Users...");
+      await syncService.fullSyncTable("users", user: user, userId: userId);
+    } catch (e) {
+      print("💽 Error loading user: $e");
+    }
+  }
+
   Future<void> _loadCompanies() async {
     try {
-      Company? company = await getOneCompanyWithID(db, _user!.company);
-      setState(() {
-        _company = company!;
-      });
-
+      Company? company = await getOneCompanyWithID(db, _user.company);
+      if(company != null){
+        _company = company;
+      }
     } catch (e) {
       print("Error loading Companies Names: $e");
     }
@@ -75,8 +131,10 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
   Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing users...");
+      await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies");
+      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -85,6 +143,26 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: Drawer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
+    }
+
     int timestamp = int.parse(widget.fileName);
     DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     String formattedDate = DateFormat('dd/MM/yyyy HH:mm:ss').format(date);
@@ -105,7 +183,7 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
               ListTile(
                 leading: Icon(Icons.person, color: Colors.deepPurple, size: 50),
                 title: Text(
-                  "User: ${_user?.username}",
+                  "User: ${_user.username}",
                   style: TextStyle(
                     fontSize: 22.0,
                     fontWeight: FontWeight.bold,
@@ -159,14 +237,15 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                       ),
                       onPressed: () {
                         PdfDownload(
-                            name: "${_user?.username}.${widget.fileName}",
-                            url: widget.url)
+                            name: "${_user.username}.${widget.fileName}",
+                            url: widget.url
+                        )
                             .downloadFile();
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
                               title: Text(AppLocalizations.of(context)!.download),
-                              content: Text(AppLocalizations.of(context)!.pdfDownloaded(_user!.username, widget.fileName)),
+                              content: Text(AppLocalizations.of(context)!.pdfDownloaded(_user.username, widget.fileName)),
                               actions: [
                                 TextButton(
                                     onPressed: () => Navigator.pop(context),

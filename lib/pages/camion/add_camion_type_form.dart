@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
-import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
-import 'package:flutter_application_1/services/database_firestore/check_list/database_list_of_lists_service.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_local/equipments_table.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -14,9 +10,18 @@ class AddCamionType extends StatefulWidget {
 
   CamionType? camionType;
   String? camionTypeID;
+  Map<String, String>? availableLolMap;
+  Map<String, String>? equipmentLists;
   final VoidCallback? onCamionTypeAdded;
 
-  AddCamionType({super.key, this.camionType, this.camionTypeID, this.onCamionTypeAdded});
+  AddCamionType({
+    super.key,
+    this.camionType,
+    this.camionTypeID,
+    this.onCamionTypeAdded,
+    this.availableLolMap,
+    this.equipmentLists
+  });
 
   @override
   State<AddCamionType> createState() => _AddCamionTypeState();
@@ -26,17 +31,13 @@ class _AddCamionTypeState extends State<AddCamionType> {
 
   final _formKey = GlobalKey<FormState>();
 
-  DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
-
   late Database db;
-
-  Map<String, String> availableLolMap = {};
-  Map<String, String>? _equipmentLists;
   Map<String, bool> equipmentSelection = {};
+
   final TextEditingController _nameController = TextEditingController();
-  final List<TextEditingController> _lolControllers = [];
-  final List<TextEditingController> _equipmentControllers = [];
-  final List<TextEditingController> _routerControllers = [];
+  List<TextEditingController> _lolControllers = [];
+  List<TextEditingController> _equipmentControllers = [];
+  List<TextEditingController> _routerControllers = [];
   List<String> lol = [];
   List<String> equipment = [];
   List<String> routerData = [];
@@ -45,75 +46,44 @@ class _AddCamionTypeState extends State<AddCamionType> {
   @override
   void initState() {
     super.initState();
-    _initializeData();
+    _loadData();
   }
 
-  Future<void> _initializeData() async {
+  Future<void> _loadData() async {
     await _initDatabase();
-    await _syncDatas();
-    await Future.wait([_loadEquipments(), _loadListOfLists()]);
     if (widget.camionType != null) {
       _populateFieldsWithCamionTypeData();
     }
   }
 
-
   void _populateFieldsWithCamionTypeData() {
-    _nameController.text = widget.camionType!.name;
-    lol = widget.camionType!.lol ?? [];
-    equipment = widget.camionType!.equipment ?? [];
-    routerData = widget.camionType!.routerData ?? [];
-    _lolControllers.addAll(lol.map((item) => TextEditingController(text: item)));
-    _equipmentControllers.addAll(equipment.map((item) => TextEditingController(text: item)));
-    _routerControllers.addAll(routerData.map((item) => TextEditingController(text: item)));
+    List<String> tempLol = widget.camionType!.lol ?? [];
+    List<String> tempEquipment = widget.camionType!.equipment ?? [];
+    List<String> tempRouterData = widget.camionType!.routerData ?? [];
+    Map<String, bool> tempEquipmentSelection = {
+      for (var key in widget.equipmentLists!.keys) key: tempEquipment.contains(key)
+    };
+
+    setState(() {
+      _nameController.text = widget.camionType!.name;
+      lol = tempLol;
+      equipment = tempEquipment;
+      routerData = tempRouterData;
+      _lolControllers = tempLol.map((item) => TextEditingController(text: item)).toList();
+      _equipmentControllers = tempEquipment.map((item) => TextEditingController(text: item)).toList();
+      _routerControllers = tempRouterData.map((item) => TextEditingController(text: item)).toList();
+      equipmentSelection = tempEquipmentSelection;
+    });
   }
 
   Future<void> _initDatabase() async {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
-  Future<void> _loadEquipments() async {
-    try {
-      _equipmentLists = await getAllEquipmentsNames(db);
-    } catch (e) {
-      print('Error loading equipments: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.equipmentErrorLoading)),
-      );
-    }
-  }
-
-  Future<void> _loadListOfLists() async {
-    Map<String, ListOfLists> listOfLists = await databaseListOfListsService.getAllListsWithId();
-    setState(() {
-      availableLolMap = listOfLists.map((key, list) => MapEntry(key, list.listName));
-      for (var equipmentKey in _equipmentLists!.keys) {
-        equipmentSelection[equipmentKey] = equipment.contains(equipmentKey);
-      }
-    });
-  }
-
-  Future<void> _syncDatas() async {
-    try {
-      final syncService = Provider.of<SyncService>(context, listen: false);
-      print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments");
-      print("💽 Synchronization with SQLite completed.");
-    } catch (e) {
-      print("💽 Error during synchronization with SQLite: $e");
-    }
-  }
-
   @override
   void dispose() {
     _nameController.dispose();
-    for (var controller in _lolControllers) {
-      controller.dispose();
-    }
-    for (var controller in _equipmentControllers) {
-      controller.dispose();
-    }
-    for (var controller in _routerControllers) {
+    for (var controller in [..._lolControllers, ..._equipmentControllers, ..._routerControllers]) {
       controller.dispose();
     }
     super.dispose();
@@ -166,9 +136,9 @@ class _AddCamionTypeState extends State<AddCamionType> {
             int index = entry.key;
             return ListTile(
               title: DropdownButtonFormField<String>(
-                value: availableLolMap.containsKey(lol[index]) ? lol[index] : null,
+                value: widget.availableLolMap!.containsKey(lol[index]) ? lol[index] : null,
                 decoration: InputDecoration(labelText: "List of Lists item ${index + 1}"),
-                items: availableLolMap.entries.map((entry) {
+                items: widget.availableLolMap!.entries.map((entry) {
                   return DropdownMenuItem<String>(
                     value: entry.key,
                     child: Text(entry.value),
@@ -185,14 +155,14 @@ class _AddCamionTypeState extends State<AddCamionType> {
                 onPressed: () => _removeLolField(index),
               ),
             );
-          }).toList(),
+          }),
           TextButton(
             onPressed: _addLolField,
             child: const Text("Add LOL Item"),
           ),
 
           const Text("Add Equipment Items:"),
-          ..._equipmentLists!.entries.map((entry) {
+          ...widget.equipmentLists!.entries.map((entry) {
             String equipmentKey = entry.key;
             String equipmentName = entry.value;
             return CheckboxListTile(
@@ -200,16 +170,12 @@ class _AddCamionTypeState extends State<AddCamionType> {
               value: equipmentSelection[equipmentKey] ?? false,
               onChanged: (bool? selected) {
                 setState(() {
-                  equipmentSelection[equipmentKey] = selected!;
-                  if (selected) {
-                    equipment.add(equipmentKey);
-                  } else {
-                    equipment.remove(equipmentKey);
-                  }
+                  equipmentSelection[equipmentKey] = selected ?? false;
+                  selected == true ? equipment.add(equipmentKey) : equipment.remove(equipmentKey);
                 });
               },
             );
-          }).toList(),
+          }),
 
           const SizedBox(height: 50),
           ElevatedButton(
@@ -245,7 +211,8 @@ class _AddCamionTypeState extends State<AddCamionType> {
             },
             child: Text(widget.camionType == null
                 ? AppLocalizations.of(context)!.add
-                : AppLocalizations.of(context)!.confirm),
+                : AppLocalizations.of(context)!.confirm
+            ),
           ),
         ],
       ),

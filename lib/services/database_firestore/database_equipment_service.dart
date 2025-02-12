@@ -103,7 +103,11 @@ class DatabaseEquipmentService{
   }
 
   Future<void> updateEquipment(String equipmentID, Equipment equipment) async {
-    _equipmentRef.doc(equipmentID).update(equipment.toJson());
+    final data = equipment.toJson();
+    if(equipment.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _equipmentRef.doc(equipmentID).update(data);
   }
 
   void deleteEquipment(String equipmentID){

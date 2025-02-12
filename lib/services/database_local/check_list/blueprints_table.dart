@@ -86,6 +86,22 @@ Future<void> softDeleteBlueprints(Database db, String firebaseId) async {
   }
 }
 
+Future<void> restoreBlueprints(Database db, String firebaseId) async {
+  try{
+    await db.update(
+        tableName,
+        {
+          'updatedAt': DateTime.now().toIso8601String(),
+          'deletedAt': null
+        },
+        where: 'id = ?',
+        whereArgs: [firebaseId],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  } catch (e){
+    print("Error while restoring data with id $firebaseId in table Blueprints: $e");
+  }
+}
+
 Future<Map<String,Blueprint>?> getAllBlueprints(Database db) async {
   Map<String, Blueprint> blueprints = {};
   try{

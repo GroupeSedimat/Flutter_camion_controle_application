@@ -25,9 +25,10 @@ class CompanyList extends StatefulWidget {
 
 class _CompanyListState extends State<CompanyList> {
   late Database db;
+  late MyUser _user;
+  late String _userId;
+  bool _isLoading = true;
   Map<String, Company> _companyList = HashMap();
-  MyUser? _user;
-  String? _userId;
   late AuthController authController;
   late UserService userService;
   late NetworkService networkService;
@@ -53,13 +54,11 @@ class _CompanyListState extends State<CompanyList> {
       await _syncData();
     }
     await _loadDataFromDatabase();
-  }
-
-  Future<void> _loadDataFromDatabase() async {
-    Map<String, Company>? companyList = await getAllCompanies(db);
-    setState(() {
-      _companyList = companyList!;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _initDatabase() async {
@@ -125,15 +124,43 @@ class _CompanyListState extends State<CompanyList> {
     }
   }
 
+  Future<void> _loadDataFromDatabase() async {
+    await _loadCompanyList();
+  }
+
+  Future<void> _loadCompanyList() async {
+    Map<String, Company>? companyList = await getAllCompanies(db);
+    if(companyList != null){
+      _companyList = companyList;
+    }
+  }
+
   bool _isSuperAdmin() {
-    return _user?.role == 'superadmin';
+    return _user.role == 'superadmin';
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null || _companyList.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+    if (_isLoading) {
+      return Scaffold(
+        body: Drawer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
     }
+
     return Scaffold(
       body: BasePage(
         title: title(),
@@ -166,11 +193,18 @@ class _CompanyListState extends State<CompanyList> {
             height: 60,
           );
         }
+        String isDeleted = "";
+        if(_companyList.values.elementAt(index).deletedAt != null){
+          isDeleted = " (deleted)";
+        }
         return Padding(
           padding: EdgeInsets.all(8),
           child: ExpansionTile(
             leading: leading,
-            title: Text(_companyList.values.elementAt(index).name, style: TextStyle(fontSize: 24, color:Theme.of(context).primaryColor, ),),
+            title: Text(
+              "${_companyList.values.elementAt(index).name}$isDeleted",
+              style: TextStyle(fontSize: 24, color:Theme.of(context).primaryColor, ),
+            ),
             trailing: PopupMenuButton(
               onSelected: (value) async {
                 if (value == 'edit') {
@@ -180,6 +214,13 @@ class _CompanyListState extends State<CompanyList> {
                   );
                 } else if (value == 'delete') {
                   _showDeleteConfirmation(_companyList.keys.elementAt(index));
+                } else if (value == 'restore') {
+                  await restoreCompany(db, _companyList.keys.elementAt(index));
+                  if (networkService.isOnline) {
+                    await _syncCompanies();
+                  }
+                  await _loadDataFromDatabase();
+                  setState(() {});
                 }
               },
               itemBuilder: (context) => [
@@ -188,10 +229,15 @@ class _CompanyListState extends State<CompanyList> {
                   child: Text(AppLocalizations.of(context)!.edit),
                 ),
                 if(_isSuperAdmin())
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Text(AppLocalizations.of(context)!.delete),
-                ),
+                  _companyList.values.elementAt(index).deletedAt == null
+                    ? PopupMenuItem(
+                      value: 'delete',
+                      child: Text(AppLocalizations.of(context)!.delete),
+                    )
+                    : PopupMenuItem(
+                      value: 'restore',
+                      child: Text(AppLocalizations.of(context)!.restore),
+                    ),
               ],
             ),
             children: [
@@ -281,7 +327,11 @@ class _CompanyListState extends State<CompanyList> {
           child: AddCompany(
             company: company,
             companyID: companyID,
-            onCompanyAdded: () {
+            onCompanyAdded: () async {
+              if (networkService.isOnline) {
+                await _syncCompanies();
+              }
+              await _loadDataFromDatabase();
               setState(() {});
               Navigator.pop(context);
             },
@@ -303,8 +353,12 @@ class _CompanyListState extends State<CompanyList> {
             child: Text(AppLocalizations.of(context)!.no),
           ),
           TextButton(
-            onPressed: () {
-              softDeleteCompany(db, companyID);
+            onPressed: () async {
+              await softDeleteCompany(db, companyID);
+              if (networkService.isOnline) {
+                await _syncCompanies();
+              }
+              await _loadDataFromDatabase();
               setState(() {});
               Navigator.pop(context);
             },
@@ -314,5 +368,16 @@ class _CompanyListState extends State<CompanyList> {
         ],
       ),
     );
+  }
+
+  Future<void> _syncCompanies() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Companies...");
+      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during synchronization with SQLite: $e");
+    }
   }
 }

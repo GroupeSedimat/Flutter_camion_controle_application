@@ -99,7 +99,11 @@ class DatabaseCamionTypeService{
   }
 
   Future<void> updateCamionType(String camionTypeID, CamionType camionType) async {
-    _camionTypeRef.doc(camionTypeID).update(camionType.toJson());
+    final data = camionType.toJson();
+    if(camionType.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _camionTypeRef.doc(camionTypeID).update(data);
   }
 
   void deleteCamionType(String camionTypeID){

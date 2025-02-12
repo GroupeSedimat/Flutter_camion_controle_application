@@ -207,6 +207,7 @@ class ValidateTaskState extends State<ValidateTask> {
                     widget.validate.updatedAt = DateTime.now();
                     if (imageGalery != null) {
                       try {
+                        /// todo work on photo offline
                         String photoFilePath = await databaseImageService.addImageToFirebase(imageGalery!.path);
                         if (mounted) {
                           setState(() {

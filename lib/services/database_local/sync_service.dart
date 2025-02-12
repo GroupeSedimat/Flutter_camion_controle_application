@@ -379,6 +379,7 @@ class SyncService {
           await db.transaction((txn) async {
             if(user == null){
               print("user or userId not provided");
+            }else if(userId == "123456789"){
               Map<String, String> companiesNames = await firebaseCompanyService.getAllCompaniesNames();
               print("Names ok");
               for (var firebaseCompany in companiesNames.entries){
@@ -720,6 +721,7 @@ class SyncService {
         print("----------- Users since last update $localUsers");
         if(localUsers != null){
           for (var user in localUsers.entries) {
+            print("updating user ${user.key} ${user.value.role} ${user.value.username}");
             await firebaseUserService.updateUser(user.key, user.value);
           }
         }

@@ -134,7 +134,11 @@ class DatabaseListOfListsService{
   }
 
   Future<void> updateList(String listItemID, ListOfLists listItem) async {
-    _listRef.doc(listItemID).update(listItem.toJson());
+    final data = listItem.toJson();
+    if(listItem.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _listRef.doc(listItemID).update(data);
   }
 
   Future<void> updateListItemByListNr(int listNr, ListOfLists listItem) async {

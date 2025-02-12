@@ -27,13 +27,16 @@ class ListOfListsControlPage extends StatefulWidget {
 class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
 
   late Database db;
-  MyUser? _user;
-  String? _userId;
+  late MyUser _user;
+  late String _userId;
+  bool _isLoading = true;
   Map<String, ListOfLists> _listOfLists = {};
   Map<String, String> _userMap = {};
   late AuthController authController;
   late UserService userService;
   late NetworkService networkService;
+
+  /// todo repair delete/restore List
 
   @override
   void initState() {
@@ -43,7 +46,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
 
   Future<void> _loadData() async {
     await _initDatabase();
-    await _initServices();
+    await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
     }else{
@@ -56,19 +59,18 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
       await _syncData();
     }
     await _loadDataFromDatabase();
-    setState((){});
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
-  Future<void> _loadDataFromDatabase() async {
-    Map<String, ListOfLists>? listOfLists = await getAllLists(db) ?? {};
-    Map<String, String> usersNames = await getAllUsersNames(db) ?? {};
-    setState(() {
-      _listOfLists = listOfLists;
-      _userMap = usersNames;
-    });
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
-  Future<void> _initServices() async {
+  Future<void> _initService() async {
     try {
       authController = AuthController();
       userService = UserService();
@@ -114,18 +116,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
     }
   }
 
-  Future<void> _initDatabase() async {
-    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
-  }
-
   Future<void> _syncData() async {
-
-    if (_user == null || _userId == null) {
-      print("Cannot sync data: user or userID is not loaded");
-      return;
-    }else{
-      print("Can sync data: user: ${_user!.name} is loaded");
-    }
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Users...");
@@ -157,7 +148,6 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
           }
         }
       }
-      print("Camion List of Lists Ids: $camionListOfListId");
       print("💽 Synchronizing LOL...");
       await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
       print("💽 Synchronization with SQLite completed.");
@@ -166,10 +156,55 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
     }
   }
 
+  Future<void> _loadDataFromDatabase() async {
+    await _loadListOfLists();
+    await _loadUsersNames();
+  }
 
+  Future<void> _loadListOfLists() async {
+    try {
+      Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db);
+      if(listOfListsFuture != null){
+        _listOfLists = listOfListsFuture;
+      }
+    } catch (e) {
+      print("Error loading list of lists: $e");
+    }
+  }
+
+  Future<void> _loadUsersNames() async {
+    try {
+      Map<String, String>? usersNames = await getAllUsersNames(db);
+      if(usersNames != null){
+        _userMap = usersNames;
+      }
+    } catch (e) {
+      print("Error loading list of lists: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: Drawer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       /// delete DefaultTabController??
       body: DefaultTabController(
@@ -226,7 +261,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                           listItem: listItem,
                           listItemID: key,
                           onListAdded:  () async {
-                            // on accept sync and reload data then refresh page
+                            // on accept, sync and reload data then refresh page
                             await _syncData();
                             await _loadDataFromDatabase();
                             Navigator.pop(context);

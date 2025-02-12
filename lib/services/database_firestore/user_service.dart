@@ -106,17 +106,21 @@ class UserService{
       return doc.data() as MyUser;
   }
 
-  Stream<DocumentSnapshot> getOneUserWithID(String userID){
-    return _userRef.doc(userID).snapshots();
+  Stream<DocumentSnapshot> getOneUserWithID(String userId){
+    return _userRef.doc(userId).snapshots();
   }
 
-  Future<MyUser> getUserData(String userID) async {
-    DocumentSnapshot doc = await _userRef.doc(userID).get();
+  Future<MyUser> getUserData(String userId) async {
+    DocumentSnapshot doc = await _userRef.doc(userId).get();
     return doc.data() as MyUser;
   }
 
   Future<void> updateUser(String userId, MyUser user) async {
-    _userRef.doc(userId).update(user.toJson());
+    final data = user.toJson();
+    if(user.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _userRef.doc(userId).update(data);
   }
 
 

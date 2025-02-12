@@ -76,7 +76,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Companies...");
       String timeSync = DateTime.now().toIso8601String();
-      await syncService.syncFromFirebase("companies", timeSync);
+      await syncService.syncFromFirebase("companies", userId: "123456789", timeSync);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");

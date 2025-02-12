@@ -39,8 +39,8 @@ class _CheckListState extends State<CheckList> {
   late Database db;
   late MyUser _user;
   late String _userId;
-  late List<int> counter;
   bool _isLoading = true;
+  late List<int> counter;
   late Map<String, ListOfLists> _listOfLists = {};
   late Map<String, Blueprint> _blueprints = {};
   late Map<String, TaskChecklist> _tasks = {};
@@ -57,23 +57,9 @@ class _CheckListState extends State<CheckList> {
     _loadData();
   }
 
-  Future<void> _initServices() async {
-    try {
-      authController = AuthController();
-      userService = UserService();
-      networkService = Provider.of<NetworkService>(context, listen: false);
-    } catch (e) {
-      print("Error loading services: $e");
-    }
-  }
-
-  Future<void> _initDatabase() async {
-    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
-  }
-
   Future<void> _loadData() async {
     await _initDatabase();
-    await _initServices();
+    await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
     }else{
@@ -93,57 +79,17 @@ class _CheckListState extends State<CheckList> {
     }
   }
 
-  Future<void> _loadDataFromDatabase() async {
-    await _loadListOfLists();
-    await _loadBlueprints();
-    await _loadTasks();
-    setState((){});
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
-  Future<void> _syncData() async {
+  Future<void> _initService() async {
     try {
-      final syncService = Provider.of<SyncService>(context, listen: false);
-      print("💽 Synchronizing users...");
-      await syncService.fullSyncTable("users", user: _user, userId: _userId);
-      print("💽 Synchronizing users Camions...");
-      await syncService.fullSyncTable("camions", user: _user, userId: _userId);
-      List<String> camionsTypeIdList = [];
-      await getAllCamions(db).then((camionsMap) {
-        if(camionsMap != null){
-          for(var camion in camionsMap.entries){
-            if(!camionsTypeIdList.contains(camion.value.camionType)){
-              camionsTypeIdList.add(camion.value.camionType);
-            }
-          }
-        }
-      });
-      print("Camion types Ids in list: $camionsTypeIdList");
-      print("💽 Synchronizing CamionTypess...");
-      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
-      List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
-      if(camionTypesMap != null){
-        for(var camionType in camionTypesMap.entries){
-          if(camionType.value.lol != null){
-            for(var list in camionType.value.lol!){
-              if(!camionListOfListId.contains(list)){
-                camionListOfListId.add(list);
-              }
-            }
-          }
-        }
-      }
-      print("Camion List of Lists Ids: $camionListOfListId");
-      print("💽 Synchronizing LOL...");
-      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
-      print("💽 Synchronizing Blueprints...");
-      await syncService.fullSyncTable("blueprints");
-      print("💽 Synchronizing Validate Tasks...");
-      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
-      print("💽 Synchronization with SQLite completed.");
+      authController = AuthController();
+      userService = UserService();
+      networkService = Provider.of<NetworkService>(context, listen: false);
     } catch (e) {
-      print("💽 Error during global data synchronization: $e");
-      rethrow;
+      print("Error loading services: $e");
     }
   }
 
@@ -181,6 +127,57 @@ class _CheckListState extends State<CheckList> {
     } catch (e) {
       print("Error loading user: $e");
     }
+  }
+
+  Future<void> _syncData() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing users...");
+      await syncService.fullSyncTable("users", user: _user, userId: _userId);
+      print("💽 Synchronizing users Camions...");
+      await syncService.fullSyncTable("camions", user: _user, userId: _userId);
+      List<String> camionsTypeIdList = [];
+      await getAllCamions(db).then((camionsMap) {
+        if(camionsMap != null){
+          for(var camion in camionsMap.entries){
+            if(!camionsTypeIdList.contains(camion.value.camionType)){
+              camionsTypeIdList.add(camion.value.camionType);
+            }
+          }
+        }
+      });
+      print("💽 Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      List<String> camionListOfListId = [];
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
+      if(camionTypesMap != null){
+        for(var camionType in camionTypesMap.entries){
+          if(camionType.value.lol != null){
+            for(var list in camionType.value.lol!){
+              if(!camionListOfListId.contains(list)){
+                camionListOfListId.add(list);
+              }
+            }
+          }
+        }
+      }
+      print("💽 Synchronizing LOL...");
+      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
+      print("💽 Synchronizing Blueprints...");
+      await syncService.fullSyncTable("blueprints");
+      print("💽 Synchronizing Validate Tasks...");
+      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during global data synchronization: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> _loadDataFromDatabase() async {
+    await _loadListOfLists();
+    await _loadBlueprints();
+    await _loadTasks();
   }
 
   Future<void> _loadBlueprints() async {
@@ -381,10 +378,6 @@ class _CheckListState extends State<CheckList> {
   }
 
   Widget body() {
-    if (_listOfLists.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     return TabBarView(
       children: <Widget>[
         for (ListOfLists list in _listOfLists.values)
@@ -401,32 +394,9 @@ class _CheckListState extends State<CheckList> {
                   blueprint: blueprint,
                   role: _user.role,
                   delete: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text(AppLocalizations.of(context)!.confirmDelete),
-                          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
-                          actions: [
-                            TextButton(
-                              child: Text(AppLocalizations.of(context)!.no),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            TextButton(
-                              child: Text(AppLocalizations.of(context)!.yes),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                String key = _blueprints.keys
-                                    .firstWhere((k) => _blueprints[k] == blueprint);
-                                softDeleteBlueprints(db, key);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                    String key = _blueprints.keys
+                        .firstWhere((k) => _blueprints[k] == blueprint);
+                    _showDeleteConfirmation(key);
                   },
                   validate: () {
                     showTask(blueprint);
@@ -441,6 +411,16 @@ class _CheckListState extends State<CheckList> {
                       blueprintID: blueprintID,
                     );
                   },
+                  restore: () async {
+                    String key = _blueprints.keys
+                        .firstWhere((k) => _blueprints[k] == blueprint);
+                    await restoreBlueprints(db, key);
+                    if (networkService.isOnline) {
+                      await _syncBlueprints();
+                    }
+                    await _loadDataFromDatabase();
+                    setState(() {});
+                  }
                 ),
               const SizedBox(height: 10),
               if (_user.role == 'superadmin')
@@ -508,5 +488,45 @@ class _CheckListState extends State<CheckList> {
           ),
       ],
     );
+  }
+
+  void _showDeleteConfirmation(String key) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.confirmDelete),
+        content: Text(AppLocalizations.of(context)!.confirmDeleteText),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.no),
+          ),
+          TextButton(
+            onPressed: () async {
+              await softDeleteBlueprints(db, key);
+              if (networkService.isOnline) {
+                await _syncBlueprints();
+              }
+              await _loadDataFromDatabase();
+              setState(() {});
+              Navigator.pop(context);
+            },
+            child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _syncBlueprints() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Blueprints...");
+      await syncService.fullSyncTable("blueprints");
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during global data synchronization: $e");
+      rethrow;
+    }
   }
 }

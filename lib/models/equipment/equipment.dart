@@ -72,16 +72,17 @@ class Equipment {
   }
 
   Map<String, Object?> toJson(){
-    return{
-      'idShop': idShop,
+    final Map<String, Object?> json = {
       'name': name,
-      'description': description,
-      'photo': photo,
-      'quantity': quantity,
-      'available': available,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'deletedAt': deletedAt,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
+    if (idShop != null) json['idShop'] = idShop;
+    if (description != null) json['description'] = description;
+    if (photo != null) json['photo'] = photo!.map((item) => item).toList();
+    if (quantity != null) json['quantity'] = quantity;
+    if (available != null) json['available'] = available;
+    if (deletedAt != null) json['deletedAt'] = deletedAt!.toIso8601String();
+    return json;
   }
 }

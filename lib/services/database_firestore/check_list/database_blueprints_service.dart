@@ -52,7 +52,11 @@ class DatabaseBlueprintsService{
   }
 
   Future<void> updateBlueprint(String blueprintID, Blueprint blueprint) async {
-    _blueprintRef.doc(blueprintID).update(blueprint.toJson());
+    final data = blueprint.toJson();
+    if(blueprint.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _blueprintRef.doc(blueprintID).update(data);
   }
 
   void deleteBlueprint(String blueprintID){

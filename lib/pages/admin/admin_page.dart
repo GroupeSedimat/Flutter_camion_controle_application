@@ -35,6 +35,7 @@ class _AdminPageState extends State<AdminPage> {
   late Database db;
   MyUser? _user;
   String? _userId;
+  bool _isLoading = true;
   late NetworkService networkService;
   late AuthController authController;
   late UserService userService;
@@ -59,10 +60,15 @@ class _AdminPageState extends State<AdminPage> {
     }{
       await _syncData();
     }
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadUserToConnection() async {
-    print("welcome user to connection firebase ☢☢☢☢☢☢☢");
+    print("admin_page user_to_connection firebase ☢☢☢☢☢☢☢");
     Map<String, MyUser>? users = await getThisUser(db);
     print("users: $users");
     if(users != null ){
@@ -142,6 +148,26 @@ class _AdminPageState extends State<AdminPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: Drawer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
+    }
+
     return BasePage(
       title: AppLocalizations.of(context)!.superAdminPage,
       body: _buildDashboard(context),

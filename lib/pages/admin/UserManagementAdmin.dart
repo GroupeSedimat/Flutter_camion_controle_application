@@ -10,6 +10,9 @@ import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserManagementAdmin extends StatelessWidget {
+
+//for admin
+
   final AuthController authController = Get.find<AuthController>();
   final UserService userService = UserService();
 
