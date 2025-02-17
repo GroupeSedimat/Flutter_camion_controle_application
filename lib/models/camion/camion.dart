@@ -7,6 +7,9 @@ class Camion {
   String? status;
   String? location;
   String company;
+  double? latitude;
+  double? longitude;
+  
 
   Camion({
     required this.name,
@@ -17,6 +20,8 @@ class Camion {
     this.status,
     this.location,
     required this.company,
+    this.latitude,
+    this.longitude,
   });
 
   // Constructor with Json
@@ -29,6 +34,8 @@ class Camion {
     status: json['status']! as String,
     location: json['location']! as String,
     company: json['company']! as String,
+    latitude: (json['latitude'] as num?)?.toDouble(),
+    longitude: (json['longitude'] as num?)?.toDouble(),
   );
 
   Camion copyWith({
@@ -40,6 +47,8 @@ class Camion {
     String? status,
     String? location,
     String? company,
+    double? latitude,
+    double? longitude,
   }) {
     return Camion(
       name: name ?? this.name,
@@ -50,6 +59,8 @@ class Camion {
       status: status ?? this.status,
       location: location ?? this.location,
       company: company ?? this.company,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
     );
   }
 
@@ -63,6 +74,8 @@ class Camion {
       'status': status,
       'location': location,
       'company': company,
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 }
