@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
+import 'package:geolocator/geolocator.dart';
 
 const String CAMION_COLLECTION_REF = "camion";
 
@@ -19,6 +20,27 @@ class DatabaseCamionService{
         toFirestore: (camion, _) => camion.toJson()
     );
   }
+
+  //Pour mettre à jour la position d'un camion
+  Future<void> updateCamionPosition(String camionID) async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      await _camionRef.doc(camionID).update({
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+
+      print("✅ Position du camion mise à jour : ${position.latitude}, ${position.longitude}");
+    } catch (e) {
+      print("❌ Erreur lors de la mise à jour de la position du camion : $e");
+      rethrow;
+    }
+  }
+
 
   Future<Map<String, Camion>> getAllCamions() async {
     try {
