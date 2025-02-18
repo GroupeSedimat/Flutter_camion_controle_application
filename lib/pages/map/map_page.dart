@@ -1,12 +1,16 @@
+import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+
+import 'package:geolocator/geolocator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:bottom_sheet/bottom_sheet.dart';
+
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MapPage extends StatefulWidget {
   @override
@@ -40,7 +44,8 @@ class _MapPageState extends State<MapPage> {
     if (!serviceEnabled) {
       _showLocationServiceDisabledDialog();
       setState(() {
-        _errorMessage = 'Les services de localisation sont désactivés. Position par défaut utilisée.';
+        _errorMessage =
+            'Les services de localisation sont désactivés. Position par défaut utilisée.';
       });
       _setDefaultLocation();
       return;
@@ -51,7 +56,8 @@ class _MapPageState extends State<MapPage> {
 
     if (permission == LocationPermission.denied) {
       setState(() {
-        _errorMessage = 'Permission de localisation refusée. Position par défaut utilisée.';
+        _errorMessage =
+            'Permission de localisation refusée. Position par défaut utilisée.';
       });
       _setDefaultLocation();
       return;
@@ -59,7 +65,8 @@ class _MapPageState extends State<MapPage> {
 
     if (permission == LocationPermission.deniedForever) {
       setState(() {
-        _errorMessage = 'Permission de localisation refusée définitivement. Veuillez activer manuellement dans les paramètres.';
+        _errorMessage =
+            'Permission de localisation refusée définitivement. Veuillez activer manuellement dans les paramètres.';
       });
       openAppSettings();
       return;
@@ -75,7 +82,8 @@ class _MapPageState extends State<MapPage> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Erreur lors de la récupération de la position. Position par défaut utilisée.';
+        _errorMessage =
+            'Erreur lors de la récupération de la position. Position par défaut utilisée.';
         _setDefaultLocation();
       });
     }
@@ -87,7 +95,8 @@ class _MapPageState extends State<MapPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Services de localisation désactivés'),
-          content: Text('Veuillez activer les services de localisation dans les paramètres de l\'appareil.'),
+          content: Text(
+              'Veuillez activer les services de localisation dans les paramètres de l\'appareil.'),
           actions: <Widget>[
             TextButton(
               child: Text('OK'),
@@ -134,14 +143,16 @@ class _MapPageState extends State<MapPage> {
         StreamBuilder(
           stream: FirebaseFirestore.instance.collection('camion').snapshots(),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+            if (!snapshot.hasData)
+              return Center(child: CircularProgressIndicator());
 
             final camions = snapshot.data!.docs;
             List<Marker> markers = [];
 
             for (var camion in camions) {
               final data = camion.data();
-              if (data.containsKey('latitude') && data.containsKey('longitude')) {
+              if (data.containsKey('latitude') &&
+                  data.containsKey('longitude')) {
                 markers.add(
                   Marker(
                     point: LatLng(data['latitude'], data['longitude']),
@@ -158,17 +169,31 @@ class _MapPageState extends State<MapPage> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text('Camion ${data["name"]}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                  Text('Camion ${data["name"]}',
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold)),
                                   SizedBox(height: 10),
-                                  Text('Statut: ${data["status"]}', style: TextStyle(fontSize: 16)),
+                                  Text('Statut: ${data["status"]}',
+                                      style: TextStyle(fontSize: 16)),
                                   SizedBox(height: 10),
                                   ElevatedButton(
                                     onPressed: () async {
-                                      String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=${data['latitude']},${data['longitude']}";
-                                      if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
-                                        await launchUrl(Uri.parse(googleMapsUrl));
+                                      String googleMapsUrl =
+                                          "https://www.google.com/maps/search/?api=1&query=${data['latitude']},${data['longitude']}";
+                                      if (await canLaunchUrl(
+                                          Uri.parse(googleMapsUrl))) {
+                                        await launchUrl(
+                                            Uri.parse(googleMapsUrl));
                                       } else {
-                                        throw 'Could not open the map.';
+                                        print('Could not open the map.');
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Impossible d\'ouvrir la carte.'),
+                                              backgroundColor: Colors.red),
+                                        );
                                       }
                                     },
                                     child: Text('Voir sur Google Maps'),
@@ -185,7 +210,8 @@ class _MapPageState extends State<MapPage> {
                         builder: (context, value, child) {
                           return Transform.scale(
                             scale: value,
-                            child: Icon(Icons.local_shipping, color: Colors.blue, size: 40.0),
+                            child: Icon(Icons.local_shipping,
+                                color: Colors.blue, size: 40.0),
                           );
                         },
                       ),
@@ -198,7 +224,9 @@ class _MapPageState extends State<MapPage> {
             return FlutterMap(
               mapController: _mapController,
               options: MapOptions(
-                center: LatLng(_currentPosition?.latitude ?? _defaultLocation.latitude, _currentPosition?.longitude ?? _defaultLocation.longitude),
+                center: LatLng(
+                    _currentPosition?.latitude ?? _defaultLocation.latitude,
+                    _currentPosition?.longitude ?? _defaultLocation.longitude),
                 zoom: _zoomLevel,
               ),
               children: [
@@ -217,7 +245,8 @@ class _MapPageState extends State<MapPage> {
           top: 20,
           left: 10,
           right: 10,
-          child: SearchBar(),
+          child: SearchBar(
+              mapController: _mapController), // Passe le MapController
         ),
         Positioned(
           bottom: 80,
@@ -279,7 +308,58 @@ class _MapPageState extends State<MapPage> {
   }
 }
 
-class SearchBar extends StatelessWidget {
+class SearchBar extends StatefulWidget {
+  final MapController mapController;
+
+  SearchBar({required this.mapController});
+
+  @override
+  _SearchBarState createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<SearchBar> {
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic> _searchResults = [];
+  bool _isLoading = false;
+
+  Future<void> _search(String query) async {
+    setState(() {
+      _isLoading = true;
+      _searchResults = []; // Efface les résultats précédents
+    });
+
+    if (query.isEmpty) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final url = Uri.parse(
+        'https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=5');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _searchResults = json.decode(response.body);
+          _isLoading = false;
+        });
+      } else {
+        print('Erreur de requête: ${response.statusCode}');
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Erreur: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -296,12 +376,62 @@ class SearchBar extends StatelessWidget {
           ),
         ],
       ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Rechercher un lieu',
-          prefixIcon: Icon(Icons.search),
-          border: InputBorder.none,
-        ),
+      child: Column(
+        children: [
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Rechercher un lieu',
+              prefixIcon: Icon(Icons.search),
+              suffixIcon: _isLoading
+                  ? CircularProgressIndicator()
+                  : IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchResults = []; // Efface les résultats
+                        });
+                      },
+                    ),
+              border: InputBorder.none,
+            ),
+            onChanged: (value) {
+              _search(value);
+            },
+          ),
+          if (_searchResults.isNotEmpty)
+            Container(
+              height: 200, // Ajuste la hauteur selon tes besoins
+              child: ListView.builder(
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final result = _searchResults[index];
+                  return ListTile(
+                    title: Text(result['display_name']),
+                    onTap: () {
+                      final latitude = double.parse(result['lat']);
+                      final longitude = double.parse(result['lon']);
+
+                      // Centre la carte sur le lieu sélectionné
+                      widget.mapController.move(LatLng(latitude, longitude),
+                          14.0); // Remplace 14.0 par le niveau de zoom souhaité
+
+                      print('Lieu sélectionné: ${result['display_name']}');
+                      print(
+                          'Latitude: ${result['lat']}, Longitude: ${result['lon']}');
+
+                      // Ferme la liste de résultats
+                      setState(() {
+                        _searchResults = [];
+                        _searchController.clear();
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+        ],
       ),
     );
   }
