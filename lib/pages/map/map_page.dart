@@ -245,8 +245,7 @@ class _MapPageState extends State<MapPage> {
           top: 20,
           left: 10,
           right: 10,
-          child: SearchBar(
-              mapController: _mapController), // Passe le MapController
+          child: SearchBar(mapController: _mapController),
         ),
         Positioned(
           bottom: 80,
@@ -325,7 +324,7 @@ class _SearchBarState extends State<SearchBar> {
   Future<void> _search(String query) async {
     setState(() {
       _isLoading = true;
-      _searchResults = []; // Efface les résultats précédents
+      _searchResults = [];
     });
 
     if (query.isEmpty) {
