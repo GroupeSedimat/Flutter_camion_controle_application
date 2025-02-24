@@ -104,7 +104,7 @@ Future<void> restoreCamionType(Database db, String firebaseId) async {
   }
 }
 
-Future<Map<String,CamionType>?> getAllCamionTypes(Database db) async {
+Future<Map<String,CamionType>?> getAllCamionTypes(Database db, String role) async {
   Map<String, CamionType> camionTypes = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -113,7 +113,9 @@ Future<Map<String,CamionType>?> getAllCamionTypes(Database db) async {
     }
 
     for (var camionTypeItem in maps) {
-      camionTypes[camionTypeItem["id"] as String] = responseItemToCamionType(camionTypeItem);
+      if(camionTypeItem["deletedAt"] == null || role == "superadmin"){
+        camionTypes[camionTypeItem["id"] as String] = responseItemToCamionType(camionTypeItem);
+      }
     }
 
   } catch (e){
@@ -122,7 +124,7 @@ Future<Map<String,CamionType>?> getAllCamionTypes(Database db) async {
   return sortedCamionTypes(camionTypes: camionTypes);
 }
 
-Future<Map<String,String>?> getAllCamionTypeNames(Database db) async {
+Future<Map<String,String>?> getAllCamionTypeNames(Database db, String role) async {
   Map<String, String> camionTypesNames = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -131,7 +133,9 @@ Future<Map<String,String>?> getAllCamionTypeNames(Database db) async {
     }
 
     for (var camionTypeItem in maps) {
-      camionTypesNames[camionTypeItem["id"] as String] = responseItemToCamionType(camionTypeItem).name;
+      if(camionTypeItem["deletedAt"] == null || role == "superadmin"){
+        camionTypesNames[camionTypeItem["id"] as String] = responseItemToCamionType(camionTypeItem).name;
+      }
     }
 
   } catch (e){

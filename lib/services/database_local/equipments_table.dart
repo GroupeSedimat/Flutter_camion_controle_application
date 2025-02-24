@@ -106,7 +106,7 @@ Future<void> restoreEquipment(Database db, String firebaseId) async {
   }
 }
 
-Future<Map<String,Equipment>?> getAllEquipments(Database db) async {
+Future<Map<String,Equipment>?> getAllEquipments(Database db, String role) async {
   Map<String, Equipment> equipments = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -115,7 +115,9 @@ Future<Map<String,Equipment>?> getAllEquipments(Database db) async {
     }
 
     for (var equipmentItem in maps) {
-      equipments[equipmentItem["id"] as String] = responseItemToEquipment(equipmentItem);
+      if(equipmentItem["deletedAt"] == null || role == "superadmin"){
+        equipments[equipmentItem["id"] as String] = responseItemToEquipment(equipmentItem);
+      }
     }
 
   } catch (e){
@@ -124,7 +126,7 @@ Future<Map<String,Equipment>?> getAllEquipments(Database db) async {
   return sortedEquipments(equipments: equipments);
 }
 
-Future<Map<String,String>?> getAllEquipmentsNames(Database db) async {
+Future<Map<String,String>?> getAllEquipmentsNames(Database db, String role) async {
   Map<String, String> equipmentsNames = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -133,7 +135,9 @@ Future<Map<String,String>?> getAllEquipmentsNames(Database db) async {
     }
 
     for (var equipmentItem in maps) {
-      equipmentsNames[equipmentItem["id"] as String] = responseItemToEquipment(equipmentItem).name;
+      if(equipmentItem["deletedAt"] == null || role == "superadmin"){
+        equipmentsNames[equipmentItem["id"] as String] = responseItemToEquipment(equipmentItem).name;
+      }
     }
 
   } catch (e){

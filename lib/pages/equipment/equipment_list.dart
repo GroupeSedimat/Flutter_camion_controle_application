@@ -121,7 +121,7 @@ class _EquipmentListState extends State<EquipmentList> {
       print("💽 Synchronizing Users...");
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments");
+      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -129,7 +129,7 @@ class _EquipmentListState extends State<EquipmentList> {
   }
 
   Future<void> _loadDataFromDatabase() async {
-    Map<String, Equipment>? equipmentLists = await getAllEquipments(db);
+    Map<String, Equipment>? equipmentLists = await getAllEquipments(db, _user.role);
     setState(() {
       _equipmentLists = equipmentLists!;
     });
@@ -143,20 +143,18 @@ class _EquipmentListState extends State<EquipmentList> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -394,7 +392,7 @@ class _EquipmentListState extends State<EquipmentList> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments");
+      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");

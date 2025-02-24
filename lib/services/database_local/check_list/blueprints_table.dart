@@ -102,7 +102,7 @@ Future<void> restoreBlueprints(Database db, String firebaseId) async {
   }
 }
 
-Future<Map<String,Blueprint>?> getAllBlueprints(Database db) async {
+Future<Map<String,Blueprint>?> getAllBlueprints(Database db, String role) async {
   Map<String, Blueprint> blueprints = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -111,25 +111,9 @@ Future<Map<String,Blueprint>?> getAllBlueprints(Database db) async {
     }
 
     for (var blueprintItem in maps) {
-      blueprints[blueprintItem["id"] as String] = responseItemToBlueprint(blueprintItem);
-    }
-
-  } catch (e){
-    print("Error while getting all data from table Blueprints: $e");
-  }
-  return sortedBlueprints(blueprints: blueprints);
-}
-
-Future<Map<String,Blueprint>?> getAllBlueprintsForLOL(Database db, List<String> list) async {
-  Map<String, Blueprint> blueprints = {};
-  try{
-    final List<Map<String, dynamic>> maps = await db.query(tableName);
-    if(maps.isEmpty){
-      return null;
-    }
-
-    for (var blueprintItem in maps) {
-      blueprints[blueprintItem["id"] as String] = responseItemToBlueprint(blueprintItem);
+      if(blueprintItem["deletedAt"] == null || role == "superadmin"){
+        blueprints[blueprintItem["id"] as String] = responseItemToBlueprint(blueprintItem);
+      }
     }
 
   } catch (e){

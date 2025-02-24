@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:sqflite/sqflite.dart';
@@ -82,7 +83,7 @@ Future<void> restoreUser(Database db, String firebaseId) async {
   }
 }
 
-Future<Map<String,MyUser>?> getAllUsers(Database db) async {
+Future<Map<String,MyUser>?> getAllUsers(Database db, String role) async {
   Map<String, MyUser> users = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -91,7 +92,9 @@ Future<Map<String,MyUser>?> getAllUsers(Database db) async {
     }
 
     for (var user in maps) {
-      users[user["id"] as String] = responseItemToUser(user);
+      if(user["deletedAt"] == null || role == "superadmin"){
+        users[user["id"] as String] = responseItemToUser(user);
+      }
     }
 
   } catch (e){
@@ -100,7 +103,7 @@ Future<Map<String,MyUser>?> getAllUsers(Database db) async {
   return users;
 }
 
-Future<Map<String,String>?> getAllUsersNames(Database db) async {
+Future<Map<String,String>?> getAllUsersNames(Database db, String role) async {
   Map<String, String> usersNames = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -109,7 +112,9 @@ Future<Map<String,String>?> getAllUsersNames(Database db) async {
     }
 
     for (var user in maps) {
-      usersNames[user["id"] as String] = responseItemToUser(user).username;
+      if(user["deletedAt"] == null || role == "superadmin"){
+        usersNames[user["id"] as String] = responseItemToUser(user).username;
+      }
     }
 
   } catch (e){
@@ -165,6 +170,30 @@ Future<Map<String,MyUser>?> getAllCompanyUsersSinceLastUpdate(dynamic dbOrTxn, S
 
   } catch (e){
     print("Error while getting all data from table Users since last actualisation: $e");
+  }
+  return sortedUsers(users: users);
+}
+
+Future<Map<String,MyUser>?> getAllCompanyUsers(dynamic dbOrTxn, String companyId) async {
+  Map<String, MyUser> users = {};
+  try {
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
+        tableName,
+        where: 'company = ?',
+        whereArgs: [companyId]);
+    if(maps.isEmpty){
+      return null;
+    }
+    print("-------- All Company Users");
+
+    for (var user in maps) {
+      users[user["id"] as String] = responseItemToUser(user);
+    }
+
+    return sortedUsers(users: users);
+
+  } catch (e){
+    print("Error while getting all Company Users from table Users: $e");
   }
   return sortedUsers(users: users);
 }
@@ -230,6 +259,23 @@ Future<MyUser?> getOneUserWithID(dynamic dbOrTxn, String userID) async {
   }
 }
 
+Future<String?> getOneUserIdByEmail(dynamic dbOrTxn, String userEmail) async {
+  try{
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
+      tableName,
+      where: 'email = ?',
+      whereArgs: [userEmail],
+    );
+    if(maps.isEmpty){
+      return null;
+    }
+    return maps.first["id"];
+  } catch (e){
+    print("Error while getting firebase ID of User with email $userEmail from table Users: $e");
+    return null;
+  }
+}
+
 Future<Map<String,MyUser>?> getThisUser(dynamic dbOrTxn) async {
   Map<String, MyUser> users = {};
   try{
@@ -273,7 +319,9 @@ Map<String, dynamic> userToMap(MyUser user, {String? firebaseId, String? thisUse
     'company': user.company,
     'apresFormation': apresFormation,
     'apresFormationDoc': user.apresFormationDoc,
-    'camion': user.camion,
+    'camion': (user.camion != null && user.camion != [] )
+        ? jsonEncode(user.camion!.map((e) => e).toList())
+        : null,
     'createdAt': user.createdAt.toIso8601String(),
     'updatedAt': user.updatedAt.toIso8601String(),
     'deletedAt': user.deletedAt?.toIso8601String(),
@@ -304,7 +352,7 @@ MyUser responseItemToUser(var user){
         ? user['apresFormationDoc'] as String
         : null,
     camion: user["camion"]!= null
-        ? user['camion'] as String
+        ? dataInJsonToList(user["camion"] as String)
         : null,
     createdAt: DateTime.parse(user["createdAt"] as String),
     updatedAt: DateTime.parse(user["updatedAt"] as String),
@@ -312,6 +360,11 @@ MyUser responseItemToUser(var user){
         ? DateTime.parse(user["deletedAt"] as String)
         : null,
   );
+}
+
+List<String> dataInJsonToList(String data){
+  final List<dynamic> decodedData = jsonDecode(data);
+  return decodedData.map((item) => item as String).toList();
 }
 
 LinkedHashMap<String, MyUser> sortedUsers({

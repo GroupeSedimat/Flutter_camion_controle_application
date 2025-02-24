@@ -143,7 +143,7 @@ class _CamionListState extends State<CamionList> {
       print("💽 Synchronizing users Camions...");
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
-      await getAllCamions(db).then((camionsMap) {
+      await getAllCamions(db, _user.role).then((camionsMap) {
         if(camionsMap != null){
           for(var camion in camionsMap.entries){
             if(!camionsTypeIdList.contains(camion.value.camionType)){
@@ -155,7 +155,7 @@ class _CamionListState extends State<CamionList> {
       print("💽 Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
       if(camionTypesMap != null){
         for(var camionType in camionTypesMap.entries){
           if(camionType.value.lol != null){
@@ -188,7 +188,7 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadCamionTypes() async {
     try {
-      Map<String, String>? types = await getAllCamionTypeNames(db);
+      Map<String, String>? types = await getAllCamionTypeNames(db, _user.role);
       if(types != null){
         _camionTypes = types;
       }
@@ -199,7 +199,7 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadCompaniesNames() async {
     try {
-      Map<String, String>? companies = await getAllCompaniesNames(db);
+      Map<String, String>? companies = await getAllCompaniesNames(db, _user.role);
       if(companies != null){
         _companiesNames = companies;
       }
@@ -210,7 +210,7 @@ class _CamionListState extends State<CamionList> {
 
   Future<void> _loadLocalCamions() async {
     try {
-      Map<String, Camion>? camionList = await getAllCamions(db);
+      Map<String, Camion>? camionList = await getAllCamions(db, _user.role);
       if(camionList != null){
         _camionList = camionList;
       }
@@ -261,20 +261,18 @@ class _CamionListState extends State<CamionList> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }

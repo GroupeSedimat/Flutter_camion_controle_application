@@ -126,7 +126,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
       print("💽 Synchronizing users Camions...");
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
-      await getAllCamions(db).then((camionsMap) {
+      await getAllCamions(db, _user.role).then((camionsMap) {
         if(camionsMap != null){
           for(var camion in camionsMap.entries){
             if(!camionsTypeIdList.contains(camion.value.camionType)){
@@ -138,7 +138,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
       print("💽 Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
       if(camionTypesMap != null){
         for(var camionType in camionTypesMap.entries){
           if(camionType.value.lol != null){
@@ -153,7 +153,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
       print("💽 Synchronizing Companies...");
       await syncService.fullSyncTable("companies", user: _user, userId: _userId);
       print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments");
+      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
       print("💽 Synchronizing LOL...");
       await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
       print("💽 Synchronization with SQLite completed.");
@@ -169,7 +169,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
   }
 
   Future<void> _loadEquipmentLists() async {
-    Map<String, String>? equipmentLists = await getAllEquipmentsNames(db);
+    Map<String, String>? equipmentLists = await getAllEquipmentsNames(db, _user.role);
     if(equipmentLists != null){
       _equipmentLists = equipmentLists;
     }else {
@@ -178,7 +178,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
   }
 
   Future<void> _loadCamionTypesList() async {
-    Map<String, CamionType>? camionTypesList = await getAllCamionTypes(db);
+    Map<String, CamionType>? camionTypesList = await getAllCamionTypes(db, _user.role);
     if(camionTypesList != null){
       _camionTypesList = camionTypesList;
     }else {
@@ -187,7 +187,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
   }
 
   Future<void> _loadAvailableLolMaps() async {
-    Map<String, ListOfLists>? listOfLists = await getAllLists(db);
+    Map<String, ListOfLists>? listOfLists = await getAllLists(db, _user.role);
     var temp = listOfLists?.map((key, list) => MapEntry(key, list.listName));
     if(temp != null){
       _availableLolMap = temp;
@@ -200,20 +200,18 @@ class _CamionTypeListState extends State<CamionTypeList> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -244,7 +242,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
   }
 
   Future<Map<String, CamionType>> getCamionTypesData(MyUser user) async {
-    Map<String, CamionType>? list = await getAllCamionTypes(db);
+    Map<String, CamionType>? list = await getAllCamionTypes(db, _user.role);
     if(list != null){
       return list;
     }else{
@@ -502,7 +500,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       List<String> camionsTypeIdList = [];
-      await getAllCamions(db).then((camionsMap) {
+      await getAllCamions(db, _user.role).then((camionsMap) {
         if(camionsMap != null){
           for(var camion in camionsMap.entries){
             if(!camionsTypeIdList.contains(camion.value.camionType)){

@@ -123,7 +123,7 @@ class _WelcomePageState extends State<WelcomePage> {
       print("💽 Synchronizing users Camions...");
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
-      await getAllCamions(db).then((camionsMap) {
+      await getAllCamions(db, _user!.role).then((camionsMap) {
         if(camionsMap != null){
           for(var camion in camionsMap.entries){
             if(!camionsTypeIdList.contains(camion.value.camionType)){
@@ -136,7 +136,7 @@ class _WelcomePageState extends State<WelcomePage> {
       print("💽 Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user!.role);
       if(camionTypesMap != null){
         for(var camionType in camionTypesMap.entries){
           if(camionType.value.lol != null){
@@ -151,7 +151,7 @@ class _WelcomePageState extends State<WelcomePage> {
       print("💽 Synchronizing Companies...");
       await syncService.fullSyncTable("companies", user: _user, userId: _userId);
       print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments");
+      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
       print("Camion List of Lists Ids: $camionListOfListId");
       print("💽 Synchronizing LOL...");
       await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);

@@ -134,38 +134,36 @@ class _PDFShowListState extends State<PDFShowList> {
 
   Future<void> _loadPdfs() async {
     /// todo pdf firebase to local?
-
     DatabasePDFService databasePDFService = DatabasePDFService();
-    pdfList =  await databasePDFService.getUserListOfPDF(_user.company);
+    pdfList =  await databasePDFService.getUserListOfPDF(_user.company, _userId);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
     if (!networkService.isOnline){
       return BasePage(
         title: AppLocalizations.of(context)!.pdfListAdmin,
         body: Text(
           AppLocalizations.of(context)!.dataNoDataOffLine,
           style: TextStyle(color: Colors.red, fontSize: 30),
-        ),
-      );
-    }
-    if (_isLoading) {
-      return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: Center(child: CircularProgressIndicator()),
-          ),
         ),
       );
     }
@@ -191,7 +189,7 @@ class _PDFShowListState extends State<PDFShowList> {
         final entry = sortedPdf.entries.toList()[index];
         final fileName = entry.key;
         final url = entry.value;
-        return PDFShowTemplate(fileName: fileName, url: url);
+        return PDFShowTemplate(fileName: fileName, url: url, user: _user);
       },
     );
   }

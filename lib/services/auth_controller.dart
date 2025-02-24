@@ -21,15 +21,12 @@ class AuthController extends GetxController {
   void onReady() {
     super.onReady();
     _user = Rx<User?>(auth.currentUser);
-    print("⚠⚠⚠⚠⚠⚠ $_user");
     _user.bindStream(auth.userChanges());
-    print("⚠⚠⚠⚠⚠⚠ $_user");
     ever(_user, _initialScreen);
   }
 
   _initialScreen(User? user) async {
     if (user == null) {
-      print(" ******************************* ---------------- --------- reset db");
       try {
         await DatabaseHelper().clearTables([
           "users",
@@ -199,7 +196,6 @@ Future<void> login(String identifier, String password) async {
     // Vérifier si l'utilisateur est super admin
     var currentUser = auth.currentUser;
     if (currentUser != null && await isSuperAdmin(currentUser.uid)) {
-      print(" * * * * * * * Irek --- ------ auth controller - connection ok - superadmin");
       Get.snackbar(
         "Connexion réussie",
         "Bienvenue ${currentUser.displayName ?? currentUser.email}",
@@ -216,7 +212,6 @@ Future<void> login(String identifier, String password) async {
       bool isApproved = userDoc.get('isApproved') ?? false;
 
       if (isApproved) {
-        print(" * * * * * * * Irek --- ------ auth controller - connection ok");
         Get.snackbar(
           "Connexion réussie",
           "Bienvenue ${userDoc.get('username')}",
@@ -225,7 +220,6 @@ Future<void> login(String identifier, String password) async {
         );
         // await Get.offAll(() => WelcomePage());
       } else {
-        print(" * * * * * * * Irek --- ------ auth controller - user not approved");
         Get.snackbar(
           "Compte non approuvé",
           "Votre compte doit être approuvé par un administrateur.",
@@ -235,7 +229,6 @@ Future<void> login(String identifier, String password) async {
         await FirebaseAuth.instance.signOut();
       }
     } else {
-      print(" * * * * * * * Irek --- ------ auth controller - user doc not found");
       Get.snackbar(
         "Erreur",
         "Les informations de l'utilisateur sont introuvables.",
@@ -246,7 +239,6 @@ Future<void> login(String identifier, String password) async {
     }
   } catch (e) {
     // Gestion des erreurs
-    print(" * * * * * * * Irek --- ------ auth controller - connection catch error");
     Get.snackbar(
       "Erreur de connexion",
       e is FirebaseAuthException ? e.message ?? "Erreur inconnue" : "Erreur lors de la connexion.",

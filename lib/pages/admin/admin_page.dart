@@ -33,8 +33,8 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> {
 
   late Database db;
-  MyUser? _user;
-  String? _userId;
+  late MyUser _user;
+  late String _userId;
   bool _isLoading = true;
   late NetworkService networkService;
   late AuthController authController;
@@ -129,13 +129,13 @@ class _AdminPageState extends State<AdminPage> {
         print("💽 Synchronizing Camions...");
         await syncService.fullSyncTable("camions", user: _user, userId: _userId);
         print("💽 Synchronizing CamionTypess...");
-        await syncService.fullSyncTable("camionTypes");
+        await syncService.fullSyncTable("camionTypes", user: _user, userId: _userId);
         print("💽 Synchronizing Companies...");
         await syncService.fullSyncTable("companies", user: _user, userId: _userId);
         print("💽 Synchronizing Equipments...");
-        await syncService.fullSyncTable("equipments");
+        await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
         print("💽 Synchronizing LOL...");
-        await syncService.fullSyncTable("listOfLists");
+        await syncService.fullSyncTable("listOfLists", user: _user, userId: _userId);
         print("💽 Synchronizing Blueprints...");
         await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
         print("💽 Synchronization with SQLite completed.");
@@ -150,20 +150,18 @@ class _AdminPageState extends State<AdminPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -242,7 +240,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   Widget _buildDashboardItem(
-    BuildContext context, // Ajouter le BuildContext en paramètre
+    BuildContext context,
     String title,
     IconData icon,
     VoidCallback onTap,

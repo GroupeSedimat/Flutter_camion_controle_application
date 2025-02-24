@@ -7,7 +7,7 @@ class MyUser {
   String company;
   bool? apresFormation;
   String? apresFormationDoc;
-  String? camion; // change to List<String> for more camions?
+  List<String>? camion; /// todo change to List<String> for more camions (here and everywhere) plus display and selection in profile editing
   DateTime createdAt;
   DateTime updatedAt;
   DateTime? deletedAt;
@@ -36,7 +36,11 @@ class MyUser {
     company: json['company']! as String,
     apresFormation: json['apresFormation'] != null ? json['apresFormation'] as bool : null,
     apresFormationDoc: json['apresFormationDoc'] != null ? json['apresFormationDoc'] as String : null,
-    camion: json['camion'] != null ? json['camion'] as String : null,
+    camion: json['camion'] != null
+        ? (json['camion'] as List<dynamic>)
+        .map((item) => item as String)
+        .toList()
+        : null,
     createdAt: DateTime.parse(json['createdAt'] as String),
     updatedAt: DateTime.parse(json['updatedAt'] as String),
     deletedAt: json['deletedAt'] != null
@@ -53,7 +57,7 @@ class MyUser {
     String? company,
     bool? apresFormation,
     String? apresFormationDoc,
-    String? camion,
+    List<String>? camion,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -87,7 +91,7 @@ class MyUser {
     if (firstname != null) json['firstname'] = firstname;
     if (apresFormation != null) json['apresFormation'] = apresFormation;
     if (apresFormationDoc != null) json['apresFormationDoc'] = apresFormationDoc;
-    if (camion != null) json['camion'] = camion;
+    if (camion != null) json['camion'] = camion!.map((item) => item).toList();
     if (deletedAt != null) json['deletedAt'] = deletedAt!.toIso8601String();
     return json;
   }

@@ -1,122 +1,79 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_template.dart';
-import 'package:flutter_application_1/services/database_firestore/user_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_application_1/services/network_service.dart';
+import 'package:flutter_application_1/services/pdf/database_pdf_service.dart';
+import 'package:provider/provider.dart';
 
 
-class UserTile extends StatelessWidget {
-  final Reference userRef;
+class UserTile extends StatefulWidget {
+  final MyUser user;
+  final Map<String, String> userData;
 
-  UserTile({required this.userRef});
+  UserTile({required this.user, required this.userData});
+
+  @override
+  State<UserTile> createState() => _UserTileState();
+}
+
+class _UserTileState extends State<UserTile> {
+  late NetworkService networkService;
+  late DatabasePDFService databasePDFService;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _initService();
+  }
+
+  Future<void> _initService() async {
+    try {
+      networkService = Provider.of<NetworkService>(context, listen: false);
+      databasePDFService = DatabasePDFService();
+    } catch (e) {
+      print("Error loading services: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final userService = UserService();
-
-    return FutureBuilder<MyUser>(
-      future: userService.getUserData(userRef.name),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return ListTile(
-            title: Text(userRef.name),
-            subtitle: Text(AppLocalizations.of(context)!.userLoading),
-          );
-        } else if (snapshot.hasError) {
-          return ListTile(
-            title: Text(userRef.name),
-            subtitle: Text("Error: ${snapshot.error}"),
-          );
-        } else if (snapshot.hasData) {
-          final user = snapshot.data!;
-          final userName = user.username;
-
-          return FutureBuilder<ListResult>(
-            future: userRef.listAll(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return ListTile(
-                  title: Text(userName),
-                  subtitle: Text(AppLocalizations.of(context)!.loading),
-                );
-              } else if (snapshot.hasError) {
-                return ListTile(
-                  title: Text(userName),
-                  subtitle: Text("Error: ${snapshot.error}"),
-                );
-              } else if (snapshot.hasData) {
-                final docList = snapshot.data!.items;
-                docList.sort((a, b) => b.name.compareTo(a.name));
-
-                return ExpansionTile(
-                 
-                  backgroundColor: Colors.lightBlueAccent,
-                  collapsedBackgroundColor: Colors.lightBlue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  collapsedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  title: Text(
-                    userName,
-                    style: TextStyle(
-                      fontSize: 22.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  children: docList.map((docRef) {
-                    return FutureBuilder<String>(
-                      future: docRef.getDownloadURL(),
-                      builder: (context, urlSnapshot) {
-                        if (urlSnapshot.connectionState == ConnectionState.waiting) {
-                          return ListTile(
-                            title: Text(
-                              docRef.name,
-                            ),
-                            subtitle: Text(AppLocalizations.of(context)!.loading),
-                          );
-                        } else if (urlSnapshot.hasError) {
-                          return ListTile(
-                            title: Text(
-                              docRef.name,
-                            ),
-                            subtitle: Text("Error: ${urlSnapshot.error}"),
-                          );
-                        } else if (urlSnapshot.hasData) {
-                          return PDFShowTemplate(
-                            fileName: docRef.name,
-                            url: urlSnapshot.data!,
-                          );
-                        } else {
-                          return ListTile(
-                            title: Text(
-                              docRef.name,
-                            ),
-                            subtitle: Text("No URL available"),
-                          );
-                        }
-                      },
-                    );
-                  }).toList(),
-                );
-              } else {
-                return ListTile(
-                  title: Text(userName),
-                  subtitle: Text(AppLocalizations.of(context)!.userDataNotFound),
-                );
-              }
-            },
-          );
-        } else {
-          return ListTile(
-            title: Text(userRef.name),
-            subtitle: Text(AppLocalizations.of(context)!.userDataNotFound),
-          );
-        }
-      },
+    print("❗User Tile build ${widget.user.username}");
+    print("❗${widget.userData}");
+    return ExpansionTile(
+      backgroundColor: Colors.lightBlueAccent,
+      collapsedBackgroundColor: Colors.lightBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      collapsedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      title: Text(
+        widget.user.username,
+        style: TextStyle(
+          fontSize: 22.0,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: widget.userData.length,
+          padding: const EdgeInsets.all(16.0),
+          itemBuilder: (BuildContext context, int index){
+            final entry = widget.userData.entries.toList()[index];
+            final fileName = entry.key;
+            final url = entry.value;
+            return PDFShowTemplate(fileName: fileName, url: url, user: widget.user,);
+          },
+        ),
+      ],
     );
   }
 }

@@ -147,6 +147,40 @@ class DatabaseCamionService{
     }
   }
 
+  Future<Map<String, Camion>> getListCamionSinceLastSync(List<String> camions, String lastSync) async {
+    Query query = _camionRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+
+    if (camions.isEmpty) {
+      return {};
+    }
+
+    try {
+      QuerySnapshot querySnapshot = await _camionRef
+          .where(FieldPath.documentId, whereIn: camions)
+          .get();
+
+      Map<String, Camion> camionsMap = {};
+
+      for (var snapshotCamionItem in querySnapshot.docs) {
+        camionsMap[snapshotCamionItem.id] = snapshotCamionItem.data() as Camion;
+      }
+
+      var sortedKeys = camionsMap.keys.toList()
+        ..sort((k1, k2) => camionsMap[k1]!.name.compareTo(camionsMap[k2]!.name));
+
+      return LinkedHashMap.fromIterable(
+        sortedKeys,
+        key: (k) => k,
+        value: (k) => camionsMap[k]!,
+      );
+
+    } catch (e) {
+      print("Error getting Camions: $e");
+      rethrow;
+    }
+  }
+
   Future<Map<String, dynamic>> getCamionsPaginated({
     String? companyId,
     String? searchQuery,

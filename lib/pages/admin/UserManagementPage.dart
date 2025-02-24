@@ -136,7 +136,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
   }
 
   Future<void> _loadCompanyList() async {
-    Map<String, String>? companyList = await getAllCompaniesNames(db);
+    Map<String, String>? companyList = await getAllCompaniesNames(db, _user.role);
     print("company list $companyList");
     if(companyList != null){
       _companyNames = companyList;
@@ -144,7 +144,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
   }
 
   Future<void> _loadUsersList() async {
-    Map<String, MyUser>? usersMap = await getAllUsers(db);
+    Map<String, MyUser>? usersMap = await getAllUsers(db, _user.role);
     print("Users map $usersMap");
     if(usersMap != null){
     List<MyUser>? usersList = usersMap.values.toList();
@@ -169,20 +169,18 @@ class _UserManagementPageState extends State<UserManagementPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -247,7 +245,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                           Get.to(() => UserDetailsPage());
                           break;
                         case 'edit':
-                          Get.to(() => UserEditPage(user: user));
+                          Get.to(() => UserEditPage(userId: userId));
                           break;
                         case 'reset_password':
                           _resetPassword(user.email);

@@ -124,7 +124,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
       print("💽 Synchronizing users Camions...");
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
-      await getAllCamions(db).then((camionsMap) {
+      await getAllCamions(db, _user.role).then((camionsMap) {
         if(camionsMap != null){
           for(var camion in camionsMap.entries){
             if(!camionsTypeIdList.contains(camion.value.camionType)){
@@ -136,7 +136,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
       print("💽 Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
       if(camionTypesMap != null){
         for(var camionType in camionTypesMap.entries){
           if(camionType.value.lol != null){
@@ -163,7 +163,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
 
   Future<void> _loadListOfLists() async {
     try {
-      Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db);
+      Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db, _user.role);
       if(listOfListsFuture != null){
         _listOfLists = listOfListsFuture;
       }
@@ -174,7 +174,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
 
   Future<void> _loadUsersNames() async {
     try {
-      Map<String, String>? usersNames = await getAllUsersNames(db);
+      Map<String, String>? usersNames = await getAllUsersNames(db, _user.role);
       if(usersNames != null){
         _userMap = usersNames;
       }
@@ -187,20 +187,18 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -239,6 +237,12 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
         String key = _listOfLists.keys.elementAt(index);
         ListOfLists listItem = _listOfLists[key]!;
         print("List Item 💡💡💡 $listItem");
+        String isDeleted;
+        if(listItem.deletedAt != null){
+          isDeleted = " (deleted)";
+        }else{
+          isDeleted = "";
+        }
         return Padding(
           padding: EdgeInsets.all(8),
           child: Card(
@@ -246,7 +250,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
             child: ExpansionTile(
               leading: const Icon(Icons.edit, color: Colors.deepPurple, size: 50),
               title: Text(
-                  "${listItem.listNr}. ${listItem.listName}",
+                  "${listItem.listNr}. ${listItem.listName}$isDeleted",
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
@@ -275,12 +279,20 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                     if (confirmed) {
                       await softDeleteList(db, key);
                       // on delete sync and reload data then refresh page
-                      await _syncData();
+                      if (networkService.isOnline) {
+                        await _syncData();
+                      }
                       await _loadDataFromDatabase();
                       setState(() {});
                     }
+                  }else if (value == 'restore') {
+                    await restoreList(db, key);
+                    if (networkService.isOnline) {
+                      await _syncData();
+                    }
+                    await _loadDataFromDatabase();
+                    setState(() {});
                   }
-                  setState(() {});
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(
@@ -290,13 +302,15 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
                       style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text(
-                      AppLocalizations.of(context)!.delete,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-                    ),
-                  ),
+                  listItem.deletedAt == null
+                      ? PopupMenuItem(
+                        value: 'delete',
+                        child: Text(AppLocalizations.of(context)!.delete),
+                      )
+                      : PopupMenuItem(
+                        value: 'restore',
+                        child: Text(AppLocalizations.of(context)!.restore),
+                      ),
                 ],
               ),
             ),

@@ -115,7 +115,7 @@ Future<void> restoreCamion(Database db, String firebaseId) async {
   }
 }
 
-Future<Map<String,Camion>?> getAllCamions(Database db) async {
+Future<Map<String,Camion>?> getAllCamions(Database db, String role) async {
   Map<String, Camion> camions = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -124,13 +124,35 @@ Future<Map<String,Camion>?> getAllCamions(Database db) async {
     }
 
     for (var camionItem in maps) {
-      camions[camionItem["id"] as String] = responseItemToCamion(camionItem);
+      if(camionItem["deletedAt"] == null || role == "superadmin"){
+        camions[camionItem["id"] as String] = responseItemToCamion(camionItem);
+      }
     }
 
   } catch (e){
     print("Error while getting all data from table Camions: $e");
   }
   return sortedCamions(camions: camions);
+}
+
+Future<Map<String,String>?> getAllCamionsNames(Database db, String role) async {
+  Map<String, String> camions = {};
+  try{
+    final List<Map<String, dynamic>> maps = await db.query(tableName);
+    if(maps.isEmpty){
+      return null;
+    }
+
+    for (var camionItem in maps) {
+      if(camionItem["deletedAt"] == null || role == "superadmin"){
+        camions[camionItem["id"] as String] = camionItem["name"];
+      }
+    }
+
+  } catch (e){
+    print("Error while getting all camion names from table Camions: $e");
+  }
+  return camions;
 }
 
 Future<Map<String,Camion>?> getAllCamionsSinceLastUpdate(dynamic dbOrTxn, String lastUpdated, String timeSync) async {
@@ -195,7 +217,7 @@ Future<Camion?> getOneCamionWithID(dynamic dbOrTxn, String camionID) async {
   }
 }
 
-Future<Map<String, Camion>?> getCompanyCamions(dynamic dbOrTxn, String companyID) async {
+Future<Map<String, Camion>?> getCompanyCamions(dynamic dbOrTxn, String companyID, String role) async {
   Map<String, Camion> camions = {};
   try {
     final List<Map<String, dynamic>> maps = await dbOrTxn.query(
@@ -207,10 +229,37 @@ Future<Map<String, Camion>?> getCompanyCamions(dynamic dbOrTxn, String companyID
     }
 
     for (var camionItem in maps) {
-      camions[camionItem["id"] as String] = responseItemToCamion(camionItem);
+      if(camionItem["deletedAt"] == null || role == "superadmin"){
+        camions[camionItem["id"] as String] = responseItemToCamion(camionItem);
+      }
     }
 
     return sortedCamions(camions: camions);
+
+  } catch (e) {
+    print("Error while getting Company Camions: $e");
+    rethrow;
+  }
+}
+
+Future<Map<String, String>?> getCompanyCamionsNames(dynamic dbOrTxn, String companyID, String role) async {
+  Map<String, String> camions = {};
+  try {
+    final List<Map<String, dynamic>> maps = await dbOrTxn.query(
+        tableName,
+        where: 'company = ?',
+        whereArgs: [companyID]);
+    if(maps.isEmpty){
+      return null;
+    }
+
+    for (var camionItem in maps) {
+      if(camionItem["deletedAt"] == null || role == "superadmin"){
+        camions[camionItem["id"] as String] = camionItem["name"];
+      }
+    }
+
+    return camions;
 
   } catch (e) {
     print("Error while getting Company Camions: $e");

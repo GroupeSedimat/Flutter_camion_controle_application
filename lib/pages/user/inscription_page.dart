@@ -59,7 +59,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
 
   Future<void> _loadCompanies() async {
     try {
-      Map<String, String>? companyNames = await getAllCompaniesNames(db);
+      Map<String, String>? companyNames = await getAllCompaniesNames(db, "");
       if(companyNames != null){
         setState(() {
           _companyListNames = companyNames;

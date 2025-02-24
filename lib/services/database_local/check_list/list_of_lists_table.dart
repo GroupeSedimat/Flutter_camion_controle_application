@@ -95,7 +95,7 @@ Future<void> restoreList(Database db, String firebaseId) async {
   }
 }
 
-Future<Map<String,ListOfLists>?> getAllLists(Database db) async {
+Future<Map<String,ListOfLists>?> getAllLists(Database db, String role) async {
   Map<String, ListOfLists> listOfLists = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -104,7 +104,9 @@ Future<Map<String,ListOfLists>?> getAllLists(Database db) async {
     }
 
     for (var litItem in maps) {
-      listOfLists[litItem["id"] as String] = responseItemToListOfLists(litItem);
+      if(litItem["deletedAt"] == null || role == "superadmin"){
+        listOfLists[litItem["id"] as String] = responseItemToListOfLists(litItem);
+      }
     }
 
   } catch (e){

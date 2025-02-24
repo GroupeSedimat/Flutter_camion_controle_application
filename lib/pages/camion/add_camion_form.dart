@@ -13,9 +13,10 @@ class AddCamion extends StatefulWidget {
 
   Camion? camion;
   String? camionID;
+  String? role;
   final VoidCallback? onCamionAdded;
 
-  AddCamion({super.key, this.camion, this.camionID, this.onCamionAdded});
+  AddCamion({super.key, this.camion, this.camionID, this.onCamionAdded, this.role});
 
   @override
   State<AddCamion> createState() => _AddCamionState();
@@ -35,6 +36,7 @@ class _AddCamionState extends State<AddCamion> {
   String location = "";
   String company = "";
   String pageTile = "";
+  String role = "";
 
   List<DateTime> checks = [];
   Map<String, CamionType>? _camionTypesMap;
@@ -58,6 +60,7 @@ class _AddCamionState extends State<AddCamion> {
   }
 
   void _populateFieldsWithCamionData() {
+    role = widget.role ?? "";
     _nameController.text = widget.camion!.name;
     _responsibleController.text = widget.camion!.responsible!;
     _lastInterventionController.text = widget.camion!.lastIntervention!;
@@ -70,7 +73,7 @@ class _AddCamionState extends State<AddCamion> {
 
   Future<void> _loadCamionTypes() async {
     try {
-      Map<String, CamionType>? camionTypes = await getAllCamionTypes(db);
+      Map<String, CamionType>? camionTypes = await getAllCamionTypes(db, role);
       setState(() {
         _camionTypesMap = camionTypes;
         _isLoadingCamionTypes = false;
@@ -92,7 +95,7 @@ class _AddCamionState extends State<AddCamion> {
 
   Future<void> _loadCompanyNames() async {
     try {
-      Map<String, String>? companies = await getAllCompaniesNames(db);
+      Map<String, String>? companies = await getAllCompaniesNames(db, role);
       setState(() {
         _companyNamesMap = companies;
         _isLoadingCompanies = false;

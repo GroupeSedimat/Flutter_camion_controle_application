@@ -261,25 +261,28 @@ class SyncService {
                 }
               }
             }else if(user.role == "user"){
-              final Map<String, Camion> firebaseCamions = await firebaseCamionService.getOneCamionSinceLastSync(user.camion, lastSync);
+              final Map<String, Camion> firebaseCamions = await firebaseCamionService.getListCamionSinceLastSync(user.camion!, lastSync);
               final Map<String, Camion>? localCamions = await getAllCamionsSinceLastUpdate(txn, lastSync, timeSync);
               print("----------- Firebase camions since last update $firebaseCamions");
 
               for (var firebaseCamion in firebaseCamions.entries) {
-                final Camion? localCamion = localCamions?[firebaseCamion.key];
-                if (localCamion == null) {
-                  await insertCamion(txn, firebaseCamion.value, firebaseCamion.key);
-                } else {
-                  if(!firebaseCamion.value.updatedAt.isAtSameMomentAs(localCamion.updatedAt)){
-                    conflicts.add({
-                      'firebaseKey': firebaseCamion.key,
-                      'firebase': firebaseCamion.value,
-                      'local': localCamion,
-                    });
+                if(firebaseCamion.value.deletedAt != null){
+                  final Camion? localCamion = localCamions?[firebaseCamion.key];
+                  if (localCamion == null) {
+                    await insertCamion(txn, firebaseCamion.value, firebaseCamion.key);
+                  } else {
+                    if(!firebaseCamion.value.updatedAt.isAtSameMomentAs(localCamion.updatedAt)){
+                      conflicts.add({
+                        'firebaseKey': firebaseCamion.key,
+                        'firebase': firebaseCamion.value,
+                        'local': localCamion,
+                      });
+                    }
                   }
                 }
               }
             }
+
 
           });
 

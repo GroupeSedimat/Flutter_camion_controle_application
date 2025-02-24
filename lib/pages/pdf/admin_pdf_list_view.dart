@@ -1,12 +1,10 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_company_tile.dart';
-import 'package:flutter_application_1/pages/pdf/admin_pdf_list_user_tile.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
@@ -25,19 +23,22 @@ class AdminPdfListView extends StatefulWidget {
 }
 
 class _AdminPdfListViewState extends State<AdminPdfListView> {
-  final Reference _firePdfReference = DatabasePDFService().firePdfReference();
 
   late Database db;
   Map<String, Company> _companyList = HashMap();
   late MyUser _user;
   late String _userId;
   bool _isLoading = true;
+  late Map<String, Map<MyUser, Map<String, String>>> _pdfList;
 
   late AuthController authController;
   late UserService userService;
   late NetworkService networkService;
+  late DatabasePDFService databasePDFService;
 
+  /// TODO poprawic zapisywanie pdfow
   /// todo repair loading view and showing files
+
   @override
   void initState() {
     super.initState();
@@ -75,6 +76,7 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
       authController = AuthController();
       userService = UserService();
       networkService = Provider.of<NetworkService>(context, listen: false);
+      databasePDFService = DatabasePDFService();
     } catch (e) {
       print("Error loading services: $e");
     }
@@ -132,11 +134,12 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
 
   Future<void> _loadDataFromDatabase() async {
     await _loadCompanies();
+    await _loadPdf();
   }
 
   Future<void> _loadCompanies() async {
     try {
-      Map<String, Company>? companyList = await getAllCompanies(db);
+      Map<String, Company>? companyList = await getAllCompanies(db, _user.role);
       if(companyList != null){
         _companyList = companyList;
       }
@@ -145,37 +148,64 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
     }
   }
 
+  Future<void> _loadPdf() async {
+    try {
+      /// Map<String, Map<MyUser, Map<String, String>>> = (companyName, (user, (pdfName, pdfDownloadUrl)))
+      Map<String, Map<MyUser, Map<String, String>>> pdf = {};
+      if(networkService.isOnline){
+        Map<String, MyUser>? users = await getAllUsers(db, _user.role);
+        for(String company in _companyList.keys){
+          for(var user in users!.entries){
+            Map<MyUser, Map<String, String>> mapUserPdf = {};
+            if(company == user.value.company){
+              Map<String, String> docList = await databasePDFService.getUserPDF(company, user.key);
+              Map<String, String> entry = {};
+              for(var doc in docList.entries){
+                entry[doc.key] = doc.value;
+                mapUserPdf[user.value] = entry;
+              }
+              pdf[company] = mapUserPdf;
+            }
+          }
+        }
+        _pdfList = pdf;
+      }
+    } catch (e) {
+      print("Error loading user's PDF: $e");
+    }
+  }
+
   bool _isSuperAdmin() {
+    //no need 4 now
     return _user.role == 'superadmin';
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
     if (!networkService.isOnline){
       return BasePage(
         title: AppLocalizations.of(context)!.pdfListAdmin,
         body: Text(
           AppLocalizations.of(context)!.dataNoDataOffLine,
           style: TextStyle(color: Colors.red, fontSize: 30),
-        ),
-      );
-    }
-    if (_isLoading) {
-      return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: Center(child: CircularProgressIndicator()),
-          ),
         ),
       );
     }
@@ -187,47 +217,16 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
   }
 
   _buildBody() {
-    return Scaffold(
-      body: FutureBuilder<ListResult>(
-        future: getCompanyPdfData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (snapshot.hasData) {
-            final companyPdfList = snapshot.data!.prefixes;
-            if (_isSuperAdmin()) {
-              return ListView(
-                // padding: EdgeInsets.all(25),
-                children: companyPdfList.map((companyRef) {
-                  return CompanyTile(
-                    companyRef: companyRef,
-                    companyName: _companyList[companyRef.name]?.name ?? companyRef.name,
-                  );
-                }).toList(),
-              );
-            } else {
-              return
-                ListView(
-                  children: companyPdfList.map((userRef) {
-                    return UserTile(userRef: userRef);
-                  }).toList(),
-                );
-            }
-          } else {
-            return Center(child: Text("No data available"));
-          }
-        },
-      ),
+    return ListView(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.all(25),
+      children: _pdfList.entries.map((companyData) {
+        return CompanyTile(
+          companyName: _companyList[companyData.key]?.name ?? companyData.key,
+          companyUsersAndPdf: companyData.value,
+        );
+      }).toList(),
     );
-  }
-
-  Future<ListResult> getCompanyPdfData() async {
-    if (_isSuperAdmin()) {
-      return _firePdfReference.listAll();
-    } else {
-      return _firePdfReference.child(_user.company).listAll();
-    }
   }
 }

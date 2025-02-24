@@ -1,9 +1,11 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/services/database_local/camions_table.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
@@ -16,7 +18,7 @@ import 'package:sqflite/sqflite.dart';
 
 class UserDetailsPage extends StatefulWidget {
 
-  MyUser? userToShow;
+  MapEntry<String, MyUser>? userToShow;
   UserDetailsPage({super.key, this.userToShow});
 
   @override
@@ -27,13 +29,17 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
 
   /// todo - show other user if other user provide
   /// todo - manage "after formation" photo
-  /// todo - add camions to user
+  /// todo - test added camions to user
 
   late Database db;
   late MyUser _thisUser;
   late String _thisUserId;
   bool _isLoading = true;
+  late Map<String, String> _availableCamions;
   Map<String, Company> _company = HashMap();
+  late MyUser showUser;
+  late String showUserId;
+
   late AuthController authController;
   late UserService userService;
   late NetworkService networkService;
@@ -131,6 +137,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
 
   Future<void> _loadDataFromDatabase() async {
     await _loadCompany();
+    await _loadAvailableCamions();
+    await _showThisUser();
   }
 
   Future<void> _loadCompany() async {
@@ -142,35 +150,58 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     }
   }
 
+  Future<void> _loadAvailableCamions() async {
+    Map<String, Camion>? camions = await getAllCamions(db, _thisUser.role);
+    var temp = camions?.map((key, camion) => MapEntry(key, camion.name));
+    if(temp != null){
+      _availableCamions = temp;
+    }else {
+      _availableCamions = {};
+    }
+  }
+
+  Future<void> _showThisUser() async {
+    if(widget.userToShow == null){
+      showUser = _thisUser;
+      showUserId = _thisUserId;
+    }else{
+      showUser = widget.userToShow!.value;
+      showUserId = widget.userToShow!.key;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
-
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.details),
-        actions: const [
+        actions: [
+          if(showUser.deletedAt == null)
           IconButton(
             icon: Icon(Icons.delete),
-            onPressed: null,
+            onPressed: _confirmDeleteUser,
+          ),
+          if(showUser.deletedAt != null)
+          IconButton(
+            icon: Icon(Icons.restore),
+            onPressed: _restoreUser,
           ),
         ],
       ),
@@ -184,35 +215,54 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 AppLocalizations.of(context)!.userName,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(_thisUser.username),
+              Text(showUser.username),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.eMail,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(_thisUser.email),
+              Text(showUser.email),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.userFirstName,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(_thisUser.firstname ?? ""),
+              Text(showUser.firstname ?? ""),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.userLastName,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(_thisUser.name ?? ""),
+              Text(showUser.name ?? ""),
               SizedBox(height: 16),
               Text(
                 'Role:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(_thisUser.role),
+              Text(showUser.role),
+              SizedBox(height: 16),
+              Text("Camions:", style: textStyleBold()),
+              ...showUser.camion!.map((item) => Container(
+                margin: EdgeInsets.only(top: 8.0),
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColorLight,
+                  borderRadius: BorderRadius.circular(8.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Text(_availableCamions[item] ?? "Unknown list!", style: textStyle()),
+              )),
               SizedBox(height: 16),
               Row(
                 children: [
-                  Checkbox(value: _thisUser.apresFormation, onChanged: null),
+                  Checkbox(value: showUser.apresFormation, onChanged: null),
                   Text(
                     'User after Formation:',
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -224,8 +274,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 'Apres Formation Doc:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              if(_thisUser.apresFormationDoc != "" && _thisUser.apresFormationDoc != null)
-              Image.network(_thisUser.apresFormationDoc!, width: 600),
+              if(showUser.apresFormationDoc != "" && showUser.apresFormationDoc != null)
+              Image.network(showUser.apresFormationDoc!, width: 600),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.company,
@@ -238,4 +288,54 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
       ),
     );
   }
+
+  TextStyle textStyle(){
+    return TextStyle(fontSize: 20);
+  }
+  TextStyle textStyleBold(){
+    return TextStyle(fontSize: 25, fontWeight: FontWeight.bold);
+  }
+
+  void _confirmDeleteUser() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.confirmDelete),
+          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
+          actions: [
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.no),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              onPressed: _deleteUser,
+              child: Text(AppLocalizations.of(context)!.yes),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteUser() async {
+    await softDeleteUser(db, showUserId);
+    if (networkService.isOnline) {
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
+    Navigator.of(context).pop();
+  }
+
+  void _restoreUser() async {
+    await restoreUser(db, showUserId);
+    if (networkService.isOnline) {
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
+    Navigator.of(context).pop();
+  }
+
 }

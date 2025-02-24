@@ -68,7 +68,7 @@ class ValidateTaskState extends State<ValidateTask> {
     double screenWidth = screenSize.width;
     double screenHeight = screenSize.height;
     DatabaseImageService databaseImageService = DatabaseImageService();
-
+    /// todo zmienic wyglad wyswietlania
     return Form(
         key: _formKey,
         child: ListView(

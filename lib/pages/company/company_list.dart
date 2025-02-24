@@ -129,7 +129,7 @@ class _CompanyListState extends State<CompanyList> {
   }
 
   Future<void> _loadCompanyList() async {
-    Map<String, Company>? companyList = await getAllCompanies(db);
+    Map<String, Company>? companyList = await getAllCompanies(db, _user.role);
     if(companyList != null){
       _companyList = companyList;
     }
@@ -143,20 +143,18 @@ class _CompanyListState extends State<CompanyList> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }

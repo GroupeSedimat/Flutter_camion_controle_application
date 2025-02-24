@@ -1,7 +1,7 @@
 class Blueprint {
   String title;
   String description;
-  String? photoFilePath;
+  String? photoFilePath; /// todo make List<String> and stock multiple photos in tel an firestore?
   int nrOfList;
   int nrEntryPosition;
   DateTime createdAt;

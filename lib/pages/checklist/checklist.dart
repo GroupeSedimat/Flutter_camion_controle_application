@@ -137,7 +137,7 @@ class _CheckListState extends State<CheckList> {
       print("💽 Synchronizing users Camions...");
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
-      await getAllCamions(db).then((camionsMap) {
+      await getAllCamions(db, _user.role).then((camionsMap) {
         if(camionsMap != null){
           for(var camion in camionsMap.entries){
             if(!camionsTypeIdList.contains(camion.value.camionType)){
@@ -149,7 +149,7 @@ class _CheckListState extends State<CheckList> {
       print("💽 Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db);
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
       if(camionTypesMap != null){
         for(var camionType in camionTypesMap.entries){
           if(camionType.value.lol != null){
@@ -164,7 +164,7 @@ class _CheckListState extends State<CheckList> {
       print("💽 Synchronizing LOL...");
       await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
       print("💽 Synchronizing Blueprints...");
-      await syncService.fullSyncTable("blueprints");
+      await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
       print("💽 Synchronizing Validate Tasks...");
       await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
@@ -181,7 +181,7 @@ class _CheckListState extends State<CheckList> {
   }
 
   Future<void> _loadBlueprints() async {
-    Map<String, Blueprint>? blueprints = await getAllBlueprints(db);
+    Map<String, Blueprint>? blueprints = await getAllBlueprints(db, _user.role);
     if(blueprints != null){
       _blueprints = blueprints;
     }
@@ -196,7 +196,7 @@ class _CheckListState extends State<CheckList> {
 
   Future<void> _loadListOfLists() async {
     try {
-      Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db);
+      Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db, _user.role);
       if(listOfListsFuture != null){
         _listOfLists = listOfListsFuture;
       }
@@ -209,20 +209,18 @@ class _CheckListState extends State<CheckList> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                  Theme.of(context).primaryColor.withOpacity(0.4),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: Center(child: CircularProgressIndicator()),
           ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -522,7 +520,7 @@ class _CheckListState extends State<CheckList> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Blueprints...");
-      await syncService.fullSyncTable("blueprints");
+      await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during global data synchronization: $e");

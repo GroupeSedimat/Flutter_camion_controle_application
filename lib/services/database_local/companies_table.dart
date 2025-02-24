@@ -125,7 +125,7 @@ Future<void> restoreCompany(Database db, String firebaseId) async {
   }
 }
 
-Future<Map<String,Company>?> getAllCompanies(Database db) async {
+Future<Map<String,Company>?> getAllCompanies(Database db, String role) async {
   Map<String, Company> companies = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -134,7 +134,9 @@ Future<Map<String,Company>?> getAllCompanies(Database db) async {
     }
 
     for (var companyItem in maps) {
-      companies[companyItem["id"] as String] = responseItemToCompany(companyItem);
+      if(companyItem["deletedAt"] == null || role == "superadmin"){
+        companies[companyItem["id"] as String] = responseItemToCompany(companyItem);
+      }
     }
 
   } catch (e){
@@ -143,7 +145,7 @@ Future<Map<String,Company>?> getAllCompanies(Database db) async {
   return sortedCompanies(companies: companies);
 }
 
-Future<Map<String,String>?> getAllCompaniesNames(Database db) async {
+Future<Map<String,String>?> getAllCompaniesNames(Database db, String role) async {
   Map<String, String> companiesNames = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -152,7 +154,9 @@ Future<Map<String,String>?> getAllCompaniesNames(Database db) async {
     }
 
     for (var companyItem in maps) {
-      companiesNames[companyItem["id"] as String] = responseItemToCompany(companyItem).name;
+      if(companyItem["deletedAt"] == null || role == "superadmin"){
+        companiesNames[companyItem["id"] as String] = responseItemToCompany(companyItem).name;
+      }
     }
 
   } catch (e){
