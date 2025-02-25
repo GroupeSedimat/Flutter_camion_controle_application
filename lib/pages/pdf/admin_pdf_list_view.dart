@@ -36,7 +36,7 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
   late NetworkService networkService;
   late DatabasePDFService databasePDFService;
 
-  /// TODO poprawic zapisywanie pdfow
+  /// TODO repair saving PDFs
   /// todo repair loading view and showing files
 
   @override

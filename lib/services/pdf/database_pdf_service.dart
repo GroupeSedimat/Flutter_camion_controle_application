@@ -66,16 +66,7 @@ class DatabasePDFService{
         String downloadURL = await pdfRef.getDownloadURL();
         pdfList[pdfRef.name] = downloadURL;
       }
-
-      var sortedKeys = pdfList.keys.toList()
-        ..sort((k1, k2) => pdfList[k2]!.compareTo(pdfList[k1]!));
-
-      return LinkedHashMap.fromIterable(
-        sortedKeys,
-        key: (k) => k,
-        value: (k) => pdfList[k]!,
-      );
-      // return pdfList;
+      return pdfList;
     } catch (error) {
       print("Error retrieving User $userId pdf list: $error");
       return pdfList;

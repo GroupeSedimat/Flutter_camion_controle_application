@@ -319,19 +319,19 @@ class PdfService {
   Future<void> savePdfFile(String companyID, Uint8List data, MyUser user, String userId, Future<void> Function() deleteOneTaskListOfUser) async {
     int time = DateTime.now().millisecondsSinceEpoch;
     String fileName = "${user.username}.${time.toString()}";
-    String documentsPath;
-    if (Platform.isAndroid) {
-      documentsPath = "/storage/emulated/0/Documents/camion_appli";
-      Directory downloadDir = Directory(documentsPath);
-      if (!await downloadDir.exists()) {
-        await downloadDir.create(recursive: true);
-      }
-    } else if (Platform.isIOS) {
-      Directory appDocDir = await getApplicationDocumentsDirectory();
-      documentsPath = appDocDir.path;
-    } else {
-      throw Exception("Unsupported platform");
-    }
+    String documentsPath = await getDocumentsPath();
+    // if (Platform.isAndroid) {
+    //   documentsPath = "/storage/emulated/0/Documents/camion_appli";
+    //   Directory downloadDir = Directory(documentsPath);
+    //   if (!await downloadDir.exists()) {
+    //     await downloadDir.create(recursive: true);
+    //   }
+    // } else if (Platform.isIOS) {
+    //   Directory appDocDir = await getApplicationDocumentsDirectory();
+    //   documentsPath = appDocDir.path;
+    // } else {
+    //   throw Exception("Unsupported platform");
+    // }
     String filePath = "$documentsPath/$fileName.pdf";
     String filePathDatabase = "${user.company}/$userId/${time.toString()}";
     final directory = Directory(documentsPath);
@@ -343,5 +343,28 @@ class PdfService {
     await databasePDFService.addPdfToFirebase(filePath, filePathDatabase);
     await deleteOneTaskListOfUser();
     await OpenDocument.openDocument(filePath: filePath);
+  }
+
+  Future<String> getDocumentsPath() async {
+    String documentsPath;
+    if (Platform.isAndroid) {
+      Directory? appDocDir = await getDownloadsDirectory();
+
+      if (appDocDir == null) {
+        throw Exception("Failed to get external directory");
+      }
+      documentsPath = "${appDocDir.path}/camion_appli";
+
+      Directory downloadDir = Directory(documentsPath);
+      if (!await downloadDir.exists()) {
+        await downloadDir.create(recursive: true);
+      }
+    } else if (Platform.isIOS) {
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      documentsPath = appDocDir.path;
+    } else {
+      throw Exception("Unsupported platform");
+    }
+    return documentsPath;
   }
 }

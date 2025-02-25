@@ -127,7 +127,7 @@ class _PDFShowListState extends State<PDFShowList> {
   }
 
   Future<void> _loadDataFromDatabase() async {
-    if (!networkService.isOnline){
+    if (networkService.isOnline){
       await _loadPdfs();
     }
   }

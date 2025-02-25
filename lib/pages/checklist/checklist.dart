@@ -254,7 +254,11 @@ class _CheckListState extends State<CheckList> {
           nrEntryPosition: nrEntryPosition,
           blueprint: blueprint,
           blueprintID: blueprintID,
-          onBlueprintAdded: () {
+          onBlueprintAdded: () async {
+            if (networkService.isOnline) {
+              await _syncBlueprints();
+            }
+            await _loadDataFromDatabase();
             setState(() {});
             Navigator.pop(context);
           },
@@ -296,8 +300,8 @@ class _CheckListState extends State<CheckList> {
                 onValidateAdded: () async {
                   await _syncData();
                   await _loadTasks();
-                  Navigator.pop(context);
                   setState(() {});
+                  Navigator.pop(context);
                 },
                 userUID: _userId,
               ),
@@ -427,13 +431,11 @@ class _CheckListState extends State<CheckList> {
                   onPressed: () {
                     showBlueprintModal(
                       nrOfList: list.listNr,
-                      nrEntryPosition: (_blueprints.values
-                          .where((b) => b.nrOfList == list.listNr)
-                          .length +
-                          1),
+                      nrEntryPosition: (_blueprints.values.where((b) => b.nrOfList == list.listNr).length + 1),
                       blueprint: null,
                       blueprintID: null,
                     );
+
                   },
                   child: const Icon(
                     Icons.add,
@@ -465,6 +467,11 @@ class _CheckListState extends State<CheckList> {
                       _userId,
                       () => deleteOneTasksListForUser(list.listNr, _userId),
                     );
+                    if (networkService.isOnline) {
+                      await _syncBlueprints();
+                    }
+                    await _loadDataFromDatabase();
+                    setState(() {});
                   },
                   backgroundColor: Colors.red,
                   child: Row(
