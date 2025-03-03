@@ -40,6 +40,20 @@
     "userApprove": "Nangu ab jëfandikukat",
     "userDataNotFound": "Amul benn done jëfandikukat",
     "role": "Cër {userRole}",
+    "searchLocationPlaceholder": "Ndeyji ci jëm kanam",
+    "mapTitle": " Màpp",
+    "viewOnGoogleMaps": "nuyoo ci Google Maps",
+    "viewMaps": "guiss maps",
+    "quickStatistics": "Statistik yu am solo",
+    "activeTrucks": "Kamiyon yu ngi ci wéet",
+    "numberOfInterventions": "Ñaari am sañ-sañ",
+    "quickActions": "Feykat yu am solo",
+    "newIntervention": "Tëggin bu bees",
+    "dailyReport": "Rapóor bu ndeyjoor",
+    "maintenance": "Sàmm",
+     
+
+
 
     "passForgot": "Fatte nga sa baatu-jàll?",
     "passNotMatch": "Baatu-jàll yi méngoo wuñu",
