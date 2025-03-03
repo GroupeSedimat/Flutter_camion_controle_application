@@ -1,5 +1,6 @@
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -8,6 +9,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -129,7 +131,18 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Carte Map'),
+        title: Text(
+          AppLocalizations.of(context)!.mapTitle,
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => WelcomePage()),
+            );
+          },
+        ),
       ),
       body: _currentPosition == null
           ? Center(child: CircularProgressIndicator())
@@ -196,7 +209,8 @@ class _MapPageState extends State<MapPage> {
                                         );
                                       }
                                     },
-                                    child: Text('Voir sur Google Maps'),
+                                    child: Text(AppLocalizations.of(context)!
+                                        .viewOnGoogleMaps),
                                   ),
                                 ],
                               ),
@@ -275,6 +289,7 @@ class _MapPageState extends State<MapPage> {
                 },
                 icon: Icons.zoom_in,
                 tooltip: 'Zoom In',
+                heroTag: 'zoom_in_button',
               ),
               SizedBox(height: 10),
               ZoomButton(
@@ -288,9 +303,11 @@ class _MapPageState extends State<MapPage> {
                 },
                 icon: Icons.zoom_out,
                 tooltip: 'Zoom Out',
+                heroTag: 'zoom_out_button',
               ),
               SizedBox(height: 10),
               FloatingActionButton(
+                heroTag: 'dark_mode_button',
                 onPressed: () {
                   setState(() {
                     _isDarkMode = !_isDarkMode;
@@ -380,7 +397,7 @@ class _SearchBarState extends State<SearchBar> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Rechercher un lieu',
+              hintText: AppLocalizations.of(context)!.searchLocationPlaceholder,
               prefixIcon: Icon(Icons.search),
               suffixIcon: _isLoading
                   ? CircularProgressIndicator()
@@ -389,11 +406,13 @@ class _SearchBarState extends State<SearchBar> {
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
-                          _searchResults = []; // Efface les résultats
+                          _searchResults = [];
                         });
                       },
                     ),
               border: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
             ),
             onChanged: (value) {
               _search(value);
@@ -401,7 +420,7 @@ class _SearchBarState extends State<SearchBar> {
           ),
           if (_searchResults.isNotEmpty)
             Container(
-              height: 200, // Ajuste la hauteur selon tes besoins
+              height: 200,
               child: ListView.builder(
                 itemCount: _searchResults.length,
                 itemBuilder: (context, index) {
@@ -411,16 +430,13 @@ class _SearchBarState extends State<SearchBar> {
                     onTap: () {
                       final latitude = double.parse(result['lat']);
                       final longitude = double.parse(result['lon']);
-
-                      // Centre la carte sur le lieu sélectionné
-                      widget.mapController.move(LatLng(latitude, longitude),
-                          14.0); // Remplace 14.0 par le niveau de zoom souhaité
+                      widget.mapController
+                          .move(LatLng(latitude, longitude), 14.0);
 
                       print('Lieu sélectionné: ${result['display_name']}');
                       print(
                           'Latitude: ${result['lat']}, Longitude: ${result['lon']}');
 
-                      // Ferme la liste de résultats
                       setState(() {
                         _searchResults = [];
                         _searchController.clear();
@@ -440,12 +456,19 @@ class ZoomButton extends StatelessWidget {
   final VoidCallback onTap;
   final IconData icon;
   final String tooltip;
+  final String heroTag;
 
-  ZoomButton({required this.onTap, required this.icon, required this.tooltip});
+  ZoomButton({
+    required this.onTap,
+    required this.icon,
+    required this.tooltip,
+    required this.heroTag,
+  });
 
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
+      heroTag: heroTag,
       onPressed: onTap,
       tooltip: tooltip,
       child: Icon(icon),
