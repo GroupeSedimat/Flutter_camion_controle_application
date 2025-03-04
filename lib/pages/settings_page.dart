@@ -1,9 +1,12 @@
 // ignore_for_file: use_key_in_widget_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
 import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 import 'package:flutter_application_1/services/app_colors.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -29,7 +32,8 @@ class SettingsPage extends StatelessWidget {
             ListTile(
               title: Text(
                 AppLocalizations.of(context)!.darkMode,
-                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
               trailing: DropdownButton<ThemeMode>(
                 value: themeProvider.themeMode,
@@ -47,7 +51,8 @@ class SettingsPage extends StatelessWidget {
                           : mode == ThemeMode.dark
                               ? AppLocalizations.of(context)!.colorDark
                               : AppLocalizations.of(context)!.colorAutomatic,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                      style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   );
                 }).toList(),
@@ -66,7 +71,8 @@ class SettingsPage extends StatelessWidget {
                     themeProvider.changeColor(newColor.color);
                   }
                 },
-                items: AppColor.values.map<DropdownMenuItem<AppColor>>((AppColor color) {
+                items: AppColor.values
+                    .map<DropdownMenuItem<AppColor>>((AppColor color) {
                   return DropdownMenuItem<AppColor>(
                     value: color,
                     child: Text(color.name),
@@ -97,9 +103,28 @@ class SettingsPage extends StatelessWidget {
             ListTile(
               title: Text(AppLocalizations.of(context)!.editInformation),
               trailing: Icon(Icons.edit),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
-                Get.to(() => ModifyProfilePage());
+
+                // Récupérer l'utilisateur actuel depuis Firestore
+                final userDoc = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(AuthController.instance.getCurrentUserUID())
+                    .get();
+
+                if (userDoc.exists) {
+                  final currentUser = MyUser.fromJson(userDoc.data()!);
+
+                  // Passe l'utilisateur à ModifyProfilePage
+                  Get.to(() => ModifyProfilePage(user: currentUser));
+                } else {
+                  Get.snackbar(
+                    "Erreur",
+                    "Impossible de récupérer les informations de l'utilisateur.",
+                    backgroundColor: Colors.red,
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
               },
             ),
 
@@ -107,7 +132,6 @@ class SettingsPage extends StatelessWidget {
             ListTile(
               trailing: Icon(Icons.lock),
               title: Text(AppLocalizations.of(context)!.passChange),
-
               onTap: () {
                 Navigator.pop(context);
                 Get.to(() => ResetPasswordPage());
