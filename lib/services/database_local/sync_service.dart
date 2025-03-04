@@ -26,6 +26,7 @@ import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/dialog_services.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
+import 'package:flutter_application_1/services/pdf/pdf_service.dart';
 import 'package:sqflite/sqflite.dart';
 
 class SyncService {
@@ -58,7 +59,7 @@ class SyncService {
         }else{
           itsOk = await syncFromFirebase(tableName, timeSync, user: user, userId: userId);
         }
-        await syncToFirebase(tableName, timeSync, userId: userId);
+        await syncToFirebase(tableName, timeSync, user: user, userId: userId);
       }else{
         itsOk = await syncFromFirebase(tableName, timeSync);
         await syncToFirebase(tableName, timeSync);
@@ -377,7 +378,6 @@ class SyncService {
           /// get data from firebase about companies and write it do db local
           /// user no need to be connected
           /// todo add company for user or all depend on role
-          /// todo add just companies names when not connected
           List<Map<String, dynamic>> conflicts = [];
           await db.transaction((txn) async {
             if(user == null){
@@ -521,9 +521,6 @@ class SyncService {
           /// sync Validated Tasks DB
           /// get data from firebase about tasks and write it do db local
           /// user need to be connected
-          /// todo for user add task from firebase to local db
-          /// todo if at least one date are newer local update delete local
-          /// todo if if local are later than firebase data, delete firebase data
           List<Map<String, dynamic>> conflicts = [];
           if(userId == null){
             print("no userId provided");
@@ -692,13 +689,17 @@ class SyncService {
 
           print("----------- sync service From Firebase Blueprints end");
           break;
+        case "pdf":
+          // If I change my mind (or someone else does) I will add here what the synchronization from the firestore side to the local database should do
+          print("There is nothing here, you don't have to download PDFs from the server right away");
+          break;
         default:
           throw "Invalid Table";
       }
       return itsOk;
   }
 
-  Future<void> syncToFirebase(String tableName, String timeSync, {String? userId}) async {
+  Future<void> syncToFirebase(String tableName, String timeSync, {MyUser? user, String? userId}) async {
     print("-----------sync service To Firebase start");
     switch (tableName) {
       case "users":
@@ -967,7 +968,19 @@ class SyncService {
         }
         print("-----------sync service To Firebase end");
         break;
-
+      case "pdf":
+      /// the file is initially saved in 2 places: in /Documents/camion_appli/ and in Firebase,
+      /// if it was saved offline, then instead of in Firebase it went to "getApplicationDocumentsDirectory()"
+      /// and during synchronization it should be saved
+        if(userId == null || user == null){
+          print("no user or userId provided");
+          break;
+        }
+        print("-----------sync PDFs To Firebase: start");
+        PdfService pdfService = PdfService();
+        pdfService.uploadAllTemporaryPDFs(user, userId);
+        print("-----------sync PDFs To Firebase end");
+        break;
       default:
         throw "Invalid Table";
     }

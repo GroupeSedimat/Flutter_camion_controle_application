@@ -128,7 +128,7 @@ Future<Map<String,TaskChecklist>?> getAllTasksOfUser(dynamic dbOrTxn, String use
 }
 
 
-Future<List<String>> getUserOneListOfTasks(Database db, String userId, int listNr) async {
+Future<List<String>> getUserOneListOfTasksId(Database db, String userId, int listNr) async {
   List<String> tasks = [];
   try{
     final List<Map<String, dynamic>> maps = await db.query(
@@ -141,6 +141,26 @@ Future<List<String>> getUserOneListOfTasks(Database db, String userId, int listN
     }
     for (var task in maps) {
       tasks.add(task["id"] as String);
+    }
+  } catch (e){
+    print("Error while getting all tasksId from one list from table Tasks: $e");
+  }
+  return tasks;
+}
+
+Future<Map<String, TaskChecklist>> getUserOneListOfTasks(Database db, String userId, int listNr) async {
+  Map<String, TaskChecklist> tasks = {};
+  try{
+    final List<Map<String, dynamic>> maps = await db.query(
+        tableName,
+        where: 'userId = ? AND nrOfList = ?',
+        whereArgs: [userId, listNr.toString()]
+    );
+    if(maps.isEmpty){
+      return tasks;
+    }
+    for (var task in maps) {
+      tasks[task["id"] as String] = responseItemToTask(task);
     }
   } catch (e){
     print("Error while getting all tasksId from one list from table Tasks: $e");

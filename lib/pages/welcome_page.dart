@@ -159,6 +159,8 @@ class _WelcomePageState extends State<WelcomePage> {
       await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
       print("💽 Synchronizing Validate Tasks...");
       await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
+      print("💽 Synchronizing PDFs...");
+      await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");

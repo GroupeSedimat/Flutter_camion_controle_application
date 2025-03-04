@@ -2,11 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
-import 'package:flutter_application_1/services/database_firestore/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/pick_image_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -33,6 +34,7 @@ class ValidateTask extends StatefulWidget {
 
 class ValidateTaskState extends State<ValidateTask> {
   final _formKey = GlobalKey<FormState>();
+  NetworkService networkService = NetworkService();
   File? imageGalery;
   late Database db;
 
@@ -67,8 +69,6 @@ class ValidateTaskState extends State<ValidateTask> {
     Size screenSize = MediaQuery.of(context).size;
     double screenWidth = screenSize.width;
     double screenHeight = screenSize.height;
-    DatabaseImageService databaseImageService = DatabaseImageService();
-    /// todo change the display appearance
     return Form(
         key: _formKey,
         child: ListView(
@@ -134,11 +134,11 @@ class ValidateTaskState extends State<ValidateTask> {
                 maxWidth: screenWidth * 0.7,
                 maxHeight: screenHeight * 0.7,
               ),
-              child: imageGalery != null
+              child: (imageGalery != null && imageGalery!.existsSync())
                 ? Image.file(imageGalery!)
                 :(
-                  (widget.validate.photoFilePath != "" && widget.validate.photoFilePath != null)
-                    ? Image.network(widget.validate.photoFilePath!)
+                  (widget.validate.photoFilePath != null && File(widget.validate.photoFilePath!).existsSync() )
+                    ? Image.file(File(widget.validate.photoFilePath!))
                     : Text(AppLocalizations.of(context)!.photoNotYet, style: TextStyle(fontSize: screenWidth * 0.03,),)
                 ),
             ),
@@ -207,11 +207,31 @@ class ValidateTaskState extends State<ValidateTask> {
                     widget.validate.updatedAt = DateTime.now();
                     if (imageGalery != null) {
                       try {
-                        /// todo work on photo offline
-                        String photoFilePath = await databaseImageService.addImageToFirebase(imageGalery!.path);
+                        String listNr = widget.blueprint.nrOfList.toString();
+                        String entryPos = widget.blueprint.nrEntryPosition.toString();
+                        while(listNr.length<4){
+                          listNr = "0$listNr";
+                        }
+                        while(entryPos.length<4){
+                          entryPos = "0$entryPos";
+                        }
+
+                        // if(networkService.isOnline){
+                        //   // todo save photo online if we are online
+                        //   String filePathFirebase = "${widget.userUID}/$listNr${entryPos}photoValidate";
+                        //   String photoFilePath = await databaseImageService.addImageToFirebase(filePathFirebase);
+                        // }
+
+                        Directory tempDir = await getApplicationDocumentsDirectory();
+                        final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
+                        if (imageGalery != null){
+                          final bytes = await imageGalery!.readAsBytes();
+                          await fileTemp.writeAsBytes(bytes);
+                          print("photo path: ${fileTemp.path}");
+                        }
                         if (mounted) {
                           setState(() {
-                            widget.validate.photoFilePath = photoFilePath;
+                            widget.validate.photoFilePath = fileTemp.path;
                           });
                         }
                       } catch (e) {

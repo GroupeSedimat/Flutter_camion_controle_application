@@ -15,7 +15,7 @@ class PdfDownload {
     try {
       if(name == "temp"){
         //save in app directory if its temp docs
-        Directory appDocDir = await getTemporaryDirectory();
+        Directory appDocDir = await getApplicationDocumentsDirectory();
         savePath = "${appDocDir.path}/$name.pdf";
         deleteFile(File(savePath));
       }else{
@@ -53,7 +53,6 @@ class PdfDownload {
         }
       }else {
         print("No write permissions!");
-        openAppSettings();
       }
     } else if (Platform.isIOS) {
       Directory? appDocDir = await getApplicationDocumentsDirectory();

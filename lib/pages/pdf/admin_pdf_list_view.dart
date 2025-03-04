@@ -36,9 +36,6 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
   late NetworkService networkService;
   late DatabasePDFService databasePDFService;
 
-  /// TODO repair saving PDFs
-  /// todo repair loading view and showing files
-
   @override
   void initState() {
     super.initState();
@@ -125,6 +122,8 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("💽 Synchronizing Companies...");
       await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      print("💽 Synchronizing PDFs...");
+      await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during global data synchronization: $e");

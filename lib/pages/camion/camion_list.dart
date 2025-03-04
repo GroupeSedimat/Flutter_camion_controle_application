@@ -167,6 +167,8 @@ class _CamionListState extends State<CamionList> {
           }
         }
       }
+      print("💽 Synchronizing PDFs...");
+      await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during global data synchronization: $e");

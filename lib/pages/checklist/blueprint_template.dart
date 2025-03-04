@@ -12,7 +12,7 @@ class BlueprintTemplate extends StatelessWidget{
   final String role;
   bool? isDone;
   BlueprintTemplate({super.key,  required this.blueprint, required this.delete, required this.edit, required this.validate, required this.restore, required this.role, this.isDone });
-/// TODO dodac dodawanie/edycje/wywalanie zdjec z galerii/aparatu
+/// TODO add adding/editing/deleting photos from gallery/camera
   @override
   Widget build(BuildContext context){
     String isDeleted = "";

@@ -36,8 +36,6 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
   late UserService userService;
   late NetworkService networkService;
 
-  /// todo repair delete/restore List
-
   @override
   void initState() {
     super.initState();

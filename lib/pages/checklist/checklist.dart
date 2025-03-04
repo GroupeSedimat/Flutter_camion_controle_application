@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -24,6 +26,8 @@ import 'package:flutter_application_1/services/database_firestore/user_service.d
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:open_document/open_document.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -167,6 +171,8 @@ class _CheckListState extends State<CheckList> {
       await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
       print("💽 Synchronizing Validate Tasks...");
       await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
+      print("💽 Synchronizing PDFs...");
+      await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during global data synchronization: $e");
@@ -184,13 +190,17 @@ class _CheckListState extends State<CheckList> {
     Map<String, Blueprint>? blueprints = await getAllBlueprints(db, _user.role);
     if(blueprints != null){
       _blueprints = blueprints;
+    }else{
+      _blueprints = {};
     }
   }
 
   Future<void> _loadTasks() async {
     Map<String, TaskChecklist>? tasks = await getAllTasksOfUser(db, _userId);
     if(tasks != null){
-        _tasks = tasks;
+      _tasks = tasks;
+    }else{
+      _tasks = {};
     }
   }
 
@@ -199,6 +209,8 @@ class _CheckListState extends State<CheckList> {
       Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db, _user.role);
       if(listOfListsFuture != null){
         _listOfLists = listOfListsFuture;
+      }else{
+        _listOfLists = {};
       }
     } catch (e) {
       print("Error loading list of lists: $e");
@@ -331,9 +343,28 @@ class _CheckListState extends State<CheckList> {
   }
 
   Future<void> deleteOneTasksListForUser(int listNr, String userUID) async {
-    List<String> validatedTask = await getUserOneListOfTasks(db, userUID, listNr);
-    for (String taskID in validatedTask) {
-      await deleteTask(db, taskID);
+    Map<String, TaskChecklist> validatedTask = await getUserOneListOfTasks(db, userUID, listNr);
+    for (var task in validatedTask.entries) {
+      try {
+        await deleteTask(db, task.key);
+        Directory tempDir = await getApplicationDocumentsDirectory();
+        String listNr = task.value.nrOfList.toString();
+        String entryPos = task.value.nrEntryPosition.toString();
+        while(listNr.length<4){
+          listNr = "0$listNr";
+        }
+        while(entryPos.length<4){
+          entryPos = "0$entryPos";
+        }
+        final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
+        if (await fileTemp.exists()) {
+          await fileTemp.delete();
+        }
+
+        print("The file with the path ${fileTemp.path} and name $listNr${entryPos}photoValidate.jpeg has been deleted.");
+      } catch (e) {
+        print("Error deleting file: $e");
+      }
     }
     setState(() {});
   }
@@ -460,18 +491,21 @@ class _CheckListState extends State<CheckList> {
                       _blueprints,
                       list,
                     );
-                    await pdfService.savePdfFile(
+                    String filePath = await pdfService.savePdfFile(
                       _user.company,
                       pdfData,
                       _user,
                       _userId,
-                      () => deleteOneTasksListForUser(list.listNr, _userId),
+                      () async {
+                        await deleteOneTasksListForUser(list.listNr, _userId);
+                        if (networkService.isOnline) {
+                          await _syncTasks();
+                        }
+                        await _loadTasks();
+                      },
                     );
-                    if (networkService.isOnline) {
-                      await _syncBlueprints();
-                    }
-                    await _loadDataFromDatabase();
-                    setState(() {});
+                    setState((){});
+                    OpenDocument.openDocument(filePath: filePath);
                   },
                   backgroundColor: Colors.red,
                   child: Row(
@@ -528,6 +562,18 @@ class _CheckListState extends State<CheckList> {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Blueprints...");
       await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during global data synchronization: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> _syncTasks() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Tasks...");
+      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during global data synchronization: $e");

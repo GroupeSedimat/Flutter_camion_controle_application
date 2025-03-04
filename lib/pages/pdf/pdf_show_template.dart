@@ -93,13 +93,13 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: () {
-                        PdfDownload(
+                      onPressed: () async {
+                        await PdfDownload(
                           name: "${widget.user.username}.${widget.fileName}",
                           url: widget.url
                         )
                           .downloadFile();
-                        showDialog(
+                        await showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text(AppLocalizations.of(context)!.download),

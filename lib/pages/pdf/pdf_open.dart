@@ -13,7 +13,7 @@ class PDFOpen {
 
   // Download and open PDF from URL path
   Future<void> openPDF() async {
-    Directory tempDir = await getTemporaryDirectory();
+    Directory tempDir = await getApplicationDocumentsDirectory();
     String filePath = path.join(tempDir.path, "temp.pdf");
 
     // Download PDF to temporary directory

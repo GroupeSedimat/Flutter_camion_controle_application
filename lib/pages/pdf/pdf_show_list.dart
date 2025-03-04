@@ -119,6 +119,8 @@ class _PDFShowListState extends State<PDFShowList> {
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("💽 Synchronizing Companies...");
       await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      print("💽 Synchronizing PDFs...");
+      await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during global data synchronization: $e");
@@ -133,7 +135,6 @@ class _PDFShowListState extends State<PDFShowList> {
   }
 
   Future<void> _loadPdfs() async {
-    /// todo pdf firebase to local?
     DatabasePDFService databasePDFService = DatabasePDFService();
     pdfList =  await databasePDFService.getUserListOfPDF(_user.company, _userId);
   }
