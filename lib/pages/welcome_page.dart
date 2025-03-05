@@ -135,6 +135,7 @@ class WelcomePage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                //Données statiques: pas de vraies données , données réelles à récupérer plutard avec la bd
                 _buildStatItem(
                     context, AppLocalizations.of(context)!.activeTrucks, "15"),
                 _buildStatItem(context,

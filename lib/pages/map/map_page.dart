@@ -20,11 +20,17 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  // Position actuelle de l'utilisateur
   Position? _currentPosition;
+  // Position par défaut si la géolocalisation échoue
   final LatLng _defaultLocation = LatLng(45.17118, 5.68718);
+  // Message d'erreur si besoin
   String? _errorMessage;
+  // Niveau de zoom initial de la carte
   double _zoomLevel = 14.0;
+// Mode sombre ou clair
   bool _isDarkMode = false;
+// Contrôleur de la carte
   MapController _mapController = MapController();
 
   @override
@@ -33,15 +39,17 @@ class _MapPageState extends State<MapPage> {
     _initialize();
   }
 
+// Initialisation de Firebase et récupération de la position
   Future<void> _initialize() async {
     await Firebase.initializeApp();
     await _getCurrentLocation();
   }
 
+// Récupère la position actuelle de l'utilisateur
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
-
+    // Vérifie si les services de localisation sont activés
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       _showLocationServiceDisabledDialog();
@@ -52,7 +60,7 @@ class _MapPageState extends State<MapPage> {
       _setDefaultLocation();
       return;
     }
-
+    // Demande la permission de localisation
     permission = await Geolocator.requestPermission();
     print("Permission demandée: $permission");
 
@@ -73,7 +81,7 @@ class _MapPageState extends State<MapPage> {
       openAppSettings();
       return;
     }
-
+    // Récupère la position actuelle si les permissions sont accordées
     try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.best,
@@ -91,6 +99,7 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+// Affiche une boîte de dialogue si les services de localisation sont désactivés
   void _showLocationServiceDisabledDialog() {
     showDialog(
       context: context,
@@ -112,6 +121,7 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
+// Définit la position par défaut en cas d'erreur de localisation
   void _setDefaultLocation() {
     _currentPosition = Position(
       latitude: _defaultLocation.latitude,
@@ -144,15 +154,18 @@ class _MapPageState extends State<MapPage> {
           },
         ),
       ),
+      // Si la position n'est pas encore récupérée, affiche un indicateur de chargement
       body: _currentPosition == null
           ? Center(child: CircularProgressIndicator())
           : _buildMap(),
     );
   }
+// Construit la carte avec les marqueurs de camions
 
   Widget _buildMap() {
     return Stack(
       children: [
+        // Écoute les mises à jour de la collection "camion" dans Firestore
         StreamBuilder(
           stream: FirebaseFirestore.instance.collection('camion').snapshots(),
           builder: (context, snapshot) {
