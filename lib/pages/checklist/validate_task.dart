@@ -36,7 +36,9 @@ class ValidateTaskState extends State<ValidateTask> {
   final _formKey = GlobalKey<FormState>();
   NetworkService networkService = NetworkService();
   File? imageGalery;
+  late Directory tempDir;
   late Database db;
+  bool _isInitialized = false;
 
   final PickImageService _pickImageService = PickImageService();
 
@@ -48,6 +50,10 @@ class ValidateTaskState extends State<ValidateTask> {
 
   Future<void> _initDatabase() async {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+    tempDir = await getApplicationDocumentsDirectory();
+    setState(() {
+      _isInitialized = true;
+    });
   }
 
   Future pickImageFromGallery() async {
@@ -66,6 +72,9 @@ class ValidateTaskState extends State<ValidateTask> {
   
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return Center(child: CircularProgressIndicator());
+    }
     Size screenSize = MediaQuery.of(context).size;
     double screenWidth = screenSize.width;
     double screenHeight = screenSize.height;
@@ -77,7 +86,7 @@ class ValidateTaskState extends State<ValidateTask> {
               widget.blueprint.title,
               style: TextStyle(
                   backgroundColor: Colors.white,
-                  fontSize: screenWidth * 0.08,
+                  fontSize: 35,
                   color: Colors.green,
                   letterSpacing: 4,
                   fontWeight: FontWeight.bold
@@ -88,10 +97,26 @@ class ValidateTaskState extends State<ValidateTask> {
               widget.blueprint.description,
               style: TextStyle(
                 backgroundColor: Colors.white,
-                fontSize: screenWidth * 0.05,
+                fontSize: 26,
                 color: Colors.grey,
               ),
             ),
+            const SizedBox(height: 20),
+            if (widget.blueprint.photoFilePath != null && widget.blueprint.photoFilePath!.isNotEmpty)
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: widget.blueprint.photoFilePath!.map((path) {
+                  return Center(
+                    child: Image.file(
+                      File("${tempDir.path}/$path"),
+                      width: screenWidth * 0.3,
+                      // height: 250,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                }).toList(),
+              ),
             const SizedBox(height: 20),
             TextFormField(
               initialValue: widget.validate.descriptionOfProblem,
@@ -138,7 +163,7 @@ class ValidateTaskState extends State<ValidateTask> {
                 ? Image.file(imageGalery!)
                 :(
                   (widget.validate.photoFilePath != null && File(widget.validate.photoFilePath!).existsSync() )
-                    ? Image.file(File(widget.validate.photoFilePath!))
+                    ? Image.file(File("${tempDir.path}/${widget.validate.photoFilePath!}"))
                     : Text(AppLocalizations.of(context)!.photoNotYet, style: TextStyle(fontSize: screenWidth * 0.03,),)
                 ),
             ),
@@ -207,14 +232,8 @@ class ValidateTaskState extends State<ValidateTask> {
                     widget.validate.updatedAt = DateTime.now();
                     if (imageGalery != null) {
                       try {
-                        String listNr = widget.blueprint.nrOfList.toString();
-                        String entryPos = widget.blueprint.nrEntryPosition.toString();
-                        while(listNr.length<4){
-                          listNr = "0$listNr";
-                        }
-                        while(entryPos.length<4){
-                          entryPos = "0$entryPos";
-                        }
+                        String listNr = widget.blueprint.nrOfList.toString().padLeft(4, '0');
+                        String entryPos = widget.blueprint.nrEntryPosition.toString().padLeft(4, '0');
 
                         // if(networkService.isOnline){
                         //   // todo save photo online if we are online
@@ -222,7 +241,6 @@ class ValidateTaskState extends State<ValidateTask> {
                         //   String photoFilePath = await databaseImageService.addImageToFirebase(filePathFirebase);
                         // }
 
-                        Directory tempDir = await getApplicationDocumentsDirectory();
                         final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
                         if (imageGalery != null){
                           final bytes = await imageGalery!.readAsBytes();

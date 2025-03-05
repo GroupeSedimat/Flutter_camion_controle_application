@@ -23,6 +23,7 @@ Future<void> createTableBlueprints(Database db) async {
 }
 
 Future<void> insertBlueprint(dynamic dbOrTxn, Blueprint blueprint, String firebaseId) async {
+  print("insert blueprint");
   try{
     await dbOrTxn.insert(
         tableName,
@@ -34,6 +35,7 @@ Future<void> insertBlueprint(dynamic dbOrTxn, Blueprint blueprint, String fireba
 }
 
 Future<void> updateBlueprint(dynamic dbOrTxn, Blueprint blueprint, String firebaseId) async {
+  print("update blueprint");
   try{
     await dbOrTxn.update(
         tableName,
@@ -103,6 +105,7 @@ Future<void> restoreBlueprints(Database db, String firebaseId) async {
 }
 
 Future<Map<String,Blueprint>?> getAllBlueprints(Database db, String role) async {
+  print("getAllBlueprints");
   Map<String, Blueprint> blueprints = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -123,6 +126,7 @@ Future<Map<String,Blueprint>?> getAllBlueprints(Database db, String role) async 
 }
 
 Future<Map<String,Blueprint>?> getAllBlueprintsSinceLastUpdate(dynamic dbOrTxn, String lastUpdated, String timeSync) async {
+  print("getAllBlueprintsSinceLastUpdate");
   Map<String, Blueprint> blueprints = {};
   try {
     final List<Map<String, dynamic>> maps = await dbOrTxn.query(
@@ -185,11 +189,14 @@ Future<Blueprint?> getOneBlueprintWithID(dynamic dbOrTxn, String blueprintID) as
 }
 
 Map<String, dynamic> blueprintToMap(Blueprint blueprint, {String? firebaseId}) {
+  print("blueprintToMap");
   return {
     'id': firebaseId,
     'title': blueprint.title,
     'description': blueprint.description,
-    'photoFilePath': blueprint.photoFilePath,
+    'photoFilePath': (blueprint.photoFilePath != null && blueprint.photoFilePath != [] )
+        ? jsonEncode(blueprint.photoFilePath!.map((e) => e).toList())
+        : null,
     'nrOfList': blueprint.nrOfList,
     'nrEntryPosition': blueprint.nrEntryPosition,
     'createdAt': blueprint.createdAt.toIso8601String(),
@@ -199,10 +206,13 @@ Map<String, dynamic> blueprintToMap(Blueprint blueprint, {String? firebaseId}) {
 }
 
 Blueprint responseItemToBlueprint(var blueprintItem){
+  print("responseItemToBlueprint");
   return Blueprint(
     title: blueprintItem["title"] as String,
     description: blueprintItem["description"] as String,
-    photoFilePath: blueprintItem["photoFilePath"] != null ?  blueprintItem['photoFilePath'] as String : null,
+    photoFilePath: blueprintItem["photoFilePath"] != null
+        ? dataInJsonToList(blueprintItem["photoFilePath"] as String)
+        : null,
     nrOfList: blueprintItem["nrOfList"] as int,
     nrEntryPosition: blueprintItem["nrEntryPosition"] as int,
     createdAt: DateTime.parse(blueprintItem["createdAt"] as String),

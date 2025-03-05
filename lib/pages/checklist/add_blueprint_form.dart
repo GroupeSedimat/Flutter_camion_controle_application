@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/check_list/blueprints_table.dart';
+import 'package:flutter_application_1/services/pick_image_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -31,10 +35,14 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _photoFilePathController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
+  late Directory appDocDir;
+  List<String> _photoFilePaths = [];
+  int photoCounter = 1;
+  File? imageGalery;
   String pageTile = "";
 
+  late PickImageService _pickImageService;
   late Database db;
 
   @override
@@ -45,6 +53,7 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
 
   Future<void> _initializeData() async {
     await _initDatabase();
+    await _initService();
     if (widget.blueprint != null) {
       _populateFieldsWithEquipmentData();
     }
@@ -54,20 +63,68 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
+  Future<void> _initService() async {
+    _pickImageService = PickImageService();
+    appDocDir = await getApplicationDocumentsDirectory();
+  }
+
   void _populateFieldsWithEquipmentData() {
+    List<String> tempPhotoPath = widget.blueprint!.photoFilePath ?? [];
+
     _titleController.text = widget.blueprint!.title;
     _descriptionController.text = widget.blueprint!.description;
-    _photoFilePathController.text = widget.blueprint!.photoFilePath ?? '';
+
+
     _quantityController.text = widget.blueprint!.nrEntryPosition.toString();
+
+    setState(() {
+      _photoFilePaths = tempPhotoPath;
+    });
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _photoFilePathController.dispose();
     _quantityController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAndSavePhoto() async {
+    final image = await _pickImageService.pickImageFromCamera();
+    if (image != null) {
+      try {
+        String listNr = widget.nrOfList.toString().padLeft(4, '0');
+        String entryPos = widget.nrEntryPosition.toString().padLeft(4, '0');
+        String fileName = "$listNr${entryPos}photoBlueprint$photoCounter.jpeg";
+        final fileTemp = File("${appDocDir.path}/$fileName");
+        final bytes = await image.readAsBytes();
+        await fileTemp.writeAsBytes(bytes);
+        print("Photo saved: ${fileTemp.path}");
+        setState(() {
+          _photoFilePaths.add(fileName);
+          photoCounter++;
+        });
+      } catch (e) {
+        print("Photo saving error: $e");
+      }
+    }
+  }
+
+  Future<void> _removePhotoAt(int index) async {
+    try {
+      String path = _photoFilePaths[index];
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+        print("Photo deleted: $path");
+      }
+      setState(() {
+        _photoFilePaths.removeAt(index);
+      });
+    } catch (e) {
+      print("Error deleting photo: $e");
+    }
   }
 
   @override
@@ -136,21 +193,35 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
           ),
 
           const SizedBox(height: 20),
-          TextFormField(
-            controller: _photoFilePathController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.photoAdd,
-              labelText: AppLocalizations.of(context)!.photoAdd,
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: const OutlineInputBorder(gapPadding: 15),
-              border: const OutlineInputBorder(gapPadding: 5),
-            ),
+          TextButton(
+            onPressed: _pickAndSavePhoto,
+            child: Text(AppLocalizations.of(context)!.photoMake),
           ),
+          const SizedBox(height: 20),
+          if (_photoFilePaths.isNotEmpty)
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: _photoFilePaths.asMap().entries.map((entry) {
+                int index = entry.key;
+                String path = "${appDocDir.path}/${entry.value}";
+                return Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    Image.file(
+                      File(path),
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _removePhotoAt(index),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
 
           const SizedBox(height: 20),
           Text(
@@ -189,7 +260,7 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
                   Blueprint newBlueprint = Blueprint(
                     title: _titleController.text,
                     description: _descriptionController.text,
-                    photoFilePath: _photoFilePathController.text,
+                    photoFilePath: _photoFilePaths,
                     nrOfList: widget.nrOfList,
                     nrEntryPosition: widget.nrEntryPosition,
                     createdAt: dateCreation,
@@ -200,7 +271,7 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
                   } else {
                     updateBlueprint(db, newBlueprint, widget.blueprintID!);
                   }
-                  if (widget.onBlueprintAdded != null) {
+                  if (mounted && widget.onBlueprintAdded != null) {
                     widget.onBlueprintAdded!();
                   }
                 }

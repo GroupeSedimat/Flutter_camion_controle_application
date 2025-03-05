@@ -7,6 +7,7 @@ import 'package:flutter_application_1/models/company/company.dart';
 import 'package:flutter_application_1/models/equipment/equipment.dart';
 import 'package:flutter_application_1/models/database_local/table_sync_info.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/services/database_firestore/check_list/database_image_service.dart';
 import 'package:flutter_application_1/services/database_firestore/database_company_service.dart';
 import 'package:flutter_application_1/services/database_firestore/check_list/database_blueprints_service.dart';
 import 'package:flutter_application_1/services/database_firestore/check_list/database_list_of_lists_service.dart';
@@ -27,6 +28,8 @@ import 'package:flutter_application_1/services/dialog_services.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';
+import 'package:open_document/my_files/init.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class SyncService {
@@ -640,8 +643,9 @@ class SyncService {
           /// sync Blueprints DB
           /// get data from firebase about blueprints and write it do db local
           /// user need to be connected
-          /// todo add blueprints for camion/s, or all depend on role and list
           List<Map<String, dynamic>> conflicts = [];
+          Directory appDocDir = await getApplicationDocumentsDirectory();
+          DatabaseImageService databaseImageService = DatabaseImageService();
           await db.transaction((txn) async {
             print("----------- sync service From Firebase Blueprints");
             final Map<String, Blueprint> firebaseBlueprints = await firebaseBlueprintService.getAllBlueprintsSinceLastSync(lastSync);
@@ -652,6 +656,17 @@ class SyncService {
               final Blueprint? localBlueprint = localBlueprintsTypes?[firebaseBlueprint.key];
               if (localBlueprint == null) {
                 await insertBlueprint(txn, firebaseBlueprint.value, firebaseBlueprint.key);
+                for (String imageName in firebaseBlueprint.value.photoFilePath!) {
+                  Uint8List? imageData = await databaseImageService.downloadBlueprintImageFromFirebase(imageName);
+
+                  if (imageData != null) {
+                    File localImageFile = File("${appDocDir.path}/$imageName");
+                    await localImageFile.writeAsBytes(imageData);
+                    print("Saved photo: ${localImageFile.path}");
+                  } else {
+                    print("Failed to load photo: $imageName");
+                  }
+                }
               } else {
                 if(!firebaseBlueprint.value.updatedAt.isAtSameMomentAs(localBlueprint.updatedAt)){
                   conflicts.add({
@@ -946,7 +961,7 @@ class SyncService {
       /// user - cant update
       /// add clear data?
         print("-----------sync service To Firebase Blueprints start");
-
+        DatabaseImageService databaseImageService = DatabaseImageService();
         TableSyncInfo? lastUpdatedDatas = await getOneWithName(db, tableName);
         String lastUpdated = lastUpdatedDatas?.lastLocalUpdate ?? "";
         if (lastUpdated == ""){
@@ -960,9 +975,16 @@ class SyncService {
             if(blueprint.key == ""){
               blueprint.value.updatedAt = DateTime.parse(timeSync);
               String newID = await firebaseBlueprintService.addBlueprint(blueprint.value);
-              await updateBlueprint(db, blueprint.value, newID);
+              print("new blueprint id: $newID");
+              await updateBlueprintFirebaseID(db, blueprint.value, newID);
             }else{
               await firebaseBlueprintService.updateBlueprint(blueprint.key, blueprint.value);
+            }
+            if(blueprint.value.photoFilePath!=null){
+              for(String path in blueprint.value.photoFilePath!){
+                Directory appDocDir = await getApplicationDocumentsDirectory();
+                databaseImageService.addBlueprintImageToFirebase(appDocDir.path, path);
+              }
             }
           }
         }

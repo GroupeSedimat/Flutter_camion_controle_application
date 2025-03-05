@@ -51,14 +51,8 @@ class PdfService {
         if (blueprint.nrEntryPosition == task.nrEntryPosition && blueprint.nrOfList == list.listNr && task.nrOfList == list.listNr){
           blueprintTaskList.addAll({blueprint: task});
           if(task.photoFilePath != "" && task.photoFilePath != null){
-            String listNr = task.nrOfList.toString();
-            String entryPos = task.nrEntryPosition.toString();
-            while(listNr.length<4){
-              listNr = "0$listNr";
-            }
-            while(entryPos.length<4){
-              entryPos = "0$entryPos";
-            }
+            String listNr = task.nrOfList.toString().padLeft(4, '0');
+            String entryPos = task.nrEntryPosition.toString().padLeft(4, '0');
             Directory tempDir = await getApplicationDocumentsDirectory();
             final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
             if (await fileTemp.exists()) {

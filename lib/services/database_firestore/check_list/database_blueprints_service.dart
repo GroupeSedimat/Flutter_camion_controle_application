@@ -32,7 +32,7 @@ class DatabaseBlueprintsService{
       }
       return blueprints;
     } catch (e) {
-      print("Error fetching ListOfLists since last update data: $e");
+      print("Error fetching Blueprints since last update data: $e");
       rethrow;
     }
   }

@@ -348,14 +348,8 @@ class _CheckListState extends State<CheckList> {
       try {
         await deleteTask(db, task.key);
         Directory tempDir = await getApplicationDocumentsDirectory();
-        String listNr = task.value.nrOfList.toString();
-        String entryPos = task.value.nrEntryPosition.toString();
-        while(listNr.length<4){
-          listNr = "0$listNr";
-        }
-        while(entryPos.length<4){
-          entryPos = "0$entryPos";
-        }
+        String listNr = task.value.nrOfList.toString().padLeft(4, '0');
+        String entryPos = task.value.nrEntryPosition.toString().padLeft(4, '0');
         final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
         if (await fileTemp.exists()) {
           await fileTemp.delete();

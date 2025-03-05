@@ -1,7 +1,7 @@
 class Blueprint {
   String title;
   String description;
-  String? photoFilePath; /// todo make List<String> and stock multiple photos in tel an firestore?
+  List<String>? photoFilePath;
   int nrOfList;
   int nrEntryPosition;
   DateTime createdAt;
@@ -22,7 +22,11 @@ class Blueprint {
   Blueprint.fromJson(Map<String, Object?> json): this (
     title: json['title']! as String,
     description: json['description']! as String,
-    photoFilePath: json['photoFilePath'] != null ? json['photoFilePath'] as String : null,
+    photoFilePath: json['photoFilePath'] != null
+        ? (json['photoFilePath'] as List<dynamic>)
+        .map((item) => item as String)
+        .toList()
+        : null,
     nrOfList: json['nrOfList']! as int,
     nrEntryPosition: json['nrEntryPosition']! as int,
     createdAt: DateTime.parse(json['createdAt'] as String),
@@ -35,7 +39,7 @@ class Blueprint {
   Blueprint copyWith({
     String? title,
     String? description,
-    String? photoFilePath,
+    List<String>? photoFilePath,
     int? nrOfList,
     int? nrEntryPosition,
     DateTime? createdAt,
@@ -63,7 +67,7 @@ class Blueprint {
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
       };
-      if (photoFilePath != null) json['photoFilePath'] = photoFilePath;
+      if (photoFilePath != null) json['photoFilePath'] = photoFilePath!.map((item) => item).toList();
       if (deletedAt != null) json['deletedAt'] = deletedAt!.toIso8601String();
       return json;
     }
