@@ -53,7 +53,7 @@ class PdfService {
           if(task.photoFilePath != "" && task.photoFilePath != null){
             String listNr = task.nrOfList.toString().padLeft(4, '0');
             String entryPos = task.nrEntryPosition.toString().padLeft(4, '0');
-            Directory tempDir = await getApplicationDocumentsDirectory();
+            Directory tempDir = await getApplicationSupportDirectory();
             final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
             if (await fileTemp.exists()) {
               Uint8List photoBytes = await fileTemp.readAsBytes();
@@ -317,8 +317,9 @@ class PdfService {
   Future<String> savePdfFile(String companyID, Uint8List data, MyUser user, String userId, Future<void> Function() deleteOneTaskListOfUser) async {
     int time = DateTime.now().millisecondsSinceEpoch;
     String fileName = "${user.username}.${time.toString()}";
+    Directory tempDir = await getApplicationSupportDirectory();
     // String documentsPath = await getDocumentsPath();
-    String documentsPath = "/storage/emulated/0/Documents/camion_appli";
+    String documentsPath = tempDir.path;
     String filePath = "$documentsPath/$fileName.pdf";
     String filePathDatabase = "${user.company}/$userId/${time.toString()}";
     final directory = Directory(documentsPath);
@@ -334,7 +335,6 @@ class PdfService {
       await databasePDFService.addPdfToFirebase(filePath, filePathDatabase);
     }else{
       /// if not, I'll save it on phone and synchronize it later
-      Directory tempDir = await getApplicationDocumentsDirectory();
       print("temp directory ${tempDir.path}");
       final fileTemp = File("${tempDir.path}/$userId.${time.toString()}.pdf");
       await fileTemp.writeAsBytes(data);
@@ -374,7 +374,7 @@ class PdfService {
         await downloadDir.create(recursive: true);
       }
     } else if (Platform.isIOS) {
-      Directory appDocDir = await getApplicationDocumentsDirectory();
+      Directory appDocDir = await getApplicationSupportDirectory();
       documentsPath = appDocDir.path;
     } else {
       throw Exception("Unsupported platform");
@@ -383,10 +383,11 @@ class PdfService {
   }
 
   Future<void> uploadAllTemporaryPDFs(MyUser user, String userId) async {
-    Directory tempDir = await getApplicationDocumentsDirectory();
+    Directory tempDir = await getApplicationSupportDirectory();
     String pdfDirPath = tempDir.path;
     Directory pdfDir = Directory(pdfDirPath);
 
+    print("uploadAllTemporaryPDFs path: $pdfDirPath");
     if (!await pdfDir.exists()) {
       print("PDF catalog does not exist: $pdfDirPath");
       return;
@@ -395,8 +396,9 @@ class PdfService {
     List<FileSystemEntity> entities = await pdfDir.list().toList();
 
     for (FileSystemEntity entity in entities) {
-      if (entity is File && entity.path.endsWith('.pdf')) {
+      if (entity is File && entity.path.endsWith('.pdf') && !entity.path.endsWith("temp.pdf")) {
         String fullPath = entity.path;
+        print("uploadAllTemporaryPDFs $fullPath");
         // Extract the relative path from the temporary directory:
         String relativePath = fullPath.substring(tempDir.path.length + 1);
         // Remove the ".pdf" extension

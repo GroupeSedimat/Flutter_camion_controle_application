@@ -15,10 +15,13 @@ class PdfDownload {
     try {
       if(name == "temp"){
         //save in app directory if its temp docs
-        Directory appDocDir = await getApplicationDocumentsDirectory();
+        print("name == temp");
+        Directory appDocDir = await getApplicationSupportDirectory();
+        print("name == temp ${appDocDir.path}");
         savePath = "${appDocDir.path}/$name.pdf";
         deleteFile(File(savePath));
       }else{
+        print("name != temp");
         String downloadDirPath = await getDocumentsPath();
         savePath = "$downloadDirPath/$name.pdf";
         print(savePath);
@@ -27,6 +30,7 @@ class PdfDownload {
           return; 
         }
       }
+      print("savePath $savePath");
       await Dio().download(url, savePath);
     } catch (e) {
       print("Error downloading file: $e");
@@ -55,7 +59,7 @@ class PdfDownload {
         print("No write permissions!");
       }
     } else if (Platform.isIOS) {
-      Directory? appDocDir = await getApplicationDocumentsDirectory();
+      Directory? appDocDir = await getApplicationSupportDirectory();
       if (appDocDir == null) {
         throw Exception("Failed to get external directory");
       }

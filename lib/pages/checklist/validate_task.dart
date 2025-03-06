@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ValidateTask extends StatefulWidget {
-
+// todo saving offline validations does not work (they overwrite each other due to lack of id?)
   Blueprint blueprint;
   TaskChecklist validate;
   String keyId;
@@ -50,7 +50,7 @@ class ValidateTaskState extends State<ValidateTask> {
 
   Future<void> _initDatabase() async {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
-    tempDir = await getApplicationDocumentsDirectory();
+    tempDir = await getApplicationSupportDirectory();
     setState(() {
       _isInitialized = true;
     });

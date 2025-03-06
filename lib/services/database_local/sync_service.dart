@@ -55,7 +55,6 @@ class SyncService {
     try {
       print("🔛 Online mode, sync possible for table: $tableName 🔛");
       bool itsOk;
-      print("Sync data plus: 💾💾💾💾 $dataPlus");
       if(user!=null){
         if(dataPlus != null){
           itsOk = await syncFromFirebase(tableName, timeSync, user: user, userId: userId, dataPlus: dataPlus);
@@ -644,7 +643,7 @@ class SyncService {
           /// get data from firebase about blueprints and write it do db local
           /// user need to be connected
           List<Map<String, dynamic>> conflicts = [];
-          Directory appDocDir = await getApplicationDocumentsDirectory();
+          Directory appDocDir = await getApplicationSupportDirectory();
           DatabaseImageService databaseImageService = DatabaseImageService();
           await db.transaction((txn) async {
             print("----------- sync service From Firebase Blueprints");
@@ -660,6 +659,7 @@ class SyncService {
                   Uint8List? imageData = await databaseImageService.downloadBlueprintImageFromFirebase(imageName);
 
                   if (imageData != null) {
+                    print("sync blueprints photos: ${appDocDir.path}");
                     File localImageFile = File("${appDocDir.path}/$imageName");
                     await localImageFile.writeAsBytes(imageData);
                     print("Saved photo: ${localImageFile.path}");
@@ -982,7 +982,7 @@ class SyncService {
             }
             if(blueprint.value.photoFilePath!=null){
               for(String path in blueprint.value.photoFilePath!){
-                Directory appDocDir = await getApplicationDocumentsDirectory();
+                Directory appDocDir = await getApplicationSupportDirectory();
                 databaseImageService.addBlueprintImageToFirebase(appDocDir.path, path);
               }
             }
@@ -992,7 +992,7 @@ class SyncService {
         break;
       case "pdf":
       /// the file is initially saved in 2 places: in /Documents/camion_appli/ and in Firebase,
-      /// if it was saved offline, then instead of in Firebase it went to "getApplicationDocumentsDirectory()"
+      /// if it was saved offline, then instead of in Firebase it went to "getApplicationSupportDirectory()"
       /// and during synchronization it should be saved
         if(userId == null || user == null){
           print("no user or userId provided");

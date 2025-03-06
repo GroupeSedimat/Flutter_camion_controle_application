@@ -80,19 +80,14 @@ class _EquipmentListState extends State<EquipmentList> {
   }
 
   Future<void> _loadUserToConnection() async {
-    print("equipment user to connection firebase ☢☢☢☢☢☢☢");
     Map<String, MyUser>? users = await getThisUser(db);
-    print("users: $users");
     if(users != null ){
       return;
     }
     try {
       MyUser user = await userService.getCurrentUserData();
-      print("user ☢☢☢☢☢☢☢ $user");
       String? userId = await userService.userID;
-      print("userId ☢☢☢☢☢☢☢ $userId");
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("💽 Synchronizing Users...");
       await syncService.fullSyncTable("users", user: user, userId: userId);
     } catch (e) {
       print("💽 Error loading user: $e");
@@ -100,14 +95,10 @@ class _EquipmentListState extends State<EquipmentList> {
   }
 
   Future<void> _loadUser() async {
-    print("equipment list page local ☢☢☢☢☢☢☢");
     try {
       Map<String, MyUser>? users = await getThisUser(db);
-      print("connected as  $users");
       MyUser user = users!.values.first;
-      print("local user ☢☢☢☢☢☢☢ $user");
       String? userId = users.keys.first;
-      print("local userId ☢☢☢☢☢☢☢ $userId");
       _userId = userId;
       _user = user;
     } catch (e) {

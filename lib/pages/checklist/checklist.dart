@@ -98,19 +98,14 @@ class _CheckListState extends State<CheckList> {
   }
 
   Future<void> _loadUserToConnection() async {
-    print("welcome user to connection firebase ☢☢☢☢☢☢☢");
     Map<String, MyUser>? users = await getThisUser(db);
-    print("users: $users");
     if(users != null ){
       return;
     }
     try {
       MyUser user = await userService.getCurrentUserData();
-      print("user ☢☢☢☢☢☢☢ $user");
       String? userId = await userService.userID;
-      print("userId ☢☢☢☢☢☢☢ $userId");
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("💽 Synchronizing Users...");
       await syncService.fullSyncTable("users", user: user, userId: userId);
     } catch (e) {
       print("💽 Error loading user: $e");
@@ -118,14 +113,10 @@ class _CheckListState extends State<CheckList> {
   }
 
   Future<void> _loadUser() async {
-    print("welcome page local ☢☢☢☢☢☢☢");
     try {
       Map<String, MyUser>? users = await getThisUser(db);
-      print("connected as  $users");
       MyUser user = users!.values.first;
-      print("local user ☢☢☢☢☢☢☢ $user");
       String? userId = users.keys.first;
-      print("local userId ☢☢☢☢☢☢☢ $userId");
       _userId = userId;
       _user = user;
     } catch (e) {
@@ -347,7 +338,7 @@ class _CheckListState extends State<CheckList> {
     for (var task in validatedTask.entries) {
       try {
         await deleteTask(db, task.key);
-        Directory tempDir = await getApplicationDocumentsDirectory();
+        Directory tempDir = await getApplicationSupportDirectory();
         String listNr = task.value.nrOfList.toString().padLeft(4, '0');
         String entryPos = task.value.nrEntryPosition.toString().padLeft(4, '0');
         final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");

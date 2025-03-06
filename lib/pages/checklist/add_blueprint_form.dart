@@ -65,7 +65,7 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
 
   Future<void> _initService() async {
     _pickImageService = PickImageService();
-    appDocDir = await getApplicationDocumentsDirectory();
+    appDocDir = await getApplicationSupportDirectory();
   }
 
   void _populateFieldsWithEquipmentData() {

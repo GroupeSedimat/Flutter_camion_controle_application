@@ -77,7 +77,6 @@ class _WelcomePageState extends State<WelcomePage> {
     }
     try {
       MyUser user = await userService.getCurrentUserData();
-      print("user ☢☢☢☢☢☢☢ $user");
       String? userId = await userService.userID;
       print("userId ☢☢☢☢☢☢☢ $userId");
       final syncService = Provider.of<SyncService>(context, listen: false);

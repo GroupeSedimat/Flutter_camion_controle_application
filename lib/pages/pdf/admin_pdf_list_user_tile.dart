@@ -43,6 +43,8 @@ class _UserTileState extends State<UserTile> {
   Widget build(BuildContext context) {
     print("❗User Tile build ${widget.user.username}");
     print("❗${widget.userData}");
+    double listHeight = MediaQuery.of(context).size.height * 0.8;
+    double minHeight = 200;
     return ExpansionTile(
       backgroundColor: Colors.lightBlueAccent,
       collapsedBackgroundColor: Colors.lightBlue,
@@ -61,17 +63,18 @@ class _UserTileState extends State<UserTile> {
         ),
       ),
       children: [
-        ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: widget.userData.length,
-          padding: const EdgeInsets.all(16.0),
-          itemBuilder: (BuildContext context, int index){
-            final entry = widget.userData.entries.toList()[index];
-            final fileName = entry.key;
-            final url = entry.value;
-            return PDFShowTemplate(fileName: fileName, url: url, user: widget.user,);
-          },
+        SizedBox(
+          height: listHeight < minHeight ? minHeight : listHeight,
+          child: ListView.builder(
+            itemCount: widget.userData.length,
+            padding: const EdgeInsets.all(16.0),
+            itemBuilder: (BuildContext context, int index) {
+              final entry = widget.userData.entries.toList()[index];
+              final fileName = entry.key;
+              final url = entry.value;
+              return PDFShowTemplate(fileName: fileName, url: url, user: widget.user);
+            },
+          ),
         ),
       ],
     );

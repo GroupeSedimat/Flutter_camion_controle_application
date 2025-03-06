@@ -81,19 +81,14 @@ class _UserManagementPageState extends State<UserManagementPage> {
   }
 
   Future<void> _loadUserToConnection() async {
-    print("welcome user to connection firebase ☢☢☢☢☢☢☢");
     Map<String, MyUser>? users = await getThisUser(db);
-    print("users: $users");
     if(users != null ){
       return;
     }
     try {
       MyUser user = await userService.getCurrentUserData();
-      print("user ☢☢☢☢☢☢☢ $user");
       String? userId = await userService.userID;
-      print("userId ☢☢☢☢☢☢☢ $userId");
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("💽 Synchronizing Users...");
       await syncService.fullSyncTable("users", user: user, userId: userId);
     } catch (e) {
       print("💽 Error loading user: $e");
@@ -101,14 +96,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
   }
 
   Future<void> _loadUser() async {
-    print("equipment list page local ☢☢☢☢☢☢☢");
     try {
       Map<String, MyUser>? users = await getThisUser(db);
-      print("connected as  $users");
       MyUser user = users!.values.first;
-      print("local user ☢☢☢☢☢☢☢ $user");
       String? userId = users.keys.first;
-      print("local userId ☢☢☢☢☢☢☢ $userId");
       _userId = userId;
       _user = user;
     } catch (e) {
@@ -209,8 +200,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
               ),
             ),
             children: companyUsers.map((user) {
-              String userId = _allUsersMap.keys.firstWhere(
-                      (element) => _allUsersMap[element] == user);
+              MapEntry<String, MyUser> userEntry = _allUsersMap.entries.firstWhere(
+                      (element) => _allUsersMap[element.key] == user);
               String isDeleted = "";
               if(user.deletedAt != null){
                 isDeleted = " (deleted)";
@@ -242,19 +233,19 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     onSelected: (String value) {
                       switch (value) {
                         case 'view':
-                          Get.to(() => UserDetailsPage());
+                          Get.to(() => UserDetailsPage(userToShow: userEntry));
                           break;
                         case 'edit':
-                          Get.to(() => UserEditPage(userId: userId));
+                          Get.to(() => UserEditPage(userId: userEntry.key));
                           break;
                         case 'reset_password':
                           _resetPassword(user.email);
                           break;
                         case 'delete':
-                          _showDeleteConfirmation(userId);
+                          _showDeleteConfirmation(userEntry.key);
                           break;
                         case 'restore':
-                          _restoreUser(userId);
+                          _restoreUser(userEntry.key);
                           break;
                       }
                     },
