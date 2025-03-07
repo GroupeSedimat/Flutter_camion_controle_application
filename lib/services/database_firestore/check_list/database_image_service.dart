@@ -38,4 +38,26 @@ class DatabaseImageService{
     }
   }
 
+  Future<Null> addBlueprintImageToFirebase(String path, String imageName) async {
+    int listNr = int.parse(imageName.substring(0, imageName.length - 24));
+    int posNr = int.parse(imageName.substring(4, imageName.length - 20));
+    Reference referenceImageToUpload = _referenceImages.child("blueprints_images").child("list_$listNr").child(imageName);
+    try{
+      await referenceImageToUpload.putFile(File("$path/$imageName"));
+    }catch(e){
+      print('Error sending image to Firebase: $e');
+    }
+  }
+
+  Future<Uint8List?> downloadBlueprintImageFromFirebase(String imageName) async {
+    try {
+      int listNr = int.parse(imageName.substring(0, imageName.length - 24));
+      Reference imageRef = _referenceImages.child("blueprints_images").child("list_$listNr").child(imageName);
+      Uint8List? data = await imageRef.getData();
+      return data;
+    } catch (e) {
+      print('Error downloading image: $e');
+      return null;
+    }
+  }
 }

@@ -2,10 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/user/inscription_page.dart';
-import 'package:get/get.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'reset_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -18,6 +16,13 @@ class _LoginPagestate extends State<LoginPage> {
   var identifierController = TextEditingController(); 
   var passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+
+  @override
+  void dispose() {
+    identifierController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

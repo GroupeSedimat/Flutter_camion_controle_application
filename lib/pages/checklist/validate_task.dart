@@ -1,29 +1,32 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
-import 'package:flutter_application_1/services/check_list/database_image_service.dart';
-import 'package:flutter_application_1/services/check_list/database_tasks_service.dart';
+import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/pick_image_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ValidateTask extends StatefulWidget {
-
-  DatabaseTasksService databaseTasksService;
+// todo saving offline validations does not work (they overwrite each other due to lack of id?)
   Blueprint blueprint;
   TaskChecklist validate;
   String keyId;
   String userUID;
+  final VoidCallback? onValidateAdded;
 
   ValidateTask({
     super.key,
-    required this.databaseTasksService,
     required this.blueprint,
     required this.validate,
     required this.keyId,
-    required this.userUID});
+    required this.userUID,
+    this.onValidateAdded
+  });
 
   @override
   State<ValidateTask> createState() => ValidateTaskState();
@@ -31,27 +34,26 @@ class ValidateTask extends StatefulWidget {
 
 class ValidateTaskState extends State<ValidateTask> {
   final _formKey = GlobalKey<FormState>();
-  late String descriptionOfProblem;
-  String? photoFilePath;
-  bool? isDone;
-  Timestamp? validationDate;
-  TaskChecklist? task;
-  int? nrOfList;
-  int? nrEntryPosition;
+  NetworkService networkService = NetworkService();
   File? imageGalery;
-  double screenWidth = 50;
-  double screenHeight = 50;
+  late Directory tempDir;
+  late Database db;
+  bool _isInitialized = false;
 
   final PickImageService _pickImageService = PickImageService();
 
   @override
   void initState() {
     super.initState();
+    _initDatabase();
+  }
 
-    task = widget.validate;
-    descriptionOfProblem = task?.descriptionOfProblem ?? "";
-    photoFilePath = task?.photoFilePath ?? "";
-    isDone = task?.isDone;
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+    tempDir = await getApplicationSupportDirectory();
+    setState(() {
+      _isInitialized = true;
+    });
   }
 
   Future pickImageFromGallery() async {
@@ -70,11 +72,12 @@ class ValidateTaskState extends State<ValidateTask> {
   
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return Center(child: CircularProgressIndicator());
+    }
     Size screenSize = MediaQuery.of(context).size;
-    screenWidth = screenSize.width;
-    screenHeight = screenSize.height;
-    DatabaseImageService databaseImageService = DatabaseImageService();
-
+    double screenWidth = screenSize.width;
+    double screenHeight = screenSize.height;
     return Form(
         key: _formKey,
         child: ListView(
@@ -83,7 +86,7 @@ class ValidateTaskState extends State<ValidateTask> {
               widget.blueprint.title,
               style: TextStyle(
                   backgroundColor: Colors.white,
-                  fontSize: screenWidth * 0.08,
+                  fontSize: 35,
                   color: Colors.green,
                   letterSpacing: 4,
                   fontWeight: FontWeight.bold
@@ -94,13 +97,29 @@ class ValidateTaskState extends State<ValidateTask> {
               widget.blueprint.description,
               style: TextStyle(
                 backgroundColor: Colors.white,
-                fontSize: screenWidth * 0.05,
+                fontSize: 26,
                 color: Colors.grey,
               ),
             ),
             const SizedBox(height: 20),
+            if (widget.blueprint.photoFilePath != null && widget.blueprint.photoFilePath!.isNotEmpty)
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: widget.blueprint.photoFilePath!.map((path) {
+                  return Center(
+                    child: Image.file(
+                      File("${tempDir.path}/$path"),
+                      width: screenWidth * 0.3,
+                      // height: 250,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                }).toList(),
+              ),
+            const SizedBox(height: 20),
             TextFormField(
-              initialValue: task?.descriptionOfProblem,
+              initialValue: widget.validate.descriptionOfProblem,
               decoration: InputDecoration(
                 hintText: AppLocalizations.of(context)!.checkListDescribe,
                 labelText: AppLocalizations.of(context)!.checkListDescribe,
@@ -113,23 +132,22 @@ class ValidateTaskState extends State<ValidateTask> {
                 border: UnderlineInputBorder(),
               ),
               validator: (val) {return (val == null || val.isEmpty) ? AppLocalizations.of(context)!.required : null;},
-              onChanged: (val) => descriptionOfProblem = val,
+              onChanged: (val) => widget.validate.descriptionOfProblem = val,
             ),
             const SizedBox(height: 40),
 
             Transform.scale(
               scale: 5,                                                           // Change checkbox scale
               child: Checkbox(
-                value: task?.isDone,
+                value: widget.validate.isDone,
                 checkColor: Colors.red,
-                activeColor: (task?.isDone == true) ? Colors.green: Colors.grey ,
+                activeColor: (widget.validate.isDone == true) ? Colors.green: Colors.grey ,
                 side: const BorderSide(width: 3, color: Colors.red),
-                shape: (task?.isDone == true) ? const ContinuousRectangleBorder() : const CircleBorder(),
+                shape: (widget.validate.isDone == true) ? const ContinuousRectangleBorder() : const CircleBorder(),
                 tristate: true,
                 onChanged: (value) {
                   setState(() {
-                    isDone = value;
-                    task?.isDone = value;
+                    widget.validate.isDone = value;
                   });
                 },
               ),
@@ -141,11 +159,11 @@ class ValidateTaskState extends State<ValidateTask> {
                 maxWidth: screenWidth * 0.7,
                 maxHeight: screenHeight * 0.7,
               ),
-              child: imageGalery != null
+              child: (imageGalery != null && imageGalery!.existsSync())
                 ? Image.file(imageGalery!)
                 :(
-                  (photoFilePath != "" && photoFilePath != null)
-                    ? Image.network(photoFilePath!)
+                  (widget.validate.photoFilePath != null && File(widget.validate.photoFilePath!).existsSync() )
+                    ? Image.file(File("${tempDir.path}/${widget.validate.photoFilePath!}"))
                     : Text(AppLocalizations.of(context)!.photoNotYet, style: TextStyle(fontSize: screenWidth * 0.03,),)
                 ),
             ),
@@ -211,13 +229,27 @@ class ValidateTaskState extends State<ValidateTask> {
                     ),
                   ),
                   onPressed: () async {
-                    validationDate = Timestamp.now();
+                    widget.validate.updatedAt = DateTime.now();
                     if (imageGalery != null) {
                       try {
-                        String photoFilePath = await databaseImageService.addImageToFirebase(imageGalery!.path);
+                        String listNr = widget.blueprint.nrOfList.toString().padLeft(4, '0');
+                        String entryPos = widget.blueprint.nrEntryPosition.toString().padLeft(4, '0');
+
+                        // if(networkService.isOnline){
+                        //   // todo save photo online if we are online
+                        //   String filePathFirebase = "${widget.userUID}/$listNr${entryPos}photoValidate";
+                        //   String photoFilePath = await databaseImageService.addImageToFirebase(filePathFirebase);
+                        // }
+
+                        final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
+                        if (imageGalery != null){
+                          final bytes = await imageGalery!.readAsBytes();
+                          await fileTemp.writeAsBytes(bytes);
+                          print("photo path: ${fileTemp.path}");
+                        }
                         if (mounted) {
                           setState(() {
-                            this.photoFilePath = photoFilePath;
+                            widget.validate.photoFilePath = fileTemp.path;
                           });
                         }
                       } catch (e) {
@@ -225,23 +257,17 @@ class ValidateTaskState extends State<ValidateTask> {
                       }
                     }
 
-                    if(isDone!=true) isDone = false;
-                    TaskChecklist task = TaskChecklist(
-                        nrOfList: widget.blueprint.nrOfList,
-                        nrEntryPosition: widget.blueprint.nrEntryPosition,
-                        validationDate: validationDate,
-                        isDone: isDone,
-                        descriptionOfProblem: descriptionOfProblem,
-                        photoFilePath: photoFilePath,
-                        userId: widget.userUID
-                    );
+                    if(widget.validate.isDone!=true) widget.validate.isDone = false;
+                    widget.validate.userId = widget.userUID;
+                    widget.validate.nrOfList = widget.blueprint.nrOfList;
+                    widget.validate.nrEntryPosition = widget.blueprint.nrEntryPosition;
                     if(widget.keyId == ""){
-                      widget.databaseTasksService.addTask(task);
+                      insertTask(db, widget.validate, "");
                     }else{
-                      widget.databaseTasksService.updateTask(widget.keyId, task);
+                      updateTask(db, widget.validate, widget.keyId);
                     }
                     if (mounted) {
-                      Navigator.pop(context);
+                      widget.onValidateAdded?.call();
                     }
                   },
                 ),
@@ -257,6 +283,7 @@ class ValidateTaskState extends State<ValidateTask> {
                     ),
                   ),
                   onPressed: () async {
+                    setState(() {});
                     Navigator.pop(context);
                   },
                 ),

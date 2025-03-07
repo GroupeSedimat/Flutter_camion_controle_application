@@ -1,5 +1,3 @@
-// ignore_for_file: constant_identifier_names, avoid_print
-
 import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -44,7 +42,7 @@ Future<Map<String, Company>> getAllCompanies() async {
 
     } catch (e) {
       print("Error getting companies: $e");
-      rethrow; // Gérez l’erreur le cas échéant.
+      rethrow;
     }
   }
 
@@ -55,27 +53,24 @@ Future<Map<String, Company>> getAllCompanies() async {
 
       Map<String, String> companies = HashMap();
       for (var companySnapshot in companySnapshotList){
-        Company company = companySnapshot.data();
-        companies.addAll({companySnapshot.id: company.name});
+        companies[companySnapshot.id] = companySnapshot.data().name;
       }
       var sortedKeys = companies.keys.toList(growable: false)
-        ..sort((k1, k2) => companies[k1]!.compareTo(companies[k2]!));
+        ..sort((k1, k2) => companies[k1]!.toLowerCase().compareTo(companies[k2]!.toLowerCase()));
 
       LinkedHashMap<String, String> sortedCompanies = LinkedHashMap.fromIterable(
         sortedKeys,
         key: (k) => k,
         value: (k) => companies[k]!,
       );
-
       return sortedCompanies;
-
     } catch (e) {
         print("Error getting companies: $e");
-        rethrow; // Gérez l’erreur le cas échéant.
+        rethrow;
       }
   }
 
-  Future<Company> getOneCompanyByName(String name) async {
+  Future<Company?> getOneCompanyByName(String name) async {
     try {
       final querySnapshot = await _firestore
           .collection(COMPANY_COLLECTION_REF)
@@ -84,13 +79,29 @@ Future<Map<String, Company>> getAllCompanies() async {
       if (querySnapshot.docs.isNotEmpty) {
         return Company.fromJson(querySnapshot.docs.first.data());
       }else{
-        return Company(name: '', description: '', sirene: '', siret: '', address: '', responsible: '', admin: '', tel: '', email: '', logo: '');
+        return null;
       }
 
     } catch (error) {
-      // Gérez l’erreur
       print("Error retrieving company: $error");
-      return Company(name: '', description: '', sirene: '', siret: '', address: '', responsible: '', admin: '', tel: '', email: '', logo: '');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, Company>> getAllCompaniesSinceLastSync(String lastSync) async {
+    Query query = _companyRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, Company> companies = HashMap();
+      for (var doc in querySnapshot.docs) {
+        companies[doc.id] = doc.data() as Company;
+      }
+      return companies;
+    } catch (e) {
+      print("Error fetching Companies since last update data: $e");
+      rethrow;
     }
   }
 
@@ -113,7 +124,7 @@ Future<Map<String, Company>> getAllCompanies() async {
     }
   }
 
-  Future<Company> getCompanyByID(String id) async {
+  Future<Company?> getCompanyByID(String id) async {
     try {
       final querySnapshot = await _companyRef.doc(id).get();
       return querySnapshot.data() as Company;
@@ -121,20 +132,56 @@ Future<Map<String, Company>> getAllCompanies() async {
     } catch (error) {
       // Gérez l’erreur
       print("Error retrieving company ID: $error");
-      return Company(name: 'Error', description: '$error', sirene: '', siret: '', address: '', responsible: '', admin: '', tel: '', email: '', logo: '');
+      return null;
     }
   }
 
-  void addCompany(Company company) {
-    _companyRef.add(company);
+  Future<Map<String, Company>> getCompanyByIdSinceLastSync(String lastSync, String id) async {
+    Query query = _companyRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, Company> companies = HashMap();
+      for (var doc in querySnapshot.docs) {
+        if(doc.id == id){
+          companies[doc.id] = doc.data() as Company;
+        }
+      }
+      return companies;
+
+    } catch (error) {
+      print("Error fetching Company with id $id since last update data: $error");
+      rethrow;
+    }
   }
 
-  void updateCompany(String companyID, Company company) {
-    _companyRef.doc(companyID).update(company.toJson());
+  Future<String> addCompany(Company company) async {
+    var returnAdd = await _companyRef.add(company);
+    print("------------- ---------- ---------- database add company${returnAdd.id}");
+    return returnAdd.id;
+  }
+
+  Future<void> updateCompany(String companyID, Company company) async {
+    final data = company.toJson();
+    if(company.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _companyRef.doc(companyID).update(data);
   }
 
   Future<void> deleteCompany(String companyID) async {
     _companyRef.doc(companyID).delete();
+  }
+
+  Future<void> softDeleteCompany(String companyID) async {
+    try{
+      await _companyRef.doc(companyID).update({
+        'deletedAt': DateTime.now().toIso8601String(),
+      });
+      print("Company with ID $companyID not found for soft delete.");
+    }catch(e){
+      print("Error while trying soft deleting company with ID $companyID: $e");
+    }
   }
 
 }

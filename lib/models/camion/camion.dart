@@ -7,6 +7,9 @@ class Camion {
   String? status;
   String? location;
   String company;
+  DateTime createdAt;
+  DateTime updatedAt;
+  DateTime? deletedAt;
 
   Camion({
     required this.name,
@@ -17,18 +20,30 @@ class Camion {
     this.status,
     this.location,
     required this.company,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
   });
 
   // Constructor with Json
   Camion.fromJson(Map<String, Object?> json): this (
     name: json['name']! as String,
     camionType: json['camionType']! as String,
-    responsible: json['responsible']! as String,
-    checks: (json['checks']! as List<dynamic>?)?.map((date) => DateTime.parse(date as String)).toList(),
-    lastIntervention: json['lastIntervention']! as String,
-    status: json['status']! as String,
-    location: json['location']! as String,
+    responsible: json['responsible'] != null ? json['responsible'] as String : null,
+    checks: json['checks'] != null
+        ? (json['checks'] as List<dynamic>)
+        .map((date) => DateTime.parse(date as String))
+        .toList()
+        : null,
+    lastIntervention: json['lastIntervention'] != null ? json['lastIntervention'] as String : null,
+    status: json['status'] != null ? json['status'] as String : null,
+    location: json['location'] != null ? json['location'] as String : null,
     company: json['company']! as String,
+    createdAt: DateTime.parse(json['createdAt'] as String),
+    updatedAt: DateTime.parse(json['updatedAt'] as String),
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.parse(json['deletedAt'] as String)
+        : null,
   );
 
   Camion copyWith({
@@ -40,6 +55,9 @@ class Camion {
     String? status,
     String? location,
     String? company,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
   }) {
     return Camion(
       name: name ?? this.name,
@@ -50,19 +68,26 @@ class Camion {
       status: status ?? this.status,
       location: location ?? this.location,
       company: company ?? this.company,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 
   Map<String, Object?> toJson(){
-    return{
+    final Map<String, Object?> json = {
       'name': name,
       'camionType': camionType,
-      'responsible': responsible,
-      'checks': checks?.map((date) => date.toIso8601String()).toList(),
-      'lastIntervention': lastIntervention,
-      'status': status,
-      'location': location,
       'company': company,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
+    if (responsible != null) json['responsible'] = responsible;
+    if (checks != null) json['checks'] = checks!.map((date) => date.toIso8601String()).toList();
+    if (lastIntervention != null) json['lastIntervention'] = lastIntervention;
+    if (status != null) json['status'] = status;
+    if (location != null) json['location'] = location;
+    if (deletedAt != null) json['deletedAt'] = deletedAt!.toIso8601String();
+    return json;
   }
 }

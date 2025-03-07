@@ -1,8 +1,13 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/company/company.dart';
-import 'package:flutter_application_1/services/database_company_service.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/services/database_local/companies_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class InscriptionPage extends StatefulWidget {
   const InscriptionPage({Key? key}) : super(key: key);
@@ -12,6 +17,10 @@ class InscriptionPage extends StatefulWidget {
 }
 
 class _InscriptionPageState extends State<InscriptionPage> {
+
+  late Database db;
+  Map<String, String> _companyListNames = HashMap();
+
   late TextEditingController emailController;
   late TextEditingController nameController;
   late TextEditingController firstnameController;
@@ -21,7 +30,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
   String selectedRole = 'user';
   String? selectedCompany;
   String? errorMessage;
-  Future<Map<String, Company>>? allCompaniesFuture;
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
@@ -29,15 +37,50 @@ class _InscriptionPageState extends State<InscriptionPage> {
   @override
   void initState() {
     super.initState();
+    _loadDataFromDatabase();
     emailController = TextEditingController();
     passwordController = TextEditingController();
     usernameController = TextEditingController();
     nameController = TextEditingController();
     firstnameController = TextEditingController();
     confirmPasswordController = TextEditingController();
-    
-    // Charger les compagnies une seule fois
-    allCompaniesFuture = DatabaseCompanyService().getAllCompanies();
+  }
+
+
+  Future<void> _loadDataFromDatabase() async {
+    await _initDatabase();
+    await _syncData();
+    await _loadCompanies();
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _loadCompanies() async {
+    try {
+      Map<String, String>? companyNames = await getAllCompaniesNames(db, "");
+      if(companyNames != null){
+        setState(() {
+          _companyListNames = companyNames;
+        });
+      }
+
+    } catch (e) {
+      print("Error loading Companies Names: $e");
+    }
+  }
+
+  Future<void> _syncData() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Companies...");
+      String timeSync = DateTime.now().toIso8601String();
+      await syncService.syncFromFirebase("companies", userId: "123456789", timeSync);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during synchronization with SQLite: $e");
+    }
   }
 
   @override  
@@ -56,6 +99,13 @@ class _InscriptionPageState extends State<InscriptionPage> {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
 
+    List<DropdownMenuItem<String>> companyItems = _companyListNames.entries
+      .map((entry) => DropdownMenuItem(
+        value: entry.key,
+        child: Text(entry.value),
+      )
+    ).toList();
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -72,6 +122,17 @@ class _InscriptionPageState extends State<InscriptionPage> {
             children: [
               GestureDetector(
                 onTap: () {
+                  DatabaseHelper().clearTables([
+                    "users",
+                    "updates",
+                    "camions",
+                    "camionTypes",
+                    "equipments",
+                    "companies",
+                    "listOfLists",
+                    "blueprints",
+                    "validateTasks"
+                  ]);
                   Navigator.of(context).pop();
                 },
                 child: Container(
@@ -141,50 +202,30 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     const SizedBox(height: 20),
                     buildPasswordTextField(AppLocalizations.of(context)!.passRepeat, confirmPasswordController, obscureConfirmPassword),
                     const SizedBox(height: 20),
-                    FutureBuilder<Map<String, Company>>(
-                      future: allCompaniesFuture,  // Chargé une seule fois
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return Text(AppLocalizations.of(context)!.companyNotFound);
-                        } else {
-                          Map<String, Company> companies = snapshot.data!;
-                          List<DropdownMenuItem<String>> companyItems = companies.entries
-                              .map((entry) => DropdownMenuItem(
-                            value: entry.key,
-                            child: Text(entry.value.name),
-                          ))
-                              .toList();
-                          return DropdownButtonFormField<String>(
-                            value: selectedCompany,
-                            hint: Text(AppLocalizations.of(context)!.companySelect),
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: const BorderSide(color: Colors.white, width: 1.0),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: const BorderSide(color: Colors.white, width: 1.0),
-                              ),
-                              focusedBorder: OutlineInputBorder( // Assure que la bordure arrondie reste après la sélection
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                            ),
-                            items: companyItems,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCompany = value!;
-                              });
-                            },
-                          );
-                        }
+                    DropdownButtonFormField<String>(
+                      value: selectedCompany,
+                      hint: Text(AppLocalizations.of(context)!.companySelect),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                      items: companyItems,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCompany = value!;
+                        });
                       },
                     ),
                   ],

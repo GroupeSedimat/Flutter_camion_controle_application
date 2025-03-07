@@ -8,13 +8,17 @@ class BlueprintTemplate extends StatelessWidget{
   final Function delete;
   final Function edit;
   final Function validate;
+  final Function restore;
   final String role;
   bool? isDone;
-  BlueprintTemplate({super.key,  required this.blueprint, required this.delete, required this.edit, required this.validate, required this.role, this.isDone });
-
+  BlueprintTemplate({super.key,  required this.blueprint, required this.delete, required this.edit, required this.validate, required this.restore, required this.role, this.isDone });
+/// TODO add adding/editing/deleting photos from gallery/camera
   @override
   Widget build(BuildContext context){
-
+    String isDeleted = "";
+    if(blueprint.deletedAt != null){
+      isDeleted = " (deleted)";
+    }
     return Card(
       margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
       color: colorColor("card_background"),
@@ -24,7 +28,7 @@ class BlueprintTemplate extends StatelessWidget{
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              blueprint.title,
+              "${blueprint.title}$isDeleted",
               style: TextStyle(
                 fontSize: 20.0,
                 color: colorColor("card_text") ,
@@ -68,7 +72,7 @@ class BlueprintTemplate extends StatelessWidget{
                     color: Colors.red,
                   ),
                 ),
-                if(role == "superadmin")
+                if(role == "superadmin" && blueprint.deletedAt == null)
                 TextButton.icon(
                   onPressed: () => delete(),
                   style: TextButton.styleFrom(
@@ -77,6 +81,16 @@ class BlueprintTemplate extends StatelessWidget{
                   ),
                   label: Text(AppLocalizations.of(context)!.delete),
                   icon: const Icon(Icons.delete),
+                ),
+                if(role == "superadmin" && blueprint.deletedAt != null)
+                TextButton.icon(
+                  onPressed: () => restore(),
+                  style: TextButton.styleFrom(
+                      foregroundColor: Colors.white60,
+                      backgroundColor: Colors.red[900]
+                  ),
+                  label: Text(AppLocalizations.of(context)!.restore),
+                  icon: const Icon(Icons.restore),
                 ),
               ],
             ),

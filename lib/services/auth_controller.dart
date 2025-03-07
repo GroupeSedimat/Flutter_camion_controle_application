@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/pages/user/login_page.dart';
@@ -24,29 +25,49 @@ class AuthController extends GetxController {
     ever(_user, _initialScreen);
   }
 
-  _initialScreen(User? user) {
+  _initialScreen(User? user) async {
     if (user == null) {
-      Get.offAll(() => LoginPage());
+      try {
+        await DatabaseHelper().clearTables([
+          "users",
+          "updates",
+          "camions",
+          "camionTypes",
+          "equipments",
+          "companies",
+          "listOfLists",
+          "blueprints",
+          "validateTasks"
+        ]);
+
+        Get.offAll(() => LoginPage());
+      } catch (e) {
+        print("Error clearing tables: $e");
+      }
     } else {
-      FirebaseFirestore.instance
+      try {
+        FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get()
           .then((DocumentSnapshot documentSnapshot) {
-        if (documentSnapshot.exists) {
-          _username = documentSnapshot.get('username');
-          _role = documentSnapshot.get('role');
-           if (_role == 'superadmin') {
-              Get.offAll(() => AdminPage(userRole: UserRole.superadmin,));
-            } else {
-              Get.offAll(() => WelcomePage());
-            }
+            if (documentSnapshot.exists) {
+              _username = documentSnapshot.get('username');
+              _role = documentSnapshot.get('role');
+              if (_role == 'superadmin') {
+                Get.offAll(() => AdminPage(userRole: UserRole.superadmin,));
               } else {
-                print('Document does not exist on the database');
+                Get.offAll(() => WelcomePage());
               }
-            }).catchError((error) {
-              print('Error getting document: $error');
-            });
+            } else {
+              print('Document does not exist on the database');
+            }
+          }).catchError((error) {
+            print('Error getting document: $error');
+          });
+      } catch (error) {
+        print('Error getting document: $error');
+      }
     }
   }
 
@@ -140,7 +161,7 @@ bool isValidPassword(String password) {
 }
 
 
-  Future<void> login(String identifier, String password) async {
+Future<void> login(String identifier, String password) async {
   try {
     UserCredential userCredential;
 
@@ -181,7 +202,7 @@ bool isValidPassword(String password) {
         backgroundColor: Colors.green,
         snackPosition: SnackPosition.BOTTOM,
       );
-      Get.offAll(() => AdminPage(userRole: UserRole.superadmin));
+      // Get.offAll(() => AdminPage(userRole: UserRole.superadmin));
       return;
     }
 
@@ -197,7 +218,7 @@ bool isValidPassword(String password) {
           backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
         );
-        Get.offAll(() => WelcomePage());
+        // await Get.offAll(() => WelcomePage());
       } else {
         Get.snackbar(
           "Compte non approuvé",
@@ -288,8 +309,12 @@ bool isValidPassword(String password) {
     }
   }
 
-  String? getCurrentUserUID() {
-    return _user.value?.uid;
+  String getCurrentUserUID() {
+    if (_user.value?.uid != null) {
+      return _user.value!.uid;
+    } else {
+      throw Exception("User not logged in");
+    }
   }
 
   String getUserName(){

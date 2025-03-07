@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
+import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_type_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
-import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
+import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
+import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/equipments_table.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/database_firestore/user_service.dart';
+import 'package:flutter_application_1/services/database_local/users_table.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CamionTypeList extends StatefulWidget {
   const CamionTypeList({super.key});
@@ -17,79 +28,220 @@ class CamionTypeList extends StatefulWidget {
 }
 
 class _CamionTypeListState extends State<CamionTypeList> {
-  final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
-  Future<MyUser>? _futureUser;
+  late Database db;
+  late MyUser _user;
+  late String _userId;
+  bool _isLoading = true;
+  late Map<String, String> _availableLolMap;
+  late Map<String, String> _equipmentLists;
+  late Map<String, CamionType> _camionTypesList;
+
+  late AuthController authController;
+  late UserService userService;
+  late NetworkService networkService;
 
   @override
   void initState() {
     super.initState();
-    _futureUser = getUser();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _initDatabase();
+    await _initService();
+    if (!networkService.isOnline) {
+      print("Offline mode, no user update possible");
+    }else{
+      await _loadUserToConnection();
+    }
+    await _loadUser();
+    if (!networkService.isOnline) {
+      print("Offline mode, no sync possible");
+    }{
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _initService() async {
+    try {
+      authController = AuthController();
+      userService = UserService();
+      networkService = Provider.of<NetworkService>(context, listen: false);
+    } catch (e) {
+      print("Error loading services: $e");
+    }
+  }
+
+  Future<void> _loadUserToConnection() async {
+    Map<String, MyUser>? users = await getThisUser(db);
+    if(users != null ){
+      return;
+    }
+    try {
+      MyUser user = await userService.getCurrentUserData();
+      String? userId = await userService.userID;
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      await syncService.fullSyncTable("users", user: user, userId: userId);
+    } catch (e) {
+      print("💽 Error loading user: $e");
+    }
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      Map<String, MyUser>? users = await getThisUser(db);
+      MyUser user = users!.values.first;
+      String? userId = users.keys.first;
+      _userId = userId;
+      _user = user;
+    } catch (e) {
+      print("Error loading user: $e");
+    }
+  }
+
+  Future<void> _syncData() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Users...");
+      await syncService.fullSyncTable("users", user: _user, userId: _userId);
+      print("💽 Synchronizing users Camions...");
+      await syncService.fullSyncTable("camions", user: _user, userId: _userId);
+      List<String> camionsTypeIdList = [];
+      await getAllCamions(db, _user.role).then((camionsMap) {
+        if(camionsMap != null){
+          for(var camion in camionsMap.entries){
+            if(!camionsTypeIdList.contains(camion.value.camionType)){
+              camionsTypeIdList.add(camion.value.camionType);
+            }
+          }
+        }
+      });
+      print("💽 Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      List<String> camionListOfListId = [];
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
+      if(camionTypesMap != null){
+        for(var camionType in camionTypesMap.entries){
+          if(camionType.value.lol != null){
+            for(var list in camionType.value.lol!){
+              if(!camionListOfListId.contains(list)){
+                camionListOfListId.add(list);
+              }
+            }
+          }
+        }
+      }
+      print("💽 Synchronizing Companies...");
+      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      print("💽 Synchronizing Equipments...");
+      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
+      print("💽 Synchronizing LOL...");
+      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during synchronization with SQLite: $e");
+    }
+  }
+
+  Future<void> _loadDataFromDatabase() async {
+    await _loadEquipmentLists();
+    await _loadCamionTypesList();
+    await _loadAvailableLolMaps();
+  }
+
+  Future<void> _loadEquipmentLists() async {
+    Map<String, String>? equipmentLists = await getAllEquipmentsNames(db, _user.role);
+    if(equipmentLists != null){
+      _equipmentLists = equipmentLists;
+    }else {
+      _equipmentLists = {};
+    }
+  }
+
+  Future<void> _loadCamionTypesList() async {
+    Map<String, CamionType>? camionTypesList = await getAllCamionTypes(db, _user.role);
+    if(camionTypesList != null){
+      _camionTypesList = camionTypesList;
+    }else {
+      _camionTypesList = {};
+    }
+  }
+
+  Future<void> _loadAvailableLolMaps() async {
+    Map<String, ListOfLists>? listOfLists = await getAllLists(db, _user.role);
+    var temp = listOfLists?.map((key, list) => MapEntry(key, list.listName));
+    if(temp != null){
+      _availableLolMap = temp;
+    }else {
+      _availableLolMap = {};
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<MyUser>(
-      future: _futureUser,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (snapshot.hasData) {
-          MyUser user = snapshot.data!;
-          return Scaffold(
-              body: FutureBuilder(
-                future: getCamionTypesData(user),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    Map<String, CamionType> camionTypesList = snapshot.data!;
-                    return DefaultTabController(
-                      initialIndex: 0,
-                      length: camionTypesList.length,
-                      child: BasePage(
-                        title: title(user),
-                        body: _buildBody(camionTypesList, user),
-                      ),
-                    );
-                  }
-                },
-              ),
-              floatingActionButton: Visibility(
-                visible: user.role == 'superadmin',
-                child: FloatingActionButton(
-                  heroTag: "addCamionTypeHero",
-                  onPressed: () {
-                    showCamionTypeModal();
-                  },
-                  // backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: const Icon(
-                    Icons.fire_truck,
-                    color: Colors.white,
-                  ),
-                ),
-              )
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    if (_isLoading) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    return Scaffold(
+        body: DefaultTabController(
+          initialIndex: 0,
+          length: _camionTypesList.length,
+          child: BasePage(
+            title: title(_user),
+            body: _buildBody(),
+          ),
+        ),
+        floatingActionButton: Visibility(
+          visible: _user.role == 'superadmin',
+          child: FloatingActionButton(
+            heroTag: "addCamionTypeHero",
+            onPressed: () {
+              showCamionTypeModal();
+            },
+            child: const Icon(
+              Icons.fire_truck,
+              color: Colors.white,
+            ),
+          ),
+        )
     );
   }
 
-  Future<MyUser> getUser() async {
-    UserService userService = UserService();
-    return await userService.getCurrentUserData();
-  }
-
   Future<Map<String, CamionType>> getCamionTypesData(MyUser user) async {
-    return databaseCamionTypeService.getAllCamionTypes();
+    Map<String, CamionType>? list = await getAllCamionTypes(db, _user.role);
+    if(list != null){
+      return list;
+    }else{
+      return {};
+    }
   }
 
-  Widget _buildBody(Map<String, CamionType> camionTypeList, MyUser user) {
+  Widget _buildBody() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -132,7 +284,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
         Expanded(
           child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
-          itemCount: camionTypeList.length,
+          itemCount: _camionTypesList.length,
           itemBuilder: (_, index) {
             Widget leading = Container(
               decoration: BoxDecoration(
@@ -151,8 +303,11 @@ class _CamionTypeListState extends State<CamionTypeList> {
               child: Icon(Icons.fire_truck, color: Colors.black, size: 50),
             );
 
-      CamionType camionType = camionTypeList.values.elementAt(index);
-
+      CamionType camionType = _camionTypesList.values.elementAt(index);
+      String isDeleted = "";
+      if(camionType.deletedAt != null){
+        isDeleted = " (deleted)";
+      }
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         child: Material(
@@ -161,7 +316,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
           child: ExpansionTile(
             leading: leading,
             title: Text(
-              camionType.name,
+              "${camionType.name}$isDeleted",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -173,10 +328,17 @@ class _CamionTypeListState extends State<CamionTypeList> {
                 if (value == 'edit') {
                   showCamionTypeModal(
                     camionType: camionType,
-                    camionTypeID: camionTypeList.keys.elementAt(index),
+                    camionTypeID: _camionTypesList.keys.elementAt(index),
                   );
                 } else if (value == 'delete') {
-                  _showDeleteConfirmation(camionTypeList.keys.elementAt(index));
+                  _showDeleteConfirmation(_camionTypesList.keys.elementAt(index));
+                } else if (value == 'restore') {
+                  await restoreCamionType(db, _camionTypesList.keys.elementAt(index));
+                  if (networkService.isOnline) {
+                    await _syncCamionsType();
+                  }
+                  await _loadDataFromDatabase();
+                  setState(() {});
                 }
               },
               itemBuilder: (context) => [
@@ -190,16 +352,15 @@ class _CamionTypeListState extends State<CamionTypeList> {
                           ],
                         ),
                 ),
-                if (user.role == "superadmin")
-                  PopupMenuItem(
-                   value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, color: Colors.redAccent),
-                              SizedBox(width: 8),
-                              Text(AppLocalizations.of(context)!.delete),
-                            ],
-                          ),
+                if (_user.role == "superadmin")
+                  camionType.deletedAt == null
+                      ? PopupMenuItem(
+                    value: 'delete',
+                    child: Text(AppLocalizations.of(context)!.delete),
+                  )
+                      : PopupMenuItem(
+                    value: 'restore',
+                    child: Text(AppLocalizations.of(context)!.restore),
                   ),
               ],
             ),
@@ -209,14 +370,14 @@ class _CamionTypeListState extends State<CamionTypeList> {
                 runSpacing: 16.0,
                 children: [
                   // Affichage de "lol"
-                  if (camionType.lol.isNotEmpty)
+                  if (camionType.lol != null)
                     Container(
                       width: 150,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("List of lists:", style: textStyleBold()),
-                          ...camionType.lol.map((item) => Container(
+                          ...camionType.lol!.map((item) => Container(
                                 margin: EdgeInsets.only(top: 8.0),
                                 padding: EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 12.0),
@@ -232,7 +393,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
                                     ),
                                   ],
                                 ),
-                                child: Text(item, style: textStyle()),
+                                child: Text(_availableLolMap[item] ?? "Unknown list!", style: textStyle()),
                               ))
                               .toList(),
                         ],
@@ -240,14 +401,14 @@ class _CamionTypeListState extends State<CamionTypeList> {
                     ),
 
                   // Affichage de "equipment"
-                  if (camionType.equipment.isNotEmpty)
+                  if (camionType.equipment != null)
                     Container(
                       width: 150,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Equipment:", style: textStyleBold()),
-                          ...camionType.equipment.map((item) => Container(
+                          ...camionType.equipment!.map((item) => Container(
                                 margin: EdgeInsets.only(top: 8.0),
                                 padding: EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 12.0),
@@ -263,7 +424,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
                                     ),
                                   ],
                                 ),
-                                child: Text(item, style: textStyle()),
+                                child: Text(_equipmentLists[item] ?? "Unknown equipment!", style: textStyle()),
                               ))
                               .toList(),
                               ],
@@ -312,7 +473,13 @@ class _CamionTypeListState extends State<CamionTypeList> {
           child: AddCamionType(
             camionType: camionType,
             camionTypeID: camionTypeID,
-            onCamionTypeAdded: () {
+            availableLolMap: _availableLolMap,
+            equipmentLists: _equipmentLists,
+            onCamionTypeAdded: () async {
+              if (networkService.isOnline) {
+                await _syncCamionsType();
+              }
+              await _loadDataFromDatabase();
               setState(() {});
               Navigator.pop(context);
             },
@@ -334,16 +501,40 @@ class _CamionTypeListState extends State<CamionTypeList> {
             child: Text(AppLocalizations.of(context)!.no),
           ),
           TextButton(
-            onPressed: () {
-              databaseCamionTypeService.deleteCamionType(camionTypeID);
+            onPressed: () async {
+              await softDeleteCamionType(db, camionTypeID);
+              if (networkService.isOnline) {
+                await _syncCamionsType();
+              }
+              await _loadDataFromDatabase();
               setState(() {});
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
-              // AppLocalizations.of(context)!
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _syncCamionsType() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      List<String> camionsTypeIdList = [];
+      await getAllCamions(db, _user.role).then((camionsMap) {
+        if(camionsMap != null){
+          for(var camion in camionsMap.entries){
+            if(!camionsTypeIdList.contains(camion.value.camionType)){
+              camionsTypeIdList.add(camion.value.camionType);
+            }
+          }
+        }
+      });
+      print("💽 Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during synchronization with SQLite: $e");
+    }
   }
 }
