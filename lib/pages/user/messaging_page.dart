@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
 
 class MessagingPage extends StatefulWidget {
   const MessagingPage({super.key});
@@ -19,6 +21,7 @@ class _MessagingPageState extends State<MessagingPage> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
   File? _selectedFile;
@@ -26,9 +29,7 @@ class _MessagingPageState extends State<MessagingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.messenger),
-      ),
+      appBar: AppBar(title: const Text('Messagerie')),
       body: SafeArea(
         child: Column(
           children: [
@@ -39,9 +40,8 @@ class _MessagingPageState extends State<MessagingPage> {
                     .orderBy('timestamp', descending: true)
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
+                  if (!snapshot.hasData)
                     return const Center(child: CircularProgressIndicator());
-                  }
 
                   var messages = snapshot.data!.docs;
 
@@ -49,22 +49,20 @@ class _MessagingPageState extends State<MessagingPage> {
                     reverse: true,
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
-                      var message = messages[index];
-                      var data = message.data() as Map<String, dynamic>;
-                      var messageText = data['text'];
-                      var messageSender = data['sender'];
-                      var messageImage = data['imageUrl'];
-                      var fileUrl = data['fileUrl'];
-                      var timestamp = data['timestamp'] as Timestamp?;
-                      var currentUser = _auth.currentUser?.email;
-
-                      var isMe = currentUser == messageSender;
+                      var message =
+                          messages[index].data() as Map<String, dynamic>;
+                      var text = message['text'];
+                      var sender = message['sender'];
+                      var imageUrl = message['imageUrl'];
+                      var fileUrl = message['fileUrl'];
+                      var timestamp = message['timestamp'] as Timestamp?;
                       var time = timestamp != null
                           ? DateFormat('HH:mm').format(timestamp.toDate())
                           : '...';
+                      var isMe = _auth.currentUser?.email == sender;
 
-                      return _buildMessageBubble(messageText, messageSender,
-                          isMe, messageImage, fileUrl, time);
+                      return _buildMessageBubble(
+                          text, sender, isMe, imageUrl, fileUrl, time);
                     },
                   );
                 },
@@ -94,8 +92,7 @@ class _MessagingPageState extends State<MessagingPage> {
             ),
           Flexible(
             child: Container(
-              constraints: const BoxConstraints(
-                  maxWidth: 250), // Limite la largeur des bulles
+              constraints: const BoxConstraints(maxWidth: 250),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isMe ? Colors.blueAccent : Colors.grey[200],
@@ -108,53 +105,36 @@ class _MessagingPageState extends State<MessagingPage> {
                     Text(
                       sender,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                      ),
+                          fontWeight: FontWeight.bold, color: Colors.black54),
                     ),
                   if (imageUrl != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Image.network(
-                        imageUrl,
-                        width: 200,
-                        height: 200,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Text('⚠️ Erreur de chargement d\'image');
-                        },
+                    GestureDetector(
+                      onTap: () => _showFullImage(imageUrl),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.network(imageUrl,
+                            width: 150, height: 150, fit: BoxFit.cover),
                       ),
                     ),
                   if (fileUrl != null)
                     GestureDetector(
-                      onTap: () {
-                        print('Ouverture du fichier : $fileUrl');
-                      },
+                      onTap: () => _openFile(fileUrl),
                       child: const Text(
-                        '📄 Fichier joint (cliquer pour ouvrir)',
-                        style: TextStyle(color: Colors.blueAccent),
-                      ),
+                          '📄 Fichier joint (cliquer pour ouvrir)',
+                          style: TextStyle(color: Colors.blueAccent)),
                     ),
                   if (text != null && text.isNotEmpty)
                     Text(
                       text,
                       style: TextStyle(
-                        color: isMe ? Colors.white : Colors.black87,
-                        fontSize: 16,
-                      ),
+                          color: isMe ? Colors.white : Colors.black87,
+                          fontSize: 16),
                     ),
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: Text(
-                      time,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.black54),
-                    ),
+                    child: Text(time,
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.black54)),
                   ),
                 ],
               ),
@@ -169,28 +149,19 @@ class _MessagingPageState extends State<MessagingPage> {
     return Container(
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.blueAccent),
-      ),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.blueAccent)),
       child: Stack(
         alignment: Alignment.topRight,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
-            child: Image.file(
-              _selectedImage!,
-              width: 150,
-              height: 150,
-              fit: BoxFit.cover,
-            ),
+            child: Image.file(_selectedImage!,
+                width: 150, height: 150, fit: BoxFit.cover),
           ),
           IconButton(
             icon: const Icon(Icons.cancel, color: Colors.redAccent),
-            onPressed: () {
-              setState(() {
-                _selectedImage = null;
-              });
-            },
+            onPressed: () => setState(() => _selectedImage = null),
           ),
         ],
       ),
@@ -202,27 +173,20 @@ class _MessagingPageState extends State<MessagingPage> {
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.blueAccent.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.blueAccent),
-      ),
+          color: Colors.blueAccent.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.blueAccent)),
       child: Row(
         children: [
           const Icon(Icons.attach_file, color: Colors.blueAccent),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              _selectedFile!.path.split('/').last,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text(_selectedFile!.path.split('/').last,
+                overflow: TextOverflow.ellipsis),
           ),
           IconButton(
             icon: const Icon(Icons.cancel, color: Colors.redAccent),
-            onPressed: () {
-              setState(() {
-                _selectedFile = null;
-              });
-            },
+            onPressed: () => setState(() => _selectedFile = null),
           ),
         ],
       ),
@@ -232,36 +196,49 @@ class _MessagingPageState extends State<MessagingPage> {
   Widget _buildMessageInput() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
-      ),
+      decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)]),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.camera_alt, color: Colors.blueAccent),
-            onPressed: _pickImage,
-          ),
+              icon: const Icon(Icons.camera_alt, color: Colors.blueAccent),
+              onPressed: _pickImage),
           IconButton(
-            icon: const Icon(Icons.attach_file, color: Colors.blueAccent),
-            onPressed: _pickFile,
-          ),
+              icon: const Icon(Icons.attach_file, color: Colors.blueAccent),
+              onPressed: _pickFile),
           Expanded(
             child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.enterMessage,
-                border: InputBorder.none,
-              ),
-            ),
+                controller: _messageController,
+                decoration: const InputDecoration(
+                    hintText: 'Écrire un message...',
+                    border: InputBorder.none)),
           ),
           IconButton(
-            icon: const Icon(Icons.send, color: Colors.blueAccent),
-            onPressed: _sendMessage,
-          ),
+              icon: const Icon(Icons.send, color: Colors.blueAccent),
+              onPressed: _sendMessage),
         ],
       ),
     );
+  }
+
+  void _showFullImage(String imageUrl) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => Scaffold(
+                  appBar: AppBar(),
+                  body: Center(child: Image.network(imageUrl)),
+                )));
+  }
+
+  Future<void> _openFile(String fileUrl) async {
+    try {
+      await OpenFilex.open(fileUrl);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Impossible d’ouvrir le fichier')));
+    }
   }
 
   Future<void> _pickImage() async {
@@ -281,6 +258,11 @@ class _MessagingPageState extends State<MessagingPage> {
       'sender': _auth.currentUser?.email,
       'timestamp': FieldValue.serverTimestamp(),
     });
-    setState(() => _messageController.clear());
+
+    setState(() {
+      _messageController.clear();
+      _selectedImage = null;
+      _selectedFile = null;
+    });
   }
 }
