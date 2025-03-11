@@ -31,6 +31,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
   late String _userId;
   bool _isLoading = true;
   Map<String, ListOfLists> _listOfLists = {};
+  Map<String, String> _userMap = {};
   late AuthController authController;
   late UserService userService;
   late NetworkService networkService;

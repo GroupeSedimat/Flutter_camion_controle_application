@@ -139,7 +139,7 @@ class MyApp extends StatelessWidget {
         '/diagrams': (context) => const Diagrams(),
         '/loadingdata': (context) => const LoadingData(),
         '/settings': (context) => SettingsPage(),
-        '/map': (context) => MapPage(),
+        // '/map': (context) => MapPage(),
       },
     );
   }

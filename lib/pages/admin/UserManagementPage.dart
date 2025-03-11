@@ -30,6 +30,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
   late MyUser _user;
   late String _userId;
   Map<String, MyUser> _allUsersMap = {};
+  List<MyUser> _allUsers = [];
   bool _isLoading = true;
   Map<String, String> _companyNames = {};
   Map<String, List<MyUser>> _usersByCompany = {};
