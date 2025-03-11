@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Image.asset(
-                'assets/images/keybas_logo.png',
+                'assets/images/mobility_corner_logo.png',
                 height: 100,
               ),
               SizedBox(height: 20),

@@ -38,7 +38,7 @@ class PdfService {
       ListOfLists list) async {
     final pdf = pw.Document();
     final company = (await getOneCompanyWithID(db, user.company))!;
-    final mobilityLogo = (await rootBundle.load('assets/images/keybas_logo.png')).buffer.asUint8List();
+    final mobilityLogo = (await rootBundle.load('assets/images/mobility_corner_logo.png')).buffer.asUint8List();
     final font = await _loadFont();
     final companyColumn = await _companyDatas(company, font);
     final photosToPDF = HashMap<int, Uint8List>();
