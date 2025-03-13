@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter_application_1/pages/pdf/pdf_download.dart';
+import 'package:flutter_application_1/utils/pdf_download.dart';
 import 'package:open_document/open_document.dart';
 import 'package:path_provider/path_provider.dart';
 

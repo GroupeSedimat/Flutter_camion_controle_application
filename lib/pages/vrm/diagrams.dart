@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/base_page.dart';
-import 'package:flutter_application_1/pages/checklist/loading.dart';
-import 'package:flutter_application_1/pages/data_api/get_data.dart';
+import 'package:flutter_application_1/widgets/base_page.dart';
+import 'package:flutter_application_1/pages/vrm/loading.dart';
+import 'package:flutter_application_1/services/data_api/get_data.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

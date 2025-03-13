@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/user/login_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/pages/checklist/diagrams.dart';
+import 'package:flutter_application_1/pages/vrm/diagrams.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({super.key});

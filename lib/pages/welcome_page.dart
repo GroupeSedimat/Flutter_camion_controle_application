@@ -6,11 +6,11 @@ import 'package:flutter_application_1/services/database_firestore/user_service.d
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/sync_service.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/widgets/base_page.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 

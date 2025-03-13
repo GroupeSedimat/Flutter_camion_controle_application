@@ -24,7 +24,7 @@ import 'package:flutter_application_1/services/database_local/companies_table.da
 import 'package:flutter_application_1/services/database_local/equipments_table.dart';
 import 'package:flutter_application_1/services/database_local/update_tables.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
-import 'package:flutter_application_1/services/dialog_services.dart';
+import 'package:flutter_application_1/utils/dialog_services.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';

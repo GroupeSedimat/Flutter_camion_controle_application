@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/widgets/base_page.dart';
 import 'package:flutter_application_1/pages/camion/add_camion_type_form.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/equipment/equipment_list.dart';
@@ -12,7 +12,7 @@ import 'package:flutter_application_1/services/database_local/camions_table.dart
 import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/equipments_table.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/sync_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';

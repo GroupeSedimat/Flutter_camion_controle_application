@@ -4,25 +4,26 @@
 ---
 ## Table of Contents
 
-- [Introduction](#1️⃣-introduction)
-- [Technologies utilisées](#2️⃣-technologies-utilisées)
-- [Architecture de l’application](#3️⃣-architecture-de-lapplication)
-- [Installation et configuration](#4️⃣-installation-et-configuration)
-- [Structure du projet](#5️⃣-structure-du-projet)
-- [Gestion des bases de données](#6️⃣-gestion-des-bases-de-données)
-- [Gestion de la synchronisation Firebase ↔ SQLite](#7️⃣-gestion-de-la-synchronisation-firebase-↔-sqlite)
-- [Sécurité et permissions](#8️⃣-sécurité-et-permissions)
-- [API et intégrations](#8️⃣-api-et-intégrations)
-- [Déploiement et mise en production](#🔟-déploiement-et-mise-en-production)
+- [Introduction](#1.-introduction)
+- [Technologies utilisées](#2.-technologies-utilisées)
+- [Architecture de l’application](#3.-architecture-de-lapplication)
+- [Installation et configuration](#4.-installation-et-configuration)
+- [Structure du projet](#5.-structure-du-projet)
+- [Gestion des bases de données](#6.-gestion-des-bases-de-données)
+- [Gestion de la synchronisation Firebase ↔ SQLite](#7.-gestion-de-la-synchronisation-firebase-↔-sqlite)
+- [Sécurité et permissions](#8.-sécurité-et-permissions)
+- [API et intégrations](#9.-api-et-intégrations)
+- [Tester l’application en local](#10.-Tester-lapplication-en-local)
+- [Déploiement et mise en production](#11.-déploiement-et-mise-en-production)
 
 ---
-## 1️⃣ Introduction
+## 1. Introduction
 
 Cette application mobile, développée avec Flutter et Dart, permet aux utilisateurs de remplir et valider des check-lists avant l’utilisation d’un camion. Elle fonctionne en mode en ligne et hors ligne grâce à une base de données hybride : Firebase (Cloud) et SQLite (local).
 
 L’application assure également la gestion des camions, des entreprises et des utilisateurs avec un système de rôles et permissions (Super Admin, Admin, Utilisateur).
 
-## 2️⃣ Technologies utilisées
+## 2. Technologies utilisées
 
 | Catégorie |Technologie|
 | -------  | ------- |
@@ -34,9 +35,9 @@ L’application assure également la gestion des camions, des entreprises et des
 | Authentification  | Firebase Authentication|
 | Environnement de dev  | Android Studio, Xcode, VS Code|
 | Gestion du code  | GitHub|
-| APIs externes  | INPI (Données entreprises), VRM (Camions energie)|
+| APIs externes  | VRM (Camions energie)|
 
-## 3️⃣ Architecture de l’application
+## 3. Architecture de l’application
 
 L’application repose sur une architecture modulaire, divisée en plusieurs couches:
 
@@ -64,16 +65,17 @@ L’application repose sur une architecture modulaire, divisée en plusieurs cou
     Firebase Authentication : gestion des connexions et des rôles utilisateurs.
 
 
-## 4️⃣ Installation et configuration
+## 4. Installation et configuration
 
 #### Pré-requis
 
+Avant d’installer le projet, assurez-vous d’avoir les éléments suivants:
 - Flutter installé : [Guide d’installation](https://docs.flutter.dev/get-started/install)
 - Android Studio / Visual Studio Code / Xcode installé
-<!-- - Clé API Firebase (fichier google-services.json pour Android, GoogleService-Info.plist pour iOS) -->
 
 #### Installation du projet
 
+Clonez le projet et installez les dépendances Flutter:
 ```bash
 git clone https://github.com/GroupeSedimat/Flutter_camion_controle_application.git  
 cd app  
@@ -81,17 +83,57 @@ flutter pub get
 flutter run
 ```
 
-## 5️⃣ Structure du projet
+#### Installation du database
+
+L’application utilise Firebase Firestore. Voici les étapes pour l’installer et la configurer:
+
+- [instaliuj CLI Firebase](https://firebase.google.com/docs/cli?hl=fr#setup_update_cli)
+- [instaluj Firebase](https://firebase.google.com/docs/flutter/setup?hl=fr&platform=ios)
+- Configurer Firebase pour le projet:
+```bash
+flutterfire configure
+```
+>[!IMPORTANT]
+>
+> Cette commande permet d’associer l’application à une base de données Firebase. Elle est utile pour changer de base (par exemple, en fonction de la branche utilisée pour les tests). Avant de l’exécuter, assurez-vous d’avoir créé la base de données Firebase.
+
+>[!IMPORTANT]
+>
+>Après flutterfire configure, assurez-vous que les fichiers suivants sont bien configurés :
+>
+>- android/app/google-services.json → pour Firebase sur Android
+>- ios/Runner/GoogleService-Info.plist → pour Firebase sur iOS
+>- .firebaserc et firebase_options.dart → pour la connexion du projet
+
+#### Installation pluginow
+
+- [strona  pluginami fo fluttera](https://pub.dev/)
+- Installer un plugin dans le projet:
+```bash
+flutter pub add PLUGIN_NAME
+```
+
+
+## 5. Structure du projet
 
 /lib  
-├── /models       # Définitions des entités (Camion, Checklist, Utilisateur...)  
-├── /services     # Gestion de la logique métier (SyncService, AuthService...)  
-├── /pages        # Écrans de l’application
-<!-- ├── /widgets      # Composants UI réutilisables   -->
-<!-- ├── /utils        # Fonctions utilitaires  -->
-├── main.dart     # Point d’entrée de l’application
+├── /models
+├── /services
+├── /pages
+├── /widgets
+├── /utils
+├── main.dart
 
-## 6️⃣ Gestion des bases de données
+
+1. models -> Définitions des entités (Camion, Checklist, Utilisateur...)
+2. services -> Gestion de la logique métier (SyncService, AuthService...)
+3. pages -> Écrans de l’application
+4. widgets -> Composants UI réutilisables
+5. utils -> Fonctions utilitaires
+6. main.dart -> Point d’entrée de l’application
+
+
+## 6. Gestion des bases de données
 #### Firebase (NoSQL - Cloud)
 
 > [!NOTE]
@@ -123,7 +165,7 @@ Collections principales dans Firestore
 - Permet l’utilisation en mode hors ligne.
 - Structure similaire à Firebase pour faciliter les mises à jour.
 
-## 7️⃣ Gestion de la synchronisation Firebase ↔ SQLite
+## 7. Gestion de la synchronisation Firebase ↔ SQLite
 
 L’application utilise un service de synchronisation dédié, SyncService, qui assure la mise à jour des données entre Firebase Firestore (Cloud) et SQLite (local).
 
@@ -136,21 +178,21 @@ L’application utilise un service de synchronisation dédié, SyncService, qui 
 >
 > Plutôt que d’appeler séparément syncFromFirebase et syncToFirebase, il suffit d’appeler une seule fonction (fullSyncTable) pour assurer la mise à jour complète d’une table.
 
-## 8️⃣ Sécurité et permissions 
+## 8. Sécurité et permissions 
 
 #### 🔒 Authentification et rôles
 
 Authentification sécurisée via Firebase Authentication avec gestion des rôles:
 
-* `superadmin` → Accès à toutes les entreprises et camions.
-* `admin` → Gestion de sa propre entreprise et de ses utilisateurs.
-* `user` → Accès restreint aux check-lists et camions assignés.
+* `superadmin` → contrôle total sur toutes les entreprises, camions et utilisateurs.
+* `admin` → gère sa propre entreprise, ses camions et ses employés.
+* `user` → accède uniquement aux check-lists et camions qui lui sont assignés.
 
 #### 🔒 Connexion HTTPS
 
     Toutes les communications entre l’application et Firebase sont chiffrées en HTTPS.
 
-## 9️⃣ API et intégrations
+## 9. API et intégrations
 
 #### INPI (Données des entreprises)
 
@@ -161,7 +203,16 @@ Authentification sécurisée via Firebase Authentication avec gestion des rôles
     Prévu pour récupérer des informations sur les véhicules.
     Actuellement désactivé en raison de priorités sur d’autres fonctionnalités.
 
-## 🔟 Déploiement et mise en production
+## 10. Tester l’application en local
+
+Pour Android : Lancer l’émulateur ou brancher un téléphone en mode développeur et exécuter :
+```bash
+flutter run --release
+```
+
+Pour iOS : Ouvrir ios/Runner.xcworkspace dans Xcode et exécuter sur un simulateur ou un iPhone réel.
+
+## 11. Déploiement et mise en production
 
 #### Publication sur Google Play et Apple Store
 

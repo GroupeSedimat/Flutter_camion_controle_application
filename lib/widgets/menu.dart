@@ -9,7 +9,7 @@ import 'package:flutter_application_1/pages/user/messaging_page.dart';
 import 'package:flutter_application_1/pages/company/company_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_list.dart';
-import 'package:flutter_application_1/pages/user/user_role.dart';
+import 'package:flutter_application_1/models/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
