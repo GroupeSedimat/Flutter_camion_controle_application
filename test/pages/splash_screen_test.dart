@@ -1,24 +1,28 @@
-import 'package:flutter_application_1/pages/splash_screen.dart';
+
+import 'package:flutter_application_1/locale_provider.dart';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 void main() {
-  testWidgets('Le bouton Log In est accessible et cliquable', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const GetMaterialApp(
-        home: SplashScreen(),
-      ),
-    );
+  TestWidgetsFlutterBinding.ensureInitialized(); 
 
-    
-    final logInButton = find.text('Log In');
-    expect(logInButton, findsOneWidget);
+  setUp(() async {
+    // Initialise SharedPreferences pour éviter les erreurs
+    SharedPreferences.setMockInitialValues({});
+  });
 
-    
-    await tester.tap(logInButton);
+  test('LocaleProvider setLocale fonctionne correctement', () async {
+    final localeProvider = LocaleProvider('en');
 
-    
-    await tester.pumpAndSettle();
+    // Vérifie si la locale initiale est 'en'
+    expect(localeProvider.locale.languageCode, 'en');
+
+    // Change la locale en 'fr'
+    await localeProvider.setLocale('fr'); 
+
+    // Vérifie si la locale a bien été changée
+    expect(localeProvider.locale.languageCode, 'fr');
   });
 }

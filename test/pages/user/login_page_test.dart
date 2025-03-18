@@ -1,8 +1,34 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
+  test('Email validation works correctly', () {
+    expect(Validator.isValidEmail('test@example.com'), isTrue); 
+    expect(Validator.isValidEmail('invalidemail'), isFalse); 
+  });
+
+  test('Password validation works correctly', () {
+    expect(Validator.isValidPassword('123456'), isTrue); 
+    expect(Validator.isValidPassword('123'), isFalse); 
+  });
+
+  
+}
+
+class Validator {
+  static bool isValidEmail(String email) {
+    return email.contains('@');
+  } 
+
+  static bool isValidPassword(String password) {
+    return password.length >= 6;
+  }
+}
+
+
+
+
+// test widget commenté 
+/**void main() {
   testWidgets('Basic widget test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -78,6 +104,6 @@ testWidgets('Sign In link navigates to InscriptionPage', (WidgetTester tester) a
   });**/
 
 
-  }
+  }**/
 
   

@@ -1,9 +1,12 @@
 // ignore_for_file: use_key_in_widget_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
 import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 import 'package:flutter_application_1/services/app_colors.dart';
+import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -21,16 +24,15 @@ class SettingsPage extends StatelessWidget {
         title: Text(AppLocalizations.of(context)!.settings),
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      body: Container(
-        color: Theme.of(context).scaffoldBackgroundColor,
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ListTile(
-              title: Text(
-                AppLocalizations.of(context)!.darkMode,
-                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-              ),
+            //_buildSectionTitle(context, 'appearance'),
+            _buildSettingCard(
+              context,
+              icon: Icons.dark_mode,
+              title: AppLocalizations.of(context)!.darkMode,
               trailing: DropdownButton<ThemeMode>(
                 value: themeProvider.themeMode,
                 onChanged: (ThemeMode? newThemeMode) {
@@ -38,6 +40,7 @@ class SettingsPage extends StatelessWidget {
                     themeProvider.changeThemeMode(newThemeMode);
                   }
                 },
+                underline: Container(),
                 items: ThemeMode.values.map((ThemeMode mode) {
                   return DropdownMenuItem<ThemeMode>(
                     value: mode,
@@ -47,26 +50,29 @@ class SettingsPage extends StatelessWidget {
                           : mode == ThemeMode.dark
                               ? AppLocalizations.of(context)!.colorDark
                               : AppLocalizations.of(context)!.colorAutomatic,
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   );
                 }).toList(),
               ),
             ),
-
-            // Sélection de la couleur du thème
-            ListTile(
-              title: Text(AppLocalizations.of(context)!.color),
+            const SizedBox(height: 12),
+            _buildSettingCard(
+              context,
+              icon: Icons.color_lens,
+              title: AppLocalizations.of(context)!.color,
               trailing: DropdownButton<AppColor>(
                 value: AppColor.values.firstWhere(
-                    (color) => color.color == themeProvider.customColor,
-                    orElse: () => AppColor.blue),
+                  (color) => color.color == themeProvider.customColor,
+                  orElse: () => AppColor.blue,
+                ),
                 onChanged: (AppColor? newColor) {
                   if (newColor != null) {
                     themeProvider.changeColor(newColor.color);
                   }
                 },
-                items: AppColor.values.map<DropdownMenuItem<AppColor>>((AppColor color) {
+                underline: Container(),
+                items: AppColor.values
+                    .map<DropdownMenuItem<AppColor>>((AppColor color) {
                   return DropdownMenuItem<AppColor>(
                     value: color,
                     child: Text(color.name),
@@ -74,9 +80,12 @@ class SettingsPage extends StatelessWidget {
                 }).toList(),
               ),
             ),
-
-            ListTile(
-              title: Text(AppLocalizations.of(context)!.language),
+            const SizedBox(height: 20),
+            // _buildSectionTitle(context, 'preferences'),
+            _buildSettingCard(
+              context,
+              icon: Icons.language,
+              title: AppLocalizations.of(context)!.language,
               trailing: DropdownButton<String>(
                 value: localeProvider.locale.languageCode,
                 onChanged: (String? newValue) {
@@ -85,6 +94,7 @@ class SettingsPage extends StatelessWidget {
                     Get.updateLocale(Locale(newValue));
                   }
                 },
+                underline: Container(),
                 items: <String>['en', 'fr', 'pl', 'ar']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
@@ -94,20 +104,41 @@ class SettingsPage extends StatelessWidget {
                 }).toList(),
               ),
             ),
-            ListTile(
-              title: Text(AppLocalizations.of(context)!.editInformation),
-              trailing: Icon(Icons.edit),
-              onTap: () {
-                Navigator.pop(context);
-                Get.to(() => ModifyProfilePage());
+            const SizedBox(height: 20),
+            //_buildSectionTitle(context, 'account'),
+            _buildClickableCard(
+              context,
+              icon: Icons.edit,
+              title: AppLocalizations.of(context)!.editInformation,
+              onTap: () async {
+                //Navigator.pop(context);
+
+                // Récupérer l'utilisateur actuel depuis Firestore
+                final userDoc = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(AuthController.instance.getCurrentUserUID())
+                    .get();
+
+                if (userDoc.exists) {
+                  final currentUser = MyUser.fromJson(userDoc.data()!);
+
+                  // Passe l'utilisateur à ModifyProfilePage
+                  Get.to(() => ModifyProfilePage(user: currentUser));
+                } else {
+                  Get.snackbar(
+                    "Erreur",
+                    "Impossible de récupérer les informations de l'utilisateur.",
+                    backgroundColor: Colors.red,
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
               },
             ),
-
-            // Modifier le mot de passe
-            ListTile(
-              trailing: Icon(Icons.lock),
-              title: Text(AppLocalizations.of(context)!.passChange),
-
+            const SizedBox(height: 12),
+            _buildClickableCard(
+              context,
+              icon: Icons.lock,
+              title: AppLocalizations.of(context)!.passChange,
               onTap: () {
                 Navigator.pop(context);
                 Get.to(() => ResetPasswordPage());
@@ -119,7 +150,67 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  // A function that returns the names of languages in selected languages
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).primaryColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    Widget? trailing,
+  }) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 3,
+      child: ListTile(
+        leading: Icon(icon, color: Theme.of(context).primaryColor),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
+        ),
+        trailing: trailing,
+      ),
+    );
+  }
+
+  Widget _buildClickableCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 3,
+        child: ListTile(
+          leading: Icon(icon, color: Theme.of(context).primaryColor),
+          title: Text(
+            title,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+        ),
+      ),
+    );
+  }
+
   String _getLanguageName(String code) {
     switch (code) {
       case 'en':

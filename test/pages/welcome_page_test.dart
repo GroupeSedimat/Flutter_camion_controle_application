@@ -42,6 +42,10 @@ void main() {
     expect(find.text("Done"), findsOneWidget);
   });
 
+
+
+
+//test widget commenté
  /** testWidgets('Affiche le message d\'erreur si une erreur survient dans FutureBuilder', (WidgetTester tester) async {
   
     await tester.pumpWidget(

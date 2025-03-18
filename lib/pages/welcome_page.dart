@@ -11,6 +11,7 @@ import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -22,7 +23,6 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-
   late Database db;
   MyUser? _user;
   String? _userId;
@@ -42,13 +42,14 @@ class _WelcomePageState extends State<WelcomePage> {
     await _initServices();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     if (mounted) {
@@ -72,7 +73,7 @@ class _WelcomePageState extends State<WelcomePage> {
     print("welcome user to connection firebase ☢☢☢☢☢☢☢");
     Map<String, MyUser>? users = await getThisUser(db);
     print("users: $users");
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -108,11 +109,10 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future<void> _syncData() async {
-
     if (_user == null || _userId == null) {
       print("Cannot sync data: user or userID is not loaded");
       return;
-    }else{
+    } else {
       print("Can sync data: user: ${_user!.name} is loaded");
     }
     try {
@@ -123,9 +123,9 @@ class _WelcomePageState extends State<WelcomePage> {
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
       await getAllCamions(db, _user!.role).then((camionsMap) {
-        if(camionsMap != null){
-          for(var camion in camionsMap.entries){
-            if(!camionsTypeIdList.contains(camion.value.camionType)){
+        if (camionsMap != null) {
+          for (var camion in camionsMap.entries) {
+            if (!camionsTypeIdList.contains(camion.value.camionType)) {
               camionsTypeIdList.add(camion.value.camionType);
             }
           }
@@ -133,14 +133,16 @@ class _WelcomePageState extends State<WelcomePage> {
       });
       print("Camion types Ids in list: $camionsTypeIdList");
       print("💽 Synchronizing CamionTypess...");
-      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      await syncService.fullSyncTable("camionTypes",
+          user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user!.role);
-      if(camionTypesMap != null){
-        for(var camionType in camionTypesMap.entries){
-          if(camionType.value.lol != null){
-            for(var list in camionType.value.lol!){
-              if(!camionListOfListId.contains(list)){
+      Map<String, CamionType>? camionTypesMap =
+          await getAllCamionTypes(db, _user!.role);
+      if (camionTypesMap != null) {
+        for (var camionType in camionTypesMap.entries) {
+          if (camionType.value.lol != null) {
+            for (var list in camionType.value.lol!) {
+              if (!camionListOfListId.contains(list)) {
                 camionListOfListId.add(list);
               }
             }
@@ -148,16 +150,21 @@ class _WelcomePageState extends State<WelcomePage> {
         }
       }
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      await syncService.fullSyncTable("companies",
+          user: _user, userId: _userId);
       print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
+      await syncService.fullSyncTable("equipments",
+          user: _user, userId: _userId);
       print("Camion List of Lists Ids: $camionListOfListId");
       print("💽 Synchronizing LOL...");
-      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
+      await syncService.fullSyncTable("listOfLists",
+          user: _user, userId: _userId, dataPlus: camionListOfListId);
       print("💽 Synchronizing Blueprints...");
-      await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
+      await syncService.fullSyncTable("blueprints",
+          user: _user, userId: _userId);
       print("💽 Synchronizing Validate Tasks...");
-      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
+      await syncService.fullSyncTable("validateTasks",
+          user: _user, userId: _userId);
       print("💽 Synchronizing PDFs...");
       await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
@@ -177,86 +184,233 @@ class _WelcomePageState extends State<WelcomePage> {
   Widget _buildBody(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
-
-    // Vérification si le mode sombre est activé
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    String welcomeMessage = _user!.role == 'admin'
-        ? AppLocalizations.of(context)!.adminHello(_user!.username)
-        : AppLocalizations.of(context)!.userHello(_user!.username);
-    return SingleChildScrollView(
-      child: Column(
+
+    return FutureBuilder<MyUser>(
+      future: UserService().getCurrentUserData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        } else if (snapshot.hasData) {
+          final MyUser userData = snapshot.data!;
+          String welcomeMessage = userData.role == 'admin'
+              ? AppLocalizations.of(context)!.adminHello(userData.username)
+              : AppLocalizations.of(context)!.userHello(userData.username);
+
+          return AnimationLimiter(
+            child: ListView(
+              children: AnimationConfiguration.toStaggeredList(
+                duration: const Duration(milliseconds: 375),
+                childAnimationBuilder: (widget) => SlideAnimation(
+                  verticalOffset: 50.0,
+                  child: FadeInAnimation(
+                    child: widget,
+                  ),
+                ),
+                children: [
+                  _buildHeader(context, w, h * 0.3, welcomeMessage, isDarkMode),
+                  SizedBox(height: 20),
+                  _buildInfoCard(context),
+                  SizedBox(height: 20),
+                  _buildMapCard(context, '/map'),
+                  SizedBox(height: 20),
+                  _buildQuickActions(context),
+                ],
+              ),
+            ),
+          );
+        } else {
+          return Center(child: Text("No data available"));
+        }
+      },
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, double width, double height,
+      String welcomeMessage, bool isDarkMode) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDarkMode
+              ? [Colors.grey[800]!, Colors.grey[900]!]
+              : [Colors.blue[300]!, Colors.blue[600]!],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Stack(
         children: [
-          Container(
-            width: w,
-            height: h * 0.3,
-            decoration: BoxDecoration(
-              color: isDarkMode
-                  ? const Color.fromARGB(255, 50, 50, 50) // Couleur pour mode sombre
-                  : const Color.fromARGB(255, 200, 225, 244), // Couleur pour mode clair
-              image: DecorationImage(
-                image: const AssetImage("assets/images/truck.jpg"),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.7),
-                  BlendMode.dstATop,
-                ),
-              ),
-            ),
-            child: Center(
-              child: Text(
-                welcomeMessage,
-                style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black,
-                      offset: Offset(2, 2),
-                      blurRadius: 5,
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-              ),
+          Positioned.fill(
+            child: Image.asset(
+              "assets/images/truck.jpg",
+              fit: BoxFit.cover,
+              color: Colors.black.withOpacity(0.6),
+              colorBlendMode: BlendMode.dstATop,
             ),
           ),
-          const SizedBox(height: 20),
-          _buildButton(
-            context,
-            'Voir maps',
-            Icons.map,
-            '/map',
+          Center(
+            child: Text(
+              welcomeMessage,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                      color: Colors.black, offset: Offset(2, 2), blurRadius: 5),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget _buildButton(BuildContext context, String text, IconData icon, String? route, {VoidCallback? onTap}) {
+  Widget _buildInfoCard(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 20),
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.quickStatistics,
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                //Données statiques: pas de vraies données , données réelles à récupérer plutard avec la bd
+                _buildStatItem(
+                    context, AppLocalizations.of(context)!.activeTrucks, "15"),
+                _buildStatItem(context,
+                    AppLocalizations.of(context)!.numberOfInterventions, "42"),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(BuildContext context, String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+        ),
+        SizedBox(height: 5),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                color: Colors.grey[600],
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMapCard(BuildContext context, String? route) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: Theme.of(context).primaryColor, // S'adapte au thème actif
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: InkWell(
+          onTap: () {
+            if (route != null) {
+              Navigator.pushReplacementNamed(context, route);
+            }
+          },
+          borderRadius: BorderRadius.circular(15),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Icon(Icons.map,
+                    size: 30, color: Theme.of(context).primaryColor),
+                SizedBox(width: 16),
+                Text(
+                  AppLocalizations.of(context)!.viewMaps,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                Spacer(),
+                Icon(Icons.arrow_forward_ios,
+                    color: Theme.of(context).primaryColor),
+              ],
+            ),
           ),
         ),
-        icon: Icon(icon),
-        label: Text(
-          text,
-          style: const TextStyle(fontSize: 18),
-        ),
-        onPressed: onTap ?? () {
-          if (route != null) {
-            Navigator.pushReplacementNamed(context, route);
-          }
-        },
       ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.quickActions,
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 15),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _buildActionChip(
+                  context,
+                  AppLocalizations.of(context)!.newIntervention,
+                  Icons.local_shipping),
+              _buildActionChip(context,
+                  AppLocalizations.of(context)!.dailyReport, Icons.assessment),
+              _buildActionChip(context,
+                  AppLocalizations.of(context)!.maintenance, Icons.build),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionChip(BuildContext context, String label, IconData icon) {
+    return ActionChip(
+      avatar: Icon(icon, size: 18, color: Theme.of(context).primaryColor),
+      label: Text(label),
+      labelStyle: TextStyle(color: Theme.of(context).primaryColor),
+      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+      onPressed: () {},
     );
   }
 }

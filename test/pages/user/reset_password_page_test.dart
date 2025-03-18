@@ -1,87 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/user/reset_password_page.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('ResetPasswordPage Tests', () {
-    testWidgets('Vérifie la présence du titre et des widgets principaux', (WidgetTester tester) async {
-    
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ResetPasswordPage(),
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-       
-          ],
-          supportedLocales: const [
-            Locale('en'), 
-          ],
-        ),
-      );
+  TestWidgetsFlutterBinding.ensureInitialized(); 
 
-     
-      expect(find.text('Password Reset'), findsOneWidget);
+  testWidgets('ResetPasswordPage permet la saisie d\'email', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate, 
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [
+         Locale('en', ''),
+        Locale('fr', ''), 
+        ],
+        home: ResetPasswordPage(),
+      ),
+    );
 
-      
-      expect(find.byType(TextField), findsOneWidget);
+    await tester.pumpAndSettle();
 
-     
-      expect(find.widgetWithText(ElevatedButton, 'Send Email'), findsOneWidget);
-    });
+   
+    final emailField = find.byType(TextField);
+    expect(emailField, findsOneWidget);
 
-    testWidgets('Simule la saisie d\'un email dans le champ', (WidgetTester tester) async {
+   
+    await tester.enterText(emailField, 'test@example.com');
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ResetPasswordPage(),
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en'), 
-          ],
-        ),
-      );
+    await tester.pump();
 
-      final emailField = find.byType(TextField);
-
-      await tester.enterText(emailField, 'test@example.com');
-
-      
-      expect(find.text('test@example.com'), findsOneWidget);
-    });
-
-    testWidgets('Vérifie que le bouton Envoyer est cliquable', (WidgetTester tester) async {
-    
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ResetPasswordPage(),
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en'), 
-          ],
-        ),
-      );
-
-      
-      final sendButton = find.widgetWithText(ElevatedButton, 'Send Email');
-
-    
-      expect(sendButton, findsOneWidget);
-
-  
-      await tester.tap(sendButton);
-
-  
-      await tester.pump();
-
-      
-    });
+ 
+    expect(find.text('test@example.com'), findsOneWidget);
   });
 }

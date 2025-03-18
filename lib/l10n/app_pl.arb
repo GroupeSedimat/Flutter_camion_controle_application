@@ -40,6 +40,19 @@
     "userApprove": "Zatwierdź użytkownika",
     "userDataNotFound": "Nie znaleziono danych użytkownika",
     "role": "Rola {userRole}",
+    "searchLocationPlaceholder": "نSzukaj miejsca",
+    "mapTitle": " Mapa",
+    "viewOnGoogleMaps": "Zobacz na Google Maps",
+    "viewMaps": "Zobacz maps",
+    "quickStatistics": "Szybkie statystyki",
+    "activeTrucks": "Aktywne ciężarówki",
+    "numberOfInterventions": "Liczba interwencji",
+    "quickActions": "Szybkie akcje",
+    "newIntervention": "Nowa interwencja",
+    "dailyReport": "Raport dzienny",
+    "maintenance": "Utrzymanie",
+    
+
 
     "passForgot": "Zapomniałeś hasła?",
     "passNotMatch": "Wpisane hasła się róźnią",

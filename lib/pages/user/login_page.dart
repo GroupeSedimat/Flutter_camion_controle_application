@@ -13,7 +13,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPagestate extends State<LoginPage> {
-  var identifierController = TextEditingController(); 
+  var identifierController = TextEditingController();
   var passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
@@ -58,51 +58,57 @@ class _LoginPagestate extends State<LoginPage> {
                     ],
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.welcomeToMC,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(1.0),
-                            offset: Offset(2, 2),
-                            blurRadius: 5,
-                          ),
-                        ],
+                child: Center(
+                  // Ajout de Center pour bien centrer sur petits écrans
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.welcomeToMC,
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(1.0),
+                              offset: Offset(2, 2),
+                              blurRadius: 5,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      AppLocalizations.of(context)!.logInText,
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(1.0),
-                            offset: Offset(2, 2),
-                          ),
-                        ],
+                      const SizedBox(height: 10),
+                      Text(
+                        AppLocalizations.of(context)!.logInText,
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(1.0),
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 50),
-              Padding(
+            Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
                   _buildTextField(
                     controller: identifierController,
-                    hintText: AppLocalizations.of(context)!.eMailOrUsernameEnter,
-                    icon: Icons.person, 
+                    hintText:
+                        AppLocalizations.of(context)!.eMailOrUsernameEnter,
+                    icon: Icons.person,
                     isDarkMode: isDarkMode,
                   ),
                   const SizedBox(height: 40),
@@ -113,7 +119,9 @@ class _LoginPagestate extends State<LoginPage> {
                     obscureText: !_isPasswordVisible,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: Theme.of(context).primaryColor,
                       ),
                       onPressed: () {
@@ -128,7 +136,7 @@ class _LoginPagestate extends State<LoginPage> {
                   GestureDetector(
                     onTap: () {
                       AuthController.instance.login(
-                        identifierController.text.trim(), 
+                        identifierController.text.trim(),
                         passwordController.text.trim(),
                       );
                     },
@@ -163,12 +171,14 @@ class _LoginPagestate extends State<LoginPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => InscriptionPage()),
+                        MaterialPageRoute(
+                            builder: (context) => InscriptionPage()),
                       );
                     },
                     child: RichText(
                       text: TextSpan(
-                        text: "${AppLocalizations.of(context)!.accountNotYet}   ",
+                        text:
+                            "${AppLocalizations.of(context)!.accountNotYet}   ",
                         style: TextStyle(color: Colors.grey[500], fontSize: 15),
                         children: [
                           TextSpan(
@@ -198,11 +208,11 @@ class _LoginPagestate extends State<LoginPage> {
     required IconData icon,
     bool obscureText = false,
     Widget? suffixIcon,
-    required bool isDarkMode, 
+    required bool isDarkMode,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.black26 : Colors.white, 
+        color: isDarkMode ? Colors.black26 : Colors.white,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -223,7 +233,8 @@ class _LoginPagestate extends State<LoginPage> {
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
+            borderSide:
+                BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),

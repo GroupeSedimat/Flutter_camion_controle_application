@@ -15,8 +15,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+
 class CompanyList extends StatefulWidget {
-  const CompanyList({super.key});
+  const CompanyList({Key? key}) : super(key: key);
 
   @override
   State<CompanyList> createState() => _CompanyListState();
@@ -43,13 +45,14 @@ class _CompanyListState extends State<CompanyList> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -76,7 +79,7 @@ class _CompanyListState extends State<CompanyList> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -107,7 +110,8 @@ class _CompanyListState extends State<CompanyList> {
       print("💽 Synchronizing Users...");
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      await syncService.fullSyncTable("companies",
+          user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -120,7 +124,7 @@ class _CompanyListState extends State<CompanyList> {
 
   Future<void> _loadCompanyList() async {
     Map<String, Company>? companyList = await getAllCompanies(db, _user.role);
-    if(companyList != null){
+    if (companyList != null) {
       _companyList = companyList;
     }
   }
@@ -173,7 +177,8 @@ class _CompanyListState extends State<CompanyList> {
       itemCount: _companyList.length,
       itemBuilder: (_, index) {
         Widget leading;
-        if (_companyList.values.elementAt(index).logo == "" || _companyList.values.elementAt(index).logo == null) {
+        if (_companyList.values.elementAt(index).logo == "" ||
+            _companyList.values.elementAt(index).logo == null) {
           leading = Container(
             decoration: BoxDecoration(
               color: Colors.grey.shade200,
@@ -202,112 +207,115 @@ class _CompanyListState extends State<CompanyList> {
           );
         }
         String isDeleted = "";
-        if(_companyList.values.elementAt(index).deletedAt != null){
+        if (_companyList.values.elementAt(index).deletedAt != null) {
           isDeleted = " (deleted)";
         }
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
           child: Material(
-          elevation: 4.0,
-          borderRadius: BorderRadius.circular(12.0),
-          child: ExpansionTile(
-            leading: leading,
-            title: Text(
+            elevation: 4.0,
+            borderRadius: BorderRadius.circular(12.0),
+            child: ExpansionTile(
+              leading: leading,
+              title: Text(
                 "${_companyList.values.elementAt(index).name}$isDeleted",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            trailing: PopupMenuButton(
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  showCompanyModal(
-                    company: _companyList.values.elementAt(index),
-                    companyID: _companyList.keys.elementAt(index),
-                  );
-                } else if (value == 'delete') {
-                  _showDeleteConfirmation(_companyList.keys.elementAt(index));
-                } else if (value == 'restore') {
-                  await restoreCompany(db, _companyList.keys.elementAt(index));
-                  if (networkService.isOnline) {
-                    await _syncCompanies();
-                  }
-                  await _loadDataFromDatabase();
-                  setState(() {});
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, color: Colors.blueAccent),
-                      SizedBox(width: 8),
-                      Text(AppLocalizations.of(context)!.edit),
-                    ],
-                  ),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
                 ),
-                if(_isSuperAdmin())
-                  _companyList.values.elementAt(index).deletedAt == null
-                    ? PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, color: Colors.redAccent),
-                          SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.delete),
-                        ],
-                      ),
-                    )
-                    : PopupMenuItem(
-                      value: 'restore',
-                      child: Text(AppLocalizations.of(context)!.restore),
+              ),
+              trailing: PopupMenuButton(
+                onSelected: (value) async {
+                  if (value == 'edit') {
+                    showCompanyModal(
+                      company: _companyList.values.elementAt(index),
+                      companyID: _companyList.keys.elementAt(index),
+                    );
+                  } else if (value == 'delete') {
+                    _showDeleteConfirmation(_companyList.keys.elementAt(index));
+                  } else if (value == 'restore') {
+                    await restoreCompany(
+                        db, _companyList.keys.elementAt(index));
+                    if (networkService.isOnline) {
+                      await _syncCompanies();
+                    }
+                    await _loadDataFromDatabase();
+                    setState(() {});
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit, color: Colors.blueAccent),
+                        SizedBox(width: 8),
+                        Text(AppLocalizations.of(context)!.edit),
+                      ],
                     ),
-              ],
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Wrap(
-                  spacing: 15,
-                  runSpacing: 15,
-                  children: [
-                    // Informations principales affichées sous forme de cartes
-                    _buildInfoCard(
-                      context,
-                      "${AppLocalizations.of(context)!.companySiret}: ${_companyList.values.elementAt(index).siret}",
-                    ),
-                    _buildInfoCard(
-                      context,
-                      "${AppLocalizations.of(context)!.companySirene}: ${_companyList.values.elementAt(index).sirene}",
-                    ),
-                    if (_companyList.values.elementAt(index).description != "")
+                  ),
+                  if (_isSuperAdmin())
+                    _companyList.values.elementAt(index).deletedAt == null
+                        ? PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Colors.redAccent),
+                                SizedBox(width: 8),
+                                Text(AppLocalizations.of(context)!.delete),
+                              ],
+                            ),
+                          )
+                        : PopupMenuItem(
+                            value: 'restore',
+                            child: Text(AppLocalizations.of(context)!.restore),
+                          ),
+                ],
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Wrap(
+                    spacing: 15,
+                    runSpacing: 15,
+                    children: [
+                      // Informations principales affichées sous forme de cartes
                       _buildInfoCard(
                         context,
-                        "${AppLocalizations.of(context)!.companyDescription}: ${_companyList.values.elementAt(index).description}",
+                        "${AppLocalizations.of(context)!.companySiret}: ${_companyList.values.elementAt(index).siret}",
                       ),
-                    if (_companyList.values.elementAt(index).tel != "")
                       _buildInfoCard(
                         context,
-                        "${AppLocalizations.of(context)!.companyPhone}: ${_companyList.values.elementAt(index).tel}",
+                        "${AppLocalizations.of(context)!.companySirene}: ${_companyList.values.elementAt(index).sirene}",
                       ),
-                    if (_companyList.values.elementAt(index).email != "")
-                      _buildInfoCard(
-                        context,
-                        "${AppLocalizations.of(context)!.companyEMail}: ${_companyList.values.elementAt(index).email}",
-                      ),
-                    if (_companyList.values.elementAt(index).address != "")
-                      _buildInfoCard(
-                        context,
-                        "${AppLocalizations.of(context)!.companyAddress}: ${_companyList.values.elementAt(index).address}",
-                      ),
-                    if (_companyList.values.elementAt(index).responsible != "")
-                      _buildInfoCard(
-                        context,
-                        "${AppLocalizations.of(context)!.companyResponsible}: ${_companyList.values.elementAt(index).responsible}",
-                      ),
+                      if (_companyList.values.elementAt(index).description !=
+                          "")
+                        _buildInfoCard(
+                          context,
+                          "${AppLocalizations.of(context)!.companyDescription}: ${_companyList.values.elementAt(index).description}",
+                        ),
+                      if (_companyList.values.elementAt(index).tel != "")
+                        _buildInfoCard(
+                          context,
+                          "${AppLocalizations.of(context)!.companyPhone}: ${_companyList.values.elementAt(index).tel}",
+                        ),
+                      if (_companyList.values.elementAt(index).email != "")
+                        _buildInfoCard(
+                          context,
+                          "${AppLocalizations.of(context)!.companyEMail}: ${_companyList.values.elementAt(index).email}",
+                        ),
+                      if (_companyList.values.elementAt(index).address != "")
+                        _buildInfoCard(
+                          context,
+                          "${AppLocalizations.of(context)!.companyAddress}: ${_companyList.values.elementAt(index).address}",
+                        ),
+                      if (_companyList.values.elementAt(index).responsible !=
+                          "")
+                        _buildInfoCard(
+                          context,
+                          "${AppLocalizations.of(context)!.companyResponsible}: ${_companyList.values.elementAt(index).responsible}",
+                        ),
                     ],
                   ),
                 ),
@@ -346,12 +354,13 @@ class _CompanyListState extends State<CompanyList> {
   }
 
   String title() {
-    if(_isSuperAdmin()){
+    if (_isSuperAdmin()) {
       return AppLocalizations.of(context)!.companyList;
-    }else{
+    } else {
       return AppLocalizations.of(context)!.details;
     }
   }
+
   void showCompanyModal({
     Company? company,
     String? companyID,
@@ -363,8 +372,7 @@ class _CompanyListState extends State<CompanyList> {
         return Container(
           padding: const EdgeInsets.all(10),
           margin: EdgeInsets.fromLTRB(
-              10, 50, 10, MediaQuery.of(context).viewInsets.bottom
-          ),
+              10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
           child: AddCompany(
             company: company,
             companyID: companyID,
@@ -403,8 +411,8 @@ class _CompanyListState extends State<CompanyList> {
               setState(() {});
               Navigator.pop(context);
             },
-            child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
-              // AppLocalizations.of(context)!
+            child: Text(AppLocalizations.of(context)!.yes,
+                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -415,7 +423,8 @@ class _CompanyListState extends State<CompanyList> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      await syncService.fullSyncTable("companies",
+          user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");

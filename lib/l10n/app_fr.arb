@@ -40,6 +40,22 @@
     "userApprove": "Approuver un utilisateur",
     "userDataNotFound": "Aucune donnée utilisateur disponible",
     "role": "Rôle {userRole}",
+    "searchLocationPlaceholder": "Rechercher un lieu",
+    "mapTitle": " Map",
+    "viewOnGoogleMaps": "Voir sur google maps",
+    "viewMaps": "Voir maps",
+    "quickStatistics": "Statistiques rapides",
+    "activeTrucks": "Camions actifs",
+    "numberOfInterventions": "Nombre d'interventions",
+    "quickActions": "Actions rapides",
+    "newIntervention": "Nouvelle intervention",
+    "dailyReport": "Rapport journalier",
+    "maintenance": "Maintenance",
+
+
+
+    
+    
 
     "passForgot": "Mot de passe oublié?",
     "passNotMatch": "Les mots de passe ne correspondent pas",
