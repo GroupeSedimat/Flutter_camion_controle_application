@@ -6,6 +6,7 @@ import 'dart:convert';
 
 String tableName = "camionTypes";
 
+/// une classe fonctionnant sur la table "camionTypes" dans database local
 Future<void> createTableCamionTypes(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -154,10 +155,8 @@ Future<Map<String,CamionType>?> getAllCamionTypesSinceLastUpdate(dynamic dbOrTxn
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated CamionTypes $lastUpdated");
 
     for (var camionTypeItem in maps) {
-      print("-------- camion type ${camionTypeItem["id"]} updatedAt ${camionTypeItem["updatedAt"]}");
       camionTypes[camionTypeItem["id"] as String] = responseItemToCamionType(camionTypeItem);
     }
 
@@ -303,10 +302,6 @@ LinkedHashMap<String, CamionType> sortedCamionTypes({
         valueA = a.name;
         valueB = b.name;
         break;
-      // case 'company':
-      //   valueA = a.company;
-      //   valueB = b.company;
-      //   break;
       default:
         valueA = a.name;
         valueB = b.name;

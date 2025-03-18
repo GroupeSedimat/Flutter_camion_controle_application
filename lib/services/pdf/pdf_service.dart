@@ -20,7 +20,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:sqflite/sqflite.dart';
 
 class PdfService {
-  /// adapt to mode offline
+
+  /// service responsable de la création de PDF
+  ///
   DatabasePDFService databasePDFService = DatabasePDFService();
   DatabaseImageService databaseImageService = DatabaseImageService();
   NetworkService networkService = NetworkService();
@@ -43,7 +45,6 @@ class PdfService {
     final companyColumn = await _companyDatas(company, font);
     final photosToPDF = HashMap<int, Uint8List>();
 
-    // final blueprintTaskList = _generateBlueprintTaskList(sortedBlueprints, tasks, list, photosToPDF);
     Map<Blueprint, TaskChecklist> blueprintTaskList = {};
 
     for (Blueprint blueprint in sortedBlueprints.values){
@@ -92,31 +93,7 @@ class PdfService {
     return pdf.save();
   }
 
-  // Map<Blueprint, TaskChecklist> _generateBlueprintTaskList(
-  //     Map<String, Blueprint> sortedBlueprints,
-  //     Map<String, TaskChecklist> tasks,
-  //     ListOfLists list,
-  //     Map<int, Uint8List> photosToPDF) {
-  //   final blueprintTaskList = HashMap<Blueprint, TaskChecklist>();
-  //
-  //   for (final blueprint in sortedBlueprints.values) {
-  //     for (final task in tasks.values) {
-  //       if (blueprint.nrEntryPosition == task.nrEntryPosition &&
-  //           blueprint.nrOfList == list.listNr &&
-  //           task.nrOfList == list.listNr) {
-  //         blueprintTaskList[blueprint] = task;
-  //         if (task.photoFilePath?.isNotEmpty == true) {
-  //           databaseImageService.downloadImageFromFirebase(task.photoFilePath!).then((photo) {
-  //             if (photo != null) photosToPDF[task.nrEntryPosition] = photo;
-  //           });
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return Map.fromEntries(
-  //       blueprintTaskList.entries.toList()..sort((e1, e2) => e1.value.nrEntryPosition.compareTo(e2.value.nrEntryPosition)));
-  // }
-
+  /// widget d'affichage d'une liste d'éléments de checklist validés
   pw.Widget _showValidation(Map<Blueprint, TaskChecklist> blueprintTaskList, pw.Font font, Map<int, Uint8List> photosToPDF) {
     int count = 1;
     return pw.ListView.builder(
@@ -185,6 +162,7 @@ class PdfService {
     );
   }
 
+  /// widget d'ajouter des photos en annexe au PDF
   pw.Widget _photoAttachments(Map<int, Uint8List> photosToPDF) {
     int count = 1;
     return pw.Wrap(
@@ -210,6 +188,7 @@ class PdfService {
     );
   }
 
+  /// widget d'arrière-plan
   pw.Widget _watermark(Uint8List logo) {
     return pw.Center(
       child: pw.Opacity(
@@ -219,6 +198,7 @@ class PdfService {
     );
   }
 
+  /// Modification de l'en-tête des pages
   pw.Column _header(pw.Context context, pw.Font font, MyUser user, ListOfLists list, Uint8List logo, pw.Row companyColumn) {
     return pw.Column(
         children: [
@@ -261,6 +241,7 @@ class PdfService {
     );
   }
 
+  /// Modification du pied de page sur les pages
   pw.Widget _footer(pw.Context context, pw.Font font) {
     return pw.Column(
       children: [
@@ -270,8 +251,8 @@ class PdfService {
     );
   }
 
+  /// Déterminer comment et quoi afficher à partir des données de l'entreprise de l'utilisateur
   Future<pw.Row> _companyDatas(Company company, pw.Font font) async {
-    /// define what and how should be displayed
     Uint8List? logoData;
     if (company.logo != null) {
       logoData = await _downloadImage(company.logo!);
@@ -343,8 +324,8 @@ class PdfService {
     return filePath;
   }
 
+  /// Déterminer comment et quoi afficher à partir des données utilisateur
   pw.Column userDatas(MyUser user, pw.Font font) {
-    /// define what and how should be displayed
     DateTime now = DateTime.now();
     DateTime localTime = now.toLocal();
     String formattedTime = DateFormat("yyyy-MM-dd HH:mm:ss").format(localTime);
@@ -359,6 +340,7 @@ class PdfService {
     );
   }
 
+  /// Spécifier où enregistrer le PDF sur appareil
   Future<String> getDocumentsPath() async {
     String documentsPath;
     if (Platform.isAndroid) {
@@ -382,12 +364,13 @@ class PdfService {
     return documentsPath;
   }
 
+  /// Si le PDF a été enregistré hors ligne, le fichier a été enregistré dans un emplacement temporaire au lieu de Firebase.
+  /// Ici, je transfère tous les fichiers temporairement enregistrés vers Firebase.
   Future<void> uploadAllTemporaryPDFs(MyUser user, String userId) async {
     Directory tempDir = await getApplicationSupportDirectory();
     String pdfDirPath = tempDir.path;
     Directory pdfDir = Directory(pdfDirPath);
 
-    print("uploadAllTemporaryPDFs path: $pdfDirPath");
     if (!await pdfDir.exists()) {
       print("PDF catalog does not exist: $pdfDirPath");
       return;

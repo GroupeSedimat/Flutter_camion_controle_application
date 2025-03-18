@@ -3,6 +3,10 @@ import 'package:sqflite/sqflite.dart';
 
 String updatesTableName = "updates";
 
+/// une classe fonctionnant sur la table "updates" dans database local
+/// la classe d'assistance enregistre les dernières modifications et
+/// les dernières dates de synchronisation des tables dans une base de données locale
+/// (pour faciliter la synchronisation avec Firebase)
 Future<void> createTableInfo(Database db) async {
   await db.execute('''
     CREATE TABLE $updatesTableName (

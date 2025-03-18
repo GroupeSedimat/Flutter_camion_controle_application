@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 
 String tableName = "listOfLists";
 
+/// une classe fonctionnant sur la table "listOfLists" dans database local
 Future<void> createTableListOfLists(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -125,10 +126,8 @@ Future<Map<String,ListOfLists>?> getAllListsSinceLastUpdate(dynamic dbOrTxn, Str
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated ListOfLists $lastUpdated");
 
     for (var element in maps) {
-      print("-------- list ${element["id"]} updatedAt ${element["updatedAt"]}");
       listOfLists[element["id"] as String] = responseItemToListOfLists(element);
     }
 

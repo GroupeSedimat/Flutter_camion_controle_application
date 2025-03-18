@@ -5,6 +5,7 @@ import 'package:flutter_application_1/models/camion/camion.dart';
 
 const String CAMION_COLLECTION_REF = "camion";
 
+/// une classe fonctionnant sur la collection "camion" dans Firebase database
 class DatabaseCamionService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _camionRef;
@@ -253,7 +254,6 @@ class DatabaseCamionService{
 
   Future<String> addCamion(Camion camion) async {
     var returnAdd = await _camionRef.add(camion);
-    print("------------- ---------- ---------- database add camion ${returnAdd.id}");
     return returnAdd.id;
   }
 

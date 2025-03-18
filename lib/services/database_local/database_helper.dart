@@ -9,6 +9,7 @@ import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:sqflite/sqflite.dart';
 import 'camions_table.dart';
 
+/// Classe d'assistance pour la gestion des tables dans la base de données locale
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   factory DatabaseHelper() => _instance;
@@ -76,18 +77,13 @@ class DatabaseHelper {
     }
   }
 
+  /// Efface les tables de base de données locales
   Future<void> clearTables(List<String> tableNames) async {
     final db = await database;
-    print("🧹 I'm starting to clean up the database...");
-
     for (var tableName in tableNames) {
-      print("🧹 I'm clearing the table: $tableName");
       await db.delete(tableName);
     }
-
-    print("🧹 Cleaning completed. Initializing update tables...");
     await _initializeUpdateTable(db, tableNames);
-
     print("✅ Cleaning and initialization completed.");
   }
 }

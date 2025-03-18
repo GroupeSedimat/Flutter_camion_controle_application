@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 const String VALIDATION_STORAGE_REF = "validation_files";
 
+/// classe responsable du transfert des documents attribués aux "MyUser.apresFormationDoc" entre Firebase et l'appareil.
 class DatabaseValidationService{
   late final Reference _referenceValidation;
   final Reference _fireReference = FirebaseStorage.instance.ref();

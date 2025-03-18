@@ -164,6 +164,11 @@ class _MenuWidgetState extends State<MenuWidget> {
         ),
       );
 
+  /// Construisez votre menu!
+  ///
+  /// Actuellement, il y a des liens vers des sites Web ci-dessous pour la navigation.
+  /// Ajoutez une nouvelle page de la même manière qu'une page existante.
+  /// Ajoutez les rôles pour lesquels elle doit être affichée "if (_role == 'user')" (ou n'ajoutez rien si la page doit être accessible à tous).
   Widget buildMenuItems(BuildContext context) => Column(
         children: [
           buildMenuItem(

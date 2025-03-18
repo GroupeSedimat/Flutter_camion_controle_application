@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 const String IMAGES_STORAGE_REF = "images";
 
+/// une classe fonctionnant sur la collection "images" dans Firebase storage
 class DatabaseImageService{
   late final Reference _referenceImages;
   final Reference _fireReference = FirebaseStorage.instance.ref();

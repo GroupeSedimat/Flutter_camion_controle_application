@@ -60,7 +60,7 @@ L’application repose sur une architecture modulaire, divisée en plusieurs cou
 
 #### 4. API et connectivité
 
-    INPI : récupération des informations des entreprises via leur numéro SIREN.
+    INPI : récupération des informations des entreprises via leur numéro SIREN (n'existe pas encore).
     VRM : récupération des données sur les camions (actuellement désactivé).
     Firebase Authentication : gestion des connexions et des rôles utilisateurs.
 
@@ -87,13 +87,13 @@ flutter run
 
 L’application utilise Firebase Firestore. Voici les étapes pour l’installer et la configurer:
 
-- [instaliuj CLI Firebase](https://firebase.google.com/docs/cli?hl=fr#setup_update_cli)
-- [instaluj Firebase](https://firebase.google.com/docs/flutter/setup?hl=fr&platform=ios)
+- [installer CLI Firebase](https://firebase.google.com/docs/cli?hl=fr#setup_update_cli)
+- [installer Firebase](https://firebase.google.com/docs/flutter/setup?hl=fr&platform=ios)
 - Configurer Firebase pour le projet:
 ```bash
 flutterfire configure
 ```
->[!IMPORTANT]
+>[!TIP]
 >
 > Cette commande permet d’associer l’application à une base de données Firebase. Elle est utile pour changer de base (par exemple, en fonction de la branche utilisée pour les tests). Avant de l’exécuter, assurez-vous d’avoir créé la base de données Firebase.
 
@@ -107,7 +107,7 @@ flutterfire configure
 
 #### Installation pluginow
 
-- [strona  pluginami fo fluttera](https://pub.dev/)
+- [Page des plugins Flutter](https://pub.dev/)
 - Installer un plugin dans le projet:
 ```bash
 flutter pub add PLUGIN_NAME
@@ -116,12 +116,12 @@ flutter pub add PLUGIN_NAME
 
 ## 5. Structure du projet
 
-/lib  
-├── /models
-├── /services
-├── /pages
-├── /widgets
-├── /utils
+/lib <br/>
+├── /models <br/>
+├── /services <br/>
+├── /pages <br/>
+├── /widgets <br/>
+├── /utils <br/>
 ├── main.dart
 
 

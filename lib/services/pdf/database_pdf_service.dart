@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 const String PDF_STORAGE_REF = "pdf";
 
+/// une classe fonctionnant sur la collection "pdf" dans Firebase storage
 class DatabasePDFService{
   late final Reference _referencePdf;
   final Reference _fireReference = FirebaseStorage.instance.ref();
@@ -50,7 +51,6 @@ class DatabasePDFService{
         value: (k) => pdfList[k]!,
       );
 
-      // return pdfList;
     } catch (error) {
       print("Error retrieving $companyID pdf list: $error");
       return pdfList;
@@ -91,7 +91,6 @@ class DatabasePDFService{
         key: (k) => k,
         value: (k) => pdfList[k]!,
       );
-      // return pdfList;
     } catch (error) {
       print("Error retrieving User $userID pdf list: $error");
       return pdfList;

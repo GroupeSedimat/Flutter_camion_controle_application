@@ -6,6 +6,7 @@ import 'package:sqflite/sqflite.dart';
 
 String tableName = "users";
 
+/// une classe fonctionnant sur la table "users" dans database local
 Future<void> createTableUsers(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -133,14 +134,11 @@ Future<Map<String,MyUser>?> getAllUsersSinceLastUpdate(dynamic dbOrTxn, String l
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Users $lastUpdated");
 
     for (var user in maps) {
-      print("-------- user ${user["id"]} updatedAt ${user["updatedAt"]}");
       users[user["id"] as String] = responseItemToUser(user);
     }
 
-    // return sortedUsers(users: users);
     return users;
 
   } catch (e){
@@ -159,10 +157,8 @@ Future<Map<String,MyUser>?> getAllCompanyUsersSinceLastUpdate(dynamic dbOrTxn, S
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Users $lastUpdated");
 
     for (var user in maps) {
-      print("-------- user ${user["id"]} updatedAt ${user["updatedAt"]}");
       users[user["id"] as String] = responseItemToUser(user);
     }
 
@@ -184,7 +180,6 @@ Future<Map<String,MyUser>?> getAllCompanyUsers(dynamic dbOrTxn, String companyId
     if(maps.isEmpty){
       return null;
     }
-    print("-------- All Company Users");
 
     for (var user in maps) {
       users[user["id"] as String] = responseItemToUser(user);
@@ -211,7 +206,6 @@ Future<Map<String,MyUser>?> getUserDataSinceLastUpdate(dynamic dbOrTxn, String l
 
     for (var user in maps) {
       if(user["id"] == userId){
-        print("-------- user ${user["id"]} updatedAt ${user["updatedAt"]}");
         users[user["id"] as String] = responseItemToUser(user);
       }
     }
@@ -289,10 +283,7 @@ Future<Map<String,MyUser>?> getThisUser(dynamic dbOrTxn) async {
     }
     for (var user in maps) {
       if(user["thisUser"] == "true"){
-        print("-------- user ${user["id"]} updatedAt ${user["updatedAt"]} is this user ${user["thisUser"]}");
-        print("-------- user ${user["role"]} username ${user["username"]} is apresFormation ${user["apresFormation"]}");
         users[user["id"] as String] = responseItemToUser(user);
-        print("users $users");
       }
     }
     return users;

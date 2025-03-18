@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 
 String tableName = "validateTasks";
 
+/// une classe fonctionnant sur la table "validateTasks" dans database local
 Future<void> createTableTasks(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -178,10 +179,8 @@ Future<Map<String,TaskChecklist>?> getAllTasksSinceLastUpdate(dynamic dbOrTxn, S
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Tasks $lastUpdated");
 
     for (var task in maps) {
-      print("-------- task ${task["id"]} updatedAt ${task["updatedAt"]}");
       tasks[task["id"] as String] = responseItemToTask(task);
     }
 

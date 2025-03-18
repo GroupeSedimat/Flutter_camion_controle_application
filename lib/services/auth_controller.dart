@@ -128,6 +128,8 @@ class AuthController extends GetxController {
       'isApproved': false,
       'apresFormation': false,
       'apresFormationDoc': "",
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     });
 
     Get.offAll(() => LoginPage());
@@ -140,6 +142,7 @@ class AuthController extends GetxController {
     );
   }
 }
+
 //augmentation securité mot de passe pour inscription
 bool isValidPassword(String password) {
   // La longueur du mot de passe doit être d'au moins 8 caractères

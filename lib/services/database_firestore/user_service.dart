@@ -8,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const String USERS_COLLECTION_REF = "users";
 
+/// une classe fonctionnant sur la collection "users" dans Firebase database
 class UserService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _userRef;

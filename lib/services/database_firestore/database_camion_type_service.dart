@@ -5,6 +5,7 @@ import 'package:flutter_application_1/models/camion/camion_type.dart';
 
 const String CAMION_TYPE_COLLECTION_REF = "camion_type";
 
+/// une classe fonctionnant sur la collection "camion_type" dans Firebase database
 class DatabaseCamionTypeService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _camionTypeRef;
@@ -37,12 +38,11 @@ class DatabaseCamionTypeService{
         key: (k) => k,
         value: (k) => camionType[k]!,
       );
-      // camions.sort((a, b) => a.name.compareTo(b.name));
       return sortedCamions;
 
     } catch (e) {
       print("Error getting listItems: $e");
-      rethrow; // Gérez l’erreur le cas échéant.
+      rethrow;
     }
   }
 
@@ -94,7 +94,6 @@ class DatabaseCamionTypeService{
 
   Future<String> addCamionType(CamionType camionType) async {
     var returnAdd = await _camionTypeRef.add(camionType);
-    print("------------- ---------- Add camion type: ${returnAdd.id}");
     return returnAdd.id;
   }
 
@@ -113,7 +112,6 @@ class DatabaseCamionTypeService{
   Future<Map<String, CamionType>> getAllCamionTypesSinceLastSync(String lastSync) async {
     Query query = _camionTypeRef;
     query = query.where('updatedAt', isGreaterThan: lastSync);
-    // print(query.parameters);
 
     try {
       QuerySnapshot querySnapshot = await query.get();
@@ -131,7 +129,6 @@ class DatabaseCamionTypeService{
   Future<Map<String, CamionType>> getListedCamionTypesSinceLastSync(String lastSync, List<String> camionsTypesId) async {
     Query query = _camionTypeRef;
     query = query.where('updatedAt', isGreaterThan: lastSync);
-    // print(query.parameters);
 
     try {
       QuerySnapshot querySnapshot = await query.get();

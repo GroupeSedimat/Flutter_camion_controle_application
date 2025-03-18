@@ -6,6 +6,7 @@ import 'dart:convert';
 
 String tableName = "camions";
 
+/// une classe fonctionnant sur la table "camions" dans database local
 Future<void> createTableCamions(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -165,10 +166,8 @@ Future<Map<String,Camion>?> getAllCamionsSinceLastUpdate(dynamic dbOrTxn, String
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated $lastUpdated");
 
     for (var camionItem in maps) {
-      print("-------- camion ${camionItem["id"]} updatedAt ${camionItem["updatedAt"]}");
       camions[camionItem["id"] as String] = responseItemToCamion(camionItem);
     }
 
@@ -364,10 +363,8 @@ LinkedHashMap<String, Camion> sortedCamions({
   String sortByField = 'name',
   bool isSortDescending = false,
 }) {
-  // Tworzymy listę kluczy
   List<String> sortedKeys = camions.keys.toList();
 
-  // Funkcja porównawcza dla pól
   int compareFields(String field, Camion a, Camion b) {
     String? valueA, valueB;
 
@@ -389,28 +386,23 @@ LinkedHashMap<String, Camion> sortedCamions({
         valueB = b.name;
     }
 
-    // Porównanie rosnąco lub malejąco
     int comparison = valueA.compareTo(valueB);
     return isSortDescending ? -comparison : comparison;
   }
 
-  // Sortowanie
   sortedKeys.sort((a, b) {
     Camion camionA = camions[a]!;
     Camion camionB = camions[b]!;
 
-    // Sortuj po głównym polu
     int primaryComparison = compareFields(sortByField, camionA, camionB);
 
     if (primaryComparison != 0) {
       return primaryComparison;
     }
 
-    // W przypadku remisu sortuj po nazwie
     return compareFields('name', camionA, camionB);
   });
 
-  // Tworzenie LinkedHashMap z posortowanymi kluczami
   return LinkedHashMap.fromIterable(
     sortedKeys,
     key: (k) => k,

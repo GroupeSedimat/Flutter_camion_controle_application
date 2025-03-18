@@ -10,7 +10,14 @@ class BasePage extends StatelessWidget {
   final String? title;
   const BasePage({super.key, required this.body, this.appBar, this.title});
 
-
+  /// La base de chaque nouvelle page
+  ///
+  ///Lors de la création d'une page, ajoutez-la comme "body"
+  /// "BasePage(
+  ///  title : _titre(),
+  ///  body : _buildBody(),
+  ///  )
+  ///  en changeant les couleurs et le thème ici, vous les changez pour toute l'application
   @override
   Widget build(BuildContext context) {
 
@@ -18,6 +25,8 @@ class BasePage extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: appBar ?? AppBar(
         backgroundColor: Theme.of(context).primaryColor,
+        /// Entrez "titre" pour utiliser la AppBar intégrée avec le nom du site
+        /// Créez votre propre AppBar et appelez-la comme "appBar"
         title: Text(
             title ?? "",
             style: TextStyle(
@@ -33,7 +42,9 @@ class BasePage extends StatelessWidget {
           ),
         ],
       ),
+      /// le menu est ajouté à chaque page
       drawer: MenuWidget(),
+      /// "body" que vous créez sera affiché sur la page avec le même thème que sur les autres pages.
       body: body,
     );
   }

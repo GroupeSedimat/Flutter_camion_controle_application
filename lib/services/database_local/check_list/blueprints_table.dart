@@ -6,6 +6,7 @@ import 'dart:convert';
 
 String tableName = "blueprints";
 
+/// une classe fonctionnant sur la table "blueprints" dans database local
 Future<void> createTableBlueprints(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -136,10 +137,8 @@ Future<Map<String,Blueprint>?> getAllBlueprintsSinceLastUpdate(dynamic dbOrTxn, 
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Blueprints $lastUpdated");
 
     for (var blueprintItem in maps) {
-      print("-------- blueprint ${blueprintItem["id"]} updatedAt ${blueprintItem["updatedAt"]}");
       blueprints[blueprintItem["id"] as String] = responseItemToBlueprint(blueprintItem);
     }
 
@@ -263,7 +262,6 @@ LinkedHashMap<String, Blueprint> sortedBlueprints({
     if (primaryComparison != 0) {
       return primaryComparison;
     }
-
     return compareFields('nrEntryPosition', blueprintA, blueprintB);
   });
 

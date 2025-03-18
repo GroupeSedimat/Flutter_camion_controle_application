@@ -6,6 +6,7 @@ import 'dart:convert';
 
 String tableName = "equipments";
 
+/// une classe fonctionnant sur la table "equipments" dans database local
 Future<void> createTableEquipments(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -156,10 +157,8 @@ Future<Map<String,Equipment>?> getAllEquipmentsSinceLastUpdate(dynamic dbOrTxn, 
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Equipments $lastUpdated");
 
     for (var equipmentItem in maps) {
-      print("-------- equipment ${equipmentItem["id"]} updatedAt ${equipmentItem["updatedAt"]}");
       equipments[equipmentItem["id"] as String] = responseItemToEquipment(equipmentItem);
     }
 

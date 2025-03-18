@@ -5,6 +5,7 @@ import 'package:flutter_application_1/models/checklist/task.dart';
 
 const String TASK_COLLECTION_REF = "tasks";
 
+/// une classe fonctionnant sur la collection "tasks" dans Firebase database
 class DatabaseTasksService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _tasksRef;
@@ -56,7 +57,6 @@ class DatabaseTasksService{
 
   Future<String> addTask(TaskChecklist task) async {
     var returnAdd = await _tasksRef.add(task);
-    print("------------- ---------- ---------- database add task${returnAdd.id}");
     return returnAdd.id;
   }
 

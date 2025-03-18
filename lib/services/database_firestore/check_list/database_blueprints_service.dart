@@ -5,6 +5,7 @@ import 'package:flutter_application_1/models/checklist/blueprint.dart';
 
 const String BLUEPRINT_COLLECTION_REF = "blueprint";
 
+/// une classe fonctionnant sur la collection "blueprint" dans Firebase database
 class DatabaseBlueprintsService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _blueprintRef;
@@ -47,7 +48,6 @@ class DatabaseBlueprintsService{
 
   Future<String> addBlueprint(Blueprint blueprint) async {
     var returnAdd = await _blueprintRef.add(blueprint);
-    print("------------- ---------- ---------- database add blueprint ${returnAdd.id}");
     return returnAdd.id;
   }
 
