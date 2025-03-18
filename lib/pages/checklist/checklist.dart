@@ -1,7 +1,6 @@
-import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
@@ -13,17 +12,24 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/pages/checklist/blueprint_template.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/pages/checklist/validate_task.dart';
-import 'package:flutter_application_1/services/camion/database_camion_service.dart';
-import 'package:flutter_application_1/services/camion/database_camion_type_service.dart';
-import 'package:flutter_application_1/services/check_list/database_blueprints_service.dart';
-import 'package:flutter_application_1/services/check_list/database_image_service.dart';
-import 'package:flutter_application_1/services/check_list/database_list_of_lists_service.dart';
-import 'package:flutter_application_1/services/check_list/database_tasks_service.dart';
+import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
+import 'package:flutter_application_1/services/database_local/camions_table.dart';
+import 'package:flutter_application_1/services/database_local/check_list/blueprints_table.dart';
+import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
+import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
+import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/database_local/users_table.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';
-import 'package:flutter_application_1/services/user_service.dart';
+import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:open_document/open_document.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CheckList extends StatefulWidget {
   const CheckList({super.key});
@@ -34,19 +40,20 @@ class CheckList extends StatefulWidget {
 
 class _CheckListState extends State<CheckList> {
 
-  final DatabaseBlueprintsService databaseBlueprintsService = DatabaseBlueprintsService();
-  final DatabaseTasksService databaseTasksService = DatabaseTasksService();
-  final DatabaseImageService databaseImageService = DatabaseImageService();
-  final DatabaseListOfListsService databaseListOfListsService = DatabaseListOfListsService();
-  final DatabaseCamionService databaseCamionService = DatabaseCamionService();
-  final DatabaseCamionTypeService databaseCamionTypeService = DatabaseCamionTypeService();
-  final PdfService pdfService = PdfService();
-  final UserService userService = UserService();
-  AuthController authController = AuthController.instance;
-
+  late Database db;
   late MyUser _user;
-  List<ListOfLists> _listOfListsFuture = [];
+  late String _userId;
+  bool _isLoading = true;
   late List<int> counter;
+  late Map<String, ListOfLists> _listOfLists = {};
+  late Map<String, Blueprint> _blueprints = {};
+  late Map<String, TaskChecklist> _tasks = {};
+
+  late AuthController authController;
+  late UserService userService;
+  late NetworkService networkService;
+  final PdfService pdfService = PdfService();
+
 
   @override
   void initState() {
@@ -54,63 +61,182 @@ class _CheckListState extends State<CheckList> {
     _loadData();
   }
 
-
   Future<void> _loadData() async {
+    await _initDatabase();
+    await _initService();
+    if (!networkService.isOnline) {
+      print("Offline mode, no user update possible");
+    }else{
+      await _loadUserToConnection();
+    }
     await _loadUser();
-    await _loadListOfLists();
+    if (!networkService.isOnline) {
+      print("Offline mode, no sync possible");
+    }{
+      await _syncData();
+    }
+    await _loadDataFromDatabase();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _initDatabase() async {
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
+  Future<void> _initService() async {
+    try {
+      authController = AuthController();
+      userService = UserService();
+      networkService = Provider.of<NetworkService>(context, listen: false);
+    } catch (e) {
+      print("Error loading services: $e");
+    }
+  }
+
+  Future<void> _loadUserToConnection() async {
+    Map<String, MyUser>? users = await getThisUser(db);
+    if(users != null ){
+      return;
+    }
+    try {
+      MyUser user = await userService.getCurrentUserData();
+      String? userId = await userService.userID;
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      await syncService.fullSyncTable("users", user: user, userId: userId);
+    } catch (e) {
+      print("💽 Error loading user: $e");
+    }
   }
 
   Future<void> _loadUser() async {
     try {
-      UserService userService = UserService();
-      MyUser user = await userService.getCurrentUserData();
-      setState(() {
-        _user = user;
-      });
+      Map<String, MyUser>? users = await getThisUser(db);
+      MyUser user = users!.values.first;
+      String? userId = users.keys.first;
+      _userId = userId;
+      _user = user;
     } catch (e) {
       print("Error loading user: $e");
     }
   }
 
-  Future<void> _loadListOfLists() async {
+  Future<void> _syncData() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing users...");
+      await syncService.fullSyncTable("users", user: _user, userId: _userId);
+      print("💽 Synchronizing users Camions...");
+      await syncService.fullSyncTable("camions", user: _user, userId: _userId);
+      List<String> camionsTypeIdList = [];
+      await getAllCamions(db, _user.role).then((camionsMap) {
+        if(camionsMap != null){
+          for(var camion in camionsMap.entries){
+            if(!camionsTypeIdList.contains(camion.value.camionType)){
+              camionsTypeIdList.add(camion.value.camionType);
+            }
+          }
+        }
+      });
+      print("💽 Synchronizing CamionTypess...");
+      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      List<String> camionListOfListId = [];
+      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
+      if(camionTypesMap != null){
+        for(var camionType in camionTypesMap.entries){
+          if(camionType.value.lol != null){
+            for(var list in camionType.value.lol!){
+              if(!camionListOfListId.contains(list)){
+                camionListOfListId.add(list);
+              }
+            }
+          }
+        }
+      }
+      print("💽 Synchronizing LOL...");
+      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
+      print("💽 Synchronizing Blueprints...");
+      await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
+      print("💽 Synchronizing Validate Tasks...");
+      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
+      print("💽 Synchronizing PDFs...");
+      await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during global data synchronization: $e");
+      rethrow;
+    }
+  }
 
-    if(_user.role == "superadmin"){
-      try {
-        List<ListOfLists> listOfListsFuture = _listOfListsFuture = await databaseListOfListsService.getAllLists();
-        setState(() {
-          _listOfListsFuture = listOfListsFuture;
-        });
-      } catch (e) {
-        print("Error loading list of lists: $e");
-      }
+  Future<void> _loadDataFromDatabase() async {
+    await _loadListOfLists();
+    await _loadBlueprints();
+    await _loadTasks();
+  }
+
+  Future<void> _loadBlueprints() async {
+    Map<String, Blueprint>? blueprints = await getAllBlueprints(db, _user.role);
+    if(blueprints != null){
+      _blueprints = blueprints;
     }else{
-      try {
-        Camion camion = await databaseCamionService.getOneCamionWithID(_user.camion) as Camion;
-        CamionType camionType = await databaseCamionTypeService.getOneCamionTypeWithID(camion.camionType) as CamionType;
-        List<ListOfLists> listOfListsFuture = await databaseListOfListsService.getListsForCamionType(camionType.lol);
-        setState(() {
-          _listOfListsFuture = listOfListsFuture;
-        });
-      } catch (e) {
-        print("Error loading list of lists: $e");
+      _blueprints = {};
+    }
+  }
+
+  Future<void> _loadTasks() async {
+    Map<String, TaskChecklist>? tasks = await getAllTasksOfUser(db, _userId);
+    if(tasks != null){
+      _tasks = tasks;
+    }else{
+      _tasks = {};
+    }
+  }
+
+  Future<void> _loadListOfLists() async {
+    try {
+      Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db, _user.role);
+      if(listOfListsFuture != null){
+        _listOfLists = listOfListsFuture;
+      }else{
+        _listOfLists = {};
       }
+    } catch (e) {
+      print("Error loading list of lists: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_listOfListsFuture.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    } else {
-      return DefaultTabController(
-        initialIndex: 0,
-        length: _listOfListsFuture.length,
-        child: BasePage(
-          appBar: appBar(_listOfListsFuture),
-          body: body(_listOfListsFuture),
+    if (_isLoading) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
+
+    return DefaultTabController(
+      initialIndex: 0,
+      length: _listOfLists.length,
+      child: BasePage(
+        appBar: appBar(),
+        body: body(),
+      ),
+    );
+
   }
 
   void showBlueprintModal({
@@ -129,9 +255,16 @@ class _CheckListState extends State<CheckList> {
         child: AddBlueprintForm(
           nrOfList: nrOfList,
           nrEntryPosition: nrEntryPosition,
-          databaseBlueprintsService: databaseBlueprintsService,
           blueprint: blueprint,
           blueprintID: blueprintID,
+          onBlueprintAdded: () async {
+            if (networkService.isOnline) {
+              await _syncBlueprints();
+            }
+            await _loadDataFromDatabase();
+            setState(() {});
+            Navigator.pop(context);
+          },
         ),
       );
     });
@@ -139,62 +272,60 @@ class _CheckListState extends State<CheckList> {
 
   void showTask(Blueprint blueprint) async {
     try {
-      String? userUID = authController.getCurrentUserUID();
-      if(userUID != null){
-        Map<String, TaskChecklist> tasks = await databaseTasksService.getAllTasks(userUID);
-        TaskChecklist validate = TaskChecklist();
-        for (TaskChecklist task in tasks.values) {
-          if (blueprint.nrOfList == task.nrOfList &&
-              blueprint.nrEntryPosition == task.nrEntryPosition) {
-            validate = task;
-            break;
-          }
+      TaskChecklist validate = TaskChecklist(nrOfList: 0, nrEntryPosition: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
+      for (TaskChecklist task in _tasks.values) {
+        if (blueprint.nrOfList == task.nrOfList &&
+            blueprint.nrEntryPosition == task.nrEntryPosition) {
+          validate = task;
+          break;
         }
-
-        String keyId = tasks.keys.firstWhere(
-              (k) => tasks[k] == validate,
-          orElse: () => '',
-        );
-
-        await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) {
-              return Container(
-                padding: const EdgeInsets.all(10),
-                color: Colors.white,
-                margin: EdgeInsets.fromLTRB(
-                    10, 50, 10, MediaQuery.of(context).viewInsets.bottom
-                ),
-                child: ValidateTask(
-                  databaseTasksService: databaseTasksService,
-                  blueprint: blueprint,
-                  validate: validate,
-                  keyId: keyId,
-                  userUID: userUID,
-                ),
-              );
-            });
-        setState(() {});
-      }else{
-        print("Error u need to log in");
       }
+
+      String keyId = _tasks.keys.firstWhere(
+            (k) => _tasks[k] == validate,
+        orElse: () => '',
+      );
+
+      await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (context) {
+            return Container(
+              padding: const EdgeInsets.all(10),
+              color: Colors.white,
+              margin: EdgeInsets.fromLTRB(
+                  10, 50, 10, MediaQuery.of(context).viewInsets.bottom
+              ),
+              child: ValidateTask(
+                blueprint: blueprint,
+                validate: validate,
+                keyId: keyId,
+                onValidateAdded: () async {
+                  await _syncData();
+                  await _loadTasks();
+                  setState(() {});
+                  Navigator.pop(context);
+                },
+                userUID: _userId,
+              ),
+            );
+          });
     } catch (e) {
       print("Error showing task: $e");
     }
   }
 
   Future<bool> testIfFull(Map<String, Blueprint> sortedBlueprints, int listNr, String userUID) async {
-    Map<String, TaskChecklist> validatedTask = await databaseTasksService.getAllTasks(userUID);
-    TaskChecklist emptyTask = TaskChecklist();
+    Map<String, TaskChecklist>? validatedTask = await getAllTasksOfUser(db, userUID);
+    TaskChecklist emptyTask = TaskChecklist(nrOfList: 0, nrEntryPosition: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
     for (Blueprint blueprint in sortedBlueprints.values) {
       if (blueprint.nrOfList == listNr) {
         int entryPosition = blueprint.nrEntryPosition;
-        TaskChecklist? task = validatedTask.values.firstWhere(
+        TaskChecklist task = validatedTask!.values.firstWhere(
               (element) => element.nrOfList == listNr && element.nrEntryPosition == entryPosition,
           orElse: () => emptyTask,
         );
-        if (task.nrEntryPosition == null) {
+        if (task.nrEntryPosition == 0) {
           return false;
         }
       }
@@ -202,15 +333,28 @@ class _CheckListState extends State<CheckList> {
     return true;
   }
 
-  Future<void> deleteOneTaskListOfUser(int listNr, String userUID) async {
-    List<String> validatedTask = await databaseTasksService.getOneListOfTasks(listNr, userUID);
-    for (String taskID in validatedTask) {
-      await databaseTasksService.deleteTaskFuture(taskID);
+  Future<void> deleteOneTasksListForUser(int listNr, String userUID) async {
+    Map<String, TaskChecklist> validatedTask = await getUserOneListOfTasks(db, userUID, listNr);
+    for (var task in validatedTask.entries) {
+      try {
+        await deleteTask(db, task.key);
+        Directory tempDir = await getApplicationSupportDirectory();
+        String listNr = task.value.nrOfList.toString().padLeft(4, '0');
+        String entryPos = task.value.nrEntryPosition.toString().padLeft(4, '0');
+        final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
+        if (await fileTemp.exists()) {
+          await fileTemp.delete();
+        }
+
+        print("The file with the path ${fileTemp.path} and name $listNr${entryPos}photoValidate.jpeg has been deleted.");
+      } catch (e) {
+        print("Error deleting file: $e");
+      }
     }
     setState(() {});
   }
 
-  AppBar appBar(List<ListOfLists> listOfLists) {
+  AppBar appBar() {
     return AppBar(
       title: Text(AppLocalizations.of(context)!.checkList,
         style: TextStyle(
@@ -235,7 +379,7 @@ class _CheckListState extends State<CheckList> {
         indicatorColor: Colors.red,
         labelColor: Colors.black,
         isScrollable: true,
-        tabs: listOfLists.map((blueprint) =>
+        tabs: _listOfLists.values.map((blueprint) =>
             Tab(
               text: blueprint.listName,
             )).toList(),
@@ -243,204 +387,182 @@ class _CheckListState extends State<CheckList> {
     );
   }
 
-  Widget body(List<ListOfLists> listOfLists) {
-    return StreamBuilder(
-      stream: databaseBlueprintsService.getBlueprints(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData || snapshot.data == null) {
-          return const Center(child: Text("No data found"));
-        }
+  bool? taskIsDone(blueprint){
+    TaskChecklist task = _tasks.values.firstWhere(
+      (task) => task.nrEntryPosition == blueprint.nrEntryPosition && task.nrOfList == blueprint.nrOfList,
+      orElse: () => TaskChecklist(nrOfList: 0, nrEntryPosition: 0, createdAt: DateTime.now(), updatedAt: DateTime.now()),
+    );
+    return task.isDone;
+  }
 
-        String? userUID = authController.getCurrentUserUID();
-        if (userUID == null) {
-          return const Center(child: Text("User not logged in"));
-        }
-        Future<Map<String, TaskChecklist>> validatedTask = databaseTasksService.getAllTasks(userUID);
-        List blueprintsSnapshotList = snapshot.data?.docs ?? [];
-        Map<String, Blueprint> blueprints = HashMap();
-        Map<String, Blueprint> sortedBlueprints = HashMap();
-        for (var blueprintSnapshot in blueprintsSnapshotList) {
-          blueprints.addAll({blueprintSnapshot.id: blueprintSnapshot.data()});
-        }
-        counter = List<int>.filled(listOfLists.length, 0);
-        for (var i = 0; i < listOfLists.length; i++) {
-          sortedBlueprints = Map.fromEntries(
-              blueprints.entries.toList()..sort((e1, e2) => (e1.value.nrEntryPosition).compareTo(e2.value.nrEntryPosition))
-          );
-          for (Blueprint blueprint in sortedBlueprints.values) {
-            if (blueprint.nrOfList == listOfLists[i].listNr) {
-              counter[i]++;
-            }
-          }
-        }
+  Widget body() {
+    return TabBarView(
+      children: <Widget>[
+        for (ListOfLists list in _listOfLists.values)
+          ListView(
+            padding: const EdgeInsets.all(16.0),
+            scrollDirection: Axis.vertical,
+            children: [
+              for (Blueprint blueprint in _blueprints.values
+                  .where((b) => b.nrOfList == list.listNr)
+                  .toList()
+                ..sort((a, b) => a.nrEntryPosition.compareTo(b.nrEntryPosition)))
+                BlueprintTemplate(
+                  isDone: taskIsDone(blueprint),
+                  blueprint: blueprint,
+                  role: _user.role,
+                  delete: () {
+                    String key = _blueprints.keys
+                        .firstWhere((k) => _blueprints[k] == blueprint);
+                    _showDeleteConfirmation(key);
+                  },
+                  validate: () {
+                    showTask(blueprint);
+                  },
+                  edit: () {
+                    String blueprintID = _blueprints.keys
+                        .firstWhere((k) => _blueprints[k] == blueprint);
+                    showBlueprintModal(
+                      nrOfList: blueprint.nrOfList,
+                      nrEntryPosition: blueprint.nrEntryPosition,
+                      blueprint: blueprint,
+                      blueprintID: blueprintID,
+                    );
+                  },
+                  restore: () async {
+                    String key = _blueprints.keys
+                        .firstWhere((k) => _blueprints[k] == blueprint);
+                    await restoreBlueprints(db, key);
+                    if (networkService.isOnline) {
+                      await _syncBlueprints();
+                    }
+                    await _loadDataFromDatabase();
+                    setState(() {});
+                  }
+                ),
+              const SizedBox(height: 10),
+              if (_user.role == 'superadmin')
+                FloatingActionButton(
+                  heroTag: "addBlueprintHero${list.listNr}",
+                  onPressed: () {
+                    showBlueprintModal(
+                      nrOfList: list.listNr,
+                      nrEntryPosition: (_blueprints.values.where((b) => b.nrOfList == list.listNr).length + 1),
+                      blueprint: null,
+                      blueprintID: null,
+                    );
 
-        return FutureBuilder<MyUser>(
-          future: userService.getCurrentUserData(),
-          builder: (context, userSnapshot) {
-            if (userSnapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (userSnapshot.hasError) {
-              return Center(child: Text('Error: ${userSnapshot.error}'));
-            }
-            if (!userSnapshot.hasData || userSnapshot.data == null) {
-              return const Center(child: Text("User data not found"));
-            }
-
-            final user = userSnapshot.data!;
-            return TabBarView(
-              children: <Widget>[
-                for (var list in listOfLists)
-                  FutureBuilder<bool>(
-                    future: testIfFull(sortedBlueprints, list.listNr, userUID),
-                    builder: (context, testIfFullSnapshot) {
-                      if (testIfFullSnapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (testIfFullSnapshot.hasError) {
-                        return Center(child: Text('Error: ${testIfFullSnapshot.error}'));
-                      }
-                      bool isFull = testIfFullSnapshot.data ?? false;
-                      return ListView(
-                        padding: const EdgeInsets.all(16.0),
-                        scrollDirection: Axis.vertical,
-                        children: [
-                          for (Blueprint blueprint in sortedBlueprints.values)
-                            if (blueprint.nrOfList == list.listNr)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: FutureBuilder<bool?>(
-                                  future: validatedTask.then((v) {
-                                    TaskChecklist? task = v.values.cast().firstWhere(
-                                            (element) =>
-                                        element.nrEntryPosition == blueprint.nrEntryPosition &&
-                                            element.nrOfList == blueprint.nrOfList,
-                                        orElse: () => null);
-                                    if (task != null) {
-                                      return task.isDone;
-                                    } else {
-                                      return null;
-                                    }
-                                  }),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return Container();
-                                    } else if (snapshot.hasError) {
-                                      return Text('Error: ${snapshot.error}');
-                                    } else {
-                                      final isDone = snapshot.data;
-                                      return BlueprintTemplate(
-                                        isDone: isDone,
-                                        blueprint: blueprint,
-                                        role: user.role,
-                                        delete: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: Text(AppLocalizations.of(context)!.confirmDelete),
-                                                content: Text(AppLocalizations.of(context)!.confirmDeleteText),
-                                                actions: [
-                                                  TextButton(
-                                                    child: Text(AppLocalizations.of(context)!.no),
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                  ),
-                                                  TextButton(
-                                                    child: Text(AppLocalizations.of(context)!.yes),
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                      String key = sortedBlueprints.keys
-                                                          .firstWhere((k) => sortedBlueprints[k] == blueprint);
-                                                      databaseBlueprintsService.deleteBlueprint(key);
-                                                    },
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        },
-                                        validate: () {
-                                          showTask(blueprint);
-                                        },
-                                        edit: () {
-                                          String blueprintID = sortedBlueprints.keys
-                                              .firstWhere((k) => sortedBlueprints[k] == blueprint);
-                                          showBlueprintModal(
-                                            nrOfList: blueprint.nrOfList,
-                                            nrEntryPosition: blueprint.nrEntryPosition,
-                                            blueprint: blueprint,
-                                            blueprintID: blueprintID,
-                                          );
-                                        },
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
-                          const SizedBox(height: 10),
-                          if (user.role == 'superadmin')
-                            FloatingActionButton(
-                              heroTag: "addBlueprintHero",
-                              onPressed: () async {
-                                showBlueprintModal(
-                                  nrOfList: list.listNr,
-                                  nrEntryPosition: (counter[list.listNr] + 1),
-                                  blueprint: null,
-                                  blueprintID: null,
-                                );
-                              },
-                              // backgroundColor: Theme.of(context).colorScheme.primary,
-                              child: const Icon(
-                                Icons.add,
-                                color: Colors.lightGreenAccent,
-                              ),
-                            ),
-                          const SizedBox(height: 20),
-                          if (user.role == 'user' && isFull || user.role == 'admin' && isFull)
-                            FloatingActionButton(
-                              heroTag: "makePDFHero",
-                              onPressed: () async {
-                                MyUser user = await userService.getCurrentUserData();
-                                String companyID = user.company;
-                                Map<String, TaskChecklist> tasks = await validatedTask;
-                                final data = await pdfService.createInvoice(tasks, sortedBlueprints, list);
-                                await pdfService.savePdfFile(companyID, data,
-                                        () async => await deleteOneTaskListOfUser(list.listNr, userUID));
-                              },
-                              backgroundColor: Colors.red,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.picture_as_pdf,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    AppLocalizations.of(context)!.pdfCreate,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      );
-                    },
+                  },
+                  child: const Icon(
+                    Icons.add,
+                    color: Colors.lightGreenAccent,
                   ),
-              ],
-            );
-          },
-        );
-      });
+                ),
+              const SizedBox(height: 20),
+              if ((_user.role == 'user' || _user.role == 'admin') &&
+                  _tasks.values
+                      .where((task) => task.nrOfList == list.listNr)
+                      .length ==
+                      _blueprints.values
+                          .where((b) => b.nrOfList == list.listNr)
+                          .length)
+                FloatingActionButton(
+                  heroTag: "makePDFHero${list.listNr}",
+                  onPressed: () async {
+                    final pdfData = await pdfService.createInvoice(
+                      db,
+                      _user,
+                      _tasks,
+                      _blueprints,
+                      list,
+                    );
+                    String filePath = await pdfService.savePdfFile(
+                      _user.company,
+                      pdfData,
+                      _user,
+                      _userId,
+                      () async {
+                        await deleteOneTasksListForUser(list.listNr, _userId);
+                        if (networkService.isOnline) {
+                          await _syncTasks();
+                        }
+                        await _loadTasks();
+                      },
+                    );
+                    setState((){});
+                    OpenDocument.openDocument(filePath: filePath);
+                  },
+                  backgroundColor: Colors.red,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.picture_as_pdf,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        AppLocalizations.of(context)!.pdfCreate,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  void _showDeleteConfirmation(String key) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.confirmDelete),
+        content: Text(AppLocalizations.of(context)!.confirmDeleteText),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.no),
+          ),
+          TextButton(
+            onPressed: () async {
+              await softDeleteBlueprints(db, key);
+              if (networkService.isOnline) {
+                await _syncBlueprints();
+              }
+              await _loadDataFromDatabase();
+              setState(() {});
+              Navigator.pop(context);
+            },
+            child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _syncBlueprints() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Blueprints...");
+      await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during global data synchronization: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> _syncTasks() async {
+    try {
+      final syncService = Provider.of<SyncService>(context, listen: false);
+      print("💽 Synchronizing Tasks...");
+      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
+      print("💽 Synchronization with SQLite completed.");
+    } catch (e) {
+      print("💽 Error during global data synchronization: $e");
+      rethrow;
+    }
   }
 }

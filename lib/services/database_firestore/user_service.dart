@@ -40,33 +40,99 @@ class UserService{
     return users;
   }
 
+  Future<Map<String,MyUser>> getAllUsersData() async {
+    Map<String, MyUser> users = HashMap();
+    try {
+      final userSnapshot = await _userRef.get();
+      for (var doc in userSnapshot.docs) {
+        MyUser user = doc.data() as MyUser;
+        users[doc.id] = user;
+      }
+    } catch (error) {
+      print("Error retrieving Users list: $error");
+    }
+    return users;
+  }
+
+  Future<Map<String,MyUser>> getAllUsersDataSinceLastSync(String lastSync) async {
+    Map<String, MyUser> users = HashMap();
+    Query query = _userRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      for (var doc in querySnapshot.docs) {
+        MyUser user = doc.data() as MyUser;
+        users[doc.id] = user;
+      }
+    } catch (error) {
+      print("Error retrieving Users list: $error");
+    }
+    return users;
+  }
+
+  Future<Map<String,MyUser>> getCompanyUsersDataSinceLastSync(String lastSync, String companyName) async {
+    Map<String, MyUser> users = HashMap();
+    Query query = _userRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    query = query.where('company', isEqualTo: companyName);
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      for (var doc in querySnapshot.docs) {
+        MyUser user = doc.data() as MyUser;
+        users[doc.id] = user;
+      }
+    } catch (error) {
+      print("Error retrieving Users list: $error");
+    }
+    return users;
+  }
+
+  Future<Map<String,MyUser>> getCurrentUserMapSinceLastSync(String lastSync, String userId) async {
+    Map<String, MyUser> users = HashMap();
+    try {
+      print(" ✳ $userId");
+      DocumentSnapshot documentSnapshot = await _userRef.doc(userId).get();
+      MyUser user = documentSnapshot.data() as MyUser;
+      users[documentSnapshot.id] = user;
+      print(" 💻 ${user.role} ${user.name}");
+    } catch (error) {
+      print("Error retrieving Users list: $error");
+    }
+    return users;
+  }
+
   Future<MyUser> getCurrentUserData() async {
-    if (userID != null) {
       DocumentSnapshot doc = await _userRef.doc(userID).get();
       return doc.data() as MyUser;
-    } else {
-      throw Exception("User not logged in");
-    }
   }
 
-  Stream<DocumentSnapshot> getOneUserWithID(){
-    return _userRef.doc(userID).snapshots();
+  Stream<DocumentSnapshot> getOneUserWithID(String userId){
+    return _userRef.doc(userId).snapshots();
   }
 
-  Future<MyUser> getUserData(String userID) async {
-    DocumentSnapshot doc = await _userRef.doc(userID).get();
+  Future<MyUser> getUserData(String userId) async {
+    DocumentSnapshot doc = await _userRef.doc(userId).get();
     return doc.data() as MyUser;
   }
+
+  Future<void> updateUser(String userId, MyUser user) async {
+    final data = user.toJson();
+    if(user.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _userRef.doc(userId).update(data);
+  }
+
 
   Future<void> deleteUser(String username) async {
     try {
       var userDoc = await _firestore
-          .collection('users')
+          .collection(USERS_COLLECTION_REF)
           .where('username', isEqualTo: username)
           .get();
 
       if (userDoc.docs.isNotEmpty) {
-        await _firestore.collection('users').doc(userDoc.docs[0].id).delete();
+        await _firestore.collection(USERS_COLLECTION_REF).doc(userDoc.docs[0].id).delete();
 
         Get.snackbar(
           "User deleted",

@@ -8,6 +8,6 @@
         name="cache"
         path="." />
     <files-path
-        name="files"
+        name="app_flutter"
         path="." />
 </paths>

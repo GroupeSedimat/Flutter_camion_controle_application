@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
+import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/pages/user/login_page.dart';
@@ -23,31 +24,51 @@ class AuthController extends GetxController {
     ever(_user, _initialScreen);
   }
 
-  _initialScreen(User? user) {
+  _initialScreen(User? user) async {
     if (user == null) {
-      Get.offAll(() => LoginPage());
+      try {
+        await DatabaseHelper().clearTables([
+          "users",
+          "updates",
+          "camions",
+          "camionTypes",
+          "equipments",
+          "companies",
+          "listOfLists",
+          "blueprints",
+          "validateTasks"
+        ]);
+
+        Get.offAll(() => LoginPage());
+      } catch (e) {
+        print("Error clearing tables: $e");
+      }
     } else {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get()
-          .then((DocumentSnapshot documentSnapshot) {
-        if (documentSnapshot.exists) {
-          _username = documentSnapshot.get('username');
-          _role = documentSnapshot.get('role');
-          if (_role == 'superadmin') {
-            Get.offAll(() => AdminPage(
-                  userRole: UserRole.superadmin,
-                ));
+      try {
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get()
+            .then((DocumentSnapshot documentSnapshot) {
+          if (documentSnapshot.exists) {
+            _username = documentSnapshot.get('username');
+            _role = documentSnapshot.get('role');
+            if (_role == 'superadmin') {
+              Get.offAll(() => AdminPage(
+                    userRole: UserRole.superadmin,
+                  ));
+            } else {
+              Get.offAll(() => WelcomePage());
+            }
           } else {
-            Get.offAll(() => WelcomePage());
+            print('Document does not exist on the database');
           }
-        } else {
-          print('Document does not exist on the database');
-        }
-      }).catchError((error) {
+        }).catchError((error) {
+          print('Error getting document: $error');
+        });
+      } catch (error) {
         print('Error getting document: $error');
-      });
+      }
     }
   }
 
@@ -117,6 +138,8 @@ class AuthController extends GetxController {
         'isApproved': false,
         'apresFormation': false,
         'apresFormationDoc': "",
+        'createdAt': DateTime.now().toIso8601String(),
+        'updatedAt': DateTime.now().toIso8601String(),
       });
 
       Get.offAll(() => LoginPage());
@@ -193,7 +216,7 @@ class AuthController extends GetxController {
           backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
         );
-        Get.offAll(() => AdminPage(userRole: UserRole.superadmin));
+        // Get.offAll(() => AdminPage(userRole: UserRole.superadmin));
         return;
       }
 
@@ -212,7 +235,7 @@ class AuthController extends GetxController {
             backgroundColor: Colors.green,
             snackPosition: SnackPosition.BOTTOM,
           );
-          Get.offAll(() => WelcomePage());
+          // await Get.offAll(() => WelcomePage());
         } else {
           Get.snackbar(
             "Compte non approuvé",
@@ -281,15 +304,15 @@ class AuthController extends GetxController {
   }
 
   Future<void> updateProfile(
-      String newUsername, String newFirstname, String newName) async {
+      String newUsername, String newDob, String newEmail) async {
     try {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(auth.currentUser!.uid)
           .update({
         'username': newUsername,
-        'firstname': newFirstname,
-        'name': newName,
+        // 'dob': newDob,
+        // 'email': newEmail,
       });
 
       Get.snackbar(
@@ -308,8 +331,12 @@ class AuthController extends GetxController {
     }
   }
 
-  String? getCurrentUserUID() {
-    return _user.value?.uid;
+  String getCurrentUserUID() {
+    if (_user.value?.uid != null) {
+      return _user.value!.uid;
+    } else {
+      throw Exception("User not logged in");
+    }
   }
 
   String getUserName() {

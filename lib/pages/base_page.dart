@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors_in_immutables
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/menu.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
@@ -10,7 +8,7 @@ class BasePage extends StatelessWidget {
   final Widget body;
   final PreferredSizeWidget? appBar;
   final String? title;
-  BasePage({super.key, required this.body, this.appBar, this.title,});
+  const BasePage({super.key, required this.body, this.appBar, this.title});
 
 
   @override

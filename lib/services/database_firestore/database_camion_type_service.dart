@@ -92,16 +92,60 @@ class DatabaseCamionTypeService{
     }
   }
 
-  void addCamionType(CamionType camionType) async {
-    _camionTypeRef.add(camionType);
+  Future<String> addCamionType(CamionType camionType) async {
+    var returnAdd = await _camionTypeRef.add(camionType);
+    print("------------- ---------- Add camion type: ${returnAdd.id}");
+    return returnAdd.id;
   }
 
-  void updateCamionType(String camionTypeID, CamionType camionType){
-    _camionTypeRef.doc(camionTypeID).update(camionType.toJson());
+  Future<void> updateCamionType(String camionTypeID, CamionType camionType) async {
+    final data = camionType.toJson();
+    if(camionType.deletedAt == null){
+      data['deletedAt'] = FieldValue.delete();
+    }
+    await _camionTypeRef.doc(camionTypeID).update(data);
   }
 
   void deleteCamionType(String camionTypeID){
     _camionTypeRef.doc(camionTypeID).delete();
+  }
+
+  Future<Map<String, CamionType>> getAllCamionTypesSinceLastSync(String lastSync) async {
+    Query query = _camionTypeRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    // print(query.parameters);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, CamionType> camions = HashMap();
+      for (var doc in querySnapshot.docs) {
+        camions[doc.id] = doc.data() as CamionType;
+      }
+      return camions;
+    } catch (e) {
+      print("Error fetching Camion Typess since last update data: $e");
+      rethrow;
+    }
+  }
+
+  Future<Map<String, CamionType>> getListedCamionTypesSinceLastSync(String lastSync, List<String> camionsTypesId) async {
+    Query query = _camionTypeRef;
+    query = query.where('updatedAt', isGreaterThan: lastSync);
+    // print(query.parameters);
+
+    try {
+      QuerySnapshot querySnapshot = await query.get();
+      Map<String, CamionType> camions = HashMap();
+      for (var doc in querySnapshot.docs) {
+        if(camionsTypesId.contains(doc.id)){
+          camions[doc.id] = doc.data() as CamionType;
+        }
+      }
+      return camions;
+    } catch (e) {
+      print("Error fetching Camion Typess from list since last update data: $e");
+      rethrow;
+    }
   }
 
 }
