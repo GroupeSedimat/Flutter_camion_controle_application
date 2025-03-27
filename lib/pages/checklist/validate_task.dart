@@ -39,6 +39,7 @@ class ValidateTaskState extends State<ValidateTask> {
   late Directory tempDir;
   late Database db;
   bool _isInitialized = false;
+  int nextTaskID = 0;
 
   final PickImageService _pickImageService = PickImageService();
 
@@ -262,7 +263,8 @@ class ValidateTaskState extends State<ValidateTask> {
                     widget.validate.nrOfList = widget.blueprint.nrOfList;
                     widget.validate.nrEntryPosition = widget.blueprint.nrEntryPosition;
                     if(widget.keyId == ""){
-                      insertTask(db, widget.validate, "");
+                      nextTaskID = await getFirstFreeTasksNumber(db);
+                      insertTask(db, widget.validate, nextTaskID.toString());
                     }else{
                       updateTask(db, widget.validate, widget.keyId);
                     }

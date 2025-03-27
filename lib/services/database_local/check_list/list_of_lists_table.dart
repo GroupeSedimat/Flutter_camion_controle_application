@@ -116,6 +116,27 @@ Future<Map<String,ListOfLists>?> getAllLists(Database db, String role) async {
   return sortedListOfLists(listOfLists: listOfLists);
 }
 
+Future<int> getFirstFreeListNumber(Database db) async {
+  int lastListID = 0;
+  try{
+    final List<Map<String, dynamic>> maps = await db.query(tableName);
+    if(maps.isEmpty){
+      return lastListID;
+    }
+
+    for (var litItem in maps) {
+      String id = litItem["id"];
+      if(id.length<10 && int.parse(id)>lastListID){
+        lastListID = int.parse(id);
+      }
+    }
+
+  } catch (e){
+    print("Error while getting first free ListOfLists ID: $e");
+  }
+  return lastListID + 1;
+}
+
 Future<Map<String,ListOfLists>?> getAllListsSinceLastUpdate(dynamic dbOrTxn, String lastUpdated, String timeSync) async {
   Map<String, ListOfLists> listOfLists = {};
   try {

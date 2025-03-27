@@ -91,11 +91,9 @@ class UserService{
   Future<Map<String,MyUser>> getCurrentUserMapSinceLastSync(String lastSync, String userId) async {
     Map<String, MyUser> users = HashMap();
     try {
-      print(" ✳ $userId");
       DocumentSnapshot documentSnapshot = await _userRef.doc(userId).get();
       MyUser user = documentSnapshot.data() as MyUser;
       users[documentSnapshot.id] = user;
-      print(" 💻 ${user.role} ${user.name}");
     } catch (error) {
       print("Error retrieving Users list: $error");
     }

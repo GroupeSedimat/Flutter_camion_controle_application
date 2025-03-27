@@ -42,6 +42,7 @@ class _AddCamionTypeState extends State<AddCamionType> {
   List<String> equipment = [];
   List<String> routerData = [];
   String pageTile = "";
+  int nextCamionTypeID = 0;
 
   @override
   void initState() {
@@ -53,6 +54,8 @@ class _AddCamionTypeState extends State<AddCamionType> {
     await _initDatabase();
     if (widget.camionType != null) {
       _populateFieldsWithCamionTypeData();
+    }else{
+      nextCamionTypeID = await getFirstFreeCamionTypeNumber(db);
     }
   }
 
@@ -193,7 +196,7 @@ class _AddCamionTypeState extends State<AddCamionType> {
                   );
 
                   if (widget.camionType == null) {
-                    insertCamionType(db, newCamionType, "");
+                    insertCamionType(db, newCamionType, nextCamionTypeID.toString());
                   } else {
                     updateCamionType(db, newCamionType, widget.camionTypeID!);
                   }

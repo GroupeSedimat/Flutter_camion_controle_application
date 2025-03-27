@@ -34,9 +34,10 @@ class _CamionTypeListState extends State<CamionTypeList> {
   bool _isLoading = true;
   late Map<String, String> _availableLolMap;
   late Map<String, String> _equipmentLists;
-  late Map<String, CamionType> _camionTypesList;
-
+  /// add consommable list
   late AuthController authController;
+
+  late Map<String, CamionType> _camionTypesList;
   late UserService userService;
   late NetworkService networkService;
 

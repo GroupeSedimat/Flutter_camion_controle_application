@@ -69,18 +69,14 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future<void> _loadUserToConnection() async {
-    print("welcome user to connection firebase ☢☢☢☢☢☢☢");
     Map<String, MyUser>? users = await getThisUser(db);
-    print("users: $users");
     if(users != null ){
       return;
     }
     try {
       MyUser user = await userService.getCurrentUserData();
       String? userId = await userService.userID;
-      print("userId ☢☢☢☢☢☢☢ $userId");
       final syncService = Provider.of<SyncService>(context, listen: false);
-      print("💽 Synchronizing Users...");
       await syncService.fullSyncTable("users", user: user, userId: userId);
     } catch (e) {
       print("💽 Error loading user: $e");

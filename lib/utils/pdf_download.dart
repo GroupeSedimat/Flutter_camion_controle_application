@@ -52,6 +52,11 @@ class PdfDownload {
   Future<String> getDocumentsPath() async {
     String documentsPath;
     if (Platform.isAndroid) {
+      /// cela fonctionne, c'est-à-dire qu'il enregistre le fichier
+      /// dans la mémoire du téléphone dans le dossier "Documents"
+      /// mais il y a une chance que si vous demandez MANAGE_EXTERNAL_STORAGE sans justification,
+      /// alors dans la public release / Play Store Google rejettera cette demande
+      /// (la plupart des applications ne seront pas acceptées).
       documentsPath = "/storage/emulated/0/Documents/camion_appli";
       if (await Permission.storage.request().isGranted){
         Directory downloadDir = Directory(documentsPath);

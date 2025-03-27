@@ -299,9 +299,10 @@ class PdfService {
     int time = DateTime.now().millisecondsSinceEpoch;
     String fileName = "${user.username}.${time.toString()}";
     Directory tempDir = await getApplicationSupportDirectory();
-    // String documentsPath = await getDocumentsPath();
-    String documentsPath = tempDir.path;
+    String documentsPath = await getDocumentsPath();
+    // String documentsPath = tempDir.path;
     String filePath = "$documentsPath/$fileName.pdf";
+    print("filePath $filePath");
     String filePathDatabase = "${user.company}/$userId/${time.toString()}";
     final directory = Directory(documentsPath);
     if (!(await directory.exists())) {
@@ -344,12 +345,18 @@ class PdfService {
   Future<String> getDocumentsPath() async {
     String documentsPath;
     if (Platform.isAndroid) {
-      Directory? appDocDir = await getDownloadsDirectory();
-
-      if (appDocDir == null) {
-        throw Exception("Failed to get external directory");
-      }
-      documentsPath = "${appDocDir.path}/camion_appli";
+      // Directory? appDocDir = await getExternalStorageDirectory();
+      //
+      // if (appDocDir == null) {
+      //   throw Exception("Failed to get external directory");
+      // }
+      // documentsPath = "${appDocDir.path}/camion_appli";
+      /// cela fonctionne, c'est-à-dire qu'il enregistre le fichier
+      /// dans la mémoire du téléphone dans le dossier "Documents"
+      /// mais il y a une chance que si vous demandez MANAGE_EXTERNAL_STORAGE sans justification,
+      /// alors dans la public release / Play Store Google rejettera cette demande
+      /// (la plupart des applications ne seront pas acceptées).
+      documentsPath = "/storage/emulated/0/Documents/camion_appli";
 
       Directory downloadDir = Directory(documentsPath);
       if (!await downloadDir.exists()) {
@@ -387,8 +394,14 @@ class PdfService {
         // Remove the ".pdf" extension
         String fileUserID = "";
         if (relativePath.endsWith('.pdf')) {
+          print("relativePath $relativePath");
+          // get users id
           fileUserID = relativePath.substring(0, relativePath.length - 18);
-          relativePath = relativePath.substring(29, relativePath.length - 4);
+          print("relativePath $relativePath");
+          print("fileUserID $fileUserID");
+          // get file name
+          relativePath = relativePath.substring(relativePath.length - 17, relativePath.length - 4);
+          print("relativePath $relativePath");
         }
 
         // Pass relativePath to the function sending to Firebase if the userId in the file is the same as the actual userId.

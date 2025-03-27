@@ -694,7 +694,7 @@ class SyncService {
         final Map<String, Camion>? localCamions = await getAllCamionsSinceLastUpdate(db, lastUpdated, timeSync);
         if(localCamions != null){
           for (var camion in localCamions.entries) {
-            if(camion.key == ""){
+            if(camion.key.length < 12){
               camion.value.updatedAt = DateTime.parse(timeSync);
               String newID = await firebaseCamionService.addCamion(camion.value);
               await updateCamionFirebaseID(db, camion.value, newID);
@@ -717,7 +717,7 @@ class SyncService {
         final Map<String, CamionType>? localCamionTypes = await getAllCamionTypesSinceLastUpdate(db, lastUpdated, timeSync);
         if(localCamionTypes != null){
           for (var camionType in localCamionTypes.entries) {
-            if(camionType.key == ""){
+            if(camionType.key.length < 16){
               camionType.value.updatedAt = DateTime.parse(timeSync);
               String newID = await firebaseCamionTypeService.addCamionType(camionType.value);
               await updateCamionTypesFirebaseID(db, camionType.value, newID);
@@ -740,7 +740,7 @@ class SyncService {
         final Map<String, Company>? localCompanies = await getAllCompaniesSinceLastUpdate(db, lastUpdated, timeSync);
         if(localCompanies != null){
           for (var company in localCompanies.entries) {
-            if(company.key == ""){
+            if(company.key.length < 16){
               company.value.updatedAt = DateTime.parse(timeSync);
               String newID = await firebaseCompanyService.addCompany(company.value);
               await updateCompanyFirebaseID(db, company.value, newID);
@@ -763,7 +763,7 @@ class SyncService {
         final Map<String, ListOfLists>? localListOfLists = await getAllListsSinceLastUpdate(db, lastUpdated, timeSync);
         if(localListOfLists != null){
           for (var list in localListOfLists.entries) {
-            if(list.key == ""){
+            if(list.key.length < 16){
               list.value.updatedAt = DateTime.parse(timeSync);
               String newID = await firebaseLOLService.addList(list.value);
               await updateListFirebaseID(db, list.value, newID);
@@ -786,7 +786,7 @@ class SyncService {
         if(tasks != null){
           await firebaseTaskService.deleteTaskForUser(userId);
           for (var task in tasks.entries) {
-            if(task.key == ""){
+            if(task.key.length < 16){
               task.value.updatedAt = DateTime.parse(timeSync);
               String newID = await firebaseTaskService.addTask(task.value);
               await updateTaskFirebaseID(db, task.value, newID);
@@ -809,7 +809,7 @@ class SyncService {
         final Map<String, Equipment>? localEquipments = await getAllEquipmentsSinceLastUpdate(db, lastUpdated, timeSync);
         if(localEquipments != null){
           for (var equipment in localEquipments.entries) {
-            if(equipment.key == ""){
+            if(equipment.key.length < 16){
               equipment.value.updatedAt = DateTime.parse(timeSync);
               String newID = await firebaseEquipmentService.addEquipment(equipment.value);
               await updateEquipmentFirebaseID(db, equipment.value, newID);
@@ -832,7 +832,7 @@ class SyncService {
         final Map<String, Blueprint>? blueprints = await getAllBlueprintsSinceLastUpdate(db, lastUpdated, timeSync);
         if(blueprints != null){
           for (var blueprint in blueprints.entries) {
-            if(blueprint.key == ""){
+            if(blueprint.key.length < 16){
               blueprint.value.updatedAt = DateTime.parse(timeSync);
               String newID = await firebaseBlueprintService.addBlueprint(blueprint.value);
               await updateBlueprintFirebaseID(db, blueprint.value, newID);

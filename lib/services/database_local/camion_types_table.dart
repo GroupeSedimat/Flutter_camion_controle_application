@@ -125,6 +125,27 @@ Future<Map<String,CamionType>?> getAllCamionTypes(Database db, String role) asyn
   return sortedCamionTypes(camionTypes: camionTypes);
 }
 
+Future<int> getFirstFreeCamionTypeNumber(Database db) async {
+  int lastCamionTypeID = 0;
+  try{
+    final List<Map<String, dynamic>> maps = await db.query(tableName);
+    if(maps.isEmpty){
+      return lastCamionTypeID;
+    }
+
+    for (var camionTypeItem in maps) {
+      String id = camionTypeItem["id"];
+      if(id.length<10 && int.parse(id)>lastCamionTypeID){
+        lastCamionTypeID = int.parse(id);
+      }
+    }
+
+  } catch (e){
+    print("Error while getting all data from table Camion Types: $e");
+  }
+  return lastCamionTypeID + 1;
+}
+
 Future<Map<String,String>?> getAllCamionTypeNames(Database db, String role) async {
   Map<String, String> camionTypesNames = {};
   try{

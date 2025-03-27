@@ -30,6 +30,7 @@ class _AddListFormState extends State<AddListForm> {
   String pageTile = "";
   bool _isLoading = true;
   late Database db;
+  int nextListID = 0;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _AddListFormState extends State<AddListForm> {
 
   Future<void> _setFirstFreeListNr() async {
     int freeNr = await findFirstFreeListNr(db);
+    nextListID = await getFirstFreeListNumber(db);
     _listNr = freeNr;
   }
 
@@ -162,8 +164,7 @@ class _AddListFormState extends State<AddListForm> {
                       updatedAt: DateTime.now(),
                     );
                     if (widget.listItem == null) {
-                      print("insert data $newBlueprint");
-                      insertList(db, newBlueprint, "");
+                      insertList(db, newBlueprint, nextListID.toString());
                     } else {
                       updateList(db, newBlueprint, widget.listItemID!);
                     }
