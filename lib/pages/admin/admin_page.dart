@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
-import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/pages/admin/user_mnagement_page.dart';
+import 'package:flutter_application_1/widgets/base_page.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/lol_control_page.dart';
 import 'package:flutter_application_1/pages/company/company_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
-import 'package:flutter_application_1/pages/user/user_role.dart';
+import 'package:flutter_application_1/models/user/user_role.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/sync_service.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -20,6 +20,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// page de démarrage et page de gestion principale de superAdmin
 class AdminPage extends StatefulWidget {
   final UserRole userRole;
 
@@ -169,6 +170,7 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
+  /// créer un menu en mosaïque
   Widget _buildModernDashboard(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -249,6 +251,7 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
+  /// tuile dans le menu
   Widget _buildDashboardItem(
     BuildContext context,
     String title,

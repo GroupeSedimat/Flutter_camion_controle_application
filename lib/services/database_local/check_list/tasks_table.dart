@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 
 String tableName = "validateTasks";
 
+/// une classe fonctionnant sur la table "validateTasks" dans database local
 Future<void> createTableTasks(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -107,6 +108,27 @@ Future<Map<String,TaskChecklist>?> getAllTasks(Database db) async {
   return sortedTasks(tasks: tasks);
 }
 
+Future<int> getFirstFreeTasksNumber(Database db) async {
+  int lastTaskID = 0;
+  try{
+    final List<Map<String, dynamic>> maps = await db.query(tableName);
+    if(maps.isEmpty){
+      return lastTaskID;
+    }
+
+    for (var task in maps) {
+      String id = task["id"];
+      if(id.length<10 && int.parse(id)>lastTaskID){
+        lastTaskID = int.parse(id);
+      }
+    }
+
+  } catch (e){
+    print("Error while getting Tasks free ID: $e");
+  }
+  return lastTaskID + 1;
+}
+
 Future<Map<String,TaskChecklist>?> getAllTasksOfUser(dynamic dbOrTxn, String userId) async {
   Map<String, TaskChecklist> tasks = {};
   try{
@@ -178,10 +200,8 @@ Future<Map<String,TaskChecklist>?> getAllTasksSinceLastUpdate(dynamic dbOrTxn, S
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Tasks $lastUpdated");
 
     for (var task in maps) {
-      print("-------- task ${task["id"]} updatedAt ${task["updatedAt"]}");
       tasks[task["id"] as String] = responseItemToTask(task);
     }
 

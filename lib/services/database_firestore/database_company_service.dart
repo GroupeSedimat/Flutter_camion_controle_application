@@ -5,6 +5,7 @@ import 'package:flutter_application_1/models/company/company.dart';
 
 const String COMPANY_COLLECTION_REF = "company";
 
+/// une classe fonctionnant sur la collection "company" dans Firebase database
 class DatabaseCompanyService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _companyRef;
@@ -157,7 +158,6 @@ Future<Map<String, Company>> getAllCompanies() async {
 
   Future<String> addCompany(Company company) async {
     var returnAdd = await _companyRef.add(company);
-    print("------------- ---------- ---------- database add company${returnAdd.id}");
     return returnAdd.id;
   }
 

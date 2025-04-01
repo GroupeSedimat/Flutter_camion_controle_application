@@ -6,6 +6,7 @@ import 'dart:convert';
 
 String tableName = "blueprints";
 
+/// une classe fonctionnant sur la table "blueprints" dans database local
 Future<void> createTableBlueprints(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -23,7 +24,6 @@ Future<void> createTableBlueprints(Database db) async {
 }
 
 Future<void> insertBlueprint(dynamic dbOrTxn, Blueprint blueprint, String firebaseId) async {
-  print("insert blueprint");
   try{
     await dbOrTxn.insert(
         tableName,
@@ -35,7 +35,6 @@ Future<void> insertBlueprint(dynamic dbOrTxn, Blueprint blueprint, String fireba
 }
 
 Future<void> updateBlueprint(dynamic dbOrTxn, Blueprint blueprint, String firebaseId) async {
-  print("update blueprint");
   try{
     await dbOrTxn.update(
         tableName,
@@ -105,7 +104,6 @@ Future<void> restoreBlueprints(Database db, String firebaseId) async {
 }
 
 Future<Map<String,Blueprint>?> getAllBlueprints(Database db, String role) async {
-  print("getAllBlueprints");
   Map<String, Blueprint> blueprints = {};
   try{
     final List<Map<String, dynamic>> maps = await db.query(tableName);
@@ -125,8 +123,28 @@ Future<Map<String,Blueprint>?> getAllBlueprints(Database db, String role) async 
   return sortedBlueprints(blueprints: blueprints);
 }
 
+Future<int> getFirstFreeBlueprintNumber(Database db) async {
+  int lastBlueprintID = 0;
+  try{
+    final List<Map<String, dynamic>> maps = await db.query(tableName);
+    if(maps.isEmpty){
+      return lastBlueprintID;
+    }
+
+    for (var blueprintItem in maps) {
+      String id = blueprintItem["id"];
+      if(id.length<10 && int.parse(id)>lastBlueprintID){
+        lastBlueprintID = int.parse(id);
+      }
+    }
+
+  } catch (e){
+    print("Error while getting next free Blueprint ID: $e");
+  }
+  return lastBlueprintID + 1;
+}
+
 Future<Map<String,Blueprint>?> getAllBlueprintsSinceLastUpdate(dynamic dbOrTxn, String lastUpdated, String timeSync) async {
-  print("getAllBlueprintsSinceLastUpdate");
   Map<String, Blueprint> blueprints = {};
   try {
     final List<Map<String, dynamic>> maps = await dbOrTxn.query(
@@ -136,10 +154,8 @@ Future<Map<String,Blueprint>?> getAllBlueprintsSinceLastUpdate(dynamic dbOrTxn, 
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Blueprints $lastUpdated");
 
     for (var blueprintItem in maps) {
-      print("-------- blueprint ${blueprintItem["id"]} updatedAt ${blueprintItem["updatedAt"]}");
       blueprints[blueprintItem["id"] as String] = responseItemToBlueprint(blueprintItem);
     }
 
@@ -189,7 +205,6 @@ Future<Blueprint?> getOneBlueprintWithID(dynamic dbOrTxn, String blueprintID) as
 }
 
 Map<String, dynamic> blueprintToMap(Blueprint blueprint, {String? firebaseId}) {
-  print("blueprintToMap");
   return {
     'id': firebaseId,
     'title': blueprint.title,
@@ -206,7 +221,6 @@ Map<String, dynamic> blueprintToMap(Blueprint blueprint, {String? firebaseId}) {
 }
 
 Blueprint responseItemToBlueprint(var blueprintItem){
-  print("responseItemToBlueprint");
   return Blueprint(
     title: blueprintItem["title"] as String,
     description: blueprintItem["description"] as String,
@@ -263,7 +277,6 @@ LinkedHashMap<String, Blueprint> sortedBlueprints({
     if (primaryComparison != 0) {
       return primaryComparison;
     }
-
     return compareFields('nrEntryPosition', blueprintA, blueprintB);
   });
 

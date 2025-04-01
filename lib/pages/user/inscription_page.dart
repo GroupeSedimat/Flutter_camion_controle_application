@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/sync_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -245,26 +245,17 @@ class _InscriptionPageState extends State<InscriptionPage> {
                       );
                     });
                   } else {
-                    if (isUsernameAlreadyTaken(usernameController.text.trim())) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(AppLocalizations.of(context)!.usernameTaken),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    } else {
-                      // Si tout va bien, procéder à l'inscription
-                      AuthController.instance.register(
-                        emailController.text.trim(),
-                        usernameController.text.trim(),
-                        nameController.text.trim(),
-                        firstnameController.text.trim(),
-                        passwordController.text.trim(),
-                        confirmPasswordController.text.trim(),
-                        selectedRole,
-                        selectedCompany!,
-                      );
-                    }
+                    // Si tout va bien, procéder à l'inscription
+                    AuthController.instance.register(
+                      emailController.text.trim(),
+                      usernameController.text.trim(),
+                      nameController.text.trim(),
+                      firstnameController.text.trim(),
+                      passwordController.text.trim(),
+                      confirmPasswordController.text.trim(),
+                      selectedRole,
+                      selectedCompany!,
+                    );
                   }
                 },
                 child: Container(
@@ -305,13 +296,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
         ),
       ),
     );
-  }
-
-  // Fonction pour vérifier si le nom d'utilisateur est déjà pris
-  bool isUsernameAlreadyTaken(String username) {
-    // Cette fonction doit vérifier dans la base de données si le nom d'utilisateur est déjà pris
-    // Retourne `true` si le nom est pris, sinon `false`
-    return false;  // Remplacer par la vraie logique
   }
 
   Widget buildTextField(String hintText, IconData icon, TextEditingController controller) {

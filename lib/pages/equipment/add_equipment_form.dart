@@ -32,6 +32,7 @@ class _AddEquipmentState extends State<AddEquipment> {
   List<String> photo = [];
   bool? available;
   String pageTile = "";
+  int nextEquipmentID = 0;
 
   @override
   void initState() {
@@ -43,6 +44,8 @@ class _AddEquipmentState extends State<AddEquipment> {
     await _initDatabase();
     if (widget.equipment != null) {
       _populateFieldsWithEquipmentData();
+    }else{
+      nextEquipmentID = await getFirstFreeEquipmentNumber(db);
     }
   }
 
@@ -260,7 +263,7 @@ class _AddEquipmentState extends State<AddEquipment> {
                   );
 
                   if (widget.equipment == null) {
-                    insertEquipment(db, newEquipment, "");
+                    insertEquipment(db, newEquipment, nextEquipmentID.toString());
                   } else {
                     updateEquipment(db, newEquipment, widget.equipmentID!);
                   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/admin/UserManagementAdmin.dart';
+import 'package:flutter_application_1/pages/admin/user_management_admin.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
@@ -9,7 +9,7 @@ import 'package:flutter_application_1/pages/user/messaging_page.dart';
 import 'package:flutter_application_1/pages/company/company_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_list.dart';
-import 'package:flutter_application_1/pages/user/user_role.dart';
+import 'package:flutter_application_1/models/user/user_role.dart';
 import 'package:flutter_application_1/pages/welcome_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
@@ -64,14 +64,11 @@ class _MenuWidgetState extends State<MenuWidget> {
   }
   
   Future<void> _loadUserLocalDB() async {
-    print("menu local ☢☢☢☢☢☢☢");
     try {
       Map<String, MyUser>? users = await getThisUser(db);
       MyUser user = users!.values.first;
       _username = user.username;
-      print("local username ☢☢☢☢☢☢☢ $_username");
       _role = user.role;
-      print("local role ☢☢☢☢☢☢☢ $_role");
     } catch (e) {
       print("Error loading user: $e");
     }
@@ -164,6 +161,11 @@ class _MenuWidgetState extends State<MenuWidget> {
         ),
       );
 
+  /// Construisez votre menu!
+  ///
+  /// Actuellement, il y a des liens vers des sites Web ci-dessous pour la navigation.
+  /// Ajoutez une nouvelle page de la même manière qu'une page existante.
+  /// Ajoutez les rôles pour lesquels elle doit être affichée "if (_role == 'user')" (ou n'ajoutez rien si la page doit être accessible à tous).
   Widget buildMenuItems(BuildContext context) => Column(
         children: [
           buildMenuItem(

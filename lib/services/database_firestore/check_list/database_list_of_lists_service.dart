@@ -5,6 +5,7 @@ import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 
 const String LIST_COLLECTION_REF = "listoflists";
 
+/// une classe fonctionnant sur la collection "listoflists" dans Firebase database
 class DatabaseListOfListsService{
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _listRef;
@@ -34,7 +35,7 @@ class DatabaseListOfListsService{
 
     } catch (e) {
       print("Error getting listItems: $e");
-      rethrow; // Gérez l’erreur le cas échéant.
+      rethrow;
     }
   }
 
@@ -76,7 +77,7 @@ class DatabaseListOfListsService{
 
     } catch (e) {
       print("Error getting listItems: $e");
-      rethrow; // Gérez l’erreur le cas échéant.
+      rethrow;
     }
   }
 
@@ -105,7 +106,7 @@ class DatabaseListOfListsService{
 
     } catch (e) {
       print("Error getting listItems: $e");
-      rethrow; // Gérez l’erreur le cas échéant.
+      rethrow;
     }
   }
 
@@ -129,7 +130,6 @@ class DatabaseListOfListsService{
 
   Future<String> addList(ListOfLists listItem) async {
     var returnAdd = await _listRef.add(listItem);
-    print("------------- ---------- ---------- database add list of list ${returnAdd.id}");
     return returnAdd.id;
   }
 

@@ -6,6 +6,7 @@ import 'dart:convert';
 
 String tableName = "companies";
 
+/// une classe fonctionnant sur la table "companies" dans database local
 Future<void> createTableCompany(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -145,6 +146,27 @@ Future<Map<String,Company>?> getAllCompanies(Database db, String role) async {
   return sortedCompanies(companies: companies);
 }
 
+Future<int> getFirstFreeCompanyNumber(Database db) async {
+  int lastCompanyID = 0;
+  try{
+    final List<Map<String, dynamic>> maps = await db.query(tableName);
+    if(maps.isEmpty){
+      return lastCompanyID;
+    }
+
+    for (var companyItem in maps) {
+      String id = companyItem["id"];
+      if(id.length<10 && int.parse(id)>lastCompanyID){
+        lastCompanyID = int.parse(id);
+      }
+    }
+
+  } catch (e){
+    print("Error while getting all data from table Companies: $e");
+  }
+  return lastCompanyID + 1 ;
+}
+
 Future<Map<String,String>?> getAllCompaniesNames(Database db, String role) async {
   Map<String, String> companiesNames = {};
   try{
@@ -175,10 +197,8 @@ Future<Map<String,Company>?> getAllCompaniesSinceLastUpdate(dynamic dbOrTxn, Str
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated Companies $lastUpdated");
 
     for (var companyItem in maps) {
-      print("-------- company ${companyItem["id"]} updatedAt ${companyItem["updatedAt"]}");
       companies[companyItem["id"] as String] = responseItemToCompany(companyItem);
     }
 

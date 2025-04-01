@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/base_page.dart';
+import 'package:flutter_application_1/widgets/base_page.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/pages/checklist/add_blueprint_form.dart';
@@ -18,7 +18,7 @@ import 'package:flutter_application_1/services/database_local/check_list/bluepri
 import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
 import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
+import 'package:flutter_application_1/services/sync_service.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+/// Une classe conçue pour télécharger un fichier PDF et le coller à l'endroit approprié
 class PdfDownload {
   final String url;
   final String name;
@@ -14,7 +15,8 @@ class PdfDownload {
     String savePath;
     try {
       if(name == "temp"){
-        //save in app directory if its temp docs
+        /// Enregistrer dans le répertoire de l'application s'il s'agit d'un document temporaire.
+        /// Chaque fichier temporaire suivant écrasera le fichier existant.
         print("name == temp");
         Directory appDocDir = await getApplicationSupportDirectory();
         print("name == temp ${appDocDir.path}");
@@ -46,9 +48,15 @@ class PdfDownload {
     }
   }
 
+  /// une fonction qui spécifie le chemin pour enregistrer le fichier sur l'appareil, en fonction du type (Android, iOS)
   Future<String> getDocumentsPath() async {
     String documentsPath;
     if (Platform.isAndroid) {
+      /// cela fonctionne, c'est-à-dire qu'il enregistre le fichier
+      /// dans la mémoire du téléphone dans le dossier "Documents"
+      /// mais il y a une chance que si vous demandez MANAGE_EXTERNAL_STORAGE sans justification,
+      /// alors dans la public release / Play Store Google rejettera cette demande
+      /// (la plupart des applications ne seront pas acceptées).
       documentsPath = "/storage/emulated/0/Documents/camion_appli";
       if (await Permission.storage.request().isGranted){
         Directory downloadDir = Directory(documentsPath);
@@ -70,16 +78,7 @@ class PdfDownload {
     return documentsPath;
   }
 
-  // Future<void> downloadFile() async {
-  //   try {
-  //     String savePath = "/storage/emulated/0/Documents/camion_appli/$name.pdf";
-  //     print("Saving PDF to $savePath");
-  //     await Dio().download(url, savePath);
-  //   } catch (e) {
-  //     print("Error downloading file: $e");
-  //   }
-  // }
-
+  ///
   Future<void> requestStoragePermission() async {
     if (await Permission.storage.request().isGranted) {
       print("Write permissions granted.");

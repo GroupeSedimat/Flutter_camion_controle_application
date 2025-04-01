@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 
+/// Une classe chargée de vérifier si l'appareil dispose d'une connexion Internet
 class NetworkService extends ChangeNotifier {
   bool _isOnline = true;
   bool get isOnline => _isOnline;

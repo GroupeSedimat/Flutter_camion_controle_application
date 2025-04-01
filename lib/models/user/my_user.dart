@@ -7,7 +7,7 @@ class MyUser {
   String company;
   bool? apresFormation;
   String? apresFormationDoc;
-  List<String>? camion; /// todo change to List<String> for more camions (here and everywhere) plus display and selection in profile editing
+  List<String>? camion;
   DateTime createdAt;
   DateTime updatedAt;
   DateTime? deletedAt;

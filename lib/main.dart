@@ -4,15 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firebase_options.dart';
 import 'package:flutter_application_1/l10n/l10n.dart';
 import 'package:flutter_application_1/pages/map/map_page.dart';
-import 'package:flutter_application_1/pages/checklist/loading_vrm.dart';
-import 'package:flutter_application_1/pages/wrapper.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
-import 'package:flutter_application_1/pages/checklist/diagrams.dart';
+import 'package:flutter_application_1/pages/vrm/diagrams.dart';
 import 'package:flutter_application_1/pages/splash_screen.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_application_1/services/database_local/sync_service.dart';
-import 'package:flutter_application_1/services/dialog_services.dart';
+import 'package:flutter_application_1/services/sync_service.dart';
+import 'package:flutter_application_1/utils/dialog_services.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -134,10 +132,8 @@ class MyApp extends StatelessWidget {
       fallbackLocale: Locale('en'),
       home: SplashScreen(),
       routes: {
-        '/wrapper': (context) => const Wrapper(),
         '/checklist': (context) => const CheckList(),
         '/diagrams': (context) => const Diagrams(),
-        '/loadingdata': (context) => const LoadingData(),
         '/settings': (context) => SettingsPage(),
         // '/map': (context) => MapPage(),
       },

@@ -37,6 +37,7 @@ class _AddCamionState extends State<AddCamion> {
   String company = "";
   String pageTile = "";
   String role = "";
+  int nextCamionID = 0;
 
   List<DateTime> checks = [];
   Map<String, CamionType>? _camionTypesMap;
@@ -56,6 +57,8 @@ class _AddCamionState extends State<AddCamion> {
     await Future.wait([_loadCamionTypes(), _loadCompanyNames()]);
     if (widget.camion != null) {
       _populateFieldsWithCamionData();
+    }else{
+      nextCamionID = await getFirstFreeCamionNumber(db);
     }
   }
 
@@ -403,7 +406,7 @@ class _AddCamionState extends State<AddCamion> {
                           );
 
                   if (widget.camion == null) {
-                    insertCamion(db, newCamion, "");
+                    insertCamion(db, newCamion, nextCamionID.toString());
                   } else {
                     updateCamion(db, newCamion, widget.camionID!);
                   }

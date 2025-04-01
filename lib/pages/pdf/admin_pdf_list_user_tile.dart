@@ -5,7 +5,7 @@ import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/pdf/database_pdf_service.dart';
 import 'package:provider/provider.dart';
 
-
+/// une classe qui affiche une liste PDF pour un utilisateur donné
 class UserTile extends StatefulWidget {
   final MyUser user;
   final Map<String, String> userData;
@@ -32,6 +32,7 @@ class _UserTileState extends State<UserTile> {
 
   Future<void> _initService() async {
     try {
+      /// initialisation des services
       networkService = Provider.of<NetworkService>(context, listen: false);
       databasePDFService = DatabasePDFService();
     } catch (e) {
@@ -41,8 +42,6 @@ class _UserTileState extends State<UserTile> {
 
   @override
   Widget build(BuildContext context) {
-    print("❗User Tile build ${widget.user.username}");
-    print("❗${widget.userData}");
     double listHeight = MediaQuery.of(context).size.height * 0.8;
     double minHeight = 200;
     return ExpansionTile(
@@ -65,6 +64,8 @@ class _UserTileState extends State<UserTile> {
       children: [
         SizedBox(
           height: listHeight < minHeight ? minHeight : listHeight,
+          /// afficher une liste de fichiers PDF en utilisant la classe PDFShowTemplate
+          /// (vous pouvez ajouter une pagination pour un plus grand nombre de fichiers)
           child: ListView.builder(
             itemCount: widget.userData.length,
             padding: const EdgeInsets.all(16.0),

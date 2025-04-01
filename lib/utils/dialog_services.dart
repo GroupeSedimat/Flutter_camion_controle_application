@@ -9,7 +9,24 @@ class DialogService {
 
   DialogService._internal();
 
-  // Function to show a generic dialog
+  /// Fonction permettant d'afficher une boîte de dialogue générale
+  ///
+  /// utilisée pour afficher des informations sur un conflit lors de la synchronisation
+  /// (peut également être utilisée pour autre chose)
+  /// ici l'apparence de la boîte de dialogue est déterminée
+  ///
+  /// title: 'titre de la fenêtre de message'
+  /// message: 'contenu du message'
+  /// actions: [
+  ///         DialogAction<Type_de_result>(
+  ///           label: 'description de choix 1',
+  ///           result: 'valeur 1',
+  ///         ),
+  ///         DialogAction<Type_de_result>(
+  ///           label: 'description de choix 2',
+  ///           result: 'valeur2',
+  ///         ),
+  ///       ],
   Future<T?> showDialog<T>({
     required String title,
     required String message,

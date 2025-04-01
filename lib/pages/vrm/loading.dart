@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+/// utilisé dans la classe Diagrams comme affichage temporaire du chargement des données
 class Loading extends StatelessWidget {
   const Loading({super.key});
 

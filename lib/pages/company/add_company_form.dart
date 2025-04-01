@@ -24,6 +24,7 @@ class _AddCompanyState extends State<AddCompany> {
   late Database db;
   bool _isLoading = true;
   String pageTile = "";
+  int nextCompanyID = 0;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _sireneController = TextEditingController();
@@ -45,6 +46,8 @@ class _AddCompanyState extends State<AddCompany> {
     await _initDatabase();
     if (widget.company != null) {
       _populateFieldsWithEquipmentData();
+    }else{
+      nextCompanyID = await getFirstFreeCompanyNumber(db);
     }
     if (mounted) {
       setState(() {
@@ -300,7 +303,7 @@ class _AddCompanyState extends State<AddCompany> {
                     updatedAt: DateTime.now(),
                   );
                   if (widget.company == null) {
-                    insertCompany(db, newCompany, "");
+                    insertCompany(db, newCompany, nextCompanyID.toString());
                   } else {
                     updateCompany(db, newCompany, widget.companyID!);
                   }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/check_list/blueprints_table.dart';
-import 'package:flutter_application_1/services/pick_image_service.dart';
+import 'package:flutter_application_1/utils/pick_image_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -41,6 +41,7 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
   int photoCounter = 1;
   File? imageGalery;
   String pageTile = "";
+  int nextBlueprintID = 0;
 
   late PickImageService _pickImageService;
   late Database db;
@@ -56,6 +57,8 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
     await _initService();
     if (widget.blueprint != null) {
       _populateFieldsWithEquipmentData();
+    }else {
+      nextBlueprintID = await getFirstFreeBlueprintNumber(db);
     }
   }
 
@@ -267,7 +270,7 @@ class _AdBlueprintFormState extends State<AddBlueprintForm> {
                     updatedAt: DateTime.now(),
                   );
                   if (widget.blueprint == null) {
-                    insertBlueprint(db, newBlueprint, "");
+                    insertBlueprint(db, newBlueprint, nextBlueprintID.toString());
                   } else {
                     updateBlueprint(db, newBlueprint, widget.blueprintID!);
                   }

@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 
 String tableName = "listOfLists";
 
+/// une classe fonctionnant sur la table "listOfLists" dans database local
 Future<void> createTableListOfLists(Database db) async {
   await db.execute('''
     CREATE TABLE $tableName (
@@ -115,6 +116,27 @@ Future<Map<String,ListOfLists>?> getAllLists(Database db, String role) async {
   return sortedListOfLists(listOfLists: listOfLists);
 }
 
+Future<int> getFirstFreeListNumber(Database db) async {
+  int lastListID = 0;
+  try{
+    final List<Map<String, dynamic>> maps = await db.query(tableName);
+    if(maps.isEmpty){
+      return lastListID;
+    }
+
+    for (var litItem in maps) {
+      String id = litItem["id"];
+      if(id.length<10 && int.parse(id)>lastListID){
+        lastListID = int.parse(id);
+      }
+    }
+
+  } catch (e){
+    print("Error while getting first free ListOfLists ID: $e");
+  }
+  return lastListID + 1;
+}
+
 Future<Map<String,ListOfLists>?> getAllListsSinceLastUpdate(dynamic dbOrTxn, String lastUpdated, String timeSync) async {
   Map<String, ListOfLists> listOfLists = {};
   try {
@@ -125,10 +147,8 @@ Future<Map<String,ListOfLists>?> getAllListsSinceLastUpdate(dynamic dbOrTxn, Str
     if(maps.isEmpty){
       return null;
     }
-    print("-------- last updated ListOfLists $lastUpdated");
 
     for (var element in maps) {
-      print("-------- list ${element["id"]} updatedAt ${element["updatedAt"]}");
       listOfLists[element["id"] as String] = responseItemToListOfLists(element);
     }
 

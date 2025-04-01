@@ -5,7 +5,7 @@ import 'package:flutter_application_1/models/checklist/task.dart';
 import 'package:flutter_application_1/services/database_local/check_list/tasks_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/network_service.dart';
-import 'package:flutter_application_1/services/pick_image_service.dart';
+import 'package:flutter_application_1/utils/pick_image_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +39,7 @@ class ValidateTaskState extends State<ValidateTask> {
   late Directory tempDir;
   late Database db;
   bool _isInitialized = false;
+  int nextTaskID = 0;
 
   final PickImageService _pickImageService = PickImageService();
 
@@ -262,7 +263,8 @@ class ValidateTaskState extends State<ValidateTask> {
                     widget.validate.nrOfList = widget.blueprint.nrOfList;
                     widget.validate.nrEntryPosition = widget.blueprint.nrEntryPosition;
                     if(widget.keyId == ""){
-                      insertTask(db, widget.validate, "");
+                      nextTaskID = await getFirstFreeTasksNumber(db);
+                      insertTask(db, widget.validate, nextTaskID.toString());
                     }else{
                       updateTask(db, widget.validate, widget.keyId);
                     }

@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 class PickImageService{
 
-
+  /// La fonction déclenche la sélection d'une photo de la galerie et la renvoie sous forme de fichier
   Future<File?> pickImageFromGallery() async{
     try {
       final image =  await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -18,6 +18,7 @@ class PickImageService{
     }
   }
 
+  /// La fonction déclenche la prise d'une photo avec l'appareil photo de l'appareil et la renvoie sous forme de fichier
   Future<File?> pickImageFromCamera() async{
     try {
       final image =  await ImagePicker().pickImage(source: ImageSource.camera);

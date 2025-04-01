@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/admin/admin_page.dart';
-import 'package:flutter_application_1/pages/user/user_role.dart';
+import 'package:flutter_application_1/models/user/user_role.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
