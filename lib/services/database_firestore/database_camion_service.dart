@@ -25,7 +25,6 @@ class DatabaseCamionService{
     try {
       final querySnapshot = await _camionRef.get();
       List snapshotList = querySnapshot.docs;
-      print(snapshotList.length);
       Map<String, Camion> camions = {};
 
       for (var snapshotCamionItem in snapshotList) {

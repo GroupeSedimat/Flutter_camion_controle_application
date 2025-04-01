@@ -14,6 +14,7 @@ import 'package:flutter_application_1/widgets/base_page.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// page d'accueil user et admin
 class WelcomePage extends StatefulWidget {
   WelcomePage({Key? key}) : super(key: key);
 
@@ -40,26 +41,35 @@ class _WelcomePageState extends State<WelcomePage> {
   Future<void> _loadData() async {
     await _initDatabase();
     await _initServices();
+    /// vérifier si l'application est en ligne
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
     }else{
       await _loadUserToConnection();
     }
     await _loadUser();
+    /// vérifier si l'application est en ligne avant d'essayer de synchroniser
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
     }{
       await _syncData();
     }
     if (mounted) {
+      /// une fois l'initialisation terminée, modifiez la valeur de _isDataLoaded en true pour afficher le contenu de la page chargée
       setState(() {
         _isDataLoaded = true;
       });
     }
   }
 
+  Future<void> _initDatabase() async {
+    /// initialisation de la base de données locale
+    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
+  }
+
   Future<void> _initServices() async {
     try {
+      /// initialisation des services
       authController = AuthController();
       userService = UserService();
       networkService = Provider.of<NetworkService>(context, listen: false);
@@ -69,11 +79,14 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future<void> _loadUserToConnection() async {
+    /// téléchargement des données utilisateur actuelles
     Map<String, MyUser>? users = await getThisUser(db);
     if(users != null ){
+      /// si l'utilisateur actuel est dans la base de données, quittez la fonction et continuez
       return;
     }
     try {
+      /// si l'utilisateur actuel n'est pas encore dans la base de données, synchroniser les données utilisateur
       MyUser user = await userService.getCurrentUserData();
       String? userId = await userService.userID;
       final syncService = Provider.of<SyncService>(context, listen: false);
@@ -83,15 +96,12 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
+  /// enregistrer l'ID utilisateur actuel et les données dans des variables
   Future<void> _loadUser() async {
-    print("welcome page local ☢☢☢☢☢☢☢");
     try {
       Map<String, MyUser>? users = await getThisUser(db);
-      print("connected as  $users");
       MyUser user = users!.values.first;
-      print("local user ☢☢☢☢☢☢☢ $user");
       String? userId = users.keys.first;
-      print("local userId ☢☢☢☢☢☢☢ $userId");
       _userId = userId;
       _user = user;
     } catch (e) {
@@ -99,17 +109,11 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
-  Future<void> _initDatabase() async {
-    db = await Provider.of<DatabaseHelper>(context, listen: false).database;
-  }
-
+  /// synchroniser chaque table séparément,
   Future<void> _syncData() async {
-
     if (_user == null || _userId == null) {
       print("Cannot sync data: user or userID is not loaded");
       return;
-    }else{
-      print("Can sync data: user: ${_user!.name} is loaded");
     }
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
@@ -127,7 +131,6 @@ class _WelcomePageState extends State<WelcomePage> {
           }
         }
       });
-      print("Camion types Ids in list: $camionsTypeIdList");
       print("💽 Synchronizing CamionTypess...");
       await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
@@ -147,7 +150,6 @@ class _WelcomePageState extends State<WelcomePage> {
       await syncService.fullSyncTable("companies", user: _user, userId: _userId);
       print("💽 Synchronizing Equipments...");
       await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
-      print("Camion List of Lists Ids: $camionListOfListId");
       print("💽 Synchronizing LOL...");
       await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
       print("💽 Synchronizing Blueprints...");
@@ -162,6 +164,8 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
+  /// Nous construisons le site basé sur BasePage.
+  /// Si les données n'ont pas encore été chargées, nous afficherons le chargement "CircularProgressIndicator"
   @override
   Widget build(BuildContext context) {
     return BasePage(
@@ -169,6 +173,7 @@ class _WelcomePageState extends State<WelcomePage> {
       body: _isDataLoaded ? _buildBody(context) : CircularProgressIndicator(),
     );
   }
+
 
   Widget _buildBody(BuildContext context) {
     double w = MediaQuery.of(context).size.width;

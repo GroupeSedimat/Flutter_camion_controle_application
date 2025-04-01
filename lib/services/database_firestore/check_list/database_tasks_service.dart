@@ -69,12 +69,10 @@ class DatabaseTasksService{
   }
 
   Future<void> deleteTaskFuture(String taskID) async {
-    print("Delete task with id: $taskID");
     await _tasksRef.doc(taskID).delete();
   }
 
   Future<void> deleteTaskForUser(String userId) async {
-    print("Delete tasks for user: $userId");
     Map<String, TaskChecklist> tasks = await getAllTasks(userId);
     for (var firebaseTask in tasks.entries){
       await _tasksRef.doc(firebaseTask.key).delete();

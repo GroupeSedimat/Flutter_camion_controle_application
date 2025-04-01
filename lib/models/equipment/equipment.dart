@@ -9,7 +9,7 @@ class Equipment {
   DateTime updatedAt;
   DateTime? deletedAt;
 // tagNFC
-// comsommable dodac link
+// comsommable
 
   Equipment({
     this.idShop,

@@ -286,6 +286,22 @@ class PdfService {
     );
   }
 
+  /// Déterminer comment et quoi afficher à partir des données utilisateur
+  pw.Column userDatas(MyUser user, pw.Font font) {
+    DateTime now = DateTime.now();
+    DateTime localTime = now.toLocal();
+    String formattedTime = DateFormat("yyyy-MM-dd HH:mm:ss").format(localTime);
+    return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text("La personne qui crée la liste:", style: pw.TextStyle(font: font,)),
+          pw.Text("Username ${user.username}", style: pw.TextStyle(font: font)),
+          pw.Text("Email ${user.email}", style: pw.TextStyle(font: font)),
+          pw.Text("Created $formattedTime", style: pw.TextStyle(font: font)),
+        ]
+    );
+  }
+
   Future<Uint8List?> _downloadImage(String url) async {
     try {
       final response = await http.get(Uri.parse(url));
@@ -323,22 +339,6 @@ class PdfService {
     }
     await deleteOneTaskListOfUser();
     return filePath;
-  }
-
-  /// Déterminer comment et quoi afficher à partir des données utilisateur
-  pw.Column userDatas(MyUser user, pw.Font font) {
-    DateTime now = DateTime.now();
-    DateTime localTime = now.toLocal();
-    String formattedTime = DateFormat("yyyy-MM-dd HH:mm:ss").format(localTime);
-    return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text("La personne qui crée la liste:", style: pw.TextStyle(font: font,)),
-          pw.Text("Username ${user.username}", style: pw.TextStyle(font: font)),
-          pw.Text("Email ${user.email}", style: pw.TextStyle(font: font)),
-          pw.Text("Created $formattedTime", style: pw.TextStyle(font: font)),
-        ]
-    );
   }
 
   /// Spécifier où enregistrer le PDF sur appareil

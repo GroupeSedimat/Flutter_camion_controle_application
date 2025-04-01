@@ -64,14 +64,11 @@ class _MenuWidgetState extends State<MenuWidget> {
   }
   
   Future<void> _loadUserLocalDB() async {
-    print("menu local ☢☢☢☢☢☢☢");
     try {
       Map<String, MyUser>? users = await getThisUser(db);
       MyUser user = users!.values.first;
       _username = user.username;
-      print("local username ☢☢☢☢☢☢☢ $_username");
       _role = user.role;
-      print("local role ☢☢☢☢☢☢☢ $_role");
     } catch (e) {
       print("Error loading user: $e");
     }

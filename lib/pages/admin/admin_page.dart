@@ -20,6 +20,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// page de démarrage et page de gestion principale de superAdmin
 class AdminPage extends StatefulWidget {
   final UserRole userRole;
 
@@ -164,6 +165,7 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
+  /// créer un menu en mosaïque
   Widget _buildDashboard(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
@@ -231,6 +233,7 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
+  /// tuile dans le menu
   Widget _buildDashboardItem(
     BuildContext context,
     String title,

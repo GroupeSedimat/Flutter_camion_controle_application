@@ -26,6 +26,8 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+
+            /// Sélection de darkMode
             ListTile(
               title: Text(
                 AppLocalizations.of(context)!.darkMode,
@@ -54,7 +56,7 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
 
-            // Sélection de la couleur du thème
+            /// Sélection de la couleur du thème
             ListTile(
               title: Text(AppLocalizations.of(context)!.color),
               trailing: DropdownButton<AppColor>(
@@ -75,6 +77,7 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
 
+            /// Sélection de la langue
             ListTile(
               title: Text(AppLocalizations.of(context)!.language),
               trailing: DropdownButton<String>(
@@ -103,7 +106,7 @@ class SettingsPage extends StatelessWidget {
               },
             ),
 
-            // Modifier le mot de passe
+            /// Modifier le mot de passe
             ListTile(
               trailing: Icon(Icons.lock),
               title: Text(AppLocalizations.of(context)!.passChange),
@@ -119,7 +122,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  // A function that returns the names of languages in selected languages
+  /// Une fonction qui renvoie les noms des langues dans les langues sélectionnées
   String _getLanguageName(String code) {
     switch (code) {
       case 'en':

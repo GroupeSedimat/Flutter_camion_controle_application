@@ -5,6 +5,7 @@ import 'package:flutter_application_1/utils/pdf_open.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
+///une classe d'affichage de fichiers PDF qui vous permet d'afficher ou de télécharger un fichier donné
 class PDFShowTemplate extends StatefulWidget {
   final String fileName;
   final String url;

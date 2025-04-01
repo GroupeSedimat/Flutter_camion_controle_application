@@ -5,16 +5,17 @@
 ## Table of Contents
 
 - [Introduction](#1.-introduction)
-- [Technologies utilisées](#2.-technologies-utilisées)
+- [Technologies utilisées](#2.-technologies-utilisees)
 - [Architecture de l’application](#3.-architecture-de-lapplication)
 - [Installation et configuration](#4.-installation-et-configuration)
 - [Structure du projet](#5.-structure-du-projet)
-- [Gestion des bases de données](#6.-gestion-des-bases-de-données)
-- [Gestion de la synchronisation Firebase ↔ SQLite](#7.-gestion-de-la-synchronisation-firebase-↔-sqlite)
-- [Sécurité et permissions](#8.-sécurité-et-permissions)
-- [API et intégrations](#9.-api-et-intégrations)
-- [Tester l’application en local](#10.-Tester-lapplication-en-local)
-- [Déploiement et mise en production](#11.-déploiement-et-mise-en-production)
+- [Gestion des bases de données](#6.-gestion-des-bases-de-donnees)
+- [Passage à un autre serveur](#7.-passage-a-un-autre-serveur)
+- [Gestion de la synchronisation Firebase ↔ SQLite](#8.-gestion-de-la-synchronisation-firebase-↔-sqlite)
+- [Sécurité et permissions](#9.-securite-et-permissions)
+- [API et intégrations](#10.-api-et-integrations)
+- [Tester l’application en local](#11.-tester-lapplication-en-local)
+- [Déploiement et mise en production](#12.-deploiement-et-mise-en-production)
 
 ---
 ## 1. Introduction
@@ -165,7 +166,27 @@ Collections principales dans Firestore
 - Permet l’utilisation en mode hors ligne.
 - Structure similaire à Firebase pour faciliter les mises à jour.
 
-## 7. Gestion de la synchronisation Firebase ↔ SQLite
+## 7. Passage à un autre serveur (autre que Firestore)
+#### Modifications nécessaires:
+1. Créer un nouveau système d’authentification (Firestore gérait l’authentification, donc en changeant de serveur, il faut tout recréer de zéro):
+   * services/auth_controller.dart → gère la création de compte, la modification de mot de passe et la connexion.
+   * services/database_firestore/user_service.dart → gère les données utilisateur contenues dans models.
+    > [!NOTE]
+    >
+    > Il est possible de fusionner auth_controller et user_service. Dans ce cas, il faut également modifier models/my_user.dart et sécuriser l’accès aux données
+   * Dans tous les services utilisant _loadUserToConnection(), remplacer user_service.dart par le nouveau service afin de récupérer les informations de l’utilisateur actuel (ID et objet).
+2. Remplacer les services Firestore (services/database_firestore/...) par des services dédiés à la gestion des données de chaque entité.
+    * Ces services sont appelés dans services/sync_service.dart, il faut donc modifier son appel à cet endroit.
+    > [!WARNING]
+    >
+    > database_image_service.dart est aussi utilisé dans services/pdf/pdf_service.dart. Il faut donc également y modifier l’appel au service.
+3. Remplacer services/pdf/database_pdf_service.dart par un service de gestion des fichiers PDF
+4. Remplacer services/database_validation_files_service.dart par un service de gestion des fichiers de certification/autorisations pour l’utilisation des camions.
+    * Ce service est utilisé dans pages/admin/UserEditPage.dart, il faut donc modifier son appel à cet endroit.
+
+
+
+## 8. Gestion de la synchronisation Firebase ↔ SQLite
 
 L’application utilise un service de synchronisation dédié, SyncService, qui assure la mise à jour des données entre Firebase Firestore (Cloud) et SQLite (local).
 
@@ -178,7 +199,7 @@ L’application utilise un service de synchronisation dédié, SyncService, qui 
 >
 > Plutôt que d’appeler séparément syncFromFirebase et syncToFirebase, il suffit d’appeler une seule fonction (fullSyncTable) pour assurer la mise à jour complète d’une table.
 
-## 8. Sécurité et permissions 
+## 9. Sécurité et permissions 
 
 #### 🔒 Authentification et rôles
 
@@ -192,7 +213,102 @@ Authentification sécurisée via Firebase Authentication avec gestion des rôles
 
     Toutes les communications entre l’application et Firebase sont chiffrées en HTTPS.
 
-## 9. API et intégrations
+#### 🔒 Storage Access Framework (SAF) — Enregistrement de fichier dans Documents sur Android 10+
+> [!WARNING]
+>
+> Cette approche est 100% conforme aux règles de Google Play (au cas où function "savePdfFile" dans pdf_service.dart serait rejeté par Google Play).
+
+Étape 1: Ajouter la dépendance
+
+  Dans pubspec.yaml:
+```bash
+dependencies:
+  storage_access_framework: ^1.1.1
+```
+Étape 2: Enregistrement d’un fichier PDF avec SAF (services/pdf/pdf_service.dart) 
+```dart
+Future<String?> savePdfFileWithSAF(
+    String companyID,
+    Uint8List data,
+    MyUser user,
+    String userId,
+    Future<void> Function() deleteOneTaskListOfUser,
+    String? folderUri, // SAF nécessite un URI de dossier enregistré
+    ) async {
+  int time = DateTime.now().millisecondsSinceEpoch;
+  String fileName = "${user.username}.${time.toString()}.pdf";
+  String filePathDatabase = "${user.company}/$userId/${time.toString()}";
+
+  // 1: Vérifier si un dossier SAF est défini
+  if (folderUri == null) {
+    print("Aucun dossier SAF défini – tentative de récupération depuis SharedPreferences.");
+
+    // Essayer de récupérer l'URI enregistré
+    final prefs = await SharedPreferences.getInstance();
+    folderUri = prefs.getString('saf_folder_uri');
+    if (folderUri != null) {
+      print("Dossier SAF récupéré depuis SharedPreferences : $folderUri");
+    }
+    
+    // Si toujours null, demander à l’utilisateur de choisir un dossier
+    if (folderUri == null) {
+      print("Aucun dossier SAF enregistré – demander à l’utilisateur de choisir un dossier.");
+      folderUri = await StorageAccessFramework.openDocumentTree();
+
+      if (folderUri != null) {
+        // Enregistrer le dossier sélectionné
+        await prefs.setString('saf_folder_uri', folderUri);
+        print("Nouveau dossier SAF enregistré: $folderUri");
+      } else {
+        print("L'utilisateur a annulé la sélection du dossier.");
+        return null; // Arrêter l'exécution si aucun dossier n'est sélectionné
+      }
+    }
+  }
+  
+  try {
+    // 2. Créer un fichier dans le dossier SAF sélectionné
+    final fileUri = await StorageAccessFramework.createFile(
+      folderUri,
+      "application/pdf",
+      fileName,
+    );
+
+    if (fileUri == null) {
+      print("Échec de la création du fichier dans SAF.");
+      return null;
+    }
+
+    // 3. Écrire les données PDF dans le fichier SAF
+    await StorageAccessFramework.writeFile(fileUri, data);
+    print("Fichier PDF enregistré: $fileUri");
+
+    // 4. Si connecté à Internet → envoyer le fichier à Firebase
+    if (networkService.isOnline) {
+      // D'abord, enregistrer temporairement le fichier sur l’appareil (Firebase nécessite un chemin de fichier)
+      Directory tempDir = await getApplicationSupportDirectory();
+      File tempFile = File("${tempDir.path}/$fileName");
+      await tempFile.writeAsBytes(data);
+
+      await databasePDFService.addPdfToFirebase(tempFile.path, filePathDatabase);
+    } else {
+      // 5. Si hors ligne → enregistrer temporairement pour synchronisation ultérieure
+      Directory tempDir = await getApplicationSupportDirectory();
+      File tempFile = File("${tempDir.path}/$userId.${time.toString()}.pdf");
+      await tempFile.writeAsBytes(data);
+      print("Fichier enregistré temporairement pour synchronisation: ${tempFile.path}");
+    }
+
+    await deleteOneTaskListOfUser();
+    return fileUri; // SAF retourne un URI, pas un chemin classique
+  } catch (e) {
+    print("Erreur SAF: $e");
+    return null;
+  }
+}
+```
+
+## 10. API et intégrations
 
 #### INPI (Données des entreprises)
 
@@ -203,7 +319,7 @@ Authentification sécurisée via Firebase Authentication avec gestion des rôles
     Prévu pour récupérer des informations sur les véhicules.
     Actuellement désactivé en raison de priorités sur d’autres fonctionnalités.
 
-## 10. Tester l’application en local
+## 11. Tester l’application en local
 
 Pour Android : Lancer l’émulateur ou brancher un téléphone en mode développeur et exécuter :
 ```bash
@@ -212,7 +328,7 @@ flutter run --release
 
 Pour iOS : Ouvrir ios/Runner.xcworkspace dans Xcode et exécuter sur un simulateur ou un iPhone réel.
 
-## 11. Déploiement et mise en production
+## 12. Déploiement et mise en production
 
 #### Publication sur Google Play et Apple Store
 

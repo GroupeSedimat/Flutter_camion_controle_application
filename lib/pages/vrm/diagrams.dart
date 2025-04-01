@@ -5,6 +5,9 @@ import 'package:flutter_application_1/services/data_api/get_data.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+/// la classe était initialement censée afficher des diagrammes basés
+/// sur des données téléchargées à partir du site Web VRM
+/// actuellement mis de côté "pour plus tard"
 class Diagrams extends StatefulWidget {
   const Diagrams({super.key});
 
@@ -17,6 +20,13 @@ class _DiagramsState extends State<Diagrams> {
   String data = 'No data, sorry :(';
   bool loading = true;
 
+  @override
+  void initState() {
+    super.initState();
+    setupGetData();
+  }
+
+  /// Utiliser la fonction GetData pour créer une instance et récupérer des données
   void setupGetData() async {
     GetData instance = GetData(signature: "381831", precision: "/stats");
     await instance.getData();
@@ -27,13 +37,6 @@ class _DiagramsState extends State<Diagrams> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    setupGetData();
-  }
-
-
-  @override
   Widget build(BuildContext context) {
     return loading ? const Loading() : BasePage(
       appBar: appBar(),
@@ -41,6 +44,7 @@ class _DiagramsState extends State<Diagrams> {
     );
   }
 
+  /// définir et créer body
   body(BuildContext context) {
     return ListView(
       children: <Widget>[
@@ -52,6 +56,7 @@ class _DiagramsState extends State<Diagrams> {
 
           icon: const Icon(Icons.check),
         ),
+        /// afficher les données téléchargées sous forme de texte
         Text(
           data,
         ),
@@ -59,6 +64,7 @@ class _DiagramsState extends State<Diagrams> {
     );
   }
 
+  /// définir et créer appBar
   appBar() {
     return AppBar(
       title: Text(AppLocalizations.of(context)!.dataReceived),
@@ -70,7 +76,6 @@ class _DiagramsState extends State<Diagrams> {
           ),
           onPressed: () async {
             AuthController.instance.logOut();
-            Navigator.pushReplacementNamed(context, '/wrapper');
           },
           child: Text(AppLocalizations.of(context)!.logOut),
         ),

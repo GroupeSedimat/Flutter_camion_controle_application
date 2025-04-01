@@ -17,6 +17,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// page affichant les fichiers PDF pour l'admin et le superadmin
 class AdminPdfListView extends StatefulWidget {
   @override
   State<AdminPdfListView> createState() => _AdminPdfListViewState();
@@ -64,12 +65,15 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
     }
   }
 
+
   Future<void> _initDatabase() async {
+    /// initialisation de la base de données locale
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
 
   Future<void> _initServices() async {
     try {
+      /// initialisation des services
       authController = AuthController();
       userService = UserService();
       networkService = Provider.of<NetworkService>(context, listen: false);
@@ -80,11 +84,14 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
   }
 
   Future<void> _loadUserToConnection() async {
+    /// téléchargement des données utilisateur actuelles
     Map<String, MyUser>? users = await getThisUser(db);
     if(users != null ){
+      /// si l'utilisateur actuel est dans la base de données, quittez la fonction et continuez
       return;
     }
     try {
+      /// si l'utilisateur actuel n'est pas encore dans la base de données, synchroniser les données utilisateur
       MyUser user = await userService.getCurrentUserData();
       String? userId = await userService.userID;
       final syncService = Provider.of<SyncService>(context, listen: false);
@@ -94,6 +101,7 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
     }
   }
 
+  /// enregistrer l'ID utilisateur actuel et les données dans des variables
   Future<void> _loadUser() async {
     try {
       Map<String, MyUser>? users = await getThisUser(db);
@@ -106,6 +114,7 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
     }
   }
 
+  /// synchroniser chaque table séparément,
   Future<void> _syncData() async {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
@@ -122,11 +131,13 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
     }
   }
 
+  /// charge les données et les stocke dans des variables locales
   Future<void> _loadDataFromDatabase() async {
     await _loadCompanies();
     await _loadPdf();
   }
 
+  /// charge l'ID et les données sur la ou les entreprises
   Future<void> _loadCompanies() async {
     try {
       Map<String, Company>? companyList = await getAllCompanies(db, _user.role);
@@ -138,8 +149,11 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
     }
   }
 
+  /// si l'application est en ligne, la fonction enregistre les données attribuées
+  /// de manière appropriée des entreprises, des utilisateurs et des fichiers PDF
   Future<void> _loadPdf() async {
     try {
+      /// créer une Map avec des données attribuées pour un transfert ultérieur
       /// Map<String, Map<MyUser, Map<String, String>>> = (companyName, (user, (pdfName, pdfDownloadUrl)))
       Map<String, Map<MyUser, Map<String, String>>> pdf = {};
       if(networkService.isOnline){
@@ -209,6 +223,8 @@ class _AdminPdfListViewState extends State<AdminPdfListView> {
   _buildBody() {
     return ListView(
       padding: EdgeInsets.all(25),
+      /// sur la base de la map précédemment créée, crée une vue de liste affichant
+      /// les données de chaque entreprise séparément à l'aide de la classe CompanyTile
       children: _pdfList.entries.map((companyData) {
         return CompanyTile(
           companyName: _companyList[companyData.key]?.name ?? companyData.key,

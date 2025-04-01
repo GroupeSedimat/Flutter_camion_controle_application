@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_application_1/locale_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-
+/// écran de démarrage
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
@@ -32,6 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+  /// initialisation de Firebase
   Future<void> _initializeFirebase() async {
     try {
       await Firebase.initializeApp();
@@ -98,6 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ],
                 ),
+                /// Sélection de la langue
                 child: DropdownButton<String>(
                   value: localeProvider.locale.languageCode,
                   icon: Icon(Icons.language, color: Colors.blueAccent),

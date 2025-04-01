@@ -18,6 +18,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// classe qui affiche la liste des équipements
 class EquipmentList extends StatefulWidget {
   const EquipmentList({super.key});
 
@@ -36,7 +37,6 @@ class _EquipmentListState extends State<EquipmentList> {
   late NetworkService networkService;
   Map<String, Equipment> _equipmentLists = HashMap();
 
-  /// todo repair names order and showing photo(s)
   @override
   void initState() {
     super.initState();
