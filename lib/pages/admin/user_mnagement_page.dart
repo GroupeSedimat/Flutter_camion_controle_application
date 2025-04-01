@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/admin/UserApprovalPage.dart';
-import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
+import 'package:flutter_application_1/pages/admin/user_approval_page.dart';
+import 'package:flutter_application_1/pages/admin/user_edit_page.dart';
 import 'package:flutter_application_1/widgets/base_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
+import 'package:flutter_application_1/pages/admin/user_details_page.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';

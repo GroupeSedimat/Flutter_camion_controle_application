@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_application_1/pages/admin/UserManagementPage.dart';
+import 'package:flutter_application_1/pages/admin/user_mnagement_page.dart';
 import 'package:flutter_application_1/widgets/base_page.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';

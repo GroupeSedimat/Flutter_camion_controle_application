@@ -4,18 +4,18 @@
 ---
 ## Table of Contents
 
-- [Introduction](#1.-introduction)
-- [Technologies utilisées](#2.-technologies-utilisees)
-- [Architecture de l’application](#3.-architecture-de-lapplication)
-- [Installation et configuration](#4.-installation-et-configuration)
-- [Structure du projet](#5.-structure-du-projet)
-- [Gestion des bases de données](#6.-gestion-des-bases-de-donnees)
-- [Passage à un autre serveur](#7.-passage-a-un-autre-serveur)
-- [Gestion de la synchronisation Firebase ↔ SQLite](#8.-gestion-de-la-synchronisation-firebase-↔-sqlite)
-- [Sécurité et permissions](#9.-securite-et-permissions)
-- [API et intégrations](#10.-api-et-integrations)
-- [Tester l’application en local](#11.-tester-lapplication-en-local)
-- [Déploiement et mise en production](#12.-deploiement-et-mise-en-production)
+- [Introduction](#1-introduction)
+- [Technologies utilisées](#2-technologies-utilisées)
+- [Architecture de l’application](#3-architecture-de-lapplication)
+- [Installation et configuration](#4-installation-et-configuration)
+- [Structure du projet](#5-structure-du-projet)
+- [Gestion des bases de données](#6-gestion-des-bases-de-données)
+- [Passage à un autre serveur](#7-passage-à-un-autre-serveur)
+- [Gestion de la synchronisation Firebase ↔ SQLite](#8-gestion-de-la-synchronisation-firebase--sqlite)
+- [Sécurité et permissions](#9-sécurité-et-permissions)
+- [API et intégrations](#10-api-et-intégrations)
+- [Tester l’application en local](#11-tester-lapplication-en-local)
+- [Déploiement et mise en production](#12-déploiement-et-mise-en-production)
 
 ---
 ## 1. Introduction
@@ -166,7 +166,7 @@ Collections principales dans Firestore
 - Permet l’utilisation en mode hors ligne.
 - Structure similaire à Firebase pour faciliter les mises à jour.
 
-## 7. Passage à un autre serveur (autre que Firestore)
+## 7. Passage à un autre serveur
 #### Modifications nécessaires:
 1. Créer un nouveau système d’authentification (Firestore gérait l’authentification, donc en changeant de serveur, il faut tout recréer de zéro):
    * services/auth_controller.dart → gère la création de compte, la modification de mot de passe et la connexion.
@@ -340,3 +340,8 @@ Pour iOS : Ouvrir ios/Runner.xcworkspace dans Xcode et exécuter sur un simulate
 
     Suivi des erreurs via Firebase Crashlytics.
     Mises à jour continues via le système de versioning GitHub.
+
+## Salut!
+  Travailler sur ce projet a été une expérience très intéressante. Je souhaite beaucoup de succès et le moins de bugs possible à toutes les personnes travaillant sur ce projet!
+
+  Le premier impliqué dans la création de cette application - [`Ireneusz PISKORSKI`](https://www.linkedin.com/in/ireneusz-piskorski/)

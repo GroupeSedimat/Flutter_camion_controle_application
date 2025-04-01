@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
-import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
+import 'package:flutter_application_1/pages/admin/user_details_page.dart';
+import 'package:flutter_application_1/pages/admin/user_edit_page.dart';
 import 'package:flutter_application_1/widgets/base_page.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
