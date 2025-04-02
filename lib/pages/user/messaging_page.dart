@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as path;
 
 class MessagingPage extends StatefulWidget {
   const MessagingPage({super.key});
@@ -86,8 +87,8 @@ class _MessagingPageState extends State<MessagingPage> {
             isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isMe)
-            const CircleAvatar(
-              backgroundColor: Colors.blueAccent,
+            CircleAvatar(
+              backgroundColor: Theme.of(context).primaryColor,
               child: Icon(Icons.person, color: Colors.white),
             ),
           Flexible(
@@ -95,7 +96,7 @@ class _MessagingPageState extends State<MessagingPage> {
               constraints: const BoxConstraints(maxWidth: 250),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isMe ? Colors.blueAccent : Colors.grey[200],
+                color: isMe ? Theme.of(context).primaryColor : Colors.grey[200],
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Column(
@@ -119,9 +120,9 @@ class _MessagingPageState extends State<MessagingPage> {
                   if (fileUrl != null)
                     GestureDetector(
                       onTap: () => _openFile(fileUrl),
-                      child: const Text(
-                          '📄 Fichier joint (cliquer pour ouvrir)',
-                          style: TextStyle(color: Colors.blueAccent)),
+                      child: Text('📄 Fichier joint (cliquer pour ouvrir)',
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor)),
                     ),
                   if (text != null && text.isNotEmpty)
                     Text(
@@ -150,7 +151,7 @@ class _MessagingPageState extends State<MessagingPage> {
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.blueAccent)),
+          border: Border.all(color: Theme.of(context).primaryColor)),
       child: Stack(
         alignment: Alignment.topRight,
         children: [
@@ -173,12 +174,12 @@ class _MessagingPageState extends State<MessagingPage> {
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-          color: Colors.blueAccent.withOpacity(0.1),
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.blueAccent)),
+          border: Border.all(color: Theme.of(context).primaryColor)),
       child: Row(
         children: [
-          const Icon(Icons.attach_file, color: Colors.blueAccent),
+          Icon(Icons.attach_file, color: Theme.of(context).primaryColor),
           const SizedBox(width: 8),
           Expanded(
             child: Text(_selectedFile!.path.split('/').last,
@@ -202,10 +203,12 @@ class _MessagingPageState extends State<MessagingPage> {
       child: Row(
         children: [
           IconButton(
-              icon: const Icon(Icons.camera_alt, color: Colors.blueAccent),
+              icon:
+                  Icon(Icons.camera_alt, color: Theme.of(context).primaryColor),
               onPressed: _pickImage),
           IconButton(
-              icon: const Icon(Icons.attach_file, color: Colors.blueAccent),
+              icon: Icon(Icons.attach_file,
+                  color: Theme.of(context).primaryColor),
               onPressed: _pickFile),
           Expanded(
             child: TextField(
@@ -215,7 +218,7 @@ class _MessagingPageState extends State<MessagingPage> {
                     border: InputBorder.none)),
           ),
           IconButton(
-              icon: const Icon(Icons.send, color: Colors.blueAccent),
+              icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
               onPressed: _sendMessage),
         ],
       ),
@@ -253,9 +256,28 @@ class _MessagingPageState extends State<MessagingPage> {
   }
 
   void _sendMessage() async {
+    if (_messageController.text.isEmpty &&
+        _selectedImage == null &&
+        _selectedFile == null) {
+      return;
+    }
+
+    String? imageUrl;
+    String? fileUrl;
+
+    if (_selectedImage != null) {
+      imageUrl = await _uploadFileToStorage(_selectedImage!, 'images');
+    }
+    if (_selectedFile != null) {
+      fileUrl = await _uploadFileToStorage(_selectedFile!, 'files');
+    }
+
     await _firestore.collection('messages').add({
-      'text': _messageController.text,
+      'text':
+          _messageController.text.isNotEmpty ? _messageController.text : null,
       'sender': _auth.currentUser?.email,
+      'imageUrl': imageUrl,
+      'fileUrl': fileUrl,
       'timestamp': FieldValue.serverTimestamp(),
     });
 
@@ -264,5 +286,29 @@ class _MessagingPageState extends State<MessagingPage> {
       _selectedImage = null;
       _selectedFile = null;
     });
+  }
+
+  Future<String?> _uploadFileToStorage(File file, String folder) async {
+    try {
+      // Vérifier la taille du fichier (max 5 Mo)
+      int fileSize = await file.length();
+      if (fileSize > 5 * 1024 * 1024) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Le fichier est trop volumineux (max 5 Mo).')));
+        return null;
+      }
+
+      // Utilise uniquement le nom de base du fichier pour éviter un nom trop long
+      String fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${path.basename(file.path)}';
+      Reference ref = _storage.ref().child('$folder/$fileName');
+
+      UploadTask uploadTask = ref.putFile(file);
+      TaskSnapshot snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Erreur lors de l\'upload du fichier : $e');
+      return null;
+    }
   }
 }

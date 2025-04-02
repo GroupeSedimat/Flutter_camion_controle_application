@@ -95,7 +95,7 @@ class SettingsPage extends StatelessWidget {
                   }
                 },
                 underline: Container(),
-                items: <String>['en', 'fr', 'pl', 'ar']
+                items: <String>['en', 'fr', 'pl', 'ar', 'nl']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -223,6 +223,8 @@ class SettingsPage extends StatelessWidget {
         return 'Wolof';
       case 'ar':
         return 'Arabic';
+      case 'nl':
+        return 'Dutch';
       default:
         return '';
     }
