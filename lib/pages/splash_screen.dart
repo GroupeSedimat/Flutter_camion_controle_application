@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_application_1/locale_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
@@ -54,9 +53,10 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/truck.jpg'),
+            image: AssetImage('assets/images/mc.jpg'),
             fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.dstATop),
+            colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.6), BlendMode.dstATop),
           ),
         ),
         child: Center(
@@ -124,7 +124,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   }).toList(),
                 ),
               ),
-
               SizedBox(height: 20),
               if (firebaseError)
                 Text(
@@ -165,6 +164,8 @@ class _SplashScreenState extends State<SplashScreen> {
         return 'Polski';
       case 'ar':
         return 'Arabic';
+      case 'nl':
+        return 'Dutch';
       default:
         return '';
     }
