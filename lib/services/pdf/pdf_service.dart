@@ -26,7 +26,8 @@ class PdfService {
   NetworkService networkService = NetworkService();
 
   Future<pw.Font> _loadFont() async {
-    final fontData = await rootBundle.load("assets/fonts/roboto/Roboto-Regular.ttf");
+    final fontData =
+        await rootBundle.load("assets/fonts/roboto/Roboto-Regular.ttf");
     return pw.Font.ttf(fontData);
   }
 
@@ -38,7 +39,10 @@ class PdfService {
       ListOfLists list) async {
     final pdf = pw.Document();
     final company = (await getOneCompanyWithID(db, user.company))!;
-    final mobilityLogo = (await rootBundle.load('assets/images/keybas_logo.png')).buffer.asUint8List();
+    final mobilityLogo =
+        (await rootBundle.load('assets/images/keybas_logo.png'))
+            .buffer
+            .asUint8List();
     final font = await _loadFont();
     final companyColumn = await _companyDatas(company, font);
     final photosToPDF = HashMap<int, Uint8List>();
@@ -46,15 +50,18 @@ class PdfService {
     // final blueprintTaskList = _generateBlueprintTaskList(sortedBlueprints, tasks, list, photosToPDF);
     Map<Blueprint, TaskChecklist> blueprintTaskList = {};
 
-    for (Blueprint blueprint in sortedBlueprints.values){
-      for(TaskChecklist task in tasks.values){
-        if (blueprint.nrEntryPosition == task.nrEntryPosition && blueprint.nrOfList == list.listNr && task.nrOfList == list.listNr){
+    for (Blueprint blueprint in sortedBlueprints.values) {
+      for (TaskChecklist task in tasks.values) {
+        if (blueprint.nrEntryPosition == task.nrEntryPosition &&
+            blueprint.nrOfList == list.listNr &&
+            task.nrOfList == list.listNr) {
           blueprintTaskList.addAll({blueprint: task});
-          if(task.photoFilePath != "" && task.photoFilePath != null){
+          if (task.photoFilePath != "" && task.photoFilePath != null) {
             String listNr = task.nrOfList.toString().padLeft(4, '0');
             String entryPos = task.nrEntryPosition.toString().padLeft(4, '0');
             Directory tempDir = await getApplicationSupportDirectory();
-            final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
+            final fileTemp =
+                File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
             if (await fileTemp.exists()) {
               Uint8List photoBytes = await fileTemp.readAsBytes();
               photosToPDF[task.nrEntryPosition] = photoBytes;
@@ -72,8 +79,10 @@ class PdfService {
     pdf.addPage(
       pw.MultiPage(
         pageTheme: pageTheme,
-        build: (context) => [_showValidation(blueprintTaskList, font, photosToPDF)],
-        header: (context) => _header(context, font, user, list, mobilityLogo, companyColumn),
+        build: (context) =>
+            [_showValidation(blueprintTaskList, font, photosToPDF)],
+        header: (context) =>
+            _header(context, font, user, list, mobilityLogo, companyColumn),
         footer: (context) => _footer(context, font),
       ),
     );
@@ -83,7 +92,8 @@ class PdfService {
         pw.MultiPage(
           pageTheme: pageTheme,
           build: (context) => [_photoAttachments(photosToPDF)],
-          header: (context) => _header(context, font, user, list, mobilityLogo, companyColumn),
+          header: (context) =>
+              _header(context, font, user, list, mobilityLogo, companyColumn),
           footer: (context) => _footer(context, font),
         ),
       );
@@ -117,7 +127,8 @@ class PdfService {
   //       blueprintTaskList.entries.toList()..sort((e1, e2) => e1.value.nrEntryPosition.compareTo(e2.value.nrEntryPosition)));
   // }
 
-  pw.Widget _showValidation(Map<Blueprint, TaskChecklist> blueprintTaskList, pw.Font font, Map<int, Uint8List> photosToPDF) {
+  pw.Widget _showValidation(Map<Blueprint, TaskChecklist> blueprintTaskList,
+      pw.Font font, Map<int, Uint8List> photosToPDF) {
     int count = 1;
     return pw.ListView.builder(
       itemCount: blueprintTaskList.length,
@@ -156,14 +167,16 @@ class PdfService {
                       if (entry.value.isDone == true)
                         pw.Text(
                           "Its ok",
-                          style: pw.TextStyle(font: font, color: PdfColors.green),
+                          style:
+                              pw.TextStyle(font: font, color: PdfColors.green),
                         ),
                       if (entry.value.isDone != true)
                         pw.Text(
                           "Its not ok!",
                           style: pw.TextStyle(font: font, color: PdfColors.red),
                         ),
-                      if (entry.value.descriptionOfProblem != "" && entry.value.descriptionOfProblem != null)
+                      if (entry.value.descriptionOfProblem != "" &&
+                          entry.value.descriptionOfProblem != null)
                         pw.Text(
                           "Problem: ${entry.value.descriptionOfProblem}",
                           style: pw.TextStyle(font: font),
@@ -192,12 +205,16 @@ class PdfService {
       alignment: pw.WrapAlignment.spaceAround,
       runAlignment: pw.WrapAlignment.spaceAround,
       children: [
-        for(Uint8List element in photosToPDF.values)
+        for (Uint8List element in photosToPDF.values)
           pw.Column(
             children: [
-              pw.SizedBox(height: 20,),
+              pw.SizedBox(
+                height: 20,
+              ),
               pw.Text("Pièce jointe n°: ${count++}"),
-              pw.SizedBox(height: 10,),
+              pw.SizedBox(
+                height: 10,
+              ),
               pw.Image(
                 pw.MemoryImage(element),
                 height: 250,
@@ -214,51 +231,53 @@ class PdfService {
     return pw.Center(
       child: pw.Opacity(
         opacity: 0.3,
-        child: pw.Transform.rotate(angle: 45, child: pw.Image(pw.MemoryImage(logo), fit: pw.BoxFit.contain)),
+        child: pw.Transform.rotate(
+            angle: 45,
+            child: pw.Image(pw.MemoryImage(logo), fit: pw.BoxFit.contain)),
       ),
     );
   }
 
-  pw.Column _header(pw.Context context, pw.Font font, MyUser user, ListOfLists list, Uint8List logo, pw.Row companyColumn) {
-    return pw.Column(
-        children: [
-          pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text("Créé avec MCTruckCheck", style: pw.TextStyle(font: font, fontSize: 14)),
-                pw.Image(pw.MemoryImage(logo), height: 50),
-              ]
+  pw.Column _header(pw.Context context, pw.Font font, MyUser user,
+      ListOfLists list, Uint8List logo, pw.Row companyColumn) {
+    return pw.Column(children: [
+      pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+        pw.Text("Créé avec MCTruckCheck",
+            style: pw.TextStyle(font: font, fontSize: 14)),
+        pw.Image(pw.MemoryImage(logo), height: 50),
+      ]),
+      // pw.Text('Page ${context.pageNumber}/${context.pagesCount}'),
+      pw.Divider(thickness: 1, color: PdfColors.black, height: 10),
+      if (context.pageNumber == 1)
+        pw.Column(children: [
+          pw.SizedBox(
+            height: 20,
           ),
-          // pw.Text('Page ${context.pageNumber}/${context.pagesCount}'),
-          pw.Divider(thickness: 1,color: PdfColors.black, height: 10 ),
-          if(context.pageNumber == 1)
-            pw.Column(
-                children:
-                [
-                  pw.SizedBox(height: 20,),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      userDatas(user, font),
-                      companyColumn,
-                    ],
-                  ),
-                  pw.SizedBox(height: 20,),
-                  pw.Text(
-                    "List ${list.listName}",
-                    style: pw.TextStyle(
-                      font: font,
-                      fontSize: 14,
-                      fontWeight: pw.FontWeight.bold,
-                      letterSpacing: 2,
-                      wordSpacing: 9,
-                    ),
-                  ),
-                  pw.SizedBox(height: 20,),
-                ]
-            )
-        ]
-    );
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              userDatas(user, font),
+              companyColumn,
+            ],
+          ),
+          pw.SizedBox(
+            height: 20,
+          ),
+          pw.Text(
+            "List ${list.listName}",
+            style: pw.TextStyle(
+              font: font,
+              fontSize: 14,
+              fontWeight: pw.FontWeight.bold,
+              letterSpacing: 2,
+              wordSpacing: 9,
+            ),
+          ),
+          pw.SizedBox(
+            height: 20,
+          ),
+        ])
+    ]);
   }
 
   pw.Widget _footer(pw.Context context, pw.Font font) {
@@ -276,33 +295,32 @@ class PdfService {
     if (company.logo != null) {
       logoData = await _downloadImage(company.logo!);
     }
-    return pw.Row(
-        children: [
-          if (logoData != null)
-            pw.Image(
-              pw.MemoryImage(logoData),
-              width: 75,
-              // height: 100,
-            ),
-          pw.SizedBox(
-            width: 20,
-          ),
-          pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text("Company name ${company.name}", style: pw.TextStyle(font: font, )),
-                if(company.sirene != "" && company.sirene != null)
-                  pw.Text("Sirene ${company.sirene}", style: pw.TextStyle(font: font)),
-                if(company.tel != "" && company.tel != null)
-                  pw.Text("Tel ${company.tel}", style: pw.TextStyle(font: font)),
-                if(company.email != "" && company.email != null)
-                  pw.Text("Email ${company.email}", style: pw.TextStyle(font: font)),
-                if(company.address != "" && company.address != null)
-                  pw.Text("Address ${company.address}", style: pw.TextStyle(font: font)),
-              ]
-          )
-        ]
-    );
+    return pw.Row(children: [
+      if (logoData != null)
+        pw.Image(
+          pw.MemoryImage(logoData),
+          width: 75,
+          // height: 100,
+        ),
+      pw.SizedBox(
+        width: 20,
+      ),
+      pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+        pw.Text("Company name ${company.name}",
+            style: pw.TextStyle(
+              font: font,
+            )),
+        if (company.sirene != "" && company.sirene != null)
+          pw.Text("Sirene ${company.sirene}", style: pw.TextStyle(font: font)),
+        if (company.tel != "" && company.tel != null)
+          pw.Text("Tel ${company.tel}", style: pw.TextStyle(font: font)),
+        if (company.email != "" && company.email != null)
+          pw.Text("Email ${company.email}", style: pw.TextStyle(font: font)),
+        if (company.address != "" && company.address != null)
+          pw.Text("Address ${company.address}",
+              style: pw.TextStyle(font: font)),
+      ])
+    ]);
   }
 
   Future<Uint8List?> _downloadImage(String url) async {
@@ -314,7 +332,8 @@ class PdfService {
     }
   }
 
-  Future<String> savePdfFile(String companyID, Uint8List data, MyUser user, String userId, Future<void> Function() deleteOneTaskListOfUser) async {
+  Future<String> savePdfFile(String companyID, Uint8List data, MyUser user,
+      String userId, Future<void> Function() deleteOneTaskListOfUser) async {
     int time = DateTime.now().millisecondsSinceEpoch;
     String fileName = "${user.username}.${time.toString()}";
     Directory tempDir = await getApplicationSupportDirectory();
@@ -326,14 +345,15 @@ class PdfService {
     if (!(await directory.exists())) {
       await directory.create(recursive: true);
     }
+
     /// save PDF to phone
     final file = File(filePath);
     await file.writeAsBytes(data);
 
-    if(networkService.isOnline){
+    if (networkService.isOnline) {
       /// and send to the database if there is an internet connection
       await databasePDFService.addPdfToFirebase(filePath, filePathDatabase);
-    }else{
+    } else {
       /// if not, I'll save it on phone and synchronize it later
       print("temp directory ${tempDir.path}");
       final fileTemp = File("${tempDir.path}/$userId.${time.toString()}.pdf");
@@ -351,12 +371,14 @@ class PdfService {
     return pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text("La personne qui crée la liste:", style: pw.TextStyle(font: font,)),
+          pw.Text("La personne qui crée la liste:",
+              style: pw.TextStyle(
+                font: font,
+              )),
           pw.Text("Username ${user.username}", style: pw.TextStyle(font: font)),
           pw.Text("Email ${user.email}", style: pw.TextStyle(font: font)),
           pw.Text("Created $formattedTime", style: pw.TextStyle(font: font)),
-        ]
-    );
+        ]);
   }
 
   Future<String> getDocumentsPath() async {
@@ -396,7 +418,9 @@ class PdfService {
     List<FileSystemEntity> entities = await pdfDir.list().toList();
 
     for (FileSystemEntity entity in entities) {
-      if (entity is File && entity.path.endsWith('.pdf') && !entity.path.endsWith("temp.pdf")) {
+      if (entity is File &&
+          entity.path.endsWith('.pdf') &&
+          !entity.path.endsWith("temp.pdf")) {
         String fullPath = entity.path;
         print("uploadAllTemporaryPDFs $fullPath");
         // Extract the relative path from the temporary directory:
@@ -404,14 +428,31 @@ class PdfService {
         // Remove the ".pdf" extension
         String fileUserID = "";
         if (relativePath.endsWith('.pdf')) {
-          fileUserID = relativePath.substring(0, relativePath.length - 18);
-          relativePath = relativePath.substring(29, relativePath.length - 4);
+          if (relativePath.length > 18) {
+            // Extrait fileUserID
+            fileUserID = relativePath.substring(0, relativePath.length - 18);
+          } else {
+            // Gérer un cas où la longueur est trop courte
+            print("relativePath est trop court pour extraire fileUserID");
+            return;
+          }
+
+          if (relativePath.length > 29) {
+            // Extrait la nouvelle valeur de relativePath
+            relativePath = relativePath.substring(29, relativePath.length - 4);
+          } else {
+            // Gérer un cas où la longueur est trop courte pour extraire relativePath
+            print(
+                "relativePath est trop court pour extraire la partie après 29 caractères");
+            return;
+          }
         }
 
         // Pass relativePath to the function sending to Firebase if the userId in the file is the same as the actual userId.
-        if(userId == fileUserID){
+        if (userId == fileUserID) {
           try {
-            await databasePDFService.addPdfToFirebase(fullPath, "${user.company}/$fileUserID/$relativePath");
+            await databasePDFService.addPdfToFirebase(
+                fullPath, "${user.company}/$fileUserID/$relativePath");
             await entity.delete();
             print("File deleted: $fullPath");
           } catch (e) {
