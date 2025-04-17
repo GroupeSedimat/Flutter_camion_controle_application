@@ -5,11 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class MessagingPage extends StatefulWidget {
   const MessagingPage({super.key});
@@ -30,7 +33,7 @@ class _MessagingPageState extends State<MessagingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Messagerie')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.messenger)),
       body: SafeArea(
         child: Column(
           children: [
@@ -41,11 +44,10 @@ class _MessagingPageState extends State<MessagingPage> {
                     .orderBy('timestamp', descending: true)
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData)
+                  if (!snapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
-
+                  }
                   var messages = snapshot.data!.docs;
-
                   return ListView.builder(
                     reverse: true,
                     itemCount: messages.length,
@@ -61,7 +63,6 @@ class _MessagingPageState extends State<MessagingPage> {
                           ? DateFormat('HH:mm').format(timestamp.toDate())
                           : '...';
                       var isMe = _auth.currentUser?.email == sender;
-
                       return _buildMessageBubble(
                           text, sender, isMe, imageUrl, fileUrl, time);
                     },
@@ -89,7 +90,7 @@ class _MessagingPageState extends State<MessagingPage> {
           if (!isMe)
             CircleAvatar(
               backgroundColor: Theme.of(context).primaryColor,
-              child: Icon(Icons.person, color: Colors.white),
+              child: const Icon(Icons.person, color: Colors.white),
             ),
           Flexible(
             child: Container(
@@ -118,12 +119,48 @@ class _MessagingPageState extends State<MessagingPage> {
                       ),
                     ),
                   if (fileUrl != null)
-                    GestureDetector(
-                      onTap: () => _openFile(fileUrl),
-                      child: Text('📄 Fichier joint (cliquer pour ouvrir)',
-                          style:
-                              TextStyle(color: Theme.of(context).primaryColor)),
-                    ),
+                    fileUrl.toLowerCase().endsWith('.pdf')
+                        ? FutureBuilder<String?>(
+                            future: _downloadPdf(fileUrl),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const SizedBox(
+                                    height: 200,
+                                    child: Center(
+                                        child: CircularProgressIndicator()));
+                              }
+                              if (snapshot.hasData) {
+                                return SizedBox(
+                                  height: 200,
+                                  child: PDFView(
+                                    filePath: snapshot.data!,
+                                    enableSwipe: true,
+                                    swipeHorizontal: false,
+                                    autoSpacing: true,
+                                    pageSnap: true,
+                                    fitPolicy: FitPolicy.BOTH,
+                                    onError: (error) =>
+                                        print("Erreur PDF: $error"),
+                                  ),
+                                );
+                              }
+                              return GestureDetector(
+                                onTap: () => _openFile(fileUrl),
+                                child: Text(
+                                    '📄 Fichier joint (cliquer pour ouvrir)',
+                                    style: TextStyle(
+                                        color: Theme.of(context).primaryColor)),
+                              );
+                            },
+                          )
+                        : GestureDetector(
+                            onTap: () => _openFile(fileUrl),
+                            child: Text(
+                                '📄 Fichier joint (cliquer pour ouvrir)',
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor)),
+                          ),
                   if (text != null && text.isNotEmpty)
                     Text(
                       text,
@@ -246,13 +283,16 @@ class _MessagingPageState extends State<MessagingPage> {
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) setState(() => _selectedImage = File(image.path));
+    if (image != null) {
+      setState(() => _selectedImage = File(image.path));
+    }
   }
 
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles();
-    if (result != null)
+    if (result != null) {
       setState(() => _selectedFile = File(result.files.single.path!));
+    }
   }
 
   void _sendMessage() async {
@@ -308,6 +348,23 @@ class _MessagingPageState extends State<MessagingPage> {
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
       print('Erreur lors de l\'upload du fichier : $e');
+      return null;
+    }
+  }
+
+  Future<String?> _downloadPdf(String fileUrl) async {
+    try {
+      var response = await http.get(Uri.parse(fileUrl));
+      if (response.statusCode != 200) {
+        return null;
+      }
+      var dir = await getApplicationDocumentsDirectory();
+      File file =
+          File('${dir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      await file.writeAsBytes(response.bodyBytes);
+      return file.path;
+    } catch (e) {
+      print("Erreur lors du téléchargement du PDF: $e");
       return null;
     }
   }
