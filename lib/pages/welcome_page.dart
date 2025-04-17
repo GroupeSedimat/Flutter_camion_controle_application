@@ -12,8 +12,13 @@ import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'map/map_page.dart';
 
 class WelcomePage extends StatefulWidget {
   WelcomePage({Key? key}) : super(key: key);
@@ -253,7 +258,7 @@ class _WelcomePageState extends State<WelcomePage> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              "assets/images/truck.jpg",
+              "assets/images/mc.jpg",
               fit: BoxFit.cover,
               color: Colors.black.withOpacity(0.6),
               colorBlendMode: BlendMode.dstATop,
@@ -299,7 +304,6 @@ class _WelcomePageState extends State<WelcomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                //Données statiques: pas de vraies données , données réelles à récupérer plutard avec la bd
                 _buildStatItem(
                     context, AppLocalizations.of(context)!.activeTrucks, "15"),
                 _buildStatItem(context,
@@ -341,9 +345,8 @@ class _WelcomePageState extends State<WelcomePage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: InkWell(
           onTap: () {
-            if (route != null) {
-              Navigator.pushReplacementNamed(context, route);
-            }
+            Navigator.pop(context);
+            Get.to(() => MapPage());
           },
           borderRadius: BorderRadius.circular(15),
           child: Padding(
@@ -397,6 +400,8 @@ class _WelcomePageState extends State<WelcomePage> {
                   AppLocalizations.of(context)!.dailyReport, Icons.assessment),
               _buildActionChip(context,
                   AppLocalizations.of(context)!.maintenance, Icons.build),
+              _buildActionChip(context, "New Dialogys", Icons.open_in_new,
+                  onPressed: () => _launchDialogys(context)),
             ],
           ),
         ],
@@ -404,13 +409,25 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 
-  Widget _buildActionChip(BuildContext context, String label, IconData icon) {
+  Widget _buildActionChip(BuildContext context, String label, IconData icon,
+      {VoidCallback? onPressed}) {
     return ActionChip(
       avatar: Icon(icon, size: 18, color: Theme.of(context).primaryColor),
       label: Text(label),
       labelStyle: TextStyle(color: Theme.of(context).primaryColor),
       backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-      onPressed: () {},
+      onPressed: onPressed ?? () {},
     );
+  }
+
+  Future<void> _launchDialogys(BuildContext context) async {
+    final Uri url = Uri.parse('https://newdialogys.renault.com/#!/connection');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Impossible d\'ouvrir le lien')),
+      );
+    }
   }
 }
