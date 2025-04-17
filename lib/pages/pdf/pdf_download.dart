@@ -8,29 +8,51 @@ class PdfDownload {
   final String url;
   final String name;
 
-  PdfDownload( {required this.name, required this.url});
+  PdfDownload({required this.name, required this.url}) {
+    // Vérifie que l'URL n'est pas vide
+    if (url.trim().isEmpty) {
+      throw ArgumentError("L'URL ne peut pas être vide.");
+    }
+    // Essaye de parser l'URL et vérifie qu'elle contient bien un schéma et un hôte
+    final parsedUri = Uri.tryParse(url);
+    if (parsedUri == null ||
+        parsedUri.scheme.isEmpty ||
+        parsedUri.host.isEmpty) {
+      throw ArgumentError("L'URL n'est pas complète ou invalide: $url");
+    }
+  }
 
   Future<void> downloadFile() async {
     String savePath;
     try {
-      if(name == "temp"){
-        //save in app directory if its temp docs
+      if (name == "temp") {
+        // Enregistre dans le répertoire de l'application si c'est un document temporaire
         print("name == temp");
         Directory appDocDir = await getApplicationSupportDirectory();
-        print("name == temp ${appDocDir.path}");
+        print("Répertoire de l'app: ${appDocDir.path}");
         savePath = "${appDocDir.path}/$name.pdf";
         deleteFile(File(savePath));
-      }else{
+      } else {
         print("name != temp");
         String downloadDirPath = await getDocumentsPath();
         savePath = "$downloadDirPath/$name.pdf";
-        print(savePath);
+        print("Chemin complet: $savePath");
         File file = File(savePath);
         if (await file.exists()) {
-          return; 
+          // Le fichier existe déjà, inutile de le télécharger à nouveau.
+          return;
         }
       }
-      print("savePath $savePath");
+      print("savePath: $savePath");
+
+      // Vérifie à nouveau que l'URL est correctement formée
+      Uri? pdfUri = Uri.tryParse(url);
+      if (pdfUri == null || pdfUri.scheme.isEmpty || pdfUri.host.isEmpty) {
+        throw ArgumentError("L'URL est invalide ou incomplète: $url");
+      }
+      print("URL valide: $pdfUri");
+
+      // Lance le téléchargement avec Dio.
       await Dio().download(url, savePath);
     } catch (e) {
       print("Error downloading file: $e");
@@ -40,9 +62,9 @@ class PdfDownload {
   void deleteFile(File file) {
     if (file.existsSync()) {
       file.deleteSync();
-      print('File $name deleted.');
+      print('Fichier $name supprimé.');
     } else {
-      print('File does not exist.');
+      print('Le fichier n\'existe pas.');
     }
   }
 
@@ -50,12 +72,12 @@ class PdfDownload {
     String documentsPath;
     if (Platform.isAndroid) {
       documentsPath = "/storage/emulated/0/Documents/camion_appli";
-      if (await Permission.storage.request().isGranted){
+      if (await Permission.storage.request().isGranted) {
         Directory downloadDir = Directory(documentsPath);
         if (!await downloadDir.exists()) {
           await downloadDir.create(recursive: true);
         }
-      }else {
+      } else {
         print("No write permissions!");
       }
     } else if (Platform.isIOS) {
@@ -69,16 +91,6 @@ class PdfDownload {
     }
     return documentsPath;
   }
-
-  // Future<void> downloadFile() async {
-  //   try {
-  //     String savePath = "/storage/emulated/0/Documents/camion_appli/$name.pdf";
-  //     print("Saving PDF to $savePath");
-  //     await Dio().download(url, savePath);
-  //   } catch (e) {
-  //     print("Error downloading file: $e");
-  //   }
-  // }
 
   Future<void> requestStoragePermission() async {
     if (await Permission.storage.request().isGranted) {
