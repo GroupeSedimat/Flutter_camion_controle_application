@@ -27,9 +27,7 @@ import 'locale_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseAppCheck.instance.activate(
     webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
     androidProvider: AndroidProvider.debug,
@@ -52,12 +50,14 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => NetworkService()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider(savedLanguageCode)),
+        ChangeNotifierProvider(
+            create: (_) => LocaleProvider(savedLanguageCode)),
         Provider(create: (_) => DatabaseHelper()),
-        Provider(create: (context) => SyncService(
-          database,
-          Provider.of<NetworkService>(context, listen: false),
-        )),
+        Provider(
+            create: (context) => SyncService(
+                  database,
+                  Provider.of<NetworkService>(context, listen: false),
+                )),
       ],
       child: MyApp(savedLanguageCode: savedLanguageCode),
     ),
@@ -73,6 +73,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       navigatorKey: DialogService().navigatorKey,
       title: "Mobility Corner App",
+      debugShowCheckedModeBanner: false,
       themeMode: context.watch<ThemeProvider>().themeMode,
 
       // Thème clair
@@ -91,10 +92,12 @@ class MyApp extends StatelessWidget {
           labelStyle: TextStyle(color: Colors.black),
           hintStyle: TextStyle(color: Colors.grey),
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: context.watch<ThemeProvider>().customColor),
+            borderSide:
+                BorderSide(color: context.watch<ThemeProvider>().customColor),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: context.watch<ThemeProvider>().customColor),
+            borderSide:
+                BorderSide(color: context.watch<ThemeProvider>().customColor),
           ),
         ),
       ),
@@ -115,10 +118,12 @@ class MyApp extends StatelessWidget {
           labelStyle: TextStyle(color: Colors.white),
           hintStyle: TextStyle(color: Colors.white70),
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: context.watch<ThemeProvider>().customColor),
+            borderSide:
+                BorderSide(color: context.watch<ThemeProvider>().customColor),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: context.watch<ThemeProvider>().customColor),
+            borderSide:
+                BorderSide(color: context.watch<ThemeProvider>().customColor),
           ),
         ),
       ),
