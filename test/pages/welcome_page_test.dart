@@ -18,8 +18,9 @@ void main() {
     );
   }
 
-  testWidgets('Affiche un indicateur de chargement lorsque FutureBuilder est en attente', (WidgetTester tester) async {
-   
+  testWidgets(
+      'Affiche un indicateur de chargement lorsque FutureBuilder est en attente',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       createTestableWidget(FutureBuilder(
         future: Future.delayed(const Duration(seconds: 1)),
@@ -33,20 +34,15 @@ void main() {
       )),
     );
 
-   
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 1));
 
-
     expect(find.text("Done"), findsOneWidget);
   });
 
-
-
-
 //test widget commenté
- /** testWidgets('Affiche le message d\'erreur si une erreur survient dans FutureBuilder', (WidgetTester tester) async {
+  /** testWidgets('Affiche le message d\'erreur si une erreur survient dans FutureBuilder', (WidgetTester tester) async {
   
     await tester.pumpWidget(
       createTestableWidget(FutureBuilder(
@@ -65,7 +61,7 @@ void main() {
 
     // Vérifie que le message d'erreur est affiché
     expect(find.textContaining("Error: Erreur simulée"), findsOneWidget);
-  }); */ 
+  }); */
 
   /**testWidgets('Affiche un message de bienvenue pour un utilisateur admin', (WidgetTester tester) async {
     // Simule un utilisateur admin
@@ -83,7 +79,7 @@ void main() {
                 : 'Hello ${user.username}';
             return Text(message);
           } else {
-            return const CircularProgressIndicator();
+            return const CircularProgressIndicator();@
           }
         },
       )),
@@ -96,7 +92,8 @@ void main() {
     expect(find.text('Hello AdminUser'), findsOneWidget);
   }); **/
 
-  testWidgets('Affiche un bouton et vérifie qu\'il est cliquable', (WidgetTester tester) async {
+  testWidgets('Affiche un bouton et vérifie qu\'il est cliquable',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       createTestableWidget(
         ElevatedButton(
@@ -112,8 +109,6 @@ void main() {
     // Simule un clic sur le bouton
     await tester.tap(find.text('Voir maps'));
     await tester.pump();
-
-
   });
 
   /**testWidgets('Affiche "No data available" si aucune donnée utilisateur n\'est disponible', (WidgetTester tester) async {
