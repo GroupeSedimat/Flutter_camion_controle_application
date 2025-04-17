@@ -48,13 +48,14 @@ class _EquipmentListState extends State<EquipmentList> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -81,7 +82,7 @@ class _EquipmentListState extends State<EquipmentList> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -112,7 +113,8 @@ class _EquipmentListState extends State<EquipmentList> {
       print("💽 Synchronizing Users...");
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
+      await syncService.fullSyncTable("equipments",
+          user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -120,9 +122,15 @@ class _EquipmentListState extends State<EquipmentList> {
   }
 
   Future<void> _loadDataFromDatabase() async {
-    Map<String, Equipment>? equipmentLists = await getAllEquipments(db, _user.role);
+    Map<String, Equipment>? equipmentLists =
+        await getAllEquipments(db, _user.role);
+
     setState(() {
-      _equipmentLists = equipmentLists!;
+      if (equipmentLists != null) {
+        _equipmentLists = equipmentLists;
+      } else {
+        _equipmentLists = {};
+      }
     });
   }
 
@@ -189,7 +197,8 @@ class _EquipmentListState extends State<EquipmentList> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const CamionTypeList()),
+                  MaterialPageRoute(
+                      builder: (context) => const CamionTypeList()),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -226,17 +235,19 @@ class _EquipmentListState extends State<EquipmentList> {
                   ],
                 ),
                 padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.cell_tower_outlined, color: Colors.black, size: 50),
+                child: Icon(Icons.cell_tower_outlined,
+                    color: Colors.black, size: 50),
               );
 
               Equipment equipment = _equipmentLists.values.elementAt(index);
               String equipmentId = _equipmentLists.keys.elementAt(index);
               String isDeleted = "";
-              if(equipment.deletedAt != null){
+              if (equipment.deletedAt != null) {
                 isDeleted = " (deleted)";
               }
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                 child: Material(
                   elevation: 4.0,
                   borderRadius: BorderRadius.circular(12.0),
@@ -270,7 +281,7 @@ class _EquipmentListState extends State<EquipmentList> {
                       },
                       itemBuilder: (context) => [
                         PopupMenuItem(
-                         value: 'edit',
+                          value: 'edit',
                           child: Row(
                             children: [
                               Icon(Icons.edit, color: Colors.blueAccent),
@@ -281,71 +292,77 @@ class _EquipmentListState extends State<EquipmentList> {
                         ),
                         if (_isSuperAdmin())
                           equipment.deletedAt == null
-                            ? PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete, color: Colors.redAccent),
-                                  SizedBox(width: 8),
-                                  Text(AppLocalizations.of(context)!.delete),
-                                ],
-                              ),
-                            )
+                              ? PopupMenuItem(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.delete,
+                                          color: Colors.redAccent),
+                                      SizedBox(width: 8),
+                                      Text(
+                                          AppLocalizations.of(context)!.delete),
+                                    ],
+                                  ),
+                                )
                               : PopupMenuItem(
-                            value: 'restore',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete, color: Colors.redAccent),
-                                SizedBox(width: 8),
-                                Text(AppLocalizations.of(context)!.restore),
-                              ],
-                            ),
-                          ),
+                                  value: 'restore',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.delete,
+                                          color: Colors.redAccent),
+                                      SizedBox(width: 8),
+                                      Text(AppLocalizations.of(context)!
+                                          .restore),
+                                    ],
+                                  ),
+                                ),
                       ],
                     ),
                     children: [
-                      if(equipment.idShop != "")
+                      if (equipment.idShop != "")
                         SizedBox(
                           child: Text(
-                            "${AppLocalizations.of(context)!.equipmentIdShop}: ${equipment.idShop }",
+                            "${AppLocalizations.of(context)!.equipmentIdShop}: ${equipment.idShop}",
                             style: textStyle(),
                           ),
                         ),
-                      if(equipment.description != "")
-                      Container(
-                        margin: EdgeInsets.only(top: 8.0),
-                        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withOpacity(0.4),
-                          borderRadius: BorderRadius.circular(8.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
+                      if (equipment.description != "")
+                        Container(
+                          margin: EdgeInsets.only(top: 8.0),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 12.0),
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).primaryColor.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            "${AppLocalizations.of(context)!.equipmentDescription}: ${equipment.description}",
+                            style: textStyle(),
+                          ),
                         ),
-                        child: Text(
-                          "${AppLocalizations.of(context)!.equipmentDescription}: ${equipment.description}",
-                          style: textStyle(),
+                      if (equipment.quantity != null)
+                        SizedBox(
+                          child: Text(
+                            "${AppLocalizations.of(context)!.equipmentQuantity}: ${equipment.quantity}",
+                            style: textStyle(),
+                          ),
                         ),
-                      ),
-                      if(equipment.quantity != null)
-                      SizedBox(
-                        child: Text(
-                          "${AppLocalizations.of(context)!.equipmentQuantity}: ${equipment.quantity }",
-                          style: textStyle(),
+                      if (equipment.photo != null)
+                        SizedBox(
+                          child: Text(
+                            "${AppLocalizations.of(context)!.photoGallery}: ${equipment.photo.toString()}",
+                            style: textStyle(),
+                          ),
                         ),
-                      ),
-                      if(equipment.photo != null)
-                      SizedBox(
-                        child: Text(
-                          "${AppLocalizations.of(context)!.photoGallery}: ${equipment.photo.toString()}",
-                          style: textStyle(),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -357,17 +374,18 @@ class _EquipmentListState extends State<EquipmentList> {
     );
   }
 
-  TextStyle textStyle(){
+  TextStyle textStyle() {
     return TextStyle(fontSize: 20);
   }
-  TextStyle textStyleBold(){
+
+  TextStyle textStyleBold() {
     return TextStyle(fontSize: 25, fontWeight: FontWeight.bold);
   }
 
   String title() {
-    if(_isSuperAdmin()){
+    if (_isSuperAdmin()) {
       return AppLocalizations.of(context)!.equipmentList;
-    }else{
+    } else {
       return AppLocalizations.of(context)!.equipmentDescription;
     }
   }
@@ -383,8 +401,7 @@ class _EquipmentListState extends State<EquipmentList> {
         return Container(
           padding: const EdgeInsets.all(10),
           margin: EdgeInsets.fromLTRB(
-              10, 50, 10, MediaQuery.of(context).viewInsets.bottom
-          ),
+              10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
           child: AddEquipment(
             equipment: equipment,
             equipmentID: equipmentID,
@@ -424,7 +441,8 @@ class _EquipmentListState extends State<EquipmentList> {
               setState(() {});
               Navigator.pop(context);
             },
-            child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.yes,
+                style: TextStyle(color: Colors.red)),
             // AppLocalizations.of(context)!
           ),
         ],
@@ -436,7 +454,8 @@ class _EquipmentListState extends State<EquipmentList> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
+      await syncService.fullSyncTable("equipments",
+          user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");

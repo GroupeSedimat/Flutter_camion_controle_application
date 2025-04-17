@@ -10,17 +10,19 @@ class PDFShowTemplate extends StatefulWidget {
   final String url;
   final MyUser user;
 
-  PDFShowTemplate({super.key, required this.fileName, required this.url, required this.user});
+  PDFShowTemplate(
+      {super.key,
+      required this.fileName,
+      required this.url,
+      required this.user});
 
   @override
   State<PDFShowTemplate> createState() => _PDFShowTemplateState();
 }
 
 class _PDFShowTemplateState extends State<PDFShowTemplate> {
-
   @override
   Widget build(BuildContext context) {
-
     int timestamp = int.parse(widget.fileName);
     DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     String formattedDate = DateFormat('dd/MM/yyyy HH:mm:ss').format(date);
@@ -39,13 +41,14 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.person, color: Colors.deepPurple, size: 50),
+                leading: Icon(Icons.person,
+                    color: Theme.of(context).primaryColor, size: 50),
                 title: Text(
                   "User: ${widget.user.username}",
                   style: TextStyle(
                     fontSize: 22.0,
                     fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 // subtitle: Text(
@@ -71,7 +74,8 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                   Expanded(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -88,30 +92,33 @@ class _PDFShowTemplateState extends State<PDFShowTemplate> {
                   Expanded(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
                       onPressed: () async {
                         await PdfDownload(
-                          name: "${widget.user.username}.${widget.fileName}",
-                          url: widget.url
-                        )
-                          .downloadFile();
+                                name:
+                                    "${widget.user.username}.${widget.fileName}",
+                                url: widget.url)
+                            .downloadFile();
                         await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(AppLocalizations.of(context)!.download),
-                            content: Text(AppLocalizations.of(context)!.pdfDownloaded(widget.user.username, widget.fileName)),
-                            actions: [
-                              TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text(AppLocalizations.of(context)!.ok)
-                              )
-                            ],
-                          )
-                        );
+                            context: context,
+                            builder: (context) => AlertDialog(
+                                  title: Text(
+                                      AppLocalizations.of(context)!.download),
+                                  content: Text(AppLocalizations.of(context)!
+                                      .pdfDownloaded(widget.user.username,
+                                          widget.fileName)),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: Text(
+                                            AppLocalizations.of(context)!.ok))
+                                  ],
+                                ));
                       },
                       icon: Icon(Icons.download),
                       label: Text(AppLocalizations.of(context)!.download),

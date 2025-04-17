@@ -17,7 +17,6 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class UserDetailsPage extends StatefulWidget {
-
   MapEntry<String, MyUser>? userToShow;
   UserDetailsPage({super.key, this.userToShow});
 
@@ -26,7 +25,6 @@ class UserDetailsPage extends StatefulWidget {
 }
 
 class _UserDetailsPageState extends State<UserDetailsPage> {
-
   /// todo - show other user if other user provide
   /// todo - manage "after formation" photo
   /// todo - test added camions to user
@@ -55,13 +53,14 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -88,7 +87,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -117,9 +116,11 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Users...");
-      await syncService.fullSyncTable("users", user: _thisUser, userId: _thisUserId);
+      await syncService.fullSyncTable("users",
+          user: _thisUser, userId: _thisUserId);
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies", user: _thisUser, userId: _thisUserId);
+      await syncService.fullSyncTable("companies",
+          user: _thisUser, userId: _thisUserId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -136,7 +137,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     Map<String, Company> companyWithId = {};
     Company? company = await getOneCompanyWithID(db, _thisUser.company);
     companyWithId[_thisUser.company] = company!;
-    if(companyWithId != {}){
+    if (companyWithId != {}) {
       _company = companyWithId;
     }
   }
@@ -144,18 +145,18 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   Future<void> _loadAvailableCamions() async {
     Map<String, Camion>? camions = await getAllCamions(db, _thisUser.role);
     var temp = camions?.map((key, camion) => MapEntry(key, camion.name));
-    if(temp != null){
+    if (temp != null) {
       _availableCamions = temp;
-    }else {
+    } else {
       _availableCamions = {};
     }
   }
 
   Future<void> _showThisUser() async {
-    if(widget.userToShow == null){
+    if (widget.userToShow == null) {
       showUser = _thisUser;
       showUserId = _thisUserId;
-    }else{
+    } else {
       showUser = widget.userToShow!.value;
       showUserId = widget.userToShow!.key;
     }
@@ -184,16 +185,16 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.details),
         actions: [
-          if(showUser.deletedAt == null)
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: _confirmDeleteUser,
-          ),
-          if(showUser.deletedAt != null)
-          IconButton(
-            icon: Icon(Icons.restore),
-            onPressed: _restoreUser,
-          ),
+          if (showUser.deletedAt == null)
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: _confirmDeleteUser,
+            ),
+          if (showUser.deletedAt != null)
+            IconButton(
+              icon: Icon(Icons.restore),
+              onPressed: _restoreUser,
+            ),
         ],
       ),
       body: Padding(
@@ -233,23 +234,25 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
               Text(showUser.role),
               SizedBox(height: 16),
               Text("Camions:", style: textStyleBold()),
-              ...showUser.camion!.map((item) => Container(
-                margin: EdgeInsets.only(top: 8.0),
-                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColorLight,
-                  borderRadius: BorderRadius.circular(8.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
+              ...(showUser.camion ?? []).map((item) => Container(
+                    margin: EdgeInsets.only(top: 8.0),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColorLight,
+                      borderRadius: BorderRadius.circular(8.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Text(_availableCamions[item] ?? "Unknown list!", style: textStyle()),
-              )),
+                    child: Text(_availableCamions[item] ?? "Unknown list!",
+                        style: textStyle()),
+                  )),
               SizedBox(height: 16),
               Row(
                 children: [
@@ -265,8 +268,9 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 'Apres Formation Doc:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              if(showUser.apresFormationDoc != "" && showUser.apresFormationDoc != null)
-              Image.network(showUser.apresFormationDoc!, width: 600),
+              if (showUser.apresFormationDoc != "" &&
+                  showUser.apresFormationDoc != null)
+                Image.network(showUser.apresFormationDoc!, width: 600),
               SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.company,
@@ -280,10 +284,11 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     );
   }
 
-  TextStyle textStyle(){
+  TextStyle textStyle() {
     return TextStyle(fontSize: 20);
   }
-  TextStyle textStyleBold(){
+
+  TextStyle textStyleBold() {
     return TextStyle(fontSize: 25, fontWeight: FontWeight.bold);
   }
 
@@ -328,5 +333,4 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     await _loadDataFromDatabase();
     Navigator.of(context).pop();
   }
-
 }
