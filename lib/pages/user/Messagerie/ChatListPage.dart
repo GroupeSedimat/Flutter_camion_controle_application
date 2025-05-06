@@ -51,8 +51,16 @@ class ChatListPage extends StatelessWidget {
                   .firstWhere((uid) => uid != currentUserId);
               final lastMessage = chat['lastMessage'] ?? '';
               final lastTimestamp = chat['lastTimestamp'];
-              final lastSeenMap = chat['lastSeen'] ?? {};
+
+              final lastSeenMap =
+                  chat['lastSeen'] as Map<String, dynamic>? ?? {};
               final userLastSeen = lastSeenMap[currentUserId];
+
+              bool isUnread = false;
+              if (lastTimestamp != null && userLastSeen is Timestamp) {
+                isUnread =
+                    lastTimestamp.toDate().isAfter(userLastSeen.toDate());
+              }
 
               return FutureBuilder<DocumentSnapshot>(
                 future: _firestore.collection('users').doc(otherUserId).get(),
@@ -62,12 +70,6 @@ class ChatListPage extends StatelessWidget {
                   final userData =
                       userSnapshot.data!.data() as Map<String, dynamic>;
                   final username = userData['username'] ?? 'Utilisateur';
-
-                  bool isUnread = false;
-                  if (lastTimestamp != null && userLastSeen is Timestamp) {
-                    isUnread =
-                        lastTimestamp.toDate().isAfter(userLastSeen.toDate());
-                  }
 
                   return ListTile(
                     contentPadding:
