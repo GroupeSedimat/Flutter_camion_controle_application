@@ -5,7 +5,8 @@ import 'package:flutter_application_1/pages/admin/admin_page.dart';
 import 'package:flutter_application_1/pages/camion/camion_list.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/pages/checklist/lol_control_page.dart';
-import 'package:flutter_application_1/pages/user/messaging_page.dart';
+import 'package:flutter_application_1/pages/user/Messagerie/ChatListPage.dart';
+import 'package:flutter_application_1/pages/user/Messagerie/messaging_page.dart';
 import 'package:flutter_application_1/pages/company/company_list.dart';
 import 'package:flutter_application_1/pages/pdf/admin_pdf_list_view.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_list.dart';
@@ -21,7 +22,6 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MenuWidget extends StatefulWidget {
-
   MenuWidget({super.key});
 
   @override
@@ -44,7 +44,7 @@ class _MenuWidgetState extends State<MenuWidget> {
   Future<void> _initDatabase() async {
     db = await Provider.of<DatabaseHelper>(context, listen: false).database;
   }
-  
+
   Future<void> _loadData() async {
     await _initServices();
     await _initDatabase();
@@ -62,7 +62,7 @@ class _MenuWidgetState extends State<MenuWidget> {
       print("Error loading services: $e");
     }
   }
-  
+
   Future<void> _loadUserLocalDB() async {
     print("menu local ☢☢☢☢☢☢☢");
     try {
@@ -78,14 +78,16 @@ class _MenuWidgetState extends State<MenuWidget> {
   }
 
   @override
-  Widget build(BuildContext context){
-    if(_username == "" || _role == ""){
+  Widget build(BuildContext context) {
+    if (_username == "" || _role == "") {
       return Drawer(
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Theme.of(context).primaryColor.withOpacity(0.8), // Teinte plus foncée
+                Theme.of(context)
+                    .primaryColor
+                    .withOpacity(0.8), // Teinte plus foncée
                 Theme.of(context).primaryColor.withOpacity(0.4),
               ],
               begin: Alignment.topCenter,
@@ -101,7 +103,9 @@ class _MenuWidgetState extends State<MenuWidget> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Theme.of(context).primaryColor.withOpacity(0.8), // Teinte plus foncée
+              Theme.of(context)
+                  .primaryColor
+                  .withOpacity(0.8), // Teinte plus foncée
               Theme.of(context).primaryColor.withOpacity(0.4),
             ],
             begin: Alignment.topCenter,
@@ -122,8 +126,10 @@ class _MenuWidgetState extends State<MenuWidget> {
   Widget buildHeader(BuildContext context) => Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Theme.of(context).primaryColor.withOpacity(0.8),
-        Theme.of(context).primaryColor.withOpacity(0.4),],
+            colors: [
+              Theme.of(context).primaryColor.withOpacity(0.8),
+              Theme.of(context).primaryColor.withOpacity(0.4),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -140,7 +146,6 @@ class _MenuWidgetState extends State<MenuWidget> {
             ),
             child: Column(
               children: [
-
                 SizedBox(height: 12),
                 Text(
                   _username,
@@ -150,14 +155,14 @@ class _MenuWidgetState extends State<MenuWidget> {
                     color: Colors.white,
                   ),
                 ),
-                if(_role!="user")
-                Text(
-                  AppLocalizations.of(context)!.role(_role),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white70,
+                if (_role != "user")
+                  Text(
+                    AppLocalizations.of(context)!.role(_role),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -205,7 +210,7 @@ class _MenuWidgetState extends State<MenuWidget> {
             context,
             icon: Icons.mail_outline,
             text: AppLocalizations.of(context)!.messenger,
-            onClicked: () => Get.to(() => MessagingPage()),
+            onClicked: () => Get.to(() => ChatListPage()),
           ),
           if (_role == 'admin')
             buildMenuItem(

@@ -7,19 +7,18 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class AddEquipment extends StatefulWidget {
-
   Equipment? equipment;
   String? equipmentID;
   final VoidCallback? onEquipmentAdded;
 
-  AddEquipment({super.key, this.equipment, this.equipmentID, this.onEquipmentAdded});
+  AddEquipment(
+      {super.key, this.equipment, this.equipmentID, this.onEquipmentAdded});
 
   @override
   State<AddEquipment> createState() => _AddEquipmentState();
 }
 
 class _AddEquipmentState extends State<AddEquipment> {
-
   final _formKey = GlobalKey<FormState>();
 
   late Database db;
@@ -31,6 +30,7 @@ class _AddEquipmentState extends State<AddEquipment> {
   final List<TextEditingController> _photoControllers = [];
   List<String> photo = [];
   bool? available;
+  bool? isConsumable;
   String pageTile = "";
 
   @override
@@ -57,15 +57,14 @@ class _AddEquipmentState extends State<AddEquipment> {
     _nameController.text = widget.equipment!.name;
     _descriptionController.text = widget.equipment!.description ?? '';
 
-
     _quantityController.text = widget.equipment!.quantity?.toString() ?? '';
     available = widget.equipment!.available;
 
-    setState((){
+    setState(() {
       photo = photoList;
-      _photoControllers.addAll(photoList.map((item) => TextEditingController(text: item)));
+      _photoControllers
+          .addAll(photoList.map((item) => TextEditingController(text: item)));
     });
-
   }
 
   @override
@@ -94,19 +93,18 @@ class _AddEquipmentState extends State<AddEquipment> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    if(widget.equipment != null){
+    if (widget.equipment != null) {
       pageTile = AppLocalizations.of(context)!.edit;
-    }else{
+    } else {
       pageTile = AppLocalizations.of(context)!.add;
     }
     return Form(
         key: _formKey,
         child: ListView(
           scrollDirection: Axis.vertical,
-          children: <Widget> [
+          children: <Widget>[
             Text(
               pageTile,
               style: TextStyle(
@@ -114,168 +112,165 @@ class _AddEquipmentState extends State<AddEquipment> {
                   fontSize: 30,
                   color: Colors.black,
                   letterSpacing: 4,
-                  fontWeight: FontWeight.bold
-              ),
+                  fontWeight: FontWeight.bold),
             ),
-
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _idShopController,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelText: AppLocalizations.of(context)!.equipmentIdShop,
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: const OutlineInputBorder(gapPadding: 15),
-              border: const OutlineInputBorder(gapPadding: 5),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentName,
-              labelText: AppLocalizations.of(context)!.equipmentName,
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: const OutlineInputBorder(gapPadding: 15),
-              border: const OutlineInputBorder(gapPadding: 5),
-            ),
-            validator: (val) {
-              return (val == null || val.isEmpty || val == "")
-                  ? AppLocalizations.of(context)!.required
-                  : null;
-            },
-          ),
-
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _descriptionController,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentDescription,
-              labelText: AppLocalizations.of(context)!.equipmentDescription,
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: const OutlineInputBorder(gapPadding: 15),
-              border: const OutlineInputBorder(gapPadding: 5),
-            ),
-          ),
-
-          const Text("Add Photos:"),
-          ..._photoControllers.asMap().entries.map((entry) {
-            int index = entry.key;
-            return ListTile(
-              title: TextFormField(
-                controller: _photoControllers[index],
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.photoAdd,
-                  labelText: AppLocalizations.of(context)!.photoAdd,
-                  labelStyle: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.lightBlue,
-                    backgroundColor: Colors.white,
-                  ),
-                  focusedBorder: const OutlineInputBorder(gapPadding: 15),
-                  border: const OutlineInputBorder(gapPadding: 5),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _idShopController,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.equipmentIdShop,
+                labelText: AppLocalizations.of(context)!.equipmentIdShop,
+                labelStyle: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.lightBlue,
+                  backgroundColor: Colors.white,
                 ),
-                onChanged: (val) {
-                  setState(() {
-                    photo[index] = val;
-                  });
-                },
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.remove_circle),
-                onPressed: () => _removePhotoField(index),
-              ),
-            );
-          }),
-          TextButton(
-            onPressed: _addPhotoField,
-            child: const Text("Add photo link"),
-          ),
-
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _quantityController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.equipmentQuantity,
-              labelText: AppLocalizations.of(context)!.equipmentQuantity,
-              labelStyle: const TextStyle(
-                fontSize: 20,
-                color: Colors.lightBlue,
-                backgroundColor: Colors.white,
-              ),
-              focusedBorder: const OutlineInputBorder(gapPadding: 15),
-              border: const OutlineInputBorder(gapPadding: 5),
-            ),
-          ),
-
-
-          const SizedBox(height: 50),
-          TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.blue,
-              minimumSize: const Size(250, 60),
-            ),
-            child: Text(
-              AppLocalizations.of(context)!.confirm,
-              style: TextStyle(
-                color: Colors.white,
+                focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                border: const OutlineInputBorder(gapPadding: 5),
               ),
             ),
-            onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                try{
-                  int? parsedQuantity = int.tryParse(_quantityController.text.trim());
-                  if (parsedQuantity == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.equipmentEnterQuantity)),
-                    );
-                    return;
-                  }
-                  // List<String> cleanedPhotos = photo?.where((p) => p.trim().isNotEmpty).toList() ?? [];
-
-                  DateTime dateCreation = widget.equipment?.createdAt ?? DateTime.now();
-                  Equipment newEquipment = Equipment(
-                    idShop: _idShopController.text,
-                    name: _nameController.text,
-                    description: _descriptionController.text,
-                    photo: photo,
-                    quantity: parsedQuantity,
-                    available: available ?? false,
-                    createdAt: dateCreation,
-                    updatedAt: DateTime.now(),
-                  );
-
-                  if (widget.equipment == null) {
-                    insertEquipment(db, newEquipment, "");
-                  } else {
-                    updateEquipment(db, newEquipment, widget.equipmentID!);
-                  }
-                  widget.onEquipmentAdded?.call();
-                }
-                catch(e){
-                  print("Error: $e");
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
-                  );
-                }
-              }
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.equipmentName,
+                labelText: AppLocalizations.of(context)!.equipmentName,
+                labelStyle: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.lightBlue,
+                  backgroundColor: Colors.white,
+                ),
+                focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                border: const OutlineInputBorder(gapPadding: 5),
+              ),
+              validator: (val) {
+                return (val == null || val.isEmpty || val == "")
+                    ? AppLocalizations.of(context)!.required
+                    : null;
+              },
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _descriptionController,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.equipmentDescription,
+                labelText: AppLocalizations.of(context)!.equipmentDescription,
+                labelStyle: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.lightBlue,
+                  backgroundColor: Colors.white,
+                ),
+                focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                border: const OutlineInputBorder(gapPadding: 5),
+              ),
+            ),
+            const Text("Add Photos:"),
+            ..._photoControllers.asMap().entries.map((entry) {
+              int index = entry.key;
+              return ListTile(
+                title: TextFormField(
+                  controller: _photoControllers[index],
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.photoAdd,
+                    labelText: AppLocalizations.of(context)!.photoAdd,
+                    labelStyle: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.lightBlue,
+                      backgroundColor: Colors.white,
+                    ),
+                    focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                    border: const OutlineInputBorder(gapPadding: 5),
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      photo[index] = val;
+                    });
+                  },
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.remove_circle),
+                  onPressed: () => _removePhotoField(index),
+                ),
+              );
             }),
-        ],
-      )
-    );
+            TextButton(
+              onPressed: _addPhotoField,
+              child: const Text("Add photo link"),
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _quantityController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.equipmentQuantity,
+                labelText: AppLocalizations.of(context)!.equipmentQuantity,
+                labelStyle: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.lightBlue,
+                  backgroundColor: Colors.white,
+                ),
+                focusedBorder: const OutlineInputBorder(gapPadding: 15),
+                border: const OutlineInputBorder(gapPadding: 5),
+              ),
+            ),
+            const SizedBox(height: 50),
+            TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  minimumSize: const Size(250, 60),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.confirm,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    try {
+                      int? parsedQuantity =
+                          int.tryParse(_quantityController.text.trim());
+                      if (parsedQuantity == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(AppLocalizations.of(context)!
+                                  .equipmentEnterQuantity)),
+                        );
+                        return;
+                      }
+                      // List<String> cleanedPhotos = photo?.where((p) => p.trim().isNotEmpty).toList() ?? [];
+
+                      DateTime dateCreation =
+                          widget.equipment?.createdAt ?? DateTime.now();
+                      Equipment newEquipment = Equipment(
+                        idShop: _idShopController.text,
+                        name: _nameController.text,
+                        description: _descriptionController.text,
+                        photo: photo,
+                        quantity: parsedQuantity,
+                        available: available ?? false,
+                        isConsumable: isConsumable ?? false,
+                        createdAt: dateCreation,
+                        updatedAt: DateTime.now(),
+                      );
+
+                      if (widget.equipment == null) {
+                        insertEquipment(db, newEquipment, "");
+                      } else {
+                        updateEquipment(db, newEquipment, widget.equipmentID!);
+                      }
+                      widget.onEquipmentAdded?.call();
+                    } catch (e) {
+                      print("Error: $e");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                AppLocalizations.of(context)!.errorSavingData)),
+                      );
+                    }
+                  }
+                }),
+          ],
+        ));
   }
 }
