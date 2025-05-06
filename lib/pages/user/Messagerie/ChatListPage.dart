@@ -154,7 +154,7 @@ class ChatListPage extends StatelessWidget {
         },
       ),
       floatingActionButton: SpeedDial(
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).primaryColor,
         icon: Icons.chat,
         activeIcon: Icons.close,
         children: [
