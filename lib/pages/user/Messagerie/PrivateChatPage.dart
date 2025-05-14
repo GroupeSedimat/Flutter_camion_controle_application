@@ -62,8 +62,10 @@ class _PrivateChatPageState extends State<PrivateChatPage> {
       'users': [currentUserId, otherUserId],
       'lastMessage': text,
       'lastTimestamp': timestamp,
+      'lastSeen': {
+        currentUserId: timestamp,
+      }
     }, SetOptions(merge: true));
-
     await _firestore
         .collection('chats')
         .doc(chatId)

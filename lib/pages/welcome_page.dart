@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
+import 'package:flutter_application_1/pages/checklist/checklist.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
@@ -392,14 +393,12 @@ class _WelcomePageState extends State<WelcomePage> {
             spacing: 10,
             runSpacing: 10,
             children: [
-              _buildActionChip(
-                  context,
-                  AppLocalizations.of(context)!.newIntervention,
-                  Icons.local_shipping),
-              _buildActionChip(context,
-                  AppLocalizations.of(context)!.dailyReport, Icons.assessment),
-              _buildActionChip(context,
-                  AppLocalizations.of(context)!.maintenance, Icons.build),
+              _buildActionChip(context, "Checklist", Icons.local_shipping,
+                  onPressed: () => CheckList()),
+              /**_buildActionChip(context,
+                  AppLocalizations.of(context)!.dailyReport, Icons.assessment),*/
+              /**  _buildActionChip(context,
+                  AppLocalizations.of(context)!.maintenance, Icons.build),*/
               _buildActionChip(context, "New Dialogys", Icons.open_in_new,
                   onPressed: () => _launchDialogys(context)),
             ],

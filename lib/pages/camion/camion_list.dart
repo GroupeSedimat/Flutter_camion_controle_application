@@ -65,10 +65,15 @@ class _CamionListState extends State<CamionList> {
     await _initDatabase();
     await _initService();
     if (!networkService.isOnline) {
-      print("Offline mode, no user update possible");
+      print("Offline mode, no sync possible");
     } else {
-      await _loadUserToConnection();
+      try {
+        await _syncData();
+      } catch (e) {
+        print("💽 Erreur lors de la synchronisation : $e");
+      }
     }
+
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
@@ -76,7 +81,6 @@ class _CamionListState extends State<CamionList> {
       try {
         await _syncData();
       } catch (e) {
-        // loggez sans rethrow pour ne pas casser le flux
         print("💽 Erreur lors de la synchronisation : $e");
       }
     }
