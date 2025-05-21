@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
@@ -39,7 +40,6 @@ class CheckList extends StatefulWidget {
 }
 
 class _CheckListState extends State<CheckList> {
-
   late Database db;
   late MyUser _user;
   late String _userId;
@@ -54,7 +54,6 @@ class _CheckListState extends State<CheckList> {
   late NetworkService networkService;
   final PdfService pdfService = PdfService();
 
-
   @override
   void initState() {
     super.initState();
@@ -66,13 +65,14 @@ class _CheckListState extends State<CheckList> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -99,7 +99,7 @@ class _CheckListState extends State<CheckList> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -133,23 +133,25 @@ class _CheckListState extends State<CheckList> {
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
       await getAllCamions(db, _user.role).then((camionsMap) {
-        if(camionsMap != null){
-          for(var camion in camionsMap.entries){
-            if(!camionsTypeIdList.contains(camion.value.camionType)){
+        if (camionsMap != null) {
+          for (var camion in camionsMap.entries) {
+            if (!camionsTypeIdList.contains(camion.value.camionType)) {
               camionsTypeIdList.add(camion.value.camionType);
             }
           }
         }
       });
       print("💽 Synchronizing CamionTypess...");
-      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      await syncService.fullSyncTable("camionTypes",
+          user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
-      if(camionTypesMap != null){
-        for(var camionType in camionTypesMap.entries){
-          if(camionType.value.lol != null){
-            for(var list in camionType.value.lol!){
-              if(!camionListOfListId.contains(list)){
+      Map<String, CamionType>? camionTypesMap =
+          await getAllCamionTypes(db, _user.role);
+      if (camionTypesMap != null) {
+        for (var camionType in camionTypesMap.entries) {
+          if (camionType.value.lol != null) {
+            for (var list in camionType.value.lol!) {
+              if (!camionListOfListId.contains(list)) {
                 camionListOfListId.add(list);
               }
             }
@@ -157,11 +159,14 @@ class _CheckListState extends State<CheckList> {
         }
       }
       print("💽 Synchronizing LOL...");
-      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
+      await syncService.fullSyncTable("listOfLists",
+          user: _user, userId: _userId, dataPlus: camionListOfListId);
       print("💽 Synchronizing Blueprints...");
-      await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
+      await syncService.fullSyncTable("blueprints",
+          user: _user, userId: _userId);
       print("💽 Synchronizing Validate Tasks...");
-      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
+      await syncService.fullSyncTable("validateTasks",
+          user: _user, userId: _userId);
       print("💽 Synchronizing PDFs...");
       await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
@@ -179,28 +184,29 @@ class _CheckListState extends State<CheckList> {
 
   Future<void> _loadBlueprints() async {
     Map<String, Blueprint>? blueprints = await getAllBlueprints(db, _user.role);
-    if(blueprints != null){
+    if (blueprints != null) {
       _blueprints = blueprints;
-    }else{
+    } else {
       _blueprints = {};
     }
   }
 
   Future<void> _loadTasks() async {
     Map<String, TaskChecklist>? tasks = await getAllTasksOfUser(db, _userId);
-    if(tasks != null){
+    if (tasks != null) {
       _tasks = tasks;
-    }else{
+    } else {
       _tasks = {};
     }
   }
 
   Future<void> _loadListOfLists() async {
     try {
-      Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db, _user.role);
-      if(listOfListsFuture != null){
+      Map<String, ListOfLists>? listOfListsFuture =
+          await getAllLists(db, _user.role);
+      if (listOfListsFuture != null) {
         _listOfLists = listOfListsFuture;
-      }else{
+      } else {
         _listOfLists = {};
       }
     } catch (e) {
@@ -236,7 +242,6 @@ class _CheckListState extends State<CheckList> {
         body: body(),
       ),
     );
-
   }
 
   void showBlueprintModal({
@@ -244,35 +249,41 @@ class _CheckListState extends State<CheckList> {
     required int nrEntryPosition,
     Blueprint? blueprint,
     String? blueprintID,
-  }){
-    showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) {
-      return Container(
-        padding: const EdgeInsets.all(10),
-        color: Colors.white,
-        margin: EdgeInsets.fromLTRB(
-            10, 50, 10, MediaQuery.of(context).viewInsets.bottom
-        ),
-        child: AddBlueprintForm(
-          nrOfList: nrOfList,
-          nrEntryPosition: nrEntryPosition,
-          blueprint: blueprint,
-          blueprintID: blueprintID,
-          onBlueprintAdded: () async {
-            if (networkService.isOnline) {
-              await _syncBlueprints();
-            }
-            await _loadDataFromDatabase();
-            setState(() {});
-            Navigator.pop(context);
-          },
-        ),
-      );
-    });
+  }) {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return Container(
+            padding: const EdgeInsets.all(10),
+            color: Colors.white,
+            margin: EdgeInsets.fromLTRB(
+                10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
+            child: AddBlueprintForm(
+              nrOfList: nrOfList,
+              nrEntryPosition: nrEntryPosition,
+              blueprint: blueprint,
+              blueprintID: blueprintID,
+              onBlueprintAdded: () async {
+                if (networkService.isOnline) {
+                  await _syncBlueprints();
+                }
+                await _loadDataFromDatabase();
+                setState(() {});
+                Navigator.pop(context);
+              },
+            ),
+          );
+        });
   }
 
   void showTask(Blueprint blueprint) async {
     try {
-      TaskChecklist validate = TaskChecklist(nrOfList: 0, nrEntryPosition: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
+      TaskChecklist validate = TaskChecklist(
+          nrOfList: 0,
+          nrEntryPosition: 0,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now());
       for (TaskChecklist task in _tasks.values) {
         if (blueprint.nrOfList == task.nrOfList &&
             blueprint.nrEntryPosition == task.nrEntryPosition) {
@@ -282,9 +293,23 @@ class _CheckListState extends State<CheckList> {
       }
 
       String keyId = _tasks.keys.firstWhere(
-            (k) => _tasks[k] == validate,
+        (k) => _tasks[k] == validate,
         orElse: () => '',
       );
+// 🔽 Récupère le camion attribué à l'utilisateur
+      Map<String, Camion>? allCamions = await getAllCamions(db, _user.role);
+      Camion? camion;
+      String? camionId;
+
+      if (_user.camion != null && _user.camion!.isNotEmpty) {
+        camionId = _user.camion!.first;
+        camion = allCamions?[camionId];
+      }
+
+      if (camion == null || camionId == null) {
+        print("❌ Aucun camion attribué !");
+        return;
+      }
 
       await showModalBottomSheet(
           context: context,
@@ -294,19 +319,21 @@ class _CheckListState extends State<CheckList> {
               padding: const EdgeInsets.all(10),
               color: Colors.white,
               margin: EdgeInsets.fromLTRB(
-                  10, 50, 10, MediaQuery.of(context).viewInsets.bottom
-              ),
+                  10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
               child: ValidateTask(
                 blueprint: blueprint,
                 validate: validate,
                 keyId: keyId,
+                userUID: _userId,
+                camion: camion!,
+                camionId: camionId!,
+                user: _user,
                 onValidateAdded: () async {
                   await _syncData();
                   await _loadTasks();
                   setState(() {});
                   Navigator.pop(context);
                 },
-                userUID: _userId,
               ),
             );
           });
@@ -315,14 +342,22 @@ class _CheckListState extends State<CheckList> {
     }
   }
 
-  Future<bool> testIfFull(Map<String, Blueprint> sortedBlueprints, int listNr, String userUID) async {
-    Map<String, TaskChecklist>? validatedTask = await getAllTasksOfUser(db, userUID);
-    TaskChecklist emptyTask = TaskChecklist(nrOfList: 0, nrEntryPosition: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
+  Future<bool> testIfFull(Map<String, Blueprint> sortedBlueprints, int listNr,
+      String userUID) async {
+    Map<String, TaskChecklist>? validatedTask =
+        await getAllTasksOfUser(db, userUID);
+    TaskChecklist emptyTask = TaskChecklist(
+        nrOfList: 0,
+        nrEntryPosition: 0,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now());
     for (Blueprint blueprint in sortedBlueprints.values) {
       if (blueprint.nrOfList == listNr) {
         int entryPosition = blueprint.nrEntryPosition;
         TaskChecklist task = validatedTask!.values.firstWhere(
-              (element) => element.nrOfList == listNr && element.nrEntryPosition == entryPosition,
+          (element) =>
+              element.nrOfList == listNr &&
+              element.nrEntryPosition == entryPosition,
           orElse: () => emptyTask,
         );
         if (task.nrEntryPosition == 0) {
@@ -334,19 +369,22 @@ class _CheckListState extends State<CheckList> {
   }
 
   Future<void> deleteOneTasksListForUser(int listNr, String userUID) async {
-    Map<String, TaskChecklist> validatedTask = await getUserOneListOfTasks(db, userUID, listNr);
+    Map<String, TaskChecklist> validatedTask =
+        await getUserOneListOfTasks(db, userUID, listNr);
     for (var task in validatedTask.entries) {
       try {
         await deleteTask(db, task.key);
         Directory tempDir = await getApplicationSupportDirectory();
         String listNr = task.value.nrOfList.toString().padLeft(4, '0');
         String entryPos = task.value.nrEntryPosition.toString().padLeft(4, '0');
-        final fileTemp = File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
+        final fileTemp =
+            File("${tempDir.path}/$listNr${entryPos}photoValidate.jpeg");
         if (await fileTemp.exists()) {
           await fileTemp.delete();
         }
 
-        print("The file with the path ${fileTemp.path} and name $listNr${entryPos}photoValidate.jpeg has been deleted.");
+        print(
+            "The file with the path ${fileTemp.path} and name $listNr${entryPos}photoValidate.jpeg has been deleted.");
       } catch (e) {
         print("Error deleting file: $e");
       }
@@ -356,7 +394,8 @@ class _CheckListState extends State<CheckList> {
 
   AppBar appBar() {
     return AppBar(
-      title: Text(AppLocalizations.of(context)!.checkList,
+      title: Text(
+        AppLocalizations.of(context)!.checkList,
         style: TextStyle(
           color: Colors.black,
         ),
@@ -379,18 +418,25 @@ class _CheckListState extends State<CheckList> {
         indicatorColor: Colors.red,
         labelColor: Colors.black,
         isScrollable: true,
-        tabs: _listOfLists.values.map((blueprint) =>
-            Tab(
-              text: blueprint.listName,
-            )).toList(),
+        tabs: _listOfLists.values
+            .map((blueprint) => Tab(
+                  text: blueprint.listName,
+                ))
+            .toList(),
       ),
     );
   }
 
-  bool? taskIsDone(blueprint){
+  bool? taskIsDone(blueprint) {
     TaskChecklist task = _tasks.values.firstWhere(
-      (task) => task.nrEntryPosition == blueprint.nrEntryPosition && task.nrOfList == blueprint.nrOfList,
-      orElse: () => TaskChecklist(nrOfList: 0, nrEntryPosition: 0, createdAt: DateTime.now(), updatedAt: DateTime.now()),
+      (task) =>
+          task.nrEntryPosition == blueprint.nrEntryPosition &&
+          task.nrOfList == blueprint.nrOfList,
+      orElse: () => TaskChecklist(
+          nrOfList: 0,
+          nrEntryPosition: 0,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now()),
     );
     return task.isDone;
   }
@@ -406,40 +452,40 @@ class _CheckListState extends State<CheckList> {
               for (Blueprint blueprint in _blueprints.values
                   .where((b) => b.nrOfList == list.listNr)
                   .toList()
-                ..sort((a, b) => a.nrEntryPosition.compareTo(b.nrEntryPosition)))
+                ..sort(
+                    (a, b) => a.nrEntryPosition.compareTo(b.nrEntryPosition)))
                 BlueprintTemplate(
-                  isDone: taskIsDone(blueprint),
-                  blueprint: blueprint,
-                  role: _user.role,
-                  delete: () {
-                    String key = _blueprints.keys
-                        .firstWhere((k) => _blueprints[k] == blueprint);
-                    _showDeleteConfirmation(key);
-                  },
-                  validate: () {
-                    showTask(blueprint);
-                  },
-                  edit: () {
-                    String blueprintID = _blueprints.keys
-                        .firstWhere((k) => _blueprints[k] == blueprint);
-                    showBlueprintModal(
-                      nrOfList: blueprint.nrOfList,
-                      nrEntryPosition: blueprint.nrEntryPosition,
-                      blueprint: blueprint,
-                      blueprintID: blueprintID,
-                    );
-                  },
-                  restore: () async {
-                    String key = _blueprints.keys
-                        .firstWhere((k) => _blueprints[k] == blueprint);
-                    await restoreBlueprints(db, key);
-                    if (networkService.isOnline) {
-                      await _syncBlueprints();
-                    }
-                    await _loadDataFromDatabase();
-                    setState(() {});
-                  }
-                ),
+                    isDone: taskIsDone(blueprint),
+                    blueprint: blueprint,
+                    role: _user.role,
+                    delete: () {
+                      String key = _blueprints.keys
+                          .firstWhere((k) => _blueprints[k] == blueprint);
+                      _showDeleteConfirmation(key);
+                    },
+                    validate: () {
+                      showTask(blueprint);
+                    },
+                    edit: () {
+                      String blueprintID = _blueprints.keys
+                          .firstWhere((k) => _blueprints[k] == blueprint);
+                      showBlueprintModal(
+                        nrOfList: blueprint.nrOfList,
+                        nrEntryPosition: blueprint.nrEntryPosition,
+                        blueprint: blueprint,
+                        blueprintID: blueprintID,
+                      );
+                    },
+                    restore: () async {
+                      String key = _blueprints.keys
+                          .firstWhere((k) => _blueprints[k] == blueprint);
+                      await restoreBlueprints(db, key);
+                      if (networkService.isOnline) {
+                        await _syncBlueprints();
+                      }
+                      await _loadDataFromDatabase();
+                      setState(() {});
+                    }),
               const SizedBox(height: 10),
               if (_user.role == 'superadmin')
                 FloatingActionButton(
@@ -447,11 +493,13 @@ class _CheckListState extends State<CheckList> {
                   onPressed: () {
                     showBlueprintModal(
                       nrOfList: list.listNr,
-                      nrEntryPosition: (_blueprints.values.where((b) => b.nrOfList == list.listNr).length + 1),
+                      nrEntryPosition: (_blueprints.values
+                              .where((b) => b.nrOfList == list.listNr)
+                              .length +
+                          1),
                       blueprint: null,
                       blueprintID: null,
                     );
-
                   },
                   child: const Icon(
                     Icons.add,
@@ -461,8 +509,8 @@ class _CheckListState extends State<CheckList> {
               const SizedBox(height: 20),
               if ((_user.role == 'user' || _user.role == 'admin') &&
                   _tasks.values
-                      .where((task) => task.nrOfList == list.listNr)
-                      .length ==
+                          .where((task) => task.nrOfList == list.listNr)
+                          .length ==
                       _blueprints.values
                           .where((b) => b.nrOfList == list.listNr)
                           .length)
@@ -489,7 +537,7 @@ class _CheckListState extends State<CheckList> {
                         await _loadTasks();
                       },
                     );
-                    setState((){});
+                    setState(() {});
                     OpenDocument.openDocument(filePath: filePath);
                   },
                   backgroundColor: Colors.red,
@@ -535,7 +583,8 @@ class _CheckListState extends State<CheckList> {
               setState(() {});
               Navigator.pop(context);
             },
-            child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.yes,
+                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -546,7 +595,8 @@ class _CheckListState extends State<CheckList> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Blueprints...");
-      await syncService.fullSyncTable("blueprints", user: _user, userId: _userId);
+      await syncService.fullSyncTable("blueprints",
+          user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during global data synchronization: $e");
@@ -558,7 +608,8 @@ class _CheckListState extends State<CheckList> {
     try {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Tasks...");
-      await syncService.fullSyncTable("validateTasks", user: _user, userId: _userId);
+      await syncService.fullSyncTable("validateTasks",
+          user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during global data synchronization: $e");

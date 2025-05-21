@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -18,6 +19,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 import 'map/map_page.dart';
 
@@ -179,12 +181,91 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BasePage(
-      title: AppLocalizations.of(context)!.homePage,
-      body: _isDataLoaded ? _buildBody(context) : CircularProgressIndicator(),
-    );
+  Future<List<Widget>> _buildCamionCheckHistory() async {
+    final firestore = FirebaseFirestore.instance;
+    final currentUserId = _userId;
+    final currentCompany = _user?.company;
+    print("🔎 Current userId: $currentUserId");
+    print("🔎 Current companyId: $currentCompany");
+
+    if (currentUserId == null || currentCompany == null) return [];
+    print("🔎 Current company ID: $currentCompany");
+
+    final query = await firestore
+        .collection('camionChecks')
+        // .where('companyId', isEqualTo: currentCompany)
+        .orderBy('checkTime', descending: true)
+        .limit(20)
+        .get();
+
+    final checks = query.docs;
+
+    if (checks.isEmpty) {
+      return [
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              "Aucun check trouvé pour votre entreprise.",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ),
+        )
+      ];
+    }
+
+    Map<String, List<Map<String, dynamic>>> camionGrouped = {};
+
+    for (var doc in checks) {
+      final data = doc.data();
+      final camionId = data['camionId'] ?? 'inconnu';
+
+      // Supprimer cette ligne si tu veux voir tes propres checks :
+      // final userId = data['userId'];
+      // if (userId == currentUserId) continue;
+
+      if (!camionGrouped.containsKey(camionId)) {
+        camionGrouped[camionId] = [];
+      }
+      camionGrouped[camionId]!.add(data);
+    }
+
+    List<Widget> historyWidgets = [];
+
+    for (var entry in camionGrouped.entries) {
+      for (var check in entry.value) {
+        final username = check['username'] ?? "Un utilisateur";
+        final checkTime = (check['checkTime'] as Timestamp).toDate();
+        final camionName =
+            (check['camionName'] as String?)?.trim().isNotEmpty == true
+                ? check['camionName']
+                : 'Camion inconnu';
+
+        final ago = timeago.format(checkTime, locale: 'fr');
+
+        historyWidgets.add(Card(
+          elevation: 3,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            leading: CircleAvatar(
+              backgroundColor: Colors.blue[100],
+              child: Icon(Icons.history, color: Theme.of(context).primaryColor),
+            ),
+            title: Text(
+              "$username a effectué un check sur $camionName",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text("🕒 Il y a $ago"),
+          ),
+        ));
+      }
+    }
+
+    return historyWidgets;
   }
 
   Widget _buildBody(BuildContext context) {
@@ -211,9 +292,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 duration: const Duration(milliseconds: 375),
                 childAnimationBuilder: (widget) => SlideAnimation(
                   verticalOffset: 50.0,
-                  child: FadeInAnimation(
-                    child: widget,
-                  ),
+                  child: FadeInAnimation(child: widget),
                 ),
                 children: [
                   _buildHeader(context, w, h * 0.3, welcomeMessage, isDarkMode),
@@ -223,6 +302,55 @@ class _WelcomePageState extends State<WelcomePage> {
                   _buildMapCard(context, '/map'),
                   SizedBox(height: 20),
                   _buildQuickActions(context),
+                  SizedBox(height: 20),
+                  Card(
+                    margin: EdgeInsets.symmetric(horizontal: 20),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ExpansionTile(
+                        tilePadding: EdgeInsets.symmetric(horizontal: 10),
+                        title: Text(
+                          "📋 Historique de checks récents",
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge!
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        maintainState: true, // Conserve l'état quand replié
+                        children: [
+                          FutureBuilder<List<Widget>>(
+                            future: _buildCamionCheckHistory(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                );
+                              }
+                              if (snapshot.hasData &&
+                                  snapshot.data!.isNotEmpty) {
+                                return Column(children: snapshot.data!);
+                              } else {
+                                return Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Text(
+                                    "Aucun check trouvé pour votre entreprise.",
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.grey[600]),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -394,7 +522,8 @@ class _WelcomePageState extends State<WelcomePage> {
             runSpacing: 10,
             children: [
               _buildActionChip(context, "Checklist", Icons.local_shipping,
-                  onPressed: () => CheckList()),
+                  onPressed: () => Get.to(() => const CheckList())),
+
               /**_buildActionChip(context,
                   AppLocalizations.of(context)!.dailyReport, Icons.assessment),*/
               /**  _buildActionChip(context,
@@ -428,5 +557,13 @@ class _WelcomePageState extends State<WelcomePage> {
         SnackBar(content: Text('Impossible d\'ouvrir le lien')),
       );
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BasePage(
+      title: AppLocalizations.of(context)!.homePage,
+      body: _isDataLoaded ? _buildBody(context) : CircularProgressIndicator(),
+    );
   }
 }

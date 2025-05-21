@@ -7,7 +7,9 @@ class MyUser {
   String company;
   bool? apresFormation;
   String? apresFormationDoc;
-  List<String>? camion; /// todo change to List<String> for more camions (here and everywhere) plus display and selection in profile editing
+  List<String>? camion;
+
+  /// todo change to List<String> for more camions (here and everywhere) plus display and selection in profile editing
   DateTime createdAt;
   DateTime updatedAt;
   DateTime? deletedAt;
@@ -27,26 +29,32 @@ class MyUser {
     this.deletedAt,
   });
 
-  MyUser.fromJson(Map<String, Object?> json): this (
-    role: json['role']! as String,
-    username: json['username']! as String,
-    email: json['email']! as String,
-    name: json['name'] != null ? json['name'] as String : null,
-    firstname: json['firstname'] != null ? json['firstname'] as String : null,
-    company: json['company']! as String,
-    apresFormation: json['apresFormation'] != null ? json['apresFormation'] as bool : null,
-    apresFormationDoc: json['apresFormationDoc'] != null ? json['apresFormationDoc'] as String : null,
-    camion: json['camion'] != null
-        ? (json['camion'] as List<dynamic>)
-        .map((item) => item as String)
-        .toList()
-        : null,
-    createdAt: DateTime.parse(json['createdAt'] as String),
-    updatedAt: DateTime.parse(json['updatedAt'] as String),
-    deletedAt: json['deletedAt'] != null
-        ? DateTime.parse(json['deletedAt'] as String)
-        : null,
-  );
+  MyUser.fromJson(Map<String, Object?> json)
+      : this(
+          role: json['role']! as String,
+          username: json['username']! as String,
+          email: json['email']! as String,
+          name: json['name'] != null ? json['name'] as String : null,
+          firstname:
+              json['firstname'] != null ? json['firstname'] as String : null,
+          company: json['company']! as String,
+          apresFormation: json['apresFormation'] != null
+              ? json['apresFormation'] as bool
+              : null,
+          apresFormationDoc: json['apresFormationDoc'] != null
+              ? json['apresFormationDoc'] as String
+              : null,
+          camion: json['camion'] != null
+              ? (json['camion'] as List<dynamic>)
+                  .map((item) => item as String)
+                  .toList()
+              : null,
+          createdAt: DateTime.parse(json['createdAt'] as String),
+          updatedAt: DateTime.parse(json['updatedAt'] as String),
+          deletedAt: json['deletedAt'] != null
+              ? DateTime.parse(json['deletedAt'] as String)
+              : null,
+        );
 
   MyUser copyWith({
     String? role,
@@ -78,7 +86,7 @@ class MyUser {
     );
   }
 
-  Map<String, Object?> toJson(){
+  Map<String, Object?> toJson() {
     final Map<String, Object?> json = {
       'role': role,
       'username': username,
@@ -90,7 +98,8 @@ class MyUser {
     if (name != null) json['name'] = name;
     if (firstname != null) json['firstname'] = firstname;
     if (apresFormation != null) json['apresFormation'] = apresFormation;
-    if (apresFormationDoc != null) json['apresFormationDoc'] = apresFormationDoc;
+    if (apresFormationDoc != null)
+      json['apresFormationDoc'] = apresFormationDoc;
     if (camion != null) json['camion'] = camion!.map((item) => item).toList();
     if (deletedAt != null) json['deletedAt'] = deletedAt!.toIso8601String();
     return json;

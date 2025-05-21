@@ -140,8 +140,12 @@ class _CamionListState extends State<CamionList> {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing users...");
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
+      var camions;
+      print(
+          "Nombre de camions téléchargés depuis Firebase : ${camions.length}");
       print("💽 Synchronizing users Camions...");
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
+
       List<String> camionsTypeIdList = [];
       await getAllCamions(db, _user.role).then((camionsMap) {
         if (camionsMap != null) {
@@ -153,11 +157,13 @@ class _CamionListState extends State<CamionList> {
         }
       });
       print("💽 Synchronizing CamionTypess...");
+
       await syncService.fullSyncTable("camionTypes",
           user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
       Map<String, CamionType>? camionTypesMap =
           await getAllCamionTypes(db, _user.role);
+
       if (camionTypesMap != null) {
         for (var camionType in camionTypesMap.entries) {
           if (camionType.value.lol != null) {
