@@ -85,8 +85,8 @@ class Camion {
       'name': name,
       'camionType': camionType,
       'company': company,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
     if (responsible != null) json['responsible'] = responsible;
     if (checks != null)
@@ -94,7 +94,7 @@ class Camion {
     if (lastIntervention != null) json['lastIntervention'] = lastIntervention;
     if (status != null) json['status'] = status;
     if (location != null) json['location'] = location;
-    if (deletedAt != null) json['deletedAt'] = deletedAt!;
+    if (deletedAt != null) json['deletedAt'] = deletedAt!.toIso8601String();
     return json;
   }
 }
