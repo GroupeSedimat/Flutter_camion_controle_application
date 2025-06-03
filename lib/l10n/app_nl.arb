@@ -51,6 +51,10 @@
     "newIntervention": "Nieuwe interventie",
     "dailyReport": "Dagrapport",
     "maintenance": "Onderhoud",
+    "historyCheck":"Controlegeschiedenis",
+    "checkPerformedOn": "heeft een check uitgevoerd op",
+    "timeAgo": "sinds",
+    "noChecksFound": "Geen controles gevonden voor uw bedrijf.",
 
 
     "passForgot": "Wachtwoord vergeten?",

@@ -67,8 +67,14 @@ class ChatListPage extends StatelessWidget {
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData) return SizedBox.shrink();
 
-                  final userData =
-                      userSnapshot.data!.data() as Map<String, dynamic>;
+                  if (!userSnapshot.hasData ||
+                      userSnapshot.data?.data() == null) {
+                    return SizedBox
+                        .shrink(); // Ou afficher un utilisateur inconnu
+                  }
+
+                  final rawData = userSnapshot.data!.data();
+                  final userData = rawData as Map<String, dynamic>;
                   final username = userData['username'] ?? 'Utilisateur';
 
                   return ListTile(

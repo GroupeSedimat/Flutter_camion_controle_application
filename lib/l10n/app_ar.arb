@@ -81,6 +81,8 @@
     "companyResponsible": "الشخص المسؤول عن الاتصال",
     "companyAdmin": "المشرف الرئيسي للشركة",
     "companyLogo": "شعار الشركة",
+    "historyCheck":"سجل الفحوصات",
+    "noChecksFound": "لم يتم العثور على أي فحص لشركتك.",
 
     "camionType": "نوع الشاحنة",
     "camionsList": "قائمة الشاحنات",
@@ -103,6 +105,10 @@
     "sortDescending": "الفرز من الألف إلى الياء/من الياء إلى الألف",
     "filterType": "التصفية حسب النوع",
     "filterEntreprise": "التصفية حسب المؤسسة",
+    "checkPerformedOn": "أجرى فحصًا على",
+    "timeAgo": "منذ",
+
+
 
     "equipmentName": "اسم المعدات",
     "equipmentList": "قائمة المعدات",

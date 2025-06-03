@@ -256,10 +256,12 @@ class _WelcomePageState extends State<WelcomePage> {
               child: Icon(Icons.history, color: Theme.of(context).primaryColor),
             ),
             title: Text(
-              "$username a effectué un check sur $camionName",
+              "$username ${AppLocalizations.of(context)!.checkPerformedOn} $camionName",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
-            subtitle: Text("🕒 Il y a $ago"),
+            subtitle: Text(
+              "🕒 ${AppLocalizations.of(context)!.timeAgo} $ago",
+            ),
           ),
         ));
       }
@@ -313,7 +315,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       child: ExpansionTile(
                         tilePadding: EdgeInsets.symmetric(horizontal: 10),
                         title: Text(
-                          "📋 Historique de checks récents",
+                          AppLocalizations.of(context)!.historyCheck,
                           style: Theme.of(context)
                               .textTheme
                               .titleLarge!
@@ -339,7 +341,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                 return Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Text(
-                                    "Aucun check trouvé pour votre entreprise.",
+                                    AppLocalizations.of(context)!.noChecksFound,
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.grey[600]),
                                   ),
@@ -475,7 +477,7 @@ class _WelcomePageState extends State<WelcomePage> {
         child: InkWell(
           onTap: () {
             Navigator.pop(context);
-            Get.to(() => MapPage());
+            //Get.to(() => MapPage());
           },
           borderRadius: BorderRadius.circular(15),
           child: Padding(

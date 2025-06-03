@@ -108,6 +108,11 @@
     "sortDescending": "Trier A-Z/Z-A",
     "filterType": "Filtrer par type",
     "filterEntreprise": "Filtrer par entreprise",
+    "historyCheck":"historique des checks",
+    "checkPerformedOn": "a effectué un check sur",
+    "timeAgo": "Il y a",
+    "noChecksFound": "Aucun check trouvé pour votre entreprise.",
+
 
     "equipmentName": "Nom de l'équipement",
     "equipmentList": "Liste des équipements",

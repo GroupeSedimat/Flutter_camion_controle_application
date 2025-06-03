@@ -26,6 +26,10 @@
     "confirmApproveText": "Czy na pewno chcesz zatwierdzić tego użytkownika?",
     "confirmDisapprove": "Potwierdź odrzucenie",
     "confirmDisapproveText": "Czy na pewno chcesz odrzucić tego użytkownika?",
+    "historyCheck": "Historia sprawdzeń",
+    "checkPerformedOn": "wykonał kontrolę na",
+    "timeAgo": "temu",
+    "noChecksFound": "Nie znaleziono żadnych kontroli dla Twojej firmy.",
 
     "userProfileEdit": "Edytuj profil",
     "userLoading": "Ładowanie danych użytkownika/ów",

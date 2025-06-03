@@ -26,6 +26,10 @@
     "confirmApproveText": "Ndax wóor nga ni bëgg nga nangu jëfandikukat bii?",
     "confirmDisapprove": "Firndelal ni nanguwoo",
     "confirmDisapproveText": "Ndax wóor nga ni bëggoo dàq jëfandikukat bii?",
+    "historyCheck": "Jéego yeneen seetukaay",
+    "checkPerformedOn": "def na benn xeetu jëfandikukat ci",
+    "timeAgo": "ba pare",
+    "noChecksFound": "Amul benn jëfandikukat bu sosoon check ci sa kër gi.",
 
     "userProfileEdit": "Soppi profil",
     "userLoading": "Jëfandikukat(yi) di yobbu...",

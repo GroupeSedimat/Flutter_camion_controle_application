@@ -101,6 +101,11 @@
     "camionMenuEquipment": "Equipment",
     "camionMenuTypes": "Types",
     "camionAddedSuccessfully": "Truck added successfully",
+    "historyCheck":	"Check history",
+    "checkPerformedOn": "performed a check on",
+    "timeAgo": "ago",
+    "noChecksFound": "No checks found for your company.",
+
     "camionUpdatedSuccessfully": "Truck updated successfully",
 
     "sort": "Sort",
