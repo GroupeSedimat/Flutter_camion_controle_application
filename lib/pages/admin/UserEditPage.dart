@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/user/user_role.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
@@ -14,7 +15,6 @@ import 'package:flutter_application_1/services/database_validation_files_service
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/pick_image_service.dart';
 import 'package:get/get.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -55,7 +55,8 @@ class _UserEditPageState extends State<UserEditPage> {
   /// todo photos and files validations (DatabaseValidationService)
   /// todo repair refresh after delete/restore
   final PickImageService _pickImageService = PickImageService();
-  final DatabaseValidationService _databaseValidationService = DatabaseValidationService();
+  final DatabaseValidationService _databaseValidationService =
+      DatabaseValidationService();
 
   @override
   void initState() {
@@ -68,13 +69,14 @@ class _UserEditPageState extends State<UserEditPage> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -103,7 +105,7 @@ class _UserEditPageState extends State<UserEditPage> {
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
     print("users: $users");
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -148,21 +150,23 @@ class _UserEditPageState extends State<UserEditPage> {
 
   Future<void> _loadCamionsLists() async {
     Map<String, String>? availableCamionsLists = {};
-    if(isSuperAdmin()){
+    if (isSuperAdmin()) {
       availableCamionsLists = await getAllCamionsNames(db, _user.role);
-    }else{
-      availableCamionsLists = await getCompanyCamionsNames(db, _user.company, _user.role);
+    } else {
+      availableCamionsLists =
+          await getCompanyCamionsNames(db, _user.company, _user.role);
     }
-    if(availableCamionsLists != null){
+    if (availableCamionsLists != null) {
       availableCamionsMap = availableCamionsLists;
-    }else {
+    } else {
       availableCamionsMap = {};
     }
   }
+
   Future<void> _loadEditedUser() async {
     // get edited user
     MyUser? editUser = await getOneUserWithID(db, widget.userId);
-    if(editUser != null){
+    if (editUser != null) {
       _editedUser = editUser;
     }
     _editedUserId = widget.userId;
@@ -173,7 +177,9 @@ class _UserEditPageState extends State<UserEditPage> {
     String name = _editedUser.name ?? "";
     String firstname = _editedUser.firstname ?? "";
     String email = _editedUser.email;
-    String role = _editedUser.role.isNotEmpty ? _editedUser.role : UserRole.user.toString().split('.').last; // Default role
+    String role = _editedUser.role.isNotEmpty
+        ? _editedUser.role
+        : UserRole.user.toString().split('.').last; // Default role
     bool isValidate = _editedUser.apresFormation ?? false;
     String isValidateDoc = _editedUser.apresFormationDoc ?? "";
     String uploadedImageUrl = _editedUser.apresFormationDoc ?? "";
@@ -189,12 +195,13 @@ class _UserEditPageState extends State<UserEditPage> {
       _isValidateDoc = isValidateDoc;
       _uploadedImageUrl.text = uploadedImageUrl;
       _camions = camions;
-      _camionsControllers = camions.map((item) => TextEditingController(text: item)).toList();
+      _camionsControllers =
+          camions.map((item) => TextEditingController(text: item)).toList();
     });
   }
 
-  isSuperAdmin(){
-    return _user.role=="superadmin";
+  isSuperAdmin() {
+    return _user.role == "superadmin";
   }
 
   @override
@@ -232,10 +239,9 @@ class _UserEditPageState extends State<UserEditPage> {
         _selectedImage = image;
       });
 
-      String imageUrl = await _databaseValidationService.addValidationToFirebase(
-          image.path,
-          "${_editedUser.username}_validation_doc"
-      );
+      String imageUrl =
+          await _databaseValidationService.addValidationToFirebase(
+              image.path, "${_editedUser.username}_validation_doc");
 
       setState(() {
         _uploadedImageUrl.text = imageUrl;
@@ -252,10 +258,9 @@ class _UserEditPageState extends State<UserEditPage> {
         _selectedImage = image;
       });
 
-      String imageUrl = await _databaseValidationService.addValidationToFirebase(
-          image.path,
-          "${_editedUser.username}_validation_doc"
-      );
+      String imageUrl =
+          await _databaseValidationService.addValidationToFirebase(
+              image.path, "${_editedUser.username}_validation_doc");
 
       setState(() {
         _uploadedImageUrl.text = imageUrl;
@@ -267,7 +272,8 @@ class _UserEditPageState extends State<UserEditPage> {
   Future<void> deleteImage() async {
     if (_uploadedImageUrl.text.isNotEmpty) {
       try {
-        await _databaseValidationService.deleteValidationFromFirebase(_uploadedImageUrl.text);
+        await _databaseValidationService
+            .deleteValidationFromFirebase(_uploadedImageUrl.text);
 
         setState(() {
           _uploadedImageUrl.text = '';
@@ -311,23 +317,23 @@ class _UserEditPageState extends State<UserEditPage> {
       );
     }
 
-    List<String> roles = UserRole.values.map((role) => role.toString().split('.').last).toList();
+    List<String> roles =
+        UserRole.values.map((role) => role.toString().split('.').last).toList();
 
     String deleted = _editedUser.deletedAt == null ? "" : " user deleted";
     return Scaffold(
       appBar: AppBar(
         title: Text("${AppLocalizations.of(context)!.userProfileEdit}$deleted"),
         actions: [
-          _editedUser.deletedAt == null ?
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: _confirmDeleteUser,
-          )
-              :
-          IconButton(
-            icon: Icon(Icons.restore),
-            onPressed: _restoreUser,
-          )
+          _editedUser.deletedAt == null
+              ? IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: _confirmDeleteUser,
+                )
+              : IconButton(
+                  icon: Icon(Icons.restore),
+                  onPressed: _restoreUser,
+                )
         ],
       ),
       body: Padding(
@@ -337,32 +343,38 @@ class _UserEditPageState extends State<UserEditPage> {
             children: [
               TextField(
                 controller: _usernameController,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userName),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.userName),
               ),
               SizedBox(height: 16),
-               TextField(
+              TextField(
                 controller: _firstnameController,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userFirstName),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.userFirstName),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.userLastName),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.userLastName),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.eMail),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.eMail),
               ),
               SizedBox(height: 16),
-              if(isSuperAdmin())
-              const Text("Add Camions:"),
+              if (isSuperAdmin()) const Text("Add Camions:"),
               ..._camionsControllers.asMap().entries.map((entry) {
                 int index = entry.key;
                 return ListTile(
                   title: DropdownButtonFormField<String>(
-                    value: availableCamionsMap!.containsKey(_camions[index]) ? _camions[index] : null,
-                    decoration: InputDecoration(labelText: "Camion ${index + 1}"),
+                    value: availableCamionsMap!.containsKey(_camions[index])
+                        ? _camions[index]
+                        : null,
+                    decoration:
+                        InputDecoration(labelText: "Camion ${index + 1}"),
                     items: availableCamionsMap!.entries.map((entry) {
                       return DropdownMenuItem<String>(
                         value: entry.key,
@@ -381,33 +393,31 @@ class _UserEditPageState extends State<UserEditPage> {
                   ),
                 );
               }),
-              if(isSuperAdmin())
-              TextButton(
-                onPressed: _addCamionField,
-                child: const Text("Add Camion"),
-              ),
-              if(isSuperAdmin())
-              SizedBox(height: 16),
-              if(isSuperAdmin())
-              Wrap(
-                children: [
+              if (isSuperAdmin())
+                TextButton(
+                  onPressed: _addCamionField,
+                  child: const Text("Add Camion"),
+                ),
+              if (isSuperAdmin()) SizedBox(height: 16),
+              if (isSuperAdmin())
+                Wrap(children: [
                   Text(
                     "User after Formation",
                   ),
-                  Checkbox(value: _isValidate, onChanged: (value) {
-                    setState(() {
-                      _isValidate = value!;
-                    });
-                  }),
-                ]
-              ),
-              if(isSuperAdmin())
-              SizedBox(height: 16),
-              if(isSuperAdmin())
-              Text(
-                'Apres Formation Doc:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+                  Checkbox(
+                      value: _isValidate,
+                      onChanged: (value) {
+                        setState(() {
+                          _isValidate = value!;
+                        });
+                      }),
+                ]),
+              if (isSuperAdmin()) SizedBox(height: 16),
+              if (isSuperAdmin())
+                Text(
+                  'Apres Formation Doc:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               if (_uploadedImageUrl.text.isNotEmpty)
                 Column(
                   children: [
@@ -434,22 +444,21 @@ class _UserEditPageState extends State<UserEditPage> {
                   ),
                 ],
               ),
-
-              if(isSuperAdmin())
-              DropdownButton<String>(
-                value: _selectedRole,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedRole = newValue!;
-                  });
-                },
-                items: roles.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
+              if (isSuperAdmin())
+                DropdownButton<String>(
+                  value: _selectedRole,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedRole = newValue!;
+                    });
+                  },
+                  items: roles.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _updateUser,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/checklist/loading.dart';
 import 'package:flutter_application_1/pages/data_api/get_data.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Diagrams extends StatefulWidget {
   const Diagrams({super.key});
@@ -13,7 +13,6 @@ class Diagrams extends StatefulWidget {
 }
 
 class _DiagramsState extends State<Diagrams> {
-
   String data = 'No data, sorry :(';
   bool loading = true;
 
@@ -32,13 +31,14 @@ class _DiagramsState extends State<Diagrams> {
     setupGetData();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return loading ? const Loading() : BasePage(
-      appBar: appBar(),
-      body: body(context),
-    );
+    return loading
+        ? const Loading()
+        : BasePage(
+            appBar: appBar(),
+            body: body(context),
+          );
   }
 
   body(BuildContext context) {
@@ -49,7 +49,6 @@ class _DiagramsState extends State<Diagrams> {
             Navigator.pushNamed(context, '/checklist');
           },
           label: Text(AppLocalizations.of(context)!.checkList),
-
           icon: const Icon(Icons.check),
         ),
         Text(

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/pages/settings_page.dart';
 import 'package:flutter_application_1/locale_provider.dart';
 import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
 import 'package:flutter_application_1/pages/user/reset_password_page.dart';
 import 'package:flutter_application_1/theme_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';

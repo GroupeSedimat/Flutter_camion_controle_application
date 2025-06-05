@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/services/database_local/camions_table.dart';
 import 'package:flutter_application_1/services/database_local/camion_types_table.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class AddCamion extends StatefulWidget {
-
   Camion? camion;
   String? camionID;
   String? role;
   final VoidCallback? onCamionAdded;
 
-  AddCamion({super.key, this.camion, this.camionID, this.onCamionAdded, this.role});
+  AddCamion(
+      {super.key, this.camion, this.camionID, this.onCamionAdded, this.role});
 
   @override
   State<AddCamion> createState() => _AddCamionState();
@@ -27,7 +27,8 @@ class _AddCamionState extends State<AddCamion> {
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _responsibleController = TextEditingController();
-  final TextEditingController _lastInterventionController = TextEditingController();
+  final TextEditingController _lastInterventionController =
+      TextEditingController();
 
   late Database db;
 
@@ -43,7 +44,13 @@ class _AddCamionState extends State<AddCamion> {
   Map<String, String>? _companyNamesMap;
   bool _isLoadingCamionTypes = true;
   bool _isLoadingCompanies = true;
-  final List<String> statusOptions = ["sur la route", "arrêt", "réparation", "pour réparation", "inactif"];
+  final List<String> statusOptions = [
+    "sur la route",
+    "arrêt",
+    "réparation",
+    "pour réparation",
+    "inactif"
+  ];
 
   @override
   void initState() {
@@ -84,7 +91,9 @@ class _AddCamionState extends State<AddCamion> {
       });
       print('Error loading camion types: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.camionTypeErrorLoading)),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.camionTypeErrorLoading)),
       );
     }
   }
@@ -106,7 +115,8 @@ class _AddCamionState extends State<AddCamion> {
       });
       print('Error loading companies: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.companyErrorLoading)),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.companyErrorLoading)),
       );
     }
   }
@@ -229,24 +239,23 @@ class _AddCamionState extends State<AddCamion> {
 
           // Camion Type Dropdown
           _isLoadingCamionTypes
-            ? const CircularProgressIndicator()
-            : _camionTypesMap == null || _camionTypesMap!.isEmpty
-            ? Text(AppLocalizations.of(context)!.userDataNotFound)
-            : buildDropdownField(
-                labelText: AppLocalizations.of(context)!.camionType,
-                items: _camionTypesMap!.entries.map((entry) {
-                  return DropdownMenuItem<String>(
-                    value: entry.key,
-                    child: Text(entry.value.name),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    camionType = value ?? '';
-                  });
-                },
-                value: camionType.isNotEmpty ? camionType : null
-              ),
+              ? const CircularProgressIndicator()
+              : _camionTypesMap == null || _camionTypesMap!.isEmpty
+                  ? Text(AppLocalizations.of(context)!.userDataNotFound)
+                  : buildDropdownField(
+                      labelText: AppLocalizations.of(context)!.camionType,
+                      items: _camionTypesMap!.entries.map((entry) {
+                        return DropdownMenuItem<String>(
+                          value: entry.key,
+                          child: Text(entry.value.name),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          camionType = value ?? '';
+                        });
+                      },
+                      value: camionType.isNotEmpty ? camionType : null),
 
           const SizedBox(height: 20),
 
@@ -274,53 +283,53 @@ class _AddCamionState extends State<AddCamion> {
           const SizedBox(height: 20),
 
           // Checks field
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.camionChecks,
-              style: const TextStyle(fontSize: 20, color: Colors.lightBlue),
-            ),
-            const SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: checks.length,
-              itemBuilder: (context, index) {
-                DateTime date = checks[index];
-                return ListTile(
-                  title: Text('${date.toLocal()}'.split('.')[0]),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      setState(() {
-                        checks.removeAt(index);
-                      });
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.camionChecks,
+                style: const TextStyle(fontSize: 20, color: Colors.lightBlue),
+              ),
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: checks.length,
+                itemBuilder: (context, index) {
+                  DateTime date = checks[index];
+                  return ListTile(
+                    title: Text('${date.toLocal()}'.split('.')[0]),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          checks.removeAt(index);
+                        });
+                      },
+                    ),
+                    onTap: () async {
+                      DateTime? updatedDate = await _selectDateTime(date);
+                      if (updatedDate != null) {
+                        setState(() {
+                          checks[index] = updatedDate;
+                        });
+                      }
                     },
-                  ),
-                  onTap: () async {
-                    DateTime? updatedDate = await _selectDateTime(date);
-                    if (updatedDate != null) {
-                      setState(() {
-                        checks[index] = updatedDate;
-                      });
-                    }
-                  },
-                );
-              },
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                DateTime? pickedDate = await _selectDateTime();
-                if (pickedDate != null) {
-                  setState(() {
-                    checks.add(pickedDate);
-                  });
-                }
-              },
-              child: Text(AppLocalizations.of(context)!.add),
-            ),
-          ],
-        ),
+                  );
+                },
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  DateTime? pickedDate = await _selectDateTime();
+                  if (pickedDate != null) {
+                    setState(() {
+                      checks.add(pickedDate);
+                    });
+                  }
+                },
+                child: Text(AppLocalizations.of(context)!.add),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 20),
 
@@ -344,63 +353,62 @@ class _AddCamionState extends State<AddCamion> {
 
           // Status Dropdown
           buildDropdownField(
-            labelText: AppLocalizations.of(context)!.status,
-            items: statusOptions.map((status) {
-              return DropdownMenuItem<String>(
-                value: status,
-                child: Text(status),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                status = value ?? '';
-              });
-            },
-            value: status.isNotEmpty ? status : null
-          ),
+              labelText: AppLocalizations.of(context)!.status,
+              items: statusOptions.map((status) {
+                return DropdownMenuItem<String>(
+                  value: status,
+                  child: Text(status),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  status = value ?? '';
+                });
+              },
+              value: status.isNotEmpty ? status : null),
 
           const SizedBox(height: 20),
 
           // Company Dropdown
           _isLoadingCompanies
-            ? const CircularProgressIndicator()
-            : _companyNamesMap == null || _companyNamesMap!.isEmpty
-            ? Text(AppLocalizations.of(context)!.userDataNotFound)
-            : buildDropdownField(
-                labelText: AppLocalizations.of(context)!.company,
-                items: _companyNamesMap!.entries.map((entry) {
-                  return DropdownMenuItem<String>(
-                    value: entry.key,
-                    child: Text(entry.value),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    company = value ?? '';
-                  });
-                },
-                value: company.isNotEmpty ? company : null
-              ),
+              ? const CircularProgressIndicator()
+              : _companyNamesMap == null || _companyNamesMap!.isEmpty
+                  ? Text(AppLocalizations.of(context)!.userDataNotFound)
+                  : buildDropdownField(
+                      labelText: AppLocalizations.of(context)!.company,
+                      items: _companyNamesMap!.entries.map((entry) {
+                        return DropdownMenuItem<String>(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          company = value ?? '';
+                        });
+                      },
+                      value: company.isNotEmpty ? company : null),
 
           const SizedBox(height: 50),
           ElevatedButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                try{
-                  DateTime dateCreation = widget.camion?.createdAt ?? DateTime.now();
+                try {
+                  DateTime dateCreation =
+                      widget.camion?.createdAt ?? DateTime.now();
 
-                          Camion newCamion = Camion(
-                            name: _nameController.text,
-                            camionType: camionType,
-                            responsible: _responsibleController.text,
-                            checks: checks,
-                            lastIntervention: _lastInterventionController.text,
-                            status: status,
-                            location: location,
-                            company: company,
-                            createdAt: dateCreation,
-                            updatedAt: DateTime.now(),
-                          );
+                  Camion newCamion = Camion(
+                    name: _nameController.text,
+                    camionType: camionType,
+                    responsible: _responsibleController.text,
+                    checks: checks,
+                    lastIntervention: _lastInterventionController.text,
+                    status: status,
+                    location: location,
+                    company: company,
+                    createdAt: dateCreation,
+                    updatedAt: DateTime.now(),
+                  );
 
                   if (widget.camion == null) {
                     insertCamion(db, newCamion, "");
@@ -410,11 +418,12 @@ class _AddCamionState extends State<AddCamion> {
                   if (widget.onCamionAdded != null) {
                     widget.onCamionAdded!();
                   }
-                }
-                catch(e){
+                } catch (e) {
                   print("Error: $e");
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
+                    SnackBar(
+                        content: Text(
+                            AppLocalizations.of(context)!.errorSavingData)),
                   );
                 }
               }

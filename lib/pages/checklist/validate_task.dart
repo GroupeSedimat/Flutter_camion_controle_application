@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/models/checklist/task.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_application_1/services/database_local/database_helper.da
 import 'package:flutter_application_1/services/pick_image_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ValidateTask extends StatefulWidget {

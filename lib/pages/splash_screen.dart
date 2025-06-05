@@ -1,50 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
+import 'package:flutter_application_1/pages/user/login_page.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/locale_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  bool firebaseInitialized = false;
-  bool firebaseError = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    try {
-      await _initializeFirebase();
-    } catch (e) {
-      print("Error during app initialization: $e");
-    }
-  }
-
-  Future<void> _initializeFirebase() async {
-    try {
-      await Firebase.initializeApp();
-      setState(() {
-        firebaseInitialized = true;
-      });
-      print("Firebase initialized successfully.");
-    } catch (e) {
-      setState(() {
-        firebaseError = true;
-      });
-      print("Error initializing Firebase: $e");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,28 +89,21 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              if (firebaseError)
-                Text(
-                  'Error initializing Firebase',
-                  style: TextStyle(color: Colors.red),
-                )
-              else if (!firebaseInitialized)
-                CircularProgressIndicator()
-              else
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Get.put(AuthController());
-                    // Get.to(() => LoginPage());
-                  },
-                  icon: Icon(Icons.login),
-                  label: Text(AppLocalizations.of(context)!.logIn),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                    textStyle: TextStyle(fontSize: 18),
-                  ),
-                )
+              ElevatedButton.icon(
+                onPressed: () {
+                  Get.put(AuthController());
+
+                  Get.to(() => LoginPage());
+                },
+                icon: Icon(Icons.login),
+                label: Text(AppLocalizations.of(context)!.logIn),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+              )
             ],
           ),
         ),

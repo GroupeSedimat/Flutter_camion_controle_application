@@ -1,11 +1,11 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/services/database_local/companies_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -17,7 +17,6 @@ class InscriptionPage extends StatefulWidget {
 }
 
 class _InscriptionPageState extends State<InscriptionPage> {
-
   late Database db;
   Map<String, String> _companyListNames = HashMap();
 
@@ -46,7 +45,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
     confirmPasswordController = TextEditingController();
   }
 
-
   Future<void> _loadDataFromDatabase() async {
     await _initDatabase();
     await _syncData();
@@ -60,12 +58,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
   Future<void> _loadCompanies() async {
     try {
       Map<String, String>? companyNames = await getAllCompaniesNames(db, "");
-      if(companyNames != null){
+      if (companyNames != null) {
         setState(() {
           _companyListNames = companyNames;
         });
       }
-
     } catch (e) {
       print("Error loading Companies Names: $e");
     }
@@ -76,14 +73,15 @@ class _InscriptionPageState extends State<InscriptionPage> {
       final syncService = Provider.of<SyncService>(context, listen: false);
       print("💽 Synchronizing Companies...");
       String timeSync = DateTime.now().toIso8601String();
-      await syncService.syncFromFirebase("companies", userId: "123456789", timeSync);
+      await syncService.syncFromFirebase(
+          "companies", userId: "123456789", timeSync);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
     }
   }
 
-  @override  
+  @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
@@ -100,11 +98,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
     double h = MediaQuery.of(context).size.height;
 
     List<DropdownMenuItem<String>> companyItems = _companyListNames.entries
-      .map((entry) => DropdownMenuItem(
-        value: entry.key,
-        child: Text(entry.value),
-      )
-    ).toList();
+        .map((entry) => DropdownMenuItem(
+              value: entry.key,
+              child: Text(entry.value),
+            ))
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -141,7 +139,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   child: Container(
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withOpacity(0.8), 
+                      color: Theme.of(context).primaryColor.withOpacity(0.8),
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
@@ -151,7 +149,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
                         ),
                       ],
                     ),
-                    child: Icon(Icons.arrow_back, color: Colors.white, size: 25),
+                    child:
+                        Icon(Icons.arrow_back, color: Colors.white, size: 25),
                   ),
                 ),
               ),
@@ -190,17 +189,27 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildTextField(AppLocalizations.of(context)!.eMailEnter, Icons.email, emailController),
+                    buildTextField(AppLocalizations.of(context)!.eMailEnter,
+                        Icons.email, emailController),
                     const SizedBox(height: 20),
-                    buildTextField(AppLocalizations.of(context)!.userName, Icons.person, usernameController),
+                    buildTextField(AppLocalizations.of(context)!.userName,
+                        Icons.person, usernameController),
                     const SizedBox(height: 20),
-                    buildTextField(AppLocalizations.of(context)!.userFirstName, Icons.person, firstnameController),
+                    buildTextField(AppLocalizations.of(context)!.userFirstName,
+                        Icons.person, firstnameController),
                     const SizedBox(height: 20),
-                    buildTextField(AppLocalizations.of(context)!.userLastName, Icons.person, nameController),
+                    buildTextField(AppLocalizations.of(context)!.userLastName,
+                        Icons.person, nameController),
                     const SizedBox(height: 20),
-                    buildPasswordTextField(AppLocalizations.of(context)!.passEnter, passwordController, obscurePassword),
+                    buildPasswordTextField(
+                        AppLocalizations.of(context)!.passEnter,
+                        passwordController,
+                        obscurePassword),
                     const SizedBox(height: 20),
-                    buildPasswordTextField(AppLocalizations.of(context)!.passRepeat, confirmPasswordController, obscureConfirmPassword),
+                    buildPasswordTextField(
+                        AppLocalizations.of(context)!.passRepeat,
+                        confirmPasswordController,
+                        obscureConfirmPassword),
                     const SizedBox(height: 20),
                     DropdownButtonFormField<String>(
                       value: selectedCompany,
@@ -208,15 +217,19 @@ class _InscriptionPageState extends State<InscriptionPage> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
-                          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                          borderSide:
+                              const BorderSide(color: Colors.white, width: 1.0),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
-                          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+                          borderSide:
+                              const BorderSide(color: Colors.white, width: 1.0),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                              width: 2.0),
                         ),
                         filled: true,
                         fillColor: Colors.white,
@@ -236,19 +249,23 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 onTap: () {
                   if (selectedCompany == null) {
                     setState(() {
-                      errorMessage = AppLocalizations.of(context)!.companySelect;
+                      errorMessage =
+                          AppLocalizations.of(context)!.companySelect;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(AppLocalizations.of(context)!.companySelect),
+                          content:
+                              Text(AppLocalizations.of(context)!.companySelect),
                           backgroundColor: Colors.red,
                         ),
                       );
                     });
                   } else {
-                    if (isUsernameAlreadyTaken(usernameController.text.trim())) {
+                    if (isUsernameAlreadyTaken(
+                        usernameController.text.trim())) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(AppLocalizations.of(context)!.usernameTaken),
+                          content:
+                              Text(AppLocalizations.of(context)!.usernameTaken),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -311,10 +328,11 @@ class _InscriptionPageState extends State<InscriptionPage> {
   bool isUsernameAlreadyTaken(String username) {
     // Cette fonction doit vérifier dans la base de données si le nom d'utilisateur est déjà pris
     // Retourne `true` si le nom est pris, sinon `false`
-    return false;  // Remplacer par la vraie logique
+    return false; // Remplacer par la vraie logique
   }
 
-  Widget buildTextField(String hintText, IconData icon, TextEditingController controller) {
+  Widget buildTextField(
+      String hintText, IconData icon, TextEditingController controller) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -337,7 +355,8 @@ class _InscriptionPageState extends State<InscriptionPage> {
           hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
+            borderSide:
+                BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
@@ -353,56 +372,60 @@ class _InscriptionPageState extends State<InscriptionPage> {
     );
   }
 
- Widget buildPasswordTextField(String hintText, TextEditingController controller, bool obscureText) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(30),
-      boxShadow: [
-        BoxShadow(
-          blurRadius: 10,
-          spreadRadius: 7,
-          offset: const Offset(1, 1),
-          color: Colors.grey.withOpacity(0.3),
-        ),
-      ],
-    ),
-    child: TextField(
-      controller: controller,
-      obscureText: obscureText,  // Utilisation correcte du booléen obscureText
-      style: const TextStyle(color: Colors.black),
-      decoration: InputDecoration(
-        hintText: hintText,
-        prefixIcon: Icon(Icons.lock, color: Theme.of(context).primaryColor),
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscureText ? Icons.visibility_off : Icons.visibility,
-            color: Theme.of(context).primaryColor,
+  Widget buildPasswordTextField(
+      String hintText, TextEditingController controller, bool obscureText) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 10,
+            spreadRadius: 7,
+            offset: const Offset(1, 1),
+            color: Colors.grey.withOpacity(0.3),
           ),
-          onPressed: () {
-            setState(() {
-              if (hintText == AppLocalizations.of(context)!.passEnter) {
-                obscurePassword = !obscurePassword;  // Basculer la visibilité du mot de passe principal
-              } else {
-                obscureConfirmPassword = !obscureConfirmPassword;  // Basculer la visibilité du mot de passe de confirmation
-              }
-            });
-          },
-        ),
-        hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText, // Utilisation correcte du booléen obscureText
+        style: const TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+          hintText: hintText,
+          prefixIcon: Icon(Icons.lock, color: Theme.of(context).primaryColor),
+          suffixIcon: IconButton(
+            icon: Icon(
+              obscureText ? Icons.visibility_off : Icons.visibility,
+              color: Theme.of(context).primaryColor,
+            ),
+            onPressed: () {
+              setState(() {
+                if (hintText == AppLocalizations.of(context)!.passEnter) {
+                  obscurePassword =
+                      !obscurePassword; // Basculer la visibilité du mot de passe principal
+                } else {
+                  obscureConfirmPassword =
+                      !obscureConfirmPassword; // Basculer la visibilité du mot de passe de confirmation
+                }
+              });
+            },
+          ),
+          hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide:
+                BorderSide(color: Theme.of(context).primaryColor, width: 1.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/services/database_local/check_list/list_of_lists_table.dart';
 import 'package:flutter_application_1/services/database_local/database_helper.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -11,12 +11,7 @@ class AddListForm extends StatefulWidget {
   final String? listItemID;
   final VoidCallback? onListAdded;
 
-  AddListForm({
-    super.key,
-    this.listItem,
-    this.listItemID,
-    this.onListAdded
-  });
+  AddListForm({super.key, this.listItem, this.listItemID, this.onListAdded});
 
   @override
   _AddListFormState createState() => _AddListFormState();
@@ -46,7 +41,7 @@ class _AddListFormState extends State<AddListForm> {
     await _initDatabase();
     if (widget.listItem != null) {
       _populateFieldsWithListData();
-    }else{
+    } else {
       _setFirstFreeListNr();
     }
     if (mounted) {
@@ -95,8 +90,7 @@ class _AddListFormState extends State<AddListForm> {
       appBar: AppBar(
         title: Text(widget.listItem != null
             ? AppLocalizations.of(context)!.edit
-            : AppLocalizations.of(context)!.add
-        ),
+            : AppLocalizations.of(context)!.add),
       ),
       body: Form(
         key: _formKey,
@@ -110,8 +104,7 @@ class _AddListFormState extends State<AddListForm> {
                   fontSize: 30,
                   color: Colors.green,
                   letterSpacing: 4,
-                  fontWeight: FontWeight.bold
-              ),
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Text(
@@ -154,7 +147,8 @@ class _AddListFormState extends State<AddListForm> {
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   try {
-                    DateTime dateCreation = widget.listItem?.createdAt ?? DateTime.now();
+                    DateTime dateCreation =
+                        widget.listItem?.createdAt ?? DateTime.now();
                     ListOfLists newBlueprint = ListOfLists(
                       listNr: _listNr!,
                       listName: _listNameController.text,
@@ -176,7 +170,9 @@ class _AddListFormState extends State<AddListForm> {
                   } catch (e) {
                     print("Error: $e");
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.errorSavingData)),
+                      SnackBar(
+                          content: Text(
+                              AppLocalizations.of(context)!.errorSavingData)),
                     );
                   }
                 }

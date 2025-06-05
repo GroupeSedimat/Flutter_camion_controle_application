@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_application_1/pages/pdf/pdf_show_template.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/pdf/database_pdf_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -23,7 +23,6 @@ class PDFShowList extends StatefulWidget {
 }
 
 class _PDFShowListState extends State<PDFShowList> {
-
   late Database db;
   late MyUser _user;
   late String _userId;
@@ -45,13 +44,14 @@ class _PDFShowListState extends State<PDFShowList> {
     await _initServices();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -78,7 +78,7 @@ class _PDFShowListState extends State<PDFShowList> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -109,7 +109,8 @@ class _PDFShowListState extends State<PDFShowList> {
       print("💽 Synchronizing users...");
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      await syncService.fullSyncTable("companies",
+          user: _user, userId: _userId);
       print("💽 Synchronizing PDFs...");
       await syncService.fullSyncTable("pdf", user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
@@ -120,14 +121,14 @@ class _PDFShowListState extends State<PDFShowList> {
   }
 
   Future<void> _loadDataFromDatabase() async {
-    if (networkService.isOnline){
+    if (networkService.isOnline) {
       await _loadPdfs();
     }
   }
 
   Future<void> _loadPdfs() async {
     DatabasePDFService databasePDFService = DatabasePDFService();
-    pdfList =  await databasePDFService.getUserListOfPDF(_user.company, _userId);
+    pdfList = await databasePDFService.getUserListOfPDF(_user.company, _userId);
   }
 
   @override
@@ -150,7 +151,7 @@ class _PDFShowListState extends State<PDFShowList> {
       );
     }
 
-    if (!networkService.isOnline){
+    if (!networkService.isOnline) {
       return BasePage(
         title: AppLocalizations.of(context)!.pdfListAdmin,
         body: Text(
@@ -167,17 +168,16 @@ class _PDFShowListState extends State<PDFShowList> {
   }
 
   Widget body(BuildContext context) {
-    if(pdfList == null){
+    if (pdfList == null) {
       return Text(AppLocalizations.of(context)!.dataNoData);
     }
-    Map<String,String> sortedPdf = HashMap();
-    sortedPdf = Map.fromEntries(pdfList!.entries.toList()..sort(
-            (e1, e2) => (e2.value).compareTo(e1.value))
-    );
+    Map<String, String> sortedPdf = HashMap();
+    sortedPdf = Map.fromEntries(pdfList!.entries.toList()
+      ..sort((e1, e2) => (e2.value).compareTo(e1.value)));
     return ListView.builder(
       itemCount: sortedPdf.length,
       padding: const EdgeInsets.all(16.0),
-      itemBuilder: (BuildContext context, int index){
+      itemBuilder: (BuildContext context, int index) {
         final entry = sortedPdf.entries.toList()[index];
         final fileName = entry.key;
         final url = entry.value;

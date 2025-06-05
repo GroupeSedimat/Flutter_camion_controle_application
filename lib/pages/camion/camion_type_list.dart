@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -16,7 +17,7 @@ import 'package:flutter_application_1/services/database_local/sync_service.dart'
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -51,13 +52,14 @@ class _CamionTypeListState extends State<CamionTypeList> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -84,7 +86,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -118,23 +120,25 @@ class _CamionTypeListState extends State<CamionTypeList> {
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
       await getAllCamions(db, _user.role).then((camionsMap) {
-        if(camionsMap != null){
-          for(var camion in camionsMap.entries){
-            if(!camionsTypeIdList.contains(camion.value.camionType)){
+        if (camionsMap != null) {
+          for (var camion in camionsMap.entries) {
+            if (!camionsTypeIdList.contains(camion.value.camionType)) {
               camionsTypeIdList.add(camion.value.camionType);
             }
           }
         }
       });
       print("💽 Synchronizing CamionTypess...");
-      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      await syncService.fullSyncTable("camionTypes",
+          user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
-      if(camionTypesMap != null){
-        for(var camionType in camionTypesMap.entries){
-          if(camionType.value.lol != null){
-            for(var list in camionType.value.lol!){
-              if(!camionListOfListId.contains(list)){
+      Map<String, CamionType>? camionTypesMap =
+          await getAllCamionTypes(db, _user.role);
+      if (camionTypesMap != null) {
+        for (var camionType in camionTypesMap.entries) {
+          if (camionType.value.lol != null) {
+            for (var list in camionType.value.lol!) {
+              if (!camionListOfListId.contains(list)) {
                 camionListOfListId.add(list);
               }
             }
@@ -142,11 +146,14 @@ class _CamionTypeListState extends State<CamionTypeList> {
         }
       }
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      await syncService.fullSyncTable("companies",
+          user: _user, userId: _userId);
       print("💽 Synchronizing Equipments...");
-      await syncService.fullSyncTable("equipments", user: _user, userId: _userId);
+      await syncService.fullSyncTable("equipments",
+          user: _user, userId: _userId);
       print("💽 Synchronizing LOL...");
-      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
+      await syncService.fullSyncTable("listOfLists",
+          user: _user, userId: _userId, dataPlus: camionListOfListId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -160,19 +167,21 @@ class _CamionTypeListState extends State<CamionTypeList> {
   }
 
   Future<void> _loadEquipmentLists() async {
-    Map<String, String>? equipmentLists = await getAllEquipmentsNames(db, _user.role);
-    if(equipmentLists != null){
+    Map<String, String>? equipmentLists =
+        await getAllEquipmentsNames(db, _user.role);
+    if (equipmentLists != null) {
       _equipmentLists = equipmentLists;
-    }else {
+    } else {
       _equipmentLists = {};
     }
   }
 
   Future<void> _loadCamionTypesList() async {
-    Map<String, CamionType>? camionTypesList = await getAllCamionTypes(db, _user.role);
-    if(camionTypesList != null){
+    Map<String, CamionType>? camionTypesList =
+        await getAllCamionTypes(db, _user.role);
+    if (camionTypesList != null) {
       _camionTypesList = camionTypesList;
-    }else {
+    } else {
       _camionTypesList = {};
     }
   }
@@ -180,9 +189,9 @@ class _CamionTypeListState extends State<CamionTypeList> {
   Future<void> _loadAvailableLolMaps() async {
     Map<String, ListOfLists>? listOfLists = await getAllLists(db, _user.role);
     var temp = listOfLists?.map((key, list) => MapEntry(key, list.listName));
-    if(temp != null){
+    if (temp != null) {
       _availableLolMap = temp;
-    }else {
+    } else {
       _availableLolMap = {};
     }
   }
@@ -228,15 +237,14 @@ class _CamionTypeListState extends State<CamionTypeList> {
               color: Colors.white,
             ),
           ),
-        )
-    );
+        ));
   }
 
   Future<Map<String, CamionType>> getCamionTypesData(MyUser user) async {
     Map<String, CamionType>? list = await getAllCamionTypes(db, _user.role);
-    if(list != null){
+    if (list != null) {
       return list;
-    }else{
+    } else {
       return {};
     }
   }
@@ -271,7 +279,8 @@ class _CamionTypeListState extends State<CamionTypeList> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const EquipmentList()),
+                  MaterialPageRoute(
+                      builder: (context) => const EquipmentList()),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -283,158 +292,183 @@ class _CamionTypeListState extends State<CamionTypeList> {
         ),
         Expanded(
           child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
-          itemCount: _camionTypesList.length,
-          itemBuilder: (_, index) {
-            Widget leading = Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              padding: EdgeInsets.all(8.0),
-              child: Icon(Icons.fire_truck, color: Colors.black, size: 50),
-            );
-
-      CamionType camionType = _camionTypesList.values.elementAt(index);
-      String isDeleted = "";
-      if(camionType.deletedAt != null){
-        isDeleted = " (deleted)";
-      }
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-        child: Material(
-          elevation: 4.0,
-          borderRadius: BorderRadius.circular(12.0),
-          child: ExpansionTile(
-            leading: leading,
-            title: Text(
-              "${camionType.name}$isDeleted",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            trailing: PopupMenuButton(
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  showCamionTypeModal(
-                    camionType: camionType,
-                    camionTypeID: _camionTypesList.keys.elementAt(index),
-                  );
-                } else if (value == 'delete') {
-                  _showDeleteConfirmation(_camionTypesList.keys.elementAt(index));
-                } else if (value == 'restore') {
-                  await restoreCamionType(db, _camionTypesList.keys.elementAt(index));
-                  if (networkService.isOnline) {
-                    await _syncCamionsType();
-                  }
-                  await _loadDataFromDatabase();
-                  setState(() {});
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, color: Colors.blueAccent),
-                            SizedBox(width: 8),
-                            Text(AppLocalizations.of(context)!.edit),
-                          ],
-                        ),
-                ),
-                if (_user.role == "superadmin")
-                  camionType.deletedAt == null
-                      ? PopupMenuItem(
-                    value: 'delete',
-                    child: Text(AppLocalizations.of(context)!.delete),
-                  )
-                      : PopupMenuItem(
-                    value: 'restore',
-                    child: Text(AppLocalizations.of(context)!.restore),
-                  ),
-              ],
-            ),
-            children: [
-              Wrap(
-                spacing: 16.0,
-                runSpacing: 16.0,
-                children: [
-                  // Affichage de "lol"
-                  if (camionType.lol != null)
-                    Container(
-                      width: 150,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("List of lists:", style: textStyleBold()),
-                          ...camionType.lol!.map((item) => Container(
-                                margin: EdgeInsets.only(top: 8.0),
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 12.0),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor.withOpacity(0.4),
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(_availableLolMap[item] ?? "Unknown list!", style: textStyle()),
-                              ))
-                              .toList(),
-                        ],
-                      ),
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 50),
+            itemCount: _camionTypesList.length,
+            itemBuilder: (_, index) {
+              Widget leading = Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
                     ),
-
-                  // Affichage de "equipment"
-                  if (camionType.equipment != null)
-                    Container(
-                      width: 150,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Equipment:", style: textStyleBold()),
-                          ...camionType.equipment!.map((item) => Container(
-                                margin: EdgeInsets.only(top: 8.0),
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 12.0),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor.withOpacity(0.4),
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(_equipmentLists[item] ?? "Unknown equipment!", style: textStyle()),
-                              ))
-                              .toList(),
-                              ],
-                            ),
-                          ),
-                      ],
-                    )
                   ],
                 ),
-        ),
+                padding: EdgeInsets.all(8.0),
+                child: Icon(Icons.fire_truck, color: Colors.black, size: 50),
+              );
+
+              CamionType camionType = _camionTypesList.values.elementAt(index);
+              String isDeleted = "";
+              if (camionType.deletedAt != null) {
+                isDeleted = " (deleted)";
+              }
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                child: Material(
+                  elevation: 4.0,
+                  borderRadius: BorderRadius.circular(12.0),
+                  child: ExpansionTile(
+                    leading: leading,
+                    title: Text(
+                      "${camionType.name}$isDeleted",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    trailing: PopupMenuButton(
+                      onSelected: (value) async {
+                        if (value == 'edit') {
+                          showCamionTypeModal(
+                            camionType: camionType,
+                            camionTypeID:
+                                _camionTypesList.keys.elementAt(index),
+                          );
+                        } else if (value == 'delete') {
+                          _showDeleteConfirmation(
+                              _camionTypesList.keys.elementAt(index));
+                        } else if (value == 'restore') {
+                          await restoreCamionType(
+                              db, _camionTypesList.keys.elementAt(index));
+                          if (networkService.isOnline) {
+                            await _syncCamionsType();
+                          }
+                          await _loadDataFromDatabase();
+                          setState(() {});
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, color: Colors.blueAccent),
+                              SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.edit),
+                            ],
+                          ),
+                        ),
+                        if (_user.role == "superadmin")
+                          camionType.deletedAt == null
+                              ? PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text(
+                                      AppLocalizations.of(context)!.delete),
+                                )
+                              : PopupMenuItem(
+                                  value: 'restore',
+                                  child: Text(
+                                      AppLocalizations.of(context)!.restore),
+                                ),
+                      ],
+                    ),
+                    children: [
+                      Wrap(
+                        spacing: 16.0,
+                        runSpacing: 16.0,
+                        children: [
+                          // Affichage de "lol"
+                          if (camionType.lol != null)
+                            Container(
+                              width: 150,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("List of lists:",
+                                      style: textStyleBold()),
+                                  ...camionType.lol!
+                                      .map((item) => Container(
+                                            margin: EdgeInsets.only(top: 8.0),
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                                horizontal: 12.0),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .primaryColor
+                                                  .withOpacity(0.4),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
+                                                  spreadRadius: 2,
+                                                  blurRadius: 5,
+                                                  offset: Offset(0, 3),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Text(
+                                                _availableLolMap[item] ??
+                                                    "Unknown list!",
+                                                style: textStyle()),
+                                          ))
+                                      .toList(),
+                                ],
+                              ),
+                            ),
+
+                          // Affichage de "equipment"
+                          if (camionType.equipment != null)
+                            Container(
+                              width: 150,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Equipment:", style: textStyleBold()),
+                                  ...camionType.equipment!
+                                      .map((item) => Container(
+                                            margin: EdgeInsets.only(top: 8.0),
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                                horizontal: 12.0),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .primaryColor
+                                                  .withOpacity(0.4),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
+                                                  spreadRadius: 2,
+                                                  blurRadius: 5,
+                                                  offset: Offset(0, 3),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Text(
+                                                _equipmentLists[item] ??
+                                                    "Unknown equipment!",
+                                                style: textStyle()),
+                                          ))
+                                      .toList(),
+                                ],
+                              ),
+                            ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
               );
             },
           ),
@@ -443,20 +477,22 @@ class _CamionTypeListState extends State<CamionTypeList> {
     );
   }
 
-  TextStyle textStyle(){
+  TextStyle textStyle() {
     return TextStyle(fontSize: 20);
   }
-  TextStyle textStyleBold(){
+
+  TextStyle textStyleBold() {
     return TextStyle(fontSize: 25, fontWeight: FontWeight.bold);
   }
 
   String title(MyUser user) {
-    if(user.role == "superadmin"){
+    if (user.role == "superadmin") {
       return AppLocalizations.of(context)!.camionTypesList;
-    }else{
+    } else {
       return AppLocalizations.of(context)!.details;
     }
   }
+
   void showCamionTypeModal({
     CamionType? camionType,
     String? camionTypeID,
@@ -468,8 +504,7 @@ class _CamionTypeListState extends State<CamionTypeList> {
         return Container(
           padding: const EdgeInsets.all(10),
           margin: EdgeInsets.fromLTRB(
-              10, 50, 10, MediaQuery.of(context).viewInsets.bottom
-          ),
+              10, 50, 10, MediaQuery.of(context).viewInsets.bottom),
           child: AddCamionType(
             camionType: camionType,
             camionTypeID: camionTypeID,
@@ -510,7 +545,8 @@ class _CamionTypeListState extends State<CamionTypeList> {
               setState(() {});
               Navigator.pop(context);
             },
-            child: Text(AppLocalizations.of(context)!.yes, style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.yes,
+                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -522,16 +558,17 @@ class _CamionTypeListState extends State<CamionTypeList> {
       final syncService = Provider.of<SyncService>(context, listen: false);
       List<String> camionsTypeIdList = [];
       await getAllCamions(db, _user.role).then((camionsMap) {
-        if(camionsMap != null){
-          for(var camion in camionsMap.entries){
-            if(!camionsTypeIdList.contains(camion.value.camionType)){
+        if (camionsMap != null) {
+          for (var camion in camionsMap.entries) {
+            if (!camionsTypeIdList.contains(camion.value.camionType)) {
               camionsTypeIdList.add(camion.value.camionType);
             }
           }
         }
       });
       print("💽 Synchronizing CamionTypess...");
-      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      await syncService.fullSyncTable("camionTypes",
+          user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");

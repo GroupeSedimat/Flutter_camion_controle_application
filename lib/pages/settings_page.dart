@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/user/edit_profile_page.dart';
 import 'package:flutter_application_1/pages/user/reset_password_page.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_application_1/services/app_colors.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme_provider.dart';
 import '../../locale_provider.dart';
 

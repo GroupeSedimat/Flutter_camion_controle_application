@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_application_1/pages/pdf/pdf_download.dart';
-import 'package:open_document/open_document.dart';
+import 'package:open_filex/open_filex.dart';
+
 import 'package:path_provider/path_provider.dart';
 
 class PDFOpen {
@@ -18,7 +19,7 @@ class PDFOpen {
     PdfDownload pdfDownload = PdfDownload(name: "temp", url: url);
     await pdfDownload.downloadFile();
 
-    // Open PDF in temporary directory
-    await OpenDocument.openDocument(filePath: filePath);
+    // Open PDF in temporary directory }
+    await OpenFilex.open(filePath);
   }
 }

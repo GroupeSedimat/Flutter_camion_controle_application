@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/admin/UserApprovalPage.dart';
 import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
@@ -13,7 +13,6 @@ import 'package:flutter_application_1/services/database_local/database_helper.da
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -50,13 +49,14 @@ class _UserManagementPageState extends State<UserManagementPage> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -83,7 +83,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -114,7 +114,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
       print("💽 Synchronizing Users...");
       await syncService.fullSyncTable("users", user: _user, userId: _userId);
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      await syncService.fullSyncTable("companies",
+          user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -128,9 +129,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
   }
 
   Future<void> _loadCompanyList() async {
-    Map<String, String>? companyList = await getAllCompaniesNames(db, _user.role);
+    Map<String, String>? companyList =
+        await getAllCompaniesNames(db, _user.role);
     print("company list $companyList");
-    if(companyList != null){
+    if (companyList != null) {
       _companyNames = companyList;
     }
   }
@@ -138,8 +140,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
   Future<void> _loadUsersList() async {
     Map<String, MyUser>? usersMap = await getAllUsers(db, _user.role);
     print("Users map $usersMap");
-    if(usersMap != null){
-    List<MyUser>? usersList = usersMap.values.toList();
+    if (usersMap != null) {
+      List<MyUser>? usersList = usersMap.values.toList();
       _allUsersMap = usersMap;
       _allUsers = usersList;
     }
@@ -203,10 +205,11 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     ),
                   ),
                   children: companyUsers.map((user) {
-                    MapEntry<String, MyUser> userEntry = _allUsersMap.entries.firstWhere(
+                    MapEntry<String, MyUser> userEntry = _allUsersMap.entries
+                        .firstWhere(
                             (element) => _allUsersMap[element.key] == user);
                     String isDeleted = "";
-                    if(user.deletedAt != null){
+                    if (user.deletedAt != null) {
                       isDeleted = " (deleted)";
                     }
                     return Card(
@@ -236,10 +239,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
                           onSelected: (String value) {
                             switch (value) {
                               case 'view':
-                                Get.to(() => UserDetailsPage(userToShow: userEntry));
+                                Get.to(() =>
+                                    UserDetailsPage(userToShow: userEntry));
                                 break;
                               case 'edit':
-                                Get.to(() => UserEditPage(userId: userEntry.key));
+                                Get.to(
+                                    () => UserEditPage(userId: userEntry.key));
                                 break;
                               case 'reset_password':
                                 _resetPassword(user.email);
@@ -258,7 +263,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
                                 value: 'view',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.visibility, color: Colors.blueAccent),
+                                    Icon(Icons.visibility,
+                                        color: Colors.blueAccent),
                                     SizedBox(width: 8),
                                     Text(AppLocalizations.of(context)!.details),
                                   ],
@@ -280,31 +286,35 @@ class _UserManagementPageState extends State<UserManagementPage> {
                                   children: [
                                     Icon(Icons.lock, color: Colors.purple),
                                     SizedBox(width: 8),
-                                    Text(AppLocalizations.of(context)!.passReset),
+                                    Text(AppLocalizations.of(context)!
+                                        .passReset),
                                   ],
                                 ),
                               ),
                               user.deletedAt == null
                                   ? PopupMenuItem(
-                                value: 'delete',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.delete, color: Colors.red),
-                                    SizedBox(width: 8),
-                                    Text(AppLocalizations.of(context)!.delete),
-                                  ],
-                                ),
-                              )
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.delete, color: Colors.red),
+                                          SizedBox(width: 8),
+                                          Text(AppLocalizations.of(context)!
+                                              .delete),
+                                        ],
+                                      ),
+                                    )
                                   : PopupMenuItem(
-                                value: 'restore',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.restore, color: Colors.orange),
-                                    SizedBox(width: 8),
-                                    Text(AppLocalizations.of(context)!.restore),
-                                  ],
-                                ),
-                              ),
+                                      value: 'restore',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.restore,
+                                              color: Colors.orange),
+                                          SizedBox(width: 8),
+                                          Text(AppLocalizations.of(context)!
+                                              .restore),
+                                        ],
+                                      ),
+                                    ),
                             ];
                           },
                         ),
@@ -387,7 +397,6 @@ class _UserManagementPageState extends State<UserManagementPage> {
     setState(() {});
   }
 
-
   void _deleteUserConfirmed(String username) async {
     try {
       var userDoc = await FirebaseFirestore.instance
@@ -396,7 +405,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
           .get();
 
       if (userDoc.docs.isNotEmpty) {
-        await FirebaseFirestore.instance.collection('users').doc(userDoc.docs[0].id).delete();
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userDoc.docs[0].id)
+            .delete();
         Get.snackbar(
           "User deleted",
           "User has been deleted successfully.",

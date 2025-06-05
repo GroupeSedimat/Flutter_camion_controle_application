@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserApprovalPage extends StatelessWidget {
   @override
@@ -12,7 +12,10 @@ class UserApprovalPage extends StatelessWidget {
     return BasePage(
       title: AppLocalizations.of(context)!.userApprove,
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').where('isApproved', isEqualTo: false).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .where('isApproved', isEqualTo: false)
+            .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -43,7 +46,7 @@ class UserApprovalPage extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.close),
                       onPressed: () {
-                         _showDisapproveDialog(context, user);
+                        _showDisapproveDialog(context, user);
                       },
                     ),
                   ],
@@ -82,6 +85,7 @@ class UserApprovalPage extends StatelessWidget {
       },
     );
   }
+
   void _showDisapproveDialog(BuildContext context, MyUser user) {
     showDialog(
       context: context,

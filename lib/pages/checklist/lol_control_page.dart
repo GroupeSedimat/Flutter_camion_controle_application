@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/checklist/list_of_lists.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -13,7 +14,6 @@ import 'package:flutter_application_1/services/database_local/database_helper.da
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -25,7 +25,6 @@ class ListOfListsControlPage extends StatefulWidget {
 }
 
 class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
-
   late Database db;
   late MyUser _user;
   late String _userId;
@@ -47,13 +46,14 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -80,7 +80,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -114,23 +114,25 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       List<String> camionsTypeIdList = [];
       await getAllCamions(db, _user.role).then((camionsMap) {
-        if(camionsMap != null){
-          for(var camion in camionsMap.entries){
-            if(!camionsTypeIdList.contains(camion.value.camionType)){
+        if (camionsMap != null) {
+          for (var camion in camionsMap.entries) {
+            if (!camionsTypeIdList.contains(camion.value.camionType)) {
               camionsTypeIdList.add(camion.value.camionType);
             }
           }
         }
       });
       print("💽 Synchronizing CamionTypess...");
-      await syncService.fullSyncTable("camionTypes",  user: _user, userId: _userId, dataPlus: camionsTypeIdList);
+      await syncService.fullSyncTable("camionTypes",
+          user: _user, userId: _userId, dataPlus: camionsTypeIdList);
       List<String> camionListOfListId = [];
-      Map<String, CamionType>? camionTypesMap = await getAllCamionTypes(db, _user.role);
-      if(camionTypesMap != null){
-        for(var camionType in camionTypesMap.entries){
-          if(camionType.value.lol != null){
-            for(var list in camionType.value.lol!){
-              if(!camionListOfListId.contains(list)){
+      Map<String, CamionType>? camionTypesMap =
+          await getAllCamionTypes(db, _user.role);
+      if (camionTypesMap != null) {
+        for (var camionType in camionTypesMap.entries) {
+          if (camionType.value.lol != null) {
+            for (var list in camionType.value.lol!) {
+              if (!camionListOfListId.contains(list)) {
                 camionListOfListId.add(list);
               }
             }
@@ -138,7 +140,8 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
         }
       }
       print("💽 Synchronizing LOL...");
-      await syncService.fullSyncTable("listOfLists",  user: _user, userId: _userId, dataPlus: camionListOfListId);
+      await syncService.fullSyncTable("listOfLists",
+          user: _user, userId: _userId, dataPlus: camionListOfListId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -152,8 +155,9 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
 
   Future<void> _loadListOfLists() async {
     try {
-      Map<String, ListOfLists>? listOfListsFuture = await getAllLists(db, _user.role);
-      if(listOfListsFuture != null){
+      Map<String, ListOfLists>? listOfListsFuture =
+          await getAllLists(db, _user.role);
+      if (listOfListsFuture != null) {
         _listOfLists = listOfListsFuture;
       }
     } catch (e) {
@@ -164,7 +168,7 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
   Future<void> _loadUsersNames() async {
     try {
       Map<String, String>? usersNames = await getAllUsersNames(db, _user.role);
-      if(usersNames != null){
+      if (usersNames != null) {
         _userMap = usersNames;
       }
     } catch (e) {
@@ -227,126 +231,127 @@ class _ListOfListsControlPageState extends State<ListOfListsControlPage> {
         ListOfLists listItem = _listOfLists[key]!;
         print("List Item 💡💡💡 $listItem");
         String isDeleted;
-        if(listItem.deletedAt != null){
+        if (listItem.deletedAt != null) {
           isDeleted = " (deleted)";
-        }else{
+        } else {
           isDeleted = "";
         }
         return Padding(
-          padding: EdgeInsets.all(8),
-          child: Card(
-            color: Theme.of(context).primaryColor.withOpacity(0.4),
-            child: ExpansionTile(
-              leading:  Icon(Icons.edit, color: Colors.black, size: 50),
-              title: Text(
+            padding: EdgeInsets.all(8),
+            child: Card(
+              color: Theme.of(context).primaryColor.withOpacity(0.4),
+              child: ExpansionTile(
+                leading: Icon(Icons.edit, color: Colors.black, size: 50),
+                title: Text(
                   "${listItem.listNr}. ${listItem.listName}$isDeleted",
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-              ),
-              trailing: PopupMenuButton(
-                onSelected: (value) async {
-                  if (value == 'edit') {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddListForm(
-                          listItem: listItem,
-                          listItemID: key,
-                          onListAdded:  () async {
-                            // on accept, sync and reload data then refresh page
-                            await _syncData();
-                            await _loadDataFromDatabase();
-                            Navigator.pop(context);
-                            setState(() {});
-                          },
-                        ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
-                    );
-                  } else if (value == 'delete') {
-                    bool confirmed = await _showConfirmationDialog(context);
-                    if (confirmed) {
-                      await softDeleteList(db, key);
-                      // on delete sync and reload data then refresh page
+                ),
+                trailing: PopupMenuButton(
+                  onSelected: (value) async {
+                    if (value == 'edit') {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddListForm(
+                            listItem: listItem,
+                            listItemID: key,
+                            onListAdded: () async {
+                              // on accept, sync and reload data then refresh page
+                              await _syncData();
+                              await _loadDataFromDatabase();
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      );
+                    } else if (value == 'delete') {
+                      bool confirmed = await _showConfirmationDialog(context);
+                      if (confirmed) {
+                        await softDeleteList(db, key);
+                        // on delete sync and reload data then refresh page
+                        if (networkService.isOnline) {
+                          await _syncData();
+                        }
+                        await _loadDataFromDatabase();
+                        setState(() {});
+                      }
+                    } else if (value == 'restore') {
+                      await restoreList(db, key);
                       if (networkService.isOnline) {
                         await _syncData();
                       }
                       await _loadDataFromDatabase();
                       setState(() {});
                     }
-                  }else if (value == 'restore') {
-                    await restoreList(db, key);
-                    if (networkService.isOnline) {
-                      await _syncData();
-                    }
-                    await _loadDataFromDatabase();
-                    setState(() {});
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                   value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, color: Colors.blueAccent),
-                            SizedBox(width: 8),
-                            Text(AppLocalizations.of(context)!.edit),
-                          ],
-                        ),
-                  ),
-                  listItem.deletedAt == null
-                      ? PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.redAccent),
-                            SizedBox(width: 8),
-                            Text(AppLocalizations.of(context)!.delete),
-                          ],
-                        ),
-                      )
-                      : PopupMenuItem(
-                        value: 'restore',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.redAccent),
-                            SizedBox(width: 8),
-                            Text(AppLocalizations.of(context)!.restore),
-                          ],
-                        ),
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, color: Colors.blueAccent),
+                          SizedBox(width: 8),
+                          Text(AppLocalizations.of(context)!.edit),
+                        ],
                       ),
-                ],
+                    ),
+                    listItem.deletedAt == null
+                        ? PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Colors.redAccent),
+                                SizedBox(width: 8),
+                                Text(AppLocalizations.of(context)!.delete),
+                              ],
+                            ),
+                          )
+                        : PopupMenuItem(
+                            value: 'restore',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Colors.redAccent),
+                                SizedBox(width: 8),
+                                Text(AppLocalizations.of(context)!.restore),
+                              ],
+                            ),
+                          ),
+                  ],
+                ),
               ),
-            ),
-          )
-        );
+            ));
       },
     );
   }
+
   Future<bool> _showConfirmationDialog(BuildContext context) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.confirmDelete),
-          content: Text(AppLocalizations.of(context)!.confirmDeleteText),
-          actions: [
-            TextButton(
-              child: Text(AppLocalizations.of(context)!.no),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: Text(AppLocalizations.of(context)!.yes),
-              onPressed: () {
-                setState(() {});
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(AppLocalizations.of(context)!.confirmDelete),
+              content: Text(AppLocalizations.of(context)!.confirmDeleteText),
+              actions: [
+                TextButton(
+                  child: Text(AppLocalizations.of(context)!.no),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: Text(AppLocalizations.of(context)!.yes),
+                  onPressed: () {
+                    setState(() {});
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 }

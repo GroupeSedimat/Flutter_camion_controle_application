@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/pages/admin/UserDetailsPage.dart';
 import 'package:flutter_application_1/pages/admin/UserEditPage.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
@@ -10,19 +11,17 @@ import 'package:flutter_application_1/services/network_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class UserManagementAdmin extends StatefulWidget {
-
 //for company admin
   @override
   State<UserManagementAdmin> createState() => _UserManagementAdminState();
 }
 
 class _UserManagementAdminState extends State<UserManagementAdmin> {
-/// todo make offline
+  /// todo make offline
   late Database db;
   late MyUser _user;
   late String _userId;
@@ -44,13 +43,14 @@ class _UserManagementAdminState extends State<UserManagementAdmin> {
     await _initService();
     if (!networkService.isOnline) {
       print("Offline mode, no user update possible");
-    }else{
+    } else {
       await _loadUserToConnection();
     }
     await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
-    }{
+    }
+    {
       await _syncData();
     }
     await _loadDataFromDatabase();
@@ -77,7 +77,7 @@ class _UserManagementAdminState extends State<UserManagementAdmin> {
 
   Future<void> _loadUserToConnection() async {
     Map<String, MyUser>? users = await getThisUser(db);
-    if(users != null ){
+    if (users != null) {
       return;
     }
     try {
@@ -110,7 +110,8 @@ class _UserManagementAdminState extends State<UserManagementAdmin> {
       print("💽 Synchronizing users Camions...");
       await syncService.fullSyncTable("camions", user: _user, userId: _userId);
       print("💽 Synchronizing Companies...");
-      await syncService.fullSyncTable("companies", user: _user, userId: _userId);
+      await syncService.fullSyncTable("companies",
+          user: _user, userId: _userId);
       print("💽 Synchronization with SQLite completed.");
     } catch (e) {
       print("💽 Error during synchronization with SQLite: $e");
@@ -123,9 +124,9 @@ class _UserManagementAdminState extends State<UserManagementAdmin> {
 
   Future<void> _loadUsersLists() async {
     Map<String, MyUser>? usersList = await getAllUsers(db, _user.role);
-    if(usersList != null){
+    if (usersList != null) {
       _usersList = usersList;
-    }else {
+    } else {
       _usersList = {};
     }
   }
@@ -168,7 +169,8 @@ class _UserManagementAdminState extends State<UserManagementAdmin> {
                 onSelected: (String value) {
                   switch (value) {
                     case 'view':
-                      Get.to(() => UserDetailsPage(userToShow: _usersList.entries.elementAt(index)));
+                      Get.to(() => UserDetailsPage(
+                          userToShow: _usersList.entries.elementAt(index)));
                       break;
                     case 'edit':
                       Get.to(() => UserEditPage(userId: userId));
@@ -207,38 +209,38 @@ class _UserManagementAdminState extends State<UserManagementAdmin> {
                       ),
                     ),
                     if (networkService.isOnline)
-                    PopupMenuItem(
-                      value: 'reset_password',
-                      child: Row(
-                        children: [
-                          Icon(Icons.lock),
-                          SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.passReset),
-                        ],
+                      PopupMenuItem(
+                        value: 'reset_password',
+                        child: Row(
+                          children: [
+                            Icon(Icons.lock),
+                            SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.passReset),
+                          ],
+                        ),
                       ),
-                    ),
-                    if(user.deletedAt == null)
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete),
-                          SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.delete),
-                        ],
+                    if (user.deletedAt == null)
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete),
+                            SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.delete),
+                          ],
+                        ),
                       ),
-                    ),
-                    if(user.deletedAt != null)
-                    PopupMenuItem(
-                      value: 'restore',
-                      child: Row(
-                        children: [
-                          Icon(Icons.restore),
-                          SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.restore),
-                        ],
+                    if (user.deletedAt != null)
+                      PopupMenuItem(
+                        value: 'restore',
+                        child: Row(
+                          children: [
+                            Icon(Icons.restore),
+                            SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.restore),
+                          ],
+                        ),
                       ),
-                    ),
                   ];
                 },
               ),

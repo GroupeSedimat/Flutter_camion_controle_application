@@ -1,32 +1,33 @@
 import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/services/auth_controller.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:get/get.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const String USERS_COLLECTION_REF = "users";
 
-class UserService{
+class UserService {
   final _firestore = FirebaseFirestore.instance;
   late final CollectionReference _userRef;
   final String? userID = AuthController().auth.currentUser?.uid;
 
   UserService() {
-    _userRef = _firestore.collection(USERS_COLLECTION_REF).withConverter<MyUser>(
-      fromFirestore: (snapshots, _) => MyUser.fromJson(
-        snapshots.data()!,
-      ),
-      toFirestore: (myuser, _) => myuser.toJson(),
-    );
+    _userRef =
+        _firestore.collection(USERS_COLLECTION_REF).withConverter<MyUser>(
+              fromFirestore: (snapshots, _) => MyUser.fromJson(
+                snapshots.data()!,
+              ),
+              toFirestore: (myuser, _) => myuser.toJson(),
+            );
   }
 
-  Stream<QuerySnapshot> getUsersData(){
+  Stream<QuerySnapshot> getUsersData() {
     return _userRef.snapshots();
   }
 
-  Future<Map<String,String>> getUsersIdAndName() async {
+  Future<Map<String, String>> getUsersIdAndName() async {
     Map<String, String> users = HashMap();
     try {
       final userSnapshot = await _userRef.get();
@@ -40,7 +41,7 @@ class UserService{
     return users;
   }
 
-  Future<Map<String,MyUser>> getAllUsersData() async {
+  Future<Map<String, MyUser>> getAllUsersData() async {
     Map<String, MyUser> users = HashMap();
     try {
       final userSnapshot = await _userRef.get();
@@ -54,7 +55,8 @@ class UserService{
     return users;
   }
 
-  Future<Map<String,MyUser>> getAllUsersDataSinceLastSync(String lastSync) async {
+  Future<Map<String, MyUser>> getAllUsersDataSinceLastSync(
+      String lastSync) async {
     Map<String, MyUser> users = HashMap();
     Query query = _userRef;
     query = query.where('updatedAt', isGreaterThan: lastSync);
@@ -70,7 +72,8 @@ class UserService{
     return users;
   }
 
-  Future<Map<String,MyUser>> getCompanyUsersDataSinceLastSync(String lastSync, String companyName) async {
+  Future<Map<String, MyUser>> getCompanyUsersDataSinceLastSync(
+      String lastSync, String companyName) async {
     Map<String, MyUser> users = HashMap();
     Query query = _userRef;
     query = query.where('updatedAt', isGreaterThan: lastSync);
@@ -87,7 +90,8 @@ class UserService{
     return users;
   }
 
-  Future<Map<String,MyUser>> getCurrentUserMapSinceLastSync(String lastSync, String userId) async {
+  Future<Map<String, MyUser>> getCurrentUserMapSinceLastSync(
+      String lastSync, String userId) async {
     Map<String, MyUser> users = HashMap();
     try {
       print(" ✳ $userId");
@@ -102,11 +106,11 @@ class UserService{
   }
 
   Future<MyUser> getCurrentUserData() async {
-      DocumentSnapshot doc = await _userRef.doc(userID).get();
-      return doc.data() as MyUser;
+    DocumentSnapshot doc = await _userRef.doc(userID).get();
+    return doc.data() as MyUser;
   }
 
-  Stream<DocumentSnapshot> getOneUserWithID(String userId){
+  Stream<DocumentSnapshot> getOneUserWithID(String userId) {
     return _userRef.doc(userId).snapshots();
   }
 
@@ -117,12 +121,11 @@ class UserService{
 
   Future<void> updateUser(String userId, MyUser user) async {
     final data = user.toJson();
-    if(user.deletedAt == null){
+    if (user.deletedAt == null) {
       data['deletedAt'] = FieldValue.delete();
     }
     await _userRef.doc(userId).update(data);
   }
-
 
   Future<void> deleteUser(String username) async {
     try {
@@ -132,7 +135,10 @@ class UserService{
           .get();
 
       if (userDoc.docs.isNotEmpty) {
-        await _firestore.collection(USERS_COLLECTION_REF).doc(userDoc.docs[0].id).delete();
+        await _firestore
+            .collection(USERS_COLLECTION_REF)
+            .doc(userDoc.docs[0].id)
+            .delete();
 
         Get.snackbar(
           "User deleted",

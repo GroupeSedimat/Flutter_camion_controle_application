@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BlueprintTemplate extends StatelessWidget {
   final Blueprint blueprint;

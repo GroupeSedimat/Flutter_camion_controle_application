@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
@@ -26,8 +27,7 @@ import 'package:flutter_application_1/services/pdf/pdf_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:open_document/open_document.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -538,7 +538,7 @@ class _CheckListState extends State<CheckList> {
                       },
                     );
                     setState(() {});
-                    OpenDocument.openDocument(filePath: filePath);
+                    OpenFilex.open(filePath);
                   },
                   backgroundColor: Colors.red,
                   child: Row(

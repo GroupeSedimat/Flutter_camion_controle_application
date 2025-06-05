@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/user/my_user.dart';
 import 'package:flutter_application_1/pages/checklist/checklist.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_application_1/services/database_local/database_helper.da
 import 'package:flutter_application_1/services/database_local/sync_service.dart';
 import 'package:flutter_application_1/services/database_local/users_table.dart';
 import 'package:flutter_application_1/services/network_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_application_1/pages/base_page.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
@@ -477,7 +477,7 @@ class _WelcomePageState extends State<WelcomePage> {
         child: InkWell(
           onTap: () {
             Navigator.pop(context);
-            //Get.to(() => MapPage());
+            Get.to(() => MapPage());
           },
           borderRadius: BorderRadius.circular(15),
           child: Padding(

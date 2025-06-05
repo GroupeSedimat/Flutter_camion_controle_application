@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter_application_1/models/camion/camion.dart';
 import 'package:flutter_application_1/models/camion/camion_type.dart';
 import 'package:flutter_application_1/models/checklist/blueprint.dart';
@@ -28,7 +31,6 @@ import 'package:flutter_application_1/services/dialog_services.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/database_firestore/user_service.dart';
 import 'package:flutter_application_1/services/pdf/pdf_service.dart';
-import 'package:open_document/my_files/init.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
