@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
@@ -552,9 +554,21 @@ class _WelcomePageState extends State<WelcomePage> {
 
   Future<void> _launchDialogys(BuildContext context) async {
     final Uri url = Uri.parse('https://newdialogys.renault.com/#!/connection');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+
+    if (!await canLaunchUrl(url)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('URL invalide')),
+      );
+      return;
+    }
+
+    final mode = Platform.isAndroid
+        ? LaunchMode.platformDefault // ou try inAppBrowser
+        : LaunchMode.externalApplication;
+
+    final bool launched = await launchUrl(url, mode: mode);
+
+    if (!launched) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Impossible d\'ouvrir le lien')),
       );
