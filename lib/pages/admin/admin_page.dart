@@ -20,6 +20,11 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// Page principale pour les administrateurs (Admin ou SuperAdmin).
+/// Elle affiche un tableau de bord avec différentes actions possibles
+/// et gère le chargement des données utilisateur, la synchronisation
+/// avec la base locale (SQLite) et le backend.
+
 class AdminPage extends StatefulWidget {
   final UserRole userRole;
 
