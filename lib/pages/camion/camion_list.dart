@@ -64,6 +64,7 @@ class _CamionListState extends State<CamionList> {
   Future<void> _loadData() async {
     await _initDatabase();
     await _initService();
+    await _loadUser();
     if (!networkService.isOnline) {
       print("Offline mode, no sync possible");
     } else {
